@@ -33,23 +33,32 @@ AM_CONDITIONAL(HAVE_WISH, test x$TCL_WISH != x)
 # find any old tcl, if present. (AC_SEARCH_LIBS more useful here? I
 # think we don't want to always include it in LIBS which AC_SERCH_LIBS
 # seems to do)
-AC_CHECK_LIB(tcl,Tcl_Init,
-[LIBTCL_NAME=tcl],
-[
 if test x"${TCL_WISH}" != "x"; then
         MY_WISH=`which ${TCL_WISH}`
-        LIBTCL_NAME=`ldd ${MY_WISH} | grep libtcl | sed -e 's/[[\t ]]\+lib\(tcl[[^ \t]]\+\).so.*/\1/g'`
-AS_MESSAGE(checking Checking for tcl via ldd wish: got ${LIBTCL_NAME}...)
+        LIBTCL_PATH=[`ldd ${MY_WISH} | grep libtcl | sed -e 's/.*=>[ \t]*\(.*\)\/[^/]\+[ \t]\+(0x[0-9a-f]\+)[ \t]*/\1/'`]
+        echo "LIBTCL_PATH = $LIBTCL_PATH"
+        LIBTCL_CONFIG=${LIBTCL_PATH}/tclConfig.sh
+        if test -f ${LIBTCL_CONFIG}; then
+           source `echo ${LIBTCL_CONFIG}`
+           # WAR: I don't know what I'm doing...TCL_LIB_SPEC contains
+           # an unepanded variable ${TCL_DBGX} when I looked..
+           MYTCL_LIB_SPEC=`eval echo ${TCL_LIB_SPEC}`
+           echo "MYTCL_LIB_SPEC=$MYTCL_LIB_SPEC"
+        else
+           AC_MSG_WARN( [Failed to find tclConfih.sh... tcl dependent code may fail to build...ask package maintainer to update configure process])
+        fi
+
 else
 AC_MSG_WARN([Checking for tcl via ldd wish: no wish found])
 fi
-])
+
 
 AC_SUBST([AVR_AS])
 AC_SUBST([AVR_LD])
 AC_SUBST([AVR_GCC])
 AC_SUBST([AVR_GXX])
 AC_SUBST([TCL_WISH])
+AC_SUBST([TCL_LIB_SPEC])
 AC_SUBST([CXX])
 
 dnl This macro searches for python version 2.1.1 or newer
@@ -93,14 +102,22 @@ dnl Checks for programs.
 
 dnl Checks for libraries.
 
-AVR_BFD_LIB
-AVR_LIBIBLIO
+AC_ARG_WITH( [bfd-path],[--with-bfd-path=path location of AVR-binutils version of libbfd],
+[
+  AVR_BFD_SEARCH_STEP(${withval})
+])
+if test x"$bfd_h_location" == "x"; then
+  libbfd_root_location=$(which avr-readelf | sed -e ['s/\/[^\/]*\/[^\/]*$//']) 2> /dev/null
+  AVR_BFD_SEARCH_STEP([${libbfd_root_location}/${host}/avr])
+  AVR_BFD_SEARCH_STEP([${libbfd_root_location}])
+fi
 
-dnl WAR:::hack in where wish is...should detect
-wish_location=/usr/bin/wish
 
-dnl some systems don't make "-ltcl" link to the version of tcl that
-dnl the source code includes...so we try to detect it's installed name.
+echo set libbfd_root_location to ${libbfd_root_location}
+
+AVR_LIBIBERTY(${libbfd_root_location})
+avr_readelf=$(dirname $(dirname [$(which avr-readelf])))
+AVR_LIBIBERTY(${avr_readelf}/lib)
 
 
 dnl Checks for header files.
@@ -116,9 +133,9 @@ AC_FUNC_VPRINTF
 AC_SUBST([ac_aux_dir])
 my_top_builddir=`pwd`/
 AC_SUBST([my_top_builddir])
-AC_SUBST([LIBTCL_NAME])
 AC_SUBST([TCL_WISH])
 AC_SUBST([CCACHE])
+AC_SUBST([MYTCL_LIB_SPEC])
 
 AC_CONFIG_FILES([Makefile \
         src/Makefile \
@@ -132,13 +149,12 @@ AC_CONFIG_FILES([Makefile \
 AC_OUTPUT
 
 echo "swig_path         = " ${swig_path}
-echo "LIBTCL_NAME        = " ${LIBTCL_NAME}
 echo "libbfd.a location = " ${bfd_a_location}
 echo "bfd.h location     = " ${bfd_h_location}
-if test x"${LIBTCL_NAME}" == "x"; then
-AC_MSG_WARN([
-libtcl was not found. Problems may ensue. (if so, build proceedure should be updated)])
-fi
+echo "tcl include        = " ${TCL_INCLUDE_SPEC}
+echo "tcl version        = " ${TCL_VERSION}
+echo "tcl lib spec       = " ${TCL_LIB_SPEC}
+echo "my tcl lib spec    = " ${MYTCL_LIB_SPEC}
 
 
 
