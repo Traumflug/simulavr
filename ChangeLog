@@ -1,5 +1,7 @@
 2005-02-23    <no.mail@please.com>
 
+	* doc/Makefile.am: Added default pdf and info  generation rule
+
 	* Added $(srcdir)checkdebug.gdb.in->$(distdiri)checkdebug.gdb change
 
 2005-02-09    <rivetwa@member.fsf.org>
