@@ -1,0 +1,7 @@
+#!/bin/bash
+# I can't figure this out...autotools seems very difficult to use well.
+./bootstrap
+./bootstrap
+./configure --prefix=/asdfasdf
+make -j 8 distcheck
+
