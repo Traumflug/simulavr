@@ -8,7 +8,7 @@ EXTRA_DIST	= $(ac_aux_dir)/config.guess \
 		$(ac_aux_dir)/missing \
 		$(ac_aux_dir)/mkinstalldirs\
 		$(ac_aux_dir)/avr_local.m4 \
-		$(am_depcomp)
+		$(am_depcomp) \
 		bootstrap
 
 # WAR: Should condition examples directories based on availability of TCL/Itcl
