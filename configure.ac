@@ -183,6 +183,7 @@ AC_SUBST([my_top_builddir])
 AC_CONFIG_FILES([Makefile
         doc/Makefile
         src/Makefile
+        src/python/Makefile
         regress/Makefile
         regress/regress.py
         regress/modules/Makefile
