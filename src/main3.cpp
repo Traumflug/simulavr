@@ -196,13 +196,13 @@ int main3() {
     clk.Add(dev5->GetPin("D2")); //weiche
     data.Add(dev5->GetPin("D3")); //weiche data read
 #endif
-
     AvrDevice *dev2= new AvrDevice_atmega128;
+    GdbServer gdb2(dev2, 1213, true);
     dev2->Load("test.o.go"); //Master
     //dev2->SetClockFreq(200);    //200 ns per Cycle -> 5Mhz
     //dev2->SetClockFreq(250);    //200 ns per Cycle -> 5Mhz
     dev2->SetClockFreq(272);     //3.66 Mhz
-    SystemClock::Instance().Add(dev2);
+    SystemClock::Instance().Add(&gdb2);
 
     OpenDrain odMasterDataW( dev2->GetPin("B4") ); //master
     data.Add(&odMasterDataW);   //master
