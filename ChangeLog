@@ -22,6 +22,12 @@
     * src/hwuart.cpp 
     * src/hwuart.h
 
+2004-12-24    <rivetwa@member.fsf.org>
+
+	* Added make_tarball and changed Makefile.am to work arround
+	failure of make distcheck (complained about depcomp not being
+	cleaned up???)
+
 2004-12-24  Klaus Rudolph  <lts-rudolph@gmx.de>
     Cleanup for swig warnings
     * src/avrdevice.h 
