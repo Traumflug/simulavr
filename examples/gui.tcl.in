@@ -63,14 +63,14 @@ class Scope {
 
         method Redraw { } {
             set l [array names value]
-            puts "l: $l"
+            #puts "l: $l"
 
             set len [llength $l]
 
             for { set ii 0 } { $ii < $len } { incr ii } {
                 #puts "[lindex $l $ii]"
                 set tmp $value([lindex $l $ii])
-                puts "[lindex $l $ii] value: $tmp"
+                #puts "[lindex $l $ii] value: $tmp"
             }
         }
 
@@ -118,7 +118,87 @@ class UpdateControl {
 }
 
 
+class SerialTx {
+    protected {
+        variable parent
+        variable win
+        variable objname
+    }
 
+    public {
+        constructor { _parent _objname _win} {
+            set parent $_parent
+            set win $_win
+            set objname $_objname 
+
+
+            frame $win.$objname
+            
+
+            frame $win.$objname.tx
+            text $win.$objname.tx.text -width 40 -height 6
+            label $win.$objname.tx.status -text "-----------"
+            label $win.$objname.tx.pin -text "-----------" 
+
+            #bind $win.$objname.tx.text <<Modified>> "puts Hallo"
+            bind $win.$objname.tx.text <KeyPress> "$this NewCharEntered %K"
+
+            frame $win.$objname.config
+            label $win.$objname.config.baudrate -text "-----------"
+
+            pack $win.$objname.tx $win.$objname.tx.text $win.$objname.tx.status $win.$objname.tx.pin 
+            pack $win.$objname.config $win.$objname.config.baudrate
+
+            pack $win.$objname
+
+
+        }
+
+        method NewCharEntered { c }  {
+            $parent SendToSimulator $objname $c
+        }
+
+    }
+
+}
+
+
+class SerialRx {
+    protected {
+        variable parent
+        variable win
+        variable objname
+    }
+
+    public {
+        constructor { _parent _objname _win} {
+            set parent $_parent
+            set win $_win
+            set objname $_objname 
+
+
+            frame $win.$objname
+            
+            frame $win.$objname.rx
+            text $win.$objname.rx.text -width 40 -height 6
+            label $win.$objname.rx.status -text "-----------"
+            label $win.$objname.rx.pin -text "-----------"
+
+            frame $win.$objname.config
+            label $win.$objname.config.baudrate -text "-----------"
+
+            pack $win.$objname.rx $win.$objname.rx.text $win.$objname.rx.status $win.$objname.rx.pin
+            pack $win.$objname.config $win.$objname.config.baudrate
+
+            pack $win.$objname
+        }
+
+        method ChangeValue { c } {
+            $win.$objname.rx.text insert end $c
+        }
+    }
+
+}
 
 class Lcd {
     protected {
@@ -326,7 +406,7 @@ class Master {
                 set offset [string first " " $x ]
                 set sub [ string range $x $offset end ]
 
-               # puts "offset: $offset    rest: $sub"
+                #puts "offset: $offset    rest: $sub"
 
                # create class objName parent win objName
                 
