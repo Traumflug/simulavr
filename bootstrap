@@ -2,5 +2,6 @@
 set -x
 aclocal -I config
 autoheader
+libtoolize --force
 automake --add-missing --copy
 autoconf
