@@ -1,3 +1,14 @@
+2005-02-08   
+
+	* src/Makefile.am: (Oled Batrashev patch) Added flow in of
+	TCL_INCLUDE_SPEC variable, added to CPPFLAGS. Thanks again Oleg!
+
+2005-02-08    
+
+	* configure.ac: (Oleg Batrashev patch) Added flow of
+	TCL_INCLUDE_SPEC to Makefile, added warning message if swig is not
+	found. Thanks Oleg!
+
 2005-02-08        <rivetwa@member.fsf.org>
 
 	* updated bootstrap for my needs, commented INSTALL to reflect

@@ -64,6 +64,7 @@ AC_SUBST([AVR_LD])
 AC_SUBST([AVR_GCC])
 AC_SUBST([AVR_GXX])
 AC_SUBST([TCL_WISH])
+AC_SUBST([TCL_INCLUDE_SPEC])
 AC_SUBST([TCL_LIB_SPEC])
 AC_SUBST([CXX])
 
@@ -182,7 +183,12 @@ AC_CONFIG_FILES([Makefile \
         examples/anacomp/checkdebug.tcl ])
 AC_OUTPUT
 
-
+if test "x${swig_path}" == "x"; then
+AC_MSG_WARN([
+*** WARNING ***
+swig not found, so it is not possible to build simulavr.so and tcl examples will not run. Though simulavrxx itself may be built without it.
+])
+fi
 
 echo "swig_path         = " ${swig_path}
 echo "libbfd.a location = " ${bfd_a_location}

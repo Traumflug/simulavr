@@ -4,3 +4,7 @@ Developer:
 Build-System & Maintenance 
     Bill Rivet <rivetwa@member.fsf.org>
 
+
+Patches submitted by Oleg Batrashev:
+    - configure.ac & src/Makefile.am to complain about missing swig,
+        and to flow TCL_INCLUDE_SPEC to output makefile.

@@ -4,6 +4,7 @@ libiberty_location = @libiberty_location@
 swig_path = @swig_path@
 CCACHE = @CCACHE@
 MYTCL_LIB_SPEC=@MYTCL_LIB_SPEC@
+TCL_INCLUDE_SPEC=@TCL_INCLUDE_SPEC@
 
 MAINTAINERCLEANFILES 	= Makefile.in
 
@@ -147,6 +148,7 @@ simulavr_DEPENDENCIES = libavrsim_pp.la
 
 simulavr_LDADD = $(top_builddir)/src/libavrsim_pp.la $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a
 
+AM_CPPFLAGS=$(TCL_INCLUDE_SPEC)
 AM_CXXFLAGS=-O2
 
 INCLUDES		= -I$(bfd_h_location) -I$(top_srcdir)/src -I $(top_builddir)/src
