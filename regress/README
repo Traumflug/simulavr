@@ -1,0 +1,5 @@
+Requirements:
+  simulavr-0.0.13 or greater (savannah.gnu.org/projects/simulavr)
+  python-2.1.1 or greater (www.python.org)
+
+See the top-level INSTALL file for examples of running the regression tests.

@@ -1,0 +1,28 @@
+In that actual directory we have to checks:
+
+make check
+
+and 
+
+make checkdebug
+
+check:
+make check start a simple gui and enable the user to enter new analog
+values to the entry fields. You must press the update button!
+And "->B0" give the output state of the Port B 0 pin. The 
+simple application main.c will only use the analog comparator
+and set the pib B0 the the value which is the result from analog
+comparison!
+
+checkdebug:
+starts also the ddd graphical interface to avr-gdb which will then
+connected to simulavr. After the gui from ddd is available and all
+files loaded the avr programm can be started with the cont button.
+The breakpoint inside main stops the program flow and you can step/next
+to the programm. The gui.tcl enables you to give new analog values to
+the ain0 and ain1 pins so you can observe the comparator action.
+
+
+
+
+

@@ -1,0 +1,154 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(src/main.cpp)
+AC_CONFIG_AUX_DIR(config)
+AM_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE(avrsim_pp, 0.7)
+AM_MAINTAINER_MODE
+
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_LIBTOOL
+
+AC_CHECK_PROG(AVR_AS, avr-as, avr-as)
+AC_CHECK_PROG(AVR_LD, avr-ld, avr-ld)
+
+AC_SUBST([AVR_AS])
+AC_SUBST([AVR_LD])
+
+dnl This macro searches for python version 2.1.1 or newer
+AC_CACHE_CHECK(for python >= 2.1.1, _cv_python_211, [
+
+changequote(<@, @>)
+
+_cv_python_211='no' ;
+if python -V 2>&1 | grep -q Python ; then
+  cat <<EOF > py_ver.py
+import sys
+v = sys.version_info
+ver = (int(v[0]) << 16) + (int(v[1]) << 8) + int(v[2])
+if ver < 0x020101:
+        print 'no'
+else:
+        print 'yes'
+EOF
+  _cv_python_211=`python py_ver.py`
+  rm -f py_ver.py
+fi
+
+changequote([, ])
+])
+
+if test "x$_cv_python_211" = "xyes" ; then
+  ac_regression_subdir="regress"
+else
+  AC_MSG_WARN([ ])
+  AC_MSG_WARN([Python >= 2.1.1 not found.])
+  AC_MSG_WARN([Regression tests will not be run.])
+  AC_MSG_WARN([ ])
+fi
+AC_SUBST([ac_regression_subdir])
+AM_CONDITIONAL(COND_HAS_PYTHON, test "x$_cv_python_211" = "xyes")
+
+
+
+dnl Checks for programs.
+
+dnl Checks for libraries.
+AC_ARG_WITH( bfd-path,--with-bfd-path=path location of AVR-binutils version of libbfd,
+[if test x"${withval}" != ""; then
+   bfd_dir=${withval}
+   libbfd_root_location=${bfd_dir}/${host}/avr
+   AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path subtree...) 
+   bfd_h_location=${libbfd_root_location}/include
+   bfd_la_location=${libbfd_root_location}/lib
+   if test -f ${bfd_h_location}/bfd.h -a \
+      -f ${bfd_la_location}/libbfd.la; then
+     echo "yes"
+   else
+     echo "no"
+     bfd_h_location=""
+   fi
+  if test x"${bfd_h_location}" == x; then
+   libbfd_root_location=${bfd_dir}
+   AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path directory...) 
+   bfd_h_location=${libbfd_root_location}/include
+   bfd_la_location=${libbfd_root_location}/lib
+   if test -f ${bfd_h_location}/bfd.h -a \
+      -f ${bfd_la_location}/libbfd.la; then
+     echo "yes"
+   else
+     echo "no"
+     bfd_h_location=""
+   fi
+  fi
+  if test x"${bfd_h_location}" == x; then
+   libbfd_root_location=${bfd_dir}/avr
+   AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path (2) directory...) 
+   bfd_h_location=${libbfd_root_location}/include
+   bfd_la_location=${libbfd_root_location}/lib
+   if test -f ${bfd_h_location}/bfd.h -a \
+      -f ${bfd_la_location}/libbfd.la; then
+     echo "yes"
+   else
+     echo "no"
+     bfd_h_location=""
+   fi
+  fi
+  if test x"${bfd_h_location}" == x; then
+   libbfd_root_location=${bfd_dir}
+   AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path (3) directory...) 
+   bfd_h_location=${libbfd_root_location}
+   bfd_la_location=${libbfd_root_location}
+   if test -f ${bfd_h_location}/bfd.h -a \
+      -f ${bfd_la_location}/libbfd.la; then
+     echo "yes"
+   else
+     echo "no"
+     bfd_h_location=""
+   fi
+  fi
+  if test x"${bfd_h_location}" == x; then
+   libbfd_root_location=${bfd_dir}
+   AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path (4) directory...) 
+   bfd_h_location=${libbfd_root_location}/bfd
+   bfd_la_location=${libbfd_root_location}/bfd
+   if test -f ${bfd_h_location}/bfd.h -a \
+      -f ${bfd_la_location}/libbfd.la; then
+     echo "yes"
+   else
+     echo "no"
+     bfd_h_location=""
+   fi
+  fi
+fi
+])
+
+AVR_BFD_LIB
+AVR_LIBIBLIO
+
+
+wish_location=/usr/bin/wish
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(fcntl.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+
+dnl Checks for library functions.
+AC_FUNC_VPRINTF
+
+AC_SUBST(ac_aux_dir)
+
+AC_OUTPUT(Makefile \
+        src/Makefile \
+        regress/Makefile \
+        regress/regress.py \
+        regress/modules/Makefile \
+        regress/test_opcodes/Makefile \
+        examples/Makefile examples/anacomp/Makefile \
+        examples/gui.tcl examples/anacomp/check.tcl )
+
+echo "libbfd.la location = " ${bfd_la_location}
+echo "bfd.h location     = " ${bfd_h_location}

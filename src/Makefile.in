@@ -1,0 +1,621 @@
+# Makefile.in generated automatically by automake 1.5 from Makefile.am.
+
+# Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+# Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+@SET_MAKE@
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_HEADER = $(INSTALL_DATA)
+transform = @program_transform_name@
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
+AMTAR = @AMTAR@
+AR = @AR@
+AS = @AS@
+AVR_AS = @AVR_AS@
+AVR_LD = @AVR_LD@
+AWK = @AWK@
+CXXCPP = @CXXCPP@
+DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
+ECHO = @ECHO@
+EGREP = @EGREP@
+EXEEXT = @EXEEXT@
+F77 = @F77@
+GCJ = @GCJ@
+GCJFLAGS = @GCJFLAGS@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
+MAINT = @MAINT@
+OBJDUMP = @OBJDUMP@
+OBJEXT = @OBJEXT@
+PACKAGE = @PACKAGE@
+RANLIB = @RANLIB@
+RC = @RC@
+STRIP = @STRIP@
+VERSION = @VERSION@
+ac_aux_dir = @ac_aux_dir@
+ac_regression_subdir = @ac_regression_subdir@
+am__include = @am__include@
+am__quote = @am__quote@
+install_sh = @install_sh@
+
+CC = ccache gcc
+CXX = ccache g++
+bfd_h_location = @bfd_h_location@
+
+bfd_la_location = @bfd_la_location@
+libiberty_location = @libiberty_location@
+
+MAINTAINERCLEANFILES = Makefile.in
+
+EXTRA_DIST = simulavr.i
+
+lib_LTLIBRARIES = libavrsim_pp.la
+
+bin_PROGRAMS = simulavr kbdgentables
+
+libavrsim_pp_la_SOURCES = \
+	ass_do.cpp      	\
+	ass_do_trace.cpp	\
+	at4433.cpp		\
+	at8515.cpp		\
+	at8515special.cpp	\
+	atmega128.cpp		\
+	avrdevice.cpp		\
+	avrerror.cpp		\
+	avrmalloc.cpp		\
+	decoder.cpp		\
+	flash.cpp		\
+	gdbserver.cpp		\
+	hardware.cpp		\
+	helper.cpp		\
+	hwad.cpp		\
+	hwacomp.cpp		\
+	hweeprom.cpp		\
+	hwextirq.cpp		\
+	hwmegaextirq.cpp	\
+	hwmegatimer.cpp		\
+	hwmegatimer0123irq.cpp	\
+	hwport.cpp		\
+	hwspi.cpp		\
+	hwsreg.cpp		\
+	hwstack.cpp		\
+	hwtimer.cpp		\
+	hwtimer01irq.cpp	\
+	hwuart.cpp		\
+	hwwado.cpp		\
+	ioregs.cpp		\
+	irqsystem.cpp		\
+	keyboard.cpp		\
+	lcd.cpp			\
+	memory.cpp		\
+	mysocket.cpp		\
+	net.cpp			\
+	pin.cpp			\
+	pinatport.cpp		\
+	rwmem.cpp		\
+	scope.cpp		\
+	systemclock.cpp		\
+	trace.cpp		\
+	ui.cpp 			
+
+
+pkginclude_HEADERS = \
+	ass_do.h      		\
+	ass_do_trace.h		\
+	at4433.h		\
+	at8515.h		\
+	at8515special.h		\
+	atmega128.h		\
+	avrdevice.h		\
+	avrerror.h		\
+	avrmalloc.h		\
+	config.h		\
+	decoder.h		\
+	flash.h			\
+	hardware.h		\
+	helper.h		\
+	hwad.h			\
+	hwacomp.h		\
+	hweeprom.h		\
+	hwextirq.h		\
+	hwmegaextirq.h		\
+	hwmegatimer.h		\
+	hwmegatimer0123irq.h	\
+	hwport.h		\
+	hwspi.h			\
+	hwsreg.h		\
+	hwstack.h		\
+	hwtimer.h		\
+	hwtimer01irq.h		\
+	hwuart.h		\
+	hwwado.h		\
+	ioregs.h		\
+	irqsystem.h		\
+	keyboard.h		\
+	lcd.h			\
+	memory.h		\
+	mysocket.h		\
+	net.h			\
+	pin.h			\
+	pinatport.h		\
+	rwmem.h			\
+	scope.h			\
+	systemclock.h		\
+	trace.h			\
+	types.h			\
+	ui.h			\
+	simulationmember.h breakpoint.h config_deprecated.h \
+	global.h avrdevice_impl.h gdb.h keynumber_to_scancode.dat  xcode_to_keynumber.dat 
+
+
+kbdgentables_SOURCES = kbdgentables.cpp
+
+simulavr_SOURCES = main.cpp
+
+
+# WAR: simulavr.so/.dll needs tp be properly integrated via the
+# autotools, but I don't "get" it yet...so this hack gets us running
+# at least on Linux
+simulavr_DEPENDENCIES = libavrsim_pp.la
+
+simulavr_LDADD = $(top_builddir)/src/libavrsim_pp.la $(bfd_la_location)/libbfd.a $(libiberty_location)/libiberty.a
+
+AM_CXXFLAGS = -O2
+
+INCLUDES = -I$(bfd_h_location) -I$(top_srcdir)/src
+subdir = src
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
+CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_CLEAN_FILES =
+LTLIBRARIES = $(lib_LTLIBRARIES)
+
+libavrsim_pp_la_LDFLAGS =
+libavrsim_pp_la_LIBADD =
+am_libavrsim_pp_la_OBJECTS = ass_do.lo ass_do_trace.lo at4433.lo \
+	at8515.lo at8515special.lo atmega128.lo avrdevice.lo \
+	avrerror.lo avrmalloc.lo decoder.lo flash.lo gdbserver.lo \
+	hardware.lo helper.lo hwad.lo hwacomp.lo hweeprom.lo \
+	hwextirq.lo hwmegaextirq.lo hwmegatimer.lo \
+	hwmegatimer0123irq.lo hwport.lo hwspi.lo hwsreg.lo hwstack.lo \
+	hwtimer.lo hwtimer01irq.lo hwuart.lo hwwado.lo ioregs.lo \
+	irqsystem.lo keyboard.lo lcd.lo memory.lo mysocket.lo net.lo \
+	pin.lo pinatport.lo rwmem.lo scope.lo systemclock.lo trace.lo \
+	ui.lo
+libavrsim_pp_la_OBJECTS = $(am_libavrsim_pp_la_OBJECTS)
+bin_PROGRAMS = simulavr$(EXEEXT) kbdgentables$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS)
+
+am_kbdgentables_OBJECTS = kbdgentables.$(OBJEXT)
+kbdgentables_OBJECTS = $(am_kbdgentables_OBJECTS)
+kbdgentables_LDADD = $(LDADD)
+kbdgentables_DEPENDENCIES =
+kbdgentables_LDFLAGS =
+am_simulavr_OBJECTS = main.$(OBJEXT)
+simulavr_OBJECTS = $(am_simulavr_OBJECTS)
+simulavr_LDFLAGS =
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/ass_do.Plo $(DEPDIR)/ass_do_trace.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/at4433.Plo $(DEPDIR)/at8515.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/at8515special.Plo $(DEPDIR)/atmega128.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/avrdevice.Plo $(DEPDIR)/avrerror.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/avrmalloc.Plo $(DEPDIR)/decoder.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/flash.Plo $(DEPDIR)/gdbserver.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/hardware.Plo $(DEPDIR)/helper.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/hwacomp.Plo $(DEPDIR)/hwad.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/hweeprom.Plo $(DEPDIR)/hwextirq.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/hwmegaextirq.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/hwmegatimer.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/hwmegatimer0123irq.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/hwport.Plo $(DEPDIR)/hwspi.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/hwsreg.Plo $(DEPDIR)/hwstack.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/hwtimer.Plo $(DEPDIR)/hwtimer01irq.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/hwuart.Plo $(DEPDIR)/hwwado.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/ioregs.Plo $(DEPDIR)/irqsystem.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/kbdgentables.Po $(DEPDIR)/keyboard.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/lcd.Plo $(DEPDIR)/main.Po \
+@AMDEP_TRUE@	$(DEPDIR)/memory.Plo $(DEPDIR)/mysocket.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/net.Plo $(DEPDIR)/pin.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/pinatport.Plo $(DEPDIR)/rwmem.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/scope.Plo $(DEPDIR)/systemclock.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/trace.Plo $(DEPDIR)/ui.Plo
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+CXXFLAGS = @CXXFLAGS@
+DIST_SOURCES = $(libavrsim_pp_la_SOURCES) $(kbdgentables_SOURCES) \
+	$(simulavr_SOURCES)
+HEADERS = $(pkginclude_HEADERS)
+
+DIST_COMMON = $(pkginclude_HEADERS) Makefile.am Makefile.in
+SOURCES = $(libavrsim_pp_la_SOURCES) $(kbdgentables_SOURCES) $(simulavr_SOURCES)
+
+all: all-am
+
+.SUFFIXES:
+.SUFFIXES: .cpp .lo .o .obj
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+	cd $(top_srcdir) && \
+	  $(AUTOMAKE) --gnu  src/Makefile
+Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) && \
+	  CONFIG_HEADERS= CONFIG_LINKS= \
+	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo " $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$p $(DESTDIR)$(libdir)/$$p"; \
+	    $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$p $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  echo " $(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libdir)/$$p"; \
+	  $(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+libavrsim_pp.la: $(libavrsim_pp_la_OBJECTS) $(libavrsim_pp_la_DEPENDENCIES) 
+	$(CXXLINK) -rpath $(libdir) $(libavrsim_pp_la_LDFLAGS) $(libavrsim_pp_la_OBJECTS) $(libavrsim_pp_la_LIBADD) $(LIBS)
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  if test -f $$p \
+	     || test -f $$p1 \
+	  ; then \
+	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	  else :; fi; \
+	done
+
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
+	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
+	  rm -f $(DESTDIR)$(bindir)/$$f; \
+	done
+
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+kbdgentables$(EXEEXT): $(kbdgentables_OBJECTS) $(kbdgentables_DEPENDENCIES) 
+	@rm -f kbdgentables$(EXEEXT)
+	$(CXXLINK) $(kbdgentables_LDFLAGS) $(kbdgentables_OBJECTS) $(kbdgentables_LDADD) $(LIBS)
+simulavr$(EXEEXT): $(simulavr_OBJECTS) $(simulavr_DEPENDENCIES) 
+	@rm -f simulavr$(EXEEXT)
+	$(CXXLINK) $(simulavr_LDFLAGS) $(simulavr_OBJECTS) $(simulavr_LDADD) $(LIBS)
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ass_do.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ass_do_trace.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/at4433.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/at8515.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/at8515special.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/atmega128.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/avrdevice.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/avrerror.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/avrmalloc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/decoder.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/flash.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/gdbserver.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hardware.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/helper.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwacomp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwad.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hweeprom.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwextirq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwmegaextirq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwmegatimer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwmegatimer0123irq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwport.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwspi.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwsreg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwstack.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwtimer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwtimer01irq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwuart.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hwwado.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ioregs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/irqsystem.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/kbdgentables.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/keyboard.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lcd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/memory.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mysocket.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/net.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pin.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pinatport.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rwmem.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/scope.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/systemclock.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/trace.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ui.Plo@am__quote@
+
+distclean-depend:
+	-rm -rf $(DEPDIR)
+
+.cpp.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+.cpp.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.cpp.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+CXXDEPMODE = @CXXDEPMODE@
+uninstall-info-am:
+install-pkgincludeHEADERS: $(pkginclude_HEADERS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(pkgincludedir)
+	@list='$(pkginclude_HEADERS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " $(INSTALL_HEADER) $$d$$p $(DESTDIR)$(pkgincludedir)/$$f"; \
+	  $(INSTALL_HEADER) $$d$$p $(DESTDIR)$(pkgincludedir)/$$f; \
+	done
+
+uninstall-pkgincludeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(pkginclude_HEADERS)'; for p in $$list; do \
+	  f="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(pkgincludedir)/$$f"; \
+	  rm -f $(DESTDIR)$(pkgincludedir)/$$f; \
+	done
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || etags $(ETAGS_ARGS) $$tags  $$unique $(LISP)
+
+GTAGS:
+	here=`CDPATH=: && cd $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+
+top_distdir = ..
+distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    $(mkinstalldirs) "$(distdir)/$$dir"; \
+	  fi; \
+	  if test -d $$d/$$file; then \
+	    cp -pR $$d/$$file $(distdir) \
+	    || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done
+check-am: all-am
+check: check-am
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
+install-binPROGRAMS: install-libLTLIBRARIES
+
+
+installdirs:
+	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(bindir) $(DESTDIR)$(pkgincludedir)
+
+install: install-am
+install-exec: install-exec-am
+install-data: install-data-am
+uninstall: uninstall-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+
+installcheck: installcheck-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  `test -z '$(STRIP)' || \
+	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+	@echo "This command is intended for maintainers to use"
+	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
+clean: clean-am
+
+clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
+
+distclean: distclean-am
+
+distclean-am: clean-am distclean-compile distclean-depend \
+	distclean-generic distclean-libtool distclean-tags
+
+dvi: dvi-am
+
+dvi-am:
+
+info: info-am
+
+info-am:
+
+install-data-am: install-pkgincludeHEADERS
+
+install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
+
+install-info: install-info-am
+
+install-man:
+
+installcheck-am:
+
+maintainer-clean: maintainer-clean-am
+
+maintainer-clean-am: distclean-am maintainer-clean-generic
+
+mostlyclean: mostlyclean-am
+
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
+
+uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
+	uninstall-libLTLIBRARIES uninstall-pkgincludeHEADERS
+
+.PHONY: GTAGS all all-am check check-am clean clean-binPROGRAMS \
+	clean-generic clean-libLTLIBRARIES clean-libtool distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am info \
+	info-am install install-am install-binPROGRAMS install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-libLTLIBRARIES install-man \
+	install-pkgincludeHEADERS install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool tags uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am \
+	uninstall-libLTLIBRARIES uninstall-pkgincludeHEADERS
+
+
+# WAR: Hmm...how do we auto-depend on this generated file? Seems we
+# should be able to auto-generate at least first-generation include
+# dependencies whether or not those files exist...;-( 
+$(srcdir)/keyboard.cpp : keytrans.h 
+
+keytrans.h: kbdgentables keynumber_to_scancode.dat xcode_to_keynumber.dat
+	./kbdgentables
+
+# WAR:: should not build if no swig is detected...
+
+# This is a cheat! Hopefully it works ok...
+all-am: simulavr.so
+
+simulavr_wrap.cpp: $(srcdir)/simulavr.i
+	swig -c++ -o $@ $<
+
+simulavr.so: simulavr_wrap.o simulavr
+	g++ -I$(srcdir) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) -ltcl$(TCL_VERSION) $(bfd_la_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o simulavr.so
+
+clean : clean_simulavr.so
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

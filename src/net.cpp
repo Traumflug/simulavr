@@ -1,0 +1,70 @@
+/*
+ ****************************************************************************
+ *
+ * simulavr - A simulator for the Atmel AVR family of microcontrollers.
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ ****************************************************************************
+ */
+
+#include "net.h"
+#include "pin.h"
+
+NetInterface::~NetInterface() {}
+
+void Net::Add(Pin *p) {
+    push_back(p); 
+    p->RegisterNet(this);
+}
+
+void Net::Delete(Pin *p) {
+    erase(find(begin(), end(), p));
+}
+
+Net::~Net() {}
+
+
+bool Net::CalcNet() {
+    Pin result(Pin::TRISTATE);
+    iterator ii;
+    for (ii=begin(); ii!=end(); ii++) {
+        result+=((*ii)->GetPin()); //get state of pin (TRISTATE, HIGH, LOW ....)
+    }
+    //new result is now found, so set all pins in the Net to new state
+    //
+
+    for (ii=begin(); ii!=end(); ii++) {
+        //(*ii)->SetInState( result.GetOutState()); //In-State that means the state of register PIN not the complete pin here
+        (*ii)->SetInState( result); //In-State that means the state of register PIN not the complete pin here
+    }
+
+    return (bool) result;
+}
+
+MirrorNet::MirrorNet(Pin *_p): p(_p) { }
+MirrorNet::~MirrorNet() {}
+bool MirrorNet::CalcNet() {
+    p->SetInState(*p);
+    return (bool)*p;
+}
+
+void MirrorNet::Delete(Pin *p) { 
+    //should delete myself (delete this!) 
+}
+    
+
+
