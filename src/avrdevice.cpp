@@ -119,7 +119,8 @@ void AvrDevice::Load(const char* fname) {
         while (sec!=0)  { 
             if (sec->flags&SEC_LOAD && sec->vma<0x80ffff) { //only read flash bytes and data
                 int size;
-                size=sec->_cooked_size;
+                //size=sec->_cooked_size;
+                size=sec->rawsize;
                 unsigned char *tmp=(unsigned char *)malloc(size);
                 bfd_get_section_contents(abfd, sec, tmp, 0, size);
                 Flash->WriteMem( tmp, sec->lma, size);
@@ -128,7 +129,7 @@ void AvrDevice::Load(const char* fname) {
 
             if (sec->flags&SEC_LOAD && sec->vma>=0x810000) {
                 int size;
-                size=sec->_cooked_size;
+                size=sec->rawsize;
                 unsigned char *tmp=(unsigned char *)malloc(size);
                 bfd_get_section_contents(abfd, sec, tmp, 0, size);
                 unsigned int offset=sec->vma-0x810000;

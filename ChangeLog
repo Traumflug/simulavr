@@ -1,3 +1,7 @@
+2005-03-13 <lts-rudolph@gmx.de>
+    * src/avrdevice.cpp: Bugfix: _cooked_size -> rawsize
+    Bug #12295 fixed
+
 2005-03-03    <no.mail@please.com>
 
 	* examples/anacomp/Makefile.am (do_python): Added do_python target
