@@ -168,7 +168,6 @@ void GdbServer::avr_core_insert_breakpoint(dword pc) {
 int GdbServer::signal_has_occurred(int signo) {return 0;}
 void GdbServer::signal_watch_start(int signo){};
 void GdbServer::signal_watch_stop(int signo){};
-int GdbServer::avr_core_reset( ){return 0;}
 
 
 static char HEX_DIGIT[] = "0123456789abcdef";
@@ -975,7 +974,7 @@ int GdbServer::gdb_get_signal( char *pkt )
             /* Gdb user issuing the 'signal SIGHUP' command tells sim to reset
             itself. We reply with a SIGTRAP the same as we do when gdb
             makes first connection with simulator. */
-            avr_core_reset( );
+            core->Reset( );
             gdb_send_reply( "S05" );
     }
 
@@ -1030,7 +1029,12 @@ int GdbServer::gdb_parse_packet( char *pkt )
             break;
 
         case 'C':               /* continue with signal */
-            gdb_get_signal(pkt);
+            if(SIGHUP==gdb_get_signal(pkt)) { //very special solution only for regression testing woth
+                                              //old scripts from old simulavr! Continue means not continue
+                                              //if signal is SIGHUP :-(, so we do nothing then!
+                return GDB_RET_OK;
+            }
+            
             return GDB_RET_CONTINUE;
             break;
 
@@ -1328,7 +1332,7 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
                     break;
 
                 case GDB_RET_KILL_REQUEST:
-                    avr_core_reset(); 
+                    core->Reset();
                     conn= -1;   //we are not longer connected
                     core->DeleteAllBreakpoints();
                     return 0; 

@@ -76,7 +76,6 @@ class GdbServer: public SimulationMember {
         int signal_has_occurred(int signo); 
         void signal_watch_start(int signo);
         void signal_watch_stop(int signo);
-        int avr_core_reset( );
         int avr_core_step() ;
         int gdb_read_byte( );
         int hex2nib( char hex );
