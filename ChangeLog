@@ -1,3 +1,8 @@
+2005-02-08        <rivetwa@member.fsf.org>
+
+	* updated bootstrap for my needs, commented INSTALL to reflect
+	that this may not be exactly right for all platforms.
+
 2005-02-04    <rivetwa@member.fsf.org>
 
 	* Added documentation support. Try "make pdf" and "make info" now ;-).
