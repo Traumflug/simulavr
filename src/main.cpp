@@ -20,6 +20,7 @@
  *
  ****************************************************************************
  */
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
@@ -81,10 +82,11 @@ int main(int argc, char *argv[]) {
             {"device", 1, 0, 'd'},
             {"gdbserver", 1, 0, 'g'},
             {"trace", 1, 0, 't'},
+            {"version",0,0,'v'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long (argc, argv, "f:d:gGd:p:t:uxzh", long_options, &option_index);
+        c = getopt_long (argc, argv, "f:d:gGd:p:t:uxzhv", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -133,6 +135,15 @@ int main(int argc, char *argv[]) {
                 cout << "Running in other main loop for tests only! DO NOT USE" << endl;
                 extended_tests=3;
                 break;
+
+           case 'v':
+              {
+              std::cout << "Simulavr++ " << VERSION << std::endl;
+              std::cout << "See documentation for copyright and distribution terms" << std::endl;
+              std::cout << std::endl;
+              exit(0);
+              }
+              break;
 
             default:
                 cout << "AVR-Simulator" << endl;
