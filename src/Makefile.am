@@ -1,4 +1,4 @@
-bfd_la_location = @bfd_la_location@
+bfd_a_location = @bfd_a_location@
 bfd_h_location  = @bfd_h_location@
 libiberty_location = @libiberty_location@
 CCACHE = @CCACHE@
@@ -14,12 +14,7 @@ lib_LTLIBRARIES		= libavrsim_pp.la
 bin_PROGRAMS = simulavr kbdgentables
 
 libavrsim_pp_la_SOURCES	= 	\
-	serialrx.cpp \
-	serialtx.cpp \	
-	main3.cpp \
-	application.cpp \
-	decoder_trace.cpp \
-	printable.cpp \
+	application.cpp 	\
 	at4433.cpp		\
 	at8515.cpp		\
 	at8515special.cpp	\
@@ -28,12 +23,13 @@ libavrsim_pp_la_SOURCES	= 	\
 	avrerror.cpp		\
 	avrmalloc.cpp		\
 	decoder.cpp		\
+	decoder_trace.cpp 	\
 	flash.cpp		\
 	gdbserver.cpp		\
 	hardware.cpp		\
 	helper.cpp		\
-	hwad.cpp		\
 	hwacomp.cpp		\
+	hwad.cpp		\
 	hweeprom.cpp		\
 	hwextirq.cpp		\
 	hwmegaextirq.cpp	\
@@ -56,35 +52,37 @@ libavrsim_pp_la_SOURCES	= 	\
 	net.cpp			\
 	pin.cpp			\
 	pinatport.cpp		\
+	printable.cpp 		\
 	rwmem.cpp		\
 	scope.cpp		\
+	serialrx.cpp		\
+	serialtx.cpp		\
 	systemclock.cpp		\
 	trace.cpp		\
 	ui.cpp 			
 
 pkginclude_HEADERS = 	\
-	systemclocktypes.h \
-	serialtx.h \
-	serialrx.h \
-	pinnotify.h \	
 	application.h \
-	externaltype.h \
-	funktor.h \
-	printable.h \
 	at4433.h		\
 	at8515.h		\
 	at8515special.h		\
 	atmega128.h		\
 	avrdevice.h		\
+	avrdevice_impl.h	\
 	avrerror.h		\
 	avrmalloc.h		\
-	config.h		\
+	breakpoint.h		\
+	config_deprecated.h 	\
 	decoder.h		\
+	externaltype.h \
 	flash.h			\
+	funktor.h \
+	gdb.h			\
+	global.h		\
 	hardware.h		\
 	helper.h		\
-	hwad.h			\
 	hwacomp.h		\
+	hwad.h			\
 	hweeprom.h		\
 	hwextirq.h		\
 	hwmegaextirq.h		\
@@ -101,20 +99,26 @@ pkginclude_HEADERS = 	\
 	ioregs.h		\
 	irqsystem.h		\
 	keyboard.h		\
+	keynumber_to_scancode.dat	\
 	lcd.h			\
 	memory.h		\
 	mysocket.h		\
 	net.h			\
 	pin.h			\
 	pinatport.h		\
+	pinnotify.h		\
+	printable.h 		\
 	rwmem.h			\
 	scope.h			\
+	serialrx.h		\
+	serialtx.h		\
+	simulationmember.h	\
 	systemclock.h		\
+	systemclocktypes.h	\
 	trace.h			\
 	types.h			\
 	ui.h			\
-	simulationmember.h breakpoint.h config_deprecated.h \
-	global.h avrdevice_impl.h gdb.h keynumber_to_scancode.dat  xcode_to_keynumber.dat 
+	xcode_to_keynumber.dat
 
 LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLINK = $(LIBTOOL) --mode=link --tag=CXX $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
@@ -139,11 +143,11 @@ simulavr_SOURCES = main.cpp
 
 simulavr_DEPENDENCIES = libavrsim_pp.la
 
-simulavr_LDADD = $(top_builddir)/src/libavrsim_pp.la $(bfd_la_location)/libbfd.a $(libiberty_location)/libiberty.a
+simulavr_LDADD = $(top_builddir)/src/libavrsim_pp.la $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a
 
 AM_CXXFLAGS=-O2
 
-INCLUDES		= -I$(bfd_h_location) -I$(top_srcdir)/src
+INCLUDES		= -I$(bfd_h_location) -I$(top_srcdir)/src -I $(top_builddir)/src
 
 # WAR:: should not build if no swig is detected...
 
@@ -154,7 +158,7 @@ simulavr_wrap.cpp: $(srcdir)/simulavr.i
 	swig -c++ -o $@ $<
 
 simulavr.so: simulavr_wrap.o simulavr
-	g++ -I$(srcdir) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) -l$(LIBTCL_NAME) $(bfd_la_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o simulavr.so
+	g++ -I$(srcdir) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) -l$(LIBTCL_NAME) $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o simulavr.so
 
 clean_simulavr.so:
 	$(RM) simulavr.so 

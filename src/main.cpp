@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
     } 
 
     if (extended_tests ==2) {
-        main3();
+        //main3();
         return 0;
     }
 

@@ -96,9 +96,9 @@ AC_ARG_WITH( bfd-path,--with-bfd-path=path location of AVR-binutils version of l
    libbfd_root_location=${bfd_dir}/${host}/avr
    AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path subtree...) 
    bfd_h_location=${libbfd_root_location}/include
-   bfd_la_location=${libbfd_root_location}/lib
+   bfd_a_location=${libbfd_root_location}/lib
    if test -f ${bfd_h_location}/bfd.h -a \
-      -f ${bfd_la_location}/libbfd.la; then
+      -f ${bfd_a_location}/libbfd.a; then
      echo "yes"
    else
      echo "no"
@@ -108,9 +108,9 @@ AC_ARG_WITH( bfd-path,--with-bfd-path=path location of AVR-binutils version of l
    libbfd_root_location=${bfd_dir}
    AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path directory...) 
    bfd_h_location=${libbfd_root_location}/include
-   bfd_la_location=${libbfd_root_location}/lib
+   bfd_a_location=${libbfd_root_location}/lib
    if test -f ${bfd_h_location}/bfd.h -a \
-      -f ${bfd_la_location}/libbfd.la; then
+      -f ${bfd_a_location}/libbfd.a; then
      echo "yes"
    else
      echo "no"
@@ -121,9 +121,9 @@ AC_ARG_WITH( bfd-path,--with-bfd-path=path location of AVR-binutils version of l
    libbfd_root_location=${bfd_dir}/avr
    AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path (2) directory...) 
    bfd_h_location=${libbfd_root_location}/include
-   bfd_la_location=${libbfd_root_location}/lib
+   bfd_a_location=${libbfd_root_location}/lib
    if test -f ${bfd_h_location}/bfd.h -a \
-      -f ${bfd_la_location}/libbfd.la; then
+      -f ${bfd_a_location}/libbfd.a; then
      echo "yes"
    else
      echo "no"
@@ -134,9 +134,9 @@ AC_ARG_WITH( bfd-path,--with-bfd-path=path location of AVR-binutils version of l
    libbfd_root_location=${bfd_dir}
    AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path (3) directory...) 
    bfd_h_location=${libbfd_root_location}
-   bfd_la_location=${libbfd_root_location}
+   bfd_a_location=${libbfd_root_location}
    if test -f ${bfd_h_location}/bfd.h -a \
-      -f ${bfd_la_location}/libbfd.la; then
+      -f ${bfd_a_location}/libbfd.a; then
      echo "yes"
    else
      echo "no"
@@ -147,9 +147,9 @@ AC_ARG_WITH( bfd-path,--with-bfd-path=path location of AVR-binutils version of l
    libbfd_root_location=${bfd_dir}
    AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path (4) directory...) 
    bfd_h_location=${libbfd_root_location}/bfd
-   bfd_la_location=${libbfd_root_location}/bfd
+   bfd_a_location=${libbfd_root_location}/bfd
    if test -f ${bfd_h_location}/bfd.h -a \
-      -f ${bfd_la_location}/libbfd.la; then
+      -f ${bfd_a_location}/libbfd.a; then
      echo "yes"
    else
      echo "no"
@@ -193,12 +193,11 @@ AC_CONFIG_FILES([Makefile \
         regress/modules/Makefile \
         regress/test_opcodes/Makefile \
         examples/Makefile examples/anacomp/Makefile \
-        examples/gui.tcl examples/anacomp/check.tcl \
-        examples/anacomp/checkdebug.tcl  ])
+        examples/gui.tcl examples/anacomp/check.tcl  ])
 AC_OUTPUT
 
 echo "LIBTCL_NAME        = " ${LIBTCL_NAME}
-echo "libbfd.la location = " ${bfd_la_location}
+echo "libbfd.a location = " ${bfd_a_location}
 echo "bfd.h location     = " ${bfd_h_location}
 if test x"${LIBTCL_NAME}" == "x"; then
 AC_MSG_WARN([

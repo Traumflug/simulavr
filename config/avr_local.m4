@@ -21,9 +21,9 @@ AC_DEFUN([AVR_BFD_LIB],
    libbfd_root_location=${prefix}/${host}/avr
    AC_MSG_CHECKING(Any likely AVR-libbfd available via --prefix...) 
    bfd_h_location=${libbfd_root_location}/include
-   bfd_la_location=${libbfd_root_location}/lib
+   bfd_a_location=${libbfd_root_location}/lib
    if test -f ${bfd_h_location}/bfd.h -o \
-      -f ${bfd_la_location}/libbfd.la; then
+      -f ${bfd_a_location}/libbfd.a; then
      echo "yes"
    else
      echo "no"
@@ -37,9 +37,9 @@ AC_DEFUN([AVR_BFD_LIB],
    libbfd_root_location="${libbfd_root_location}/${host}/avr"
    AC_MSG_CHECKING(any likely AVR-libbfd available via avr-binutils install path..) 
    bfd_h_location=${libbfd_root_location}/include
-   bfd_la_location=${libbfd_root_location}/lib
+   bfd_a_location=${libbfd_root_location}/lib
    if test -f ${bfd_h_location}/include/bfd.h -o \
-      -f ${bfd_la_location}/libbfd.la; then
+      -f ${bfd_a_location}/libbfd.a; then
      echo "yes"
    else
      echo "no"
@@ -74,5 +74,5 @@ and point to the bfd sibdirecotry there.
 )
  fi
 AC_SUBST(bfd_h_location)
-AC_SUBST(bfd_la_location)
+AC_SUBST(bfd_a_location)
 ])
