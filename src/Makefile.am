@@ -1,13 +1,13 @@
-CC=ccache gcc
-CXX=ccache g++
-
 bfd_la_location = @bfd_la_location@
 bfd_h_location  = @bfd_h_location@
 libiberty_location = @libiberty_location@
+CCACHE = @CCACHE@
 
 MAINTAINERCLEANFILES 	= Makefile.in
 
-EXTRA_DIST           = simulavr.i
+DISTCLEANFILES=$DISTCLEANFILES simulavr.so keytrans.h simulavr_wrap.cpp
+
+EXTRA_DIST           = simulavr.i 
 
 lib_LTLIBRARIES		= libavrsim_pp.la
 
@@ -141,5 +141,8 @@ simulavr_wrap.cpp: $(srcdir)/simulavr.i
 
 simulavr.so: simulavr_wrap.o simulavr
 	g++ -I$(srcdir) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) -l$(LIBTCL_NAME) $(bfd_la_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o simulavr.so
+
+clean_simulavr.so:
+	$(RM) simulavr.so 
 
 clean : clean_simulavr.so

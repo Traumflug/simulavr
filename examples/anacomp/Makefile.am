@@ -2,15 +2,15 @@ bfd_la_location = @bfd_la_location@
 bfd_h_location  = @bfd_h_location@
 libiberty_location = @libiberty_location@
 
-#MAINTAINERCLEANFILES 	= Makefile.in stamp-common
 MAINTAINERCLEANFILES 	= Makefile.in
 
 pkginclude_HEADERS = 
 
 EXTRA_DIST           = main.c
-
+if HAVE_WISH
 do: anacomp
 	$(TCL_WISH) check.tcl
+endif
 
 # WAR: should detect avr-toolset first!
 

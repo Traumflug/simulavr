@@ -18,14 +18,3 @@ DIST_SUBDIRS    = src regress examples
 
 MAINTAINERCLEANFILES = Makefile.in
 
-# There has to be a better way....but I don't know it...
-# This bit might seem silly, but make distcheck failed when in a separate tree...when I fixed that, it wouldn't make distcheck from the source directory....Hoepfully it is solved now! 
-dist-hook:
-	Xfred=${ac_aux_dir} ; mkdir -p $(distdir)/$${Xfred#$(srcdir)*}
-	Xfred=${ac_aux_dir} ; for file in $(AUX_DIST) $(AUX_DIST_EXTRA); do \
-		echo cp $$file $(distdir)/$${Xfred#$(srcdir)*}; \
-	  cp $$file $(distdir)/$${Xfred#$(srcdir)*}; \
-	done
-	echo "@@@@"
-	echo source = $(AUX_DIST) $(AUX_DIST_EXTRA)
-	echo dest   = ./${ac_aux_dir#*$(srcdir)}
