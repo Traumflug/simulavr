@@ -1,11 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
+AMDEP
 AC_INIT(src/main.cpp)
 AC_CONFIG_AUX_DIR(config)
 AM_CONFIG_HEADER(src/config.h)
 AM_INIT_AUTOMAKE(avrsim_pp, 0.8.001)
 AM_MAINTAINER_MODE
 
-AMDEP
 
 AC_PROG_CC
 AC_PROG_CXX
