@@ -1,4 +1,7 @@
-2005-02-09    <no.mail@please.com>
+2005-02-09    <rivetwa@member.fsf.org>
+
+	* doc/simulavrxx.texinfo: Minor updated to spelling and word
+	choice. Minor problems remain. (version/update fields not setup)
 
 	* INSTALL (bootstrap): Updated bootstrap notes
 

@@ -200,6 +200,10 @@ Now you have an autoconfigured project. Follow the usual step:
         Notice that you may want to use --enable-install-libbfd when
         configuring binutils for AVR to get the libraries.
 
+documentation:
+   From the root of the build directory, try "make info" and "make
+   pdf" to make those versions of the documentation.
+
 
 If you are pulling files from CVS, these notes may be important to you:
 
