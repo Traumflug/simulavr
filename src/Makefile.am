@@ -62,8 +62,8 @@ libavrsim_pp_la_SOURCES	= 	\
 pkginclude_HEADERS = 	\
 	application.h \
 	externaltype.h \
-    funktor.h \
-	printable.h \	
+	funktor.h \
+	printable.h \
 	at4433.h		\
 	at8515.h		\
 	at8515special.h		\
