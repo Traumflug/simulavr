@@ -19,6 +19,7 @@ AC_CHECK_PROG(AVR_GCC, avr-gcc, avr-gcc)
 AC_CHECK_PROG(AVR_GXX, avr-g++, avr-g++)
 AC_PATH_PROG(TCL_WISH, wish wish8.4 wish8.3 wish8.2)
 AC_CHECK_PROG(CCACHE, ccache, ccache, "")
+AC_SWIG
 
 if (echo $CXX | grep ccache); then
 echo
@@ -73,6 +74,7 @@ fi
 
 changequote([, ])
 ])
+AC_PYTHON
 
 if test "x$_cv_python_211" = "xyes" ; then
   ac_regression_subdir="regress"
@@ -90,74 +92,6 @@ AM_CONDITIONAL(COND_HAS_PYTHON, test "x$_cv_python_211" = "xyes")
 dnl Checks for programs.
 
 dnl Checks for libraries.
-AC_ARG_WITH( bfd-path,--with-bfd-path=path location of AVR-binutils version of libbfd,
-[if test x"${withval}" != ""; then
-   bfd_dir=${withval}
-   libbfd_root_location=${bfd_dir}/${host}/avr
-   AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path subtree...) 
-   bfd_h_location=${libbfd_root_location}/include
-   bfd_a_location=${libbfd_root_location}/lib
-   if test -f ${bfd_h_location}/bfd.h -a \
-      -f ${bfd_a_location}/libbfd.a; then
-     echo "yes"
-   else
-     echo "no"
-     bfd_h_location=""
-   fi
-  if test x"${bfd_h_location}" == x; then
-   libbfd_root_location=${bfd_dir}
-   AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path directory...) 
-   bfd_h_location=${libbfd_root_location}/include
-   bfd_a_location=${libbfd_root_location}/lib
-   if test -f ${bfd_h_location}/bfd.h -a \
-      -f ${bfd_a_location}/libbfd.a; then
-     echo "yes"
-   else
-     echo "no"
-     bfd_h_location=""
-   fi
-  fi
-  if test x"${bfd_h_location}" == x; then
-   libbfd_root_location=${bfd_dir}/avr
-   AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path (2) directory...) 
-   bfd_h_location=${libbfd_root_location}/include
-   bfd_a_location=${libbfd_root_location}/lib
-   if test -f ${bfd_h_location}/bfd.h -a \
-      -f ${bfd_a_location}/libbfd.a; then
-     echo "yes"
-   else
-     echo "no"
-     bfd_h_location=""
-   fi
-  fi
-  if test x"${bfd_h_location}" == x; then
-   libbfd_root_location=${bfd_dir}
-   AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path (3) directory...) 
-   bfd_h_location=${libbfd_root_location}
-   bfd_a_location=${libbfd_root_location}
-   if test -f ${bfd_h_location}/bfd.h -a \
-      -f ${bfd_a_location}/libbfd.a; then
-     echo "yes"
-   else
-     echo "no"
-     bfd_h_location=""
-   fi
-  fi
-  if test x"${bfd_h_location}" == x; then
-   libbfd_root_location=${bfd_dir}
-   AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path (4) directory...) 
-   bfd_h_location=${libbfd_root_location}/bfd
-   bfd_a_location=${libbfd_root_location}/bfd
-   if test -f ${bfd_h_location}/bfd.h -a \
-      -f ${bfd_a_location}/libbfd.a; then
-     echo "yes"
-   else
-     echo "no"
-     bfd_h_location=""
-   fi
-  fi
-fi
-])
 
 AVR_BFD_LIB
 AVR_LIBIBLIO
@@ -197,6 +131,7 @@ AC_CONFIG_FILES([Makefile \
         examples/anacomp/checkdebug.tcl ])
 AC_OUTPUT
 
+echo "swig_path         = " ${swig_path}
 echo "LIBTCL_NAME        = " ${LIBTCL_NAME}
 echo "libbfd.a location = " ${bfd_a_location}
 echo "bfd.h location     = " ${bfd_h_location}

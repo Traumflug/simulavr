@@ -1,6 +1,7 @@
 bfd_a_location = @bfd_a_location@
 bfd_h_location  = @bfd_h_location@
 libiberty_location = @libiberty_location@
+swig_path = @swig_path@
 CCACHE = @CCACHE@
 
 MAINTAINERCLEANFILES 	= Makefile.in
@@ -155,7 +156,7 @@ INCLUDES		= -I$(bfd_h_location) -I$(top_srcdir)/src -I $(top_builddir)/src
 all-am: simulavr.so
 
 simulavr_wrap.cpp: $(srcdir)/simulavr.i
-	swig -c++ -o $@ $<
+	$(swig_path) -c++ -o $@ $<
 
 simulavr.so: simulavr_wrap.o simulavr
 	g++ -I$(srcdir) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) -l$(LIBTCL_NAME) $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o simulavr.so
