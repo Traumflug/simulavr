@@ -140,6 +140,6 @@ simulavr_wrap.cpp: $(srcdir)/simulavr.i
 	swig -c++ -o $@ $<
 
 simulavr.so: simulavr_wrap.o simulavr
-	g++ -I$(srcdir) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) -ltcl$(TCL_VERSION) $(bfd_la_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o simulavr.so
+	g++ -I$(srcdir) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) -l$(LIBTCL_NAME) $(bfd_la_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o simulavr.so
 
 clean : clean_simulavr.so

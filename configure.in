@@ -17,6 +17,16 @@ AC_CHECK_PROG(AVR_GCC, avr-gcc, avr-gcc)
 AC_CHECK_PROG(AVR_GXX, avr-g++, avr-g++)
 AC_CHECK_PROG(TCL_WISH,wish,wish)
 
+AC_CHECK_LIB(tcl,Tcl_CreateInterp,
+[WE_HAVE_TCL=yes])
+if test x"${WE_HAVE_TCL}" != "x"; then
+        LIBTCL_NAME=tcl
+else
+        MY_WISH=`which ${TCL_WISH}`
+        LIBTCL_NAME=`ldd ${MY_WISH} | grep libtcl | sed -e 's/[[\t ]]\+lib\(tcl[[^ \t]]\+\).so.*/\1/g'`
+fi
+
+
 
 AC_SUBST([AVR_AS])
 AC_SUBST([AVR_LD])
@@ -155,6 +165,7 @@ AC_FUNC_VPRINTF
 AC_SUBST([ac_aux_dir])
 my_top_builddir=`pwd`/
 AC_SUBST([my_top_builddir])
+AC_SUBST([LIBTCL_NAME])
 
 AC_OUTPUT(Makefile \
         src/Makefile \
@@ -166,5 +177,6 @@ AC_OUTPUT(Makefile \
         examples/gui.tcl examples/anacomp/check.tcl \
         src/config.h )
 
+echo "LIBTCL_NAME        = " ${LIBTCL_NAME}
 echo "libbfd.la location = " ${bfd_la_location}
 echo "bfd.h location     = " ${bfd_h_location}
