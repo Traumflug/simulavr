@@ -23,6 +23,7 @@
 #ifndef AVRDEVICE
 #define AVRDEVICE
 
+#include "systemclocktypes.h"
 #include "simulationmember.h"
 #include "pin.h"
 #include "net.h"
@@ -88,7 +89,7 @@ class AvrDevice: public SimulationMember {
         MemoryOffsets &operator->*(MemoryOffsets *m) { return *m;}
 
         AvrDevice(unsigned int flashSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int IoSpaceSize);
-        int Step(bool &, unsigned long long *nextStepIn_ns =0);
+        int Step(bool &, SystemClockOffset *nextStepIn_ns =0);
         void Reset();
         void SetClockFreq(unsigned long f);
         unsigned long long GetClockFreq();
@@ -100,6 +101,8 @@ class AvrDevice: public SimulationMember {
         void RegisterPin(const string &name, Pin *p) {
             allPins.insert(pair<string, Pin*>(name, p));
         }
+
+        void DeleteAllBreakpoints();
 
         const string &GetFname() { return actualFilename; }
 };

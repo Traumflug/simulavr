@@ -24,6 +24,7 @@
 #ifndef UI
 #define UI
 
+#include "systemclocktypes.h"
 #include "simulationmember.h"
 #include "mysocket.h"
 #include "pin.h"
@@ -33,7 +34,7 @@ using namespace std;
 
 class UserInterface: public SimulationMember, public Socket, public ExternalType {
     protected:
-        map<string, ExternalType*> extPins;
+        map<string, ExternalType*> extMembers;
         bool updateOn;
         unsigned long long pollFreq;
         string dummy; //replaces old dummy in Step which was static :-(
@@ -43,12 +44,12 @@ class UserInterface: public SimulationMember, public Socket, public ExternalType
 
     public:
         void SetNewValueFromUi(const string &); //this is mainly for conroling the ui interface itself from the gui
-        void AddExternalType(const string &name, ExternalType *p) { extPins[name]=p;}
+        void AddExternalType(const string &name, ExternalType *p) { extMembers[name]=p;}
         UserInterface(int port, bool withUpdateControl=true);
         ~UserInterface();
         void SendUiNewState(const string &s, const char &c);
 
-        int Step(bool &, unsigned long long *nextStepIn_ns=0);
+        int Step(bool &, SystemClockOffset *nextStepIn_ns=0);
         void SwitchUpdateOnOff(bool PollFreq);
         void Write(const string &s);
 

@@ -28,12 +28,16 @@
 #include "avrdevice.h"
 
 class SystemClock: public multimap<unsigned long, SimulationMember *> {
+    private:
+        SystemClock(); //never !
+        SystemClock(const SystemClock &);
+
     protected:
         unsigned long long currentTime;
         vector<SimulationMember*> asyncMembers;
 
     public:
-        SystemClock();
+        //SystemClock();
 
         void Add(SimulationMember *dev);
         void AddAsyncMember(SimulationMember *dev);

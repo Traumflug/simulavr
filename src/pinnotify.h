@@ -20,35 +20,12 @@
  *
  ****************************************************************************
  */
-#ifndef FLASH
-#define FLASH
-#include <string>
-#include <map>
-#include <vector>
-
-#include "decoder.h"
-#include "memory.h"
-
-class DecodedInstruction;
-
-class AvrFlash: public Memory {
-    protected:
-        AvrDevice *core;
-        vector <DecodedInstruction*> DecodedMem;
-
-    friend int avr_op_CPSE::operator()();
-    friend int avr_op_SBIC::operator()();
-    friend int avr_op_SBIS::operator()();
-    friend int avr_op_SBRC::operator()();
-    friend int avr_op_SBRS::operator()();
-    friend int AvrDevice::Step(bool &, SystemClockOffset *);
-    
-
+#ifndef PINNOTIFY
+#define PINNOTIFY
+class Pin;
+class HasPinNotifyFunction {
     public:
-        void Decode();                          //Decode comple memory
-        void Decode(int addr );                 //Decode only instruction at addr
-        void WriteMem(unsigned char*, unsigned int, unsigned int);
-        AvrFlash(AvrDevice *c, int size);
-        unsigned int GetSize();
+        virtual void PinStateHasChanged(Pin*)=0;
 };
+
 #endif

@@ -104,8 +104,8 @@ class GdbServer: public SimulationMember {
         void IdleStep();
 
     public:
-        int Step(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns=0) ;
-        int InternalStep(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns=0) ;
+        int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0) ;
+        int InternalStep(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0) ;
         void TryConnectGdb();
         void SendPosition(int signal); //send gdb the actual position where the simulation is stopped
         int SleepStep();

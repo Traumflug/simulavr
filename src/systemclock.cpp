@@ -20,6 +20,7 @@
  *
  ****************************************************************************
  */
+#include "systemclocktypes.h"
 #include "systemclock.h"
 #include "simulationmember.h"
 #include "helper.h"
@@ -28,10 +29,18 @@
 
 #include "signal.h"
 
-SystemClock::SystemClock() { currentTime=0; }
+SystemClock::SystemClock() { 
+    static int no=0;
+    currentTime=0; 
+    no++;
+    if (no>1) {
+        cerr << "Crazy problem: Second instance of SystemClock created!" << endl;
+        exit(0);
+    }
+}
 
 void SystemClock::Add(SimulationMember *dev) {
-    insert( pair<unsigned long long, SimulationMember*>(0,dev));
+    insert( pair<unsigned long long, SimulationMember*>(currentTime,dev));
 }
 
 void SystemClock::AddAsyncMember( SimulationMember *dev) {
@@ -50,7 +59,7 @@ void SystemClock::AddAsyncMember( SimulationMember *dev) {
 
 int SystemClock::Step(bool &untilCoreStepFinished) { //0-> return also if cpu in waitstate 1-> return if cpu is really finished
     int res=0; //returns the state from a core step. Needed by gdb-server to wathc for breakpoints
-    unsigned long long nextStepIn_ns;
+    SystemClockOffset nextStepIn_ns;
 
     static vector<SimulationMember*>::iterator ami;
     static vector<SimulationMember*>::iterator amiEnd;
@@ -59,19 +68,24 @@ int SystemClock::Step(bool &untilCoreStepFinished) { //0-> return also if cpu in
     if (begin()!=end()) {
         core=begin()->second;
         currentTime=begin()->first; 
+        erase(begin());
         if (trace_on) traceOut << DecLong(currentTime)<<" ";
         res=core->Step(untilCoreStepFinished, &nextStepIn_ns);
         if (nextStepIn_ns==0) { //insert the next step behind the following!
             SystemClock::iterator ii=begin();
-            ii++;
+            //ii++;
             if (ii  != end() ) {
                 nextStepIn_ns=1+ (ii->first); 
             }
-        } else {
+        } else if(nextStepIn_ns>0) {
             nextStepIn_ns+=currentTime;
         }
-        erase(begin());
-        insert (pair<unsigned long long, SimulationMember*>(nextStepIn_ns, core));
+        //erase(begin());
+
+        //if nextStepIn_ns is < 0 remove the entry from the list and do not reenter it 
+        if (nextStepIn_ns>0) {
+            insert (pair<unsigned long long, SimulationMember*>(nextStepIn_ns, core));
+        } 
 
         amiEnd= asyncMembers.end();
         for (ami= asyncMembers.begin(); ami!=amiEnd ; ami++) {

@@ -55,7 +55,7 @@ int Pin::GetAnalog() const {
     }
 }
 
-void Pin::RegisterCallback(Hardware *h) {
+void Pin::RegisterCallback(HasPinNotifyFunction *h) {
     notifyList.push_back(h);
 }
 void Pin::SetInState ( const Pin &p) { 
@@ -69,8 +69,8 @@ void Pin::SetInState ( const Pin &p) {
         }
     }
 
-    vector<Hardware*>::iterator ii;
-    vector<Hardware*>::iterator ee;
+    vector<HasPinNotifyFunction*>::iterator ii;
+    vector<HasPinNotifyFunction*>::iterator ee;
 
     ee=notifyList.end();
     for (ii=notifyList.begin(); ii!=ee; ii++) {
@@ -274,6 +274,7 @@ OpenDrain::operator bool() const
 
 ExtPin::ExtPin ( T_Pinstate ps, UserInterface *_ui, char *_extName, char *baseWindow) : Pin(ps), ui(_ui), extName(_extName) {
     ostringstream os;
+    outState=ps;
     os << "create Net "<< _extName << " "<<baseWindow << " " << endl;
     ui->Write(os.str());
 

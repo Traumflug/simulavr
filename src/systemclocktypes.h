@@ -20,35 +20,14 @@
  *
  ****************************************************************************
  */
-#ifndef FLASH
-#define FLASH
-#include <string>
-#include <map>
-#include <vector>
 
-#include "decoder.h"
-#include "memory.h"
+/*
+This file should be removed or integrated somewhere in the near future
+Actually it is only putted to make the compile possible because of 
+infinite recursion in header dependencies which I have not fixed until now
+*/
 
-class DecodedInstruction;
-
-class AvrFlash: public Memory {
-    protected:
-        AvrDevice *core;
-        vector <DecodedInstruction*> DecodedMem;
-
-    friend int avr_op_CPSE::operator()();
-    friend int avr_op_SBIC::operator()();
-    friend int avr_op_SBIS::operator()();
-    friend int avr_op_SBRC::operator()();
-    friend int avr_op_SBRS::operator()();
-    friend int AvrDevice::Step(bool &, SystemClockOffset *);
-    
-
-    public:
-        void Decode();                          //Decode comple memory
-        void Decode(int addr );                 //Decode only instruction at addr
-        void WriteMem(unsigned char*, unsigned int, unsigned int);
-        AvrFlash(AvrDevice *c, int size);
-        unsigned int GetSize();
-};
+#ifndef SYSTEMCLOCKTYPES
+#define SYSTEMCLOCKTYPES
+typedef long long SystemClockOffset;
 #endif

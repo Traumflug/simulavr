@@ -17,7 +17,7 @@
 
 #define USE_ANA
 #define USE_PWM4
-//#define USE_WEICHE8
+#define USE_WEICHE8
 #define EXPORT_CLKDATA
 
 int main3() {

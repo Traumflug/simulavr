@@ -12,6 +12,11 @@
 #include "net.h"
 #include "trace.h"
 #include "gdb.h"
+#include "lcd.h"
+#include "serialrx.h"
+#include "serialtx.h"
+
+SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %}
 
 %include "avrdevice.h"
@@ -25,7 +30,12 @@
 %include "pin.h"
 %include "net.h"
 %include "gdb.h"
+%include "lcd.h"
+%include "serialrx.h"
+%include "serialtx.h"
+
 void StartTrace(const char*);
+SystemClock &GetSystemClock();
 
 
 

@@ -28,6 +28,8 @@
 
 
 #include "externaltype.h"
+#include "pinnotify.h"
+
 using namespace std;
 
 class NetInterface;
@@ -58,7 +60,7 @@ class Pin {
         }T_Pinstate;
 
         T_Pinstate outState;
-        vector<Hardware*> notifyList;
+        vector<HasPinNotifyFunction*> notifyList;
 
     public:
         void SetOutState( T_Pinstate s);
@@ -77,7 +79,7 @@ class Pin {
         virtual ~Pin(){}
         //T_Pinstate GetOutState();
         int GetAnalog() const;
-        void RegisterCallback( Hardware *);
+        void RegisterCallback( HasPinNotifyFunction *);
 
 
         friend class HWPort;

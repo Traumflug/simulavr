@@ -30,6 +30,7 @@
 
 using namespace std;
 
+#include "systemclocktypes.h"
 #include "simulationmember.h"
 #include "ui.h"
 #include "pin.h"
@@ -51,7 +52,7 @@ class Scope : public SimulationMember {
         Scope(UserInterface *ui, const string &name, unsigned int noOfChannels, char *baseWindow);
         virtual ~Scope();
         Pin *GetPin(unsigned int no); 
-        virtual int Step(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns){return 0;} //what we should step here?
+        virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){return 0;} //what we should step here?
         void SetInStateForChannel(unsigned int channel, const Pin& p);
 };
 

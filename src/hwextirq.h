@@ -26,12 +26,13 @@
 #include "hardware.h"
 #include "pinatport.h"
 #include "rwmem.h"
+#include "pinnotify.h"
 
 
 class HWIrqSystem;
 
 
-class HWExtIrq: public Hardware {
+class HWExtIrq: public Hardware, public HasPinNotifyFunction {
 	protected:
 		unsigned char gimsk;
 		unsigned char gifr;

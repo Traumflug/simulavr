@@ -33,7 +33,7 @@ class Hardware {
         virtual void Reset() {}; //reset the hardware, used by constructor & wado
         virtual void ClearIrqFlag(unsigned int vector);
         virtual ~Hardware(){}
-        virtual void PinStateHasChanged(Pin*){};
+        //virtual void PinStateHasChanged(Pin*){};
 };
 
 #endif

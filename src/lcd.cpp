@@ -74,7 +74,7 @@ void Lcd::LcdWriteCommand(unsigned char command) {
     }       
 } 
 
-int Lcd::Step(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns) {
+int Lcd::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
     //static unsigned char lastPortValue=0;
     //static int readLow = 0;
     //static unsigned char command=0;
@@ -126,7 +126,8 @@ int Lcd::Step(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns) {
     return 0; 
 }
 
-Lcd::Lcd(UserInterface *_ui, const string &_name, const string &baseWindow): 
+//Lcd::Lcd(UserInterface *_ui, const string &_name, const string &baseWindow): 
+Lcd::Lcd(UserInterface *_ui, const char *_name, const char *baseWindow): 
 ui(_ui), name(_name),
     d0( &myPortValue, 1),
     d1( &myPortValue, 2),
@@ -137,6 +138,7 @@ ui(_ui), name(_name),
 commandData( &myPortValue, 64)
     //debugOut("./curses")
 {
+    cout << "----------" << endl;
     lastPortValue=0;
     readLow=0;
     command=0;

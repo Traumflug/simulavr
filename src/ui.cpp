@@ -52,7 +52,7 @@ void UserInterface::SwitchUpdateOnOff(bool yesNo) {
 }
 
 
-int UserInterface::Step(bool &dummy1, unsigned long long *nextStepIn_ns) {
+int UserInterface::Step(bool &dummy1, SystemClockOffset *nextStepIn_ns) {
     if (nextStepIn_ns!=0) {
         *nextStepIn_ns=pollFreq;
     }
@@ -92,8 +92,8 @@ int UserInterface::Step(bool &dummy1, unsigned long long *nextStepIn_ns) {
                         waitOnAckFromTclDone++;
                     } else {
                         map<string, ExternalType*>::iterator ii;
-                        ii=extPins.find(net);
-                        if (ii != extPins.end() ) {
+                        ii=extMembers.find(net);
+                        if (ii != extMembers.end() ) {
                             (ii->second)->SetNewValueFromUi(par);
                         } else {
                             cerr << "Netz nicht gefunden:" << net << endl;

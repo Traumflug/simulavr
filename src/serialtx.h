@@ -1,4 +1,4 @@
- /*
+/*
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -20,58 +20,71 @@
  *
  ****************************************************************************
  */
-#ifndef LCD
-#define LCD
-
-
-#include <iostream>
-#include <string>
+#ifndef SERIALTX
+#define SERIALTX
 
 #include "systemclocktypes.h"
-#include "simulationmember.h"
-//#include "hardware.h"
 #include "ui.h"
-#include "pin.h"
 
 
-class Lcd : public SimulationMember {
+class SerialTx: public SimulationMember, public ExternalType {
     protected:
         UserInterface *ui;
         string name;
-        unsigned char myPortValue;
-        map<string, Pin*> allPins;
-        Pin d0;
-        Pin d1;
-        Pin d2;
-        Pin d3;
 
-        Pin enable;
-        Pin readWrite;
-        Pin commandData;
+        Pin tx;
+
+        map < string, Pin *> allPins;
+        unsigned long long baudrate;
+
+        unsigned int CpuCycleTx();
+
+        enum T_TxState{
+            TX_DISABLED,
+            TX_SEND_STARTBIT,
+            TX_SEND_DATABIT,
+            TX_SEND_STOPBIT,
+        } ;
+
+        T_TxState txState;
+
+        vector<unsigned char> inputBuffer;
+        unsigned int data;
+        unsigned int bitCnt;
+        unsigned int maxBitCnt;
+
+#if 0
+
+        
+        unsigned char udrWrite;
+        unsigned char udrRead;
+        unsigned char usr;
+        unsigned char ucr;
+        unsigned short ubrr; //16 bit ubrr to fit also 4433 device
 
 
 
-        int merke_x;
-        int merke_y;
+        int cntRxSamples;
+        int rxLowCnt;
+        int rxHighCnt;
+        unsigned int rxDataTmp;
+        int rxBitCnt;
 
-        void LcdWriteData(unsigned char data);
-        void LcdWriteCommand(unsigned char command);
+        int baudCnt16;
+        unsigned char txDataTmp;
+        int txBitCnt;
 
-        //ofstream debugOut;
-        void SendCursorPosition();
+#endif
 
-        unsigned char lastPortValue;
-        int readLow;
-        unsigned char command;
-        int enableOld;
 
     public:
+        SerialTx(UserInterface *_ui, const char *_name, const char *baseWindow);
+        unsigned int CpuCycle();
+        void Reset();
+        Pin* GetPin(const char *name);
+        virtual ~SerialTx(){};
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
-        //Lcd(UserInterface *ui, const string &name, const string &baseWindow);
-        Lcd(UserInterface *ui, const char *name, const char *baseWindow);
-        virtual ~Lcd();
-        Pin *GetPin(const char *name); 
-
-};
+        virtual void SetNewValueFromUi(const string &);
+ };
 
 #endif

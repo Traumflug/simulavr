@@ -65,7 +65,8 @@ class HWUart: public Hardware {
             TX_SEND_STARTBIT,
             TX_SEND_DATABIT,
             TX_SEND_STOPBIT,
-            TX_AFTER_STOPBIT
+            TX_AFTER_STOPBIT,
+            TX_FIRST_RUN
         } ;
 
         T_RxState rxState;

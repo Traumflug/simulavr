@@ -27,8 +27,9 @@
 #include "avrdevice.h"
 #include "pinatport.h"
 #include "rwmem.h"
+#include "pinnotify.h"
 
-class HWAcomp: public Hardware {
+class HWAcomp: public Hardware, public HasPinNotifyFunction {
     protected:
         HWIrqSystem *irqSystem;
         PinAtPort pinAin0;

@@ -1,4 +1,4 @@
- /*
+/*
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -20,54 +20,58 @@
  *
  ****************************************************************************
  */
-#ifndef KEYBD
-#define KEYBD
-
-#define KBD_BUFFER_SIZE 128
-
-
-#include <iostream>
+#ifndef SERIALRX
+#define SERIALRX
 
 #include "systemclocktypes.h"
-#include "simulationmember.h"
-#include "hardware.h"
-#include "pin.h"
+#include "ui.h"
+#include "pinnotify.h"
 
 
-class Keyboard : public SimulationMember, ExternalType {
+class SerialRx: public SimulationMember, public ExternalType, public HasPinNotifyFunction {
     protected:
         UserInterface *ui;
         string name;
-        unsigned char myPortValue;
-        map<string, Pin*> allPins;
-        Pin clk;
-        Pin data;
 
-        unsigned int actChar;
-        unsigned int bitCnt;
+        Pin rx;
 
-        //ofstream debugOut;
-        unsigned long myClockFreq;
+        map < string, Pin *> allPins;
+        unsigned long long baudrate;
 
-        unsigned int buffer[KBD_BUFFER_SIZE];
-        unsigned int bufferWriteIndex;
-        unsigned int bufferReadIndex;
+        unsigned int CpuCycleRx();
+        void PinStateHasChanged(Pin*);
 
-        void InsertMakeCodeToBuffer(int);
-        void InsertBreakCodeToBuffer(int);
-        int InsertScanCodeToBuffer( unsigned char scan);
+        int highCnt;
 
-        unsigned char actualChar;
-         unsigned char lastPortValue;
-        
+        int bitCnt;
+        int maxBitCnt;
+        int dataByte;
+
+
+
+
+
+        enum T_RxState {
+            RX_WAIT_LOWEDGE,
+            RX_READ_STARTBIT,
+            RX_READ_DATABIT_START,
+            RX_READ_DATABIT_FIRST,
+            RX_READ_DATABIT_SECOND,
+            RX_READ_DATABIT_THIRD,
+            RX_READ_STOPBIT
+        } ;
+
+        T_RxState rxState;
+
+
     public:
-        void SetNewValueFromUi(const string &);
+        SerialRx(UserInterface *_ui, const char *_name, const char *baseWindow);
+        unsigned int CpuCycle();
+        void Reset();
+        Pin* GetPin(const char *name);
+        virtual ~SerialRx(){};
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
-        Keyboard(UserInterface *, const string &name);
-        void SetClockFreq(unsigned long f);
-        virtual ~Keyboard();
-        Pin *GetPin(const char *name); 
-
-};
+        virtual void SetNewValueFromUi(const string &);
+ };
 
 #endif

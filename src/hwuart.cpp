@@ -25,6 +25,7 @@
 #include "irqsystem.h"
 
 
+
 #define UDRE 0x20
 #define TXEN 0x08
 #define RXEN 0x10
@@ -42,7 +43,7 @@
 void HWUart::SetUdr(unsigned char val) { 
     udrWrite=val;
     if ( usr&UDRE) { //the data register was empty
-        usr|=0xff-UDRE; //so we are not able to send another value now
+        usr &=0xff-UDRE; //so we are not able to send another value now 
     }
 } 
 
@@ -76,9 +77,12 @@ void HWUart::SetUcr(unsigned char val) {
     ucr=val;
 
     if (ucr & TXEN) {
-        pinTx.SetUseAlternateDdr(1);
+        if (txState == TX_FIRST_RUN || txState == TX_SEND_STARTBIT) {
+            pinTx.SetAlternatePort(1); //send high bit
+        }
         pinTx.SetAlternateDdr(1); 		//output!
         pinTx.SetUseAlternatePort(1);
+        pinTx.SetUseAlternateDdr(1);
     } else {
         pinTx.SetUseAlternateDdr(0);
         pinTx.SetUseAlternatePort(0);
@@ -88,7 +92,7 @@ void HWUart::SetUcr(unsigned char val) {
         pinRx.SetUseAlternateDdr(1);
         pinRx.SetAlternateDdr(0);		// input 
     }
-//prepared for later remove from hwuart from every cpu cycle (only on demand)
+    //prepared for later remove from hwuart from every cpu cycle (only on demand)
 #if 0
     //Check if one of Rx or Tx is enabled NEW!
     if ( ucr & ( RXEN|TXEN) ) {//now one of rx or tx is on
@@ -124,7 +128,6 @@ unsigned int HWUart::CpuCycleRx() {
     // receiver part
     //
     //this part MUST! ONLY BE CALLED IF THE PRESCALER OUTPUT COUNTS
-
     if ( ucr & RXEN) {
         switch (rxState) {
             case RX_WAIT_FOR_HIGH: //wait for startbit
@@ -243,17 +246,15 @@ unsigned int HWUart::CpuCycleTx() {
     if (baudCnt16==16) { //1 time baud rate - baud rate / 16 here
         baudCnt16=0;
 
-
-
-
         if (ucr & TXEN ) {	//transmitter enabled
-            if (usr & UDRE ) { // there is new data in udr
-                if (usr & TXC) { //transmitter is empty
+            if (!(usr & UDRE) ) { // there is new data in udr
+                if ((usr & TXC)| (txState==TX_FIRST_RUN)) { //transmitter is empty
                     //shift data from udr->transmit shift register
                     txDataTmp=udrWrite;
                     if (ucr & TXB8) { // there is a 1 in txb8
                         txDataTmp|=0x100; // this is bit 9 in the datastream
                     }
+
 
                     usr|=UDRE; // set UDRE, UDR is empty now
                     usr&=0xff-TXC; // the transmitter is not ready
@@ -289,7 +290,7 @@ unsigned int HWUart::CpuCycleTx() {
                 case TX_SEND_STOPBIT:
                     pinTx.SetAlternatePort(1);
                     //check for new data
-                    if (usr & UDRE ) { // there is new data in udr
+                    if (!(usr & UDRE)) { // there is new data in udr
                         //shift data from udr->transmit shift register
                         txDataTmp=udrWrite;
                         if (ucr & TXB8) { // there is a 1 in txb8
@@ -297,7 +298,6 @@ unsigned int HWUart::CpuCycleTx() {
                         }
 
                         usr|=UDRE; // set UDRE, UDR is empty now
-                        usr&=0xff-TXC; // the transmitter is not ready
                         txState=TX_SEND_STARTBIT;
                     } // end of new data in udr
                     else 
@@ -314,6 +314,7 @@ unsigned int HWUart::CpuCycleTx() {
 
 
                 case TX_DISABLED:
+                case TX_FIRST_RUN:
                     break;
 
             } //end of switch tx state
@@ -348,10 +349,11 @@ Hardware(core), irqSystem(s), pinTx(tx), pinRx(rx), vectorRx(vrx), vectorUdre(vu
 void HWUart::Reset() {
     udrWrite=0;
     udrRead=0;
-    usr=0x20; //UDRE in USR is set 1 on reset
+    usr=UDRE; //UDRE in USR is set 1 on reset
     ucr=0;
     ubrr=0;
     rxState=RX_WAIT_FOR_LOWEDGE;
+    txState=TX_FIRST_RUN;
 }
 
 unsigned char HWUart::GetUdr() { 

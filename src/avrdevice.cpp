@@ -227,7 +227,7 @@ AvrDevice::AvrDevice(unsigned int ioSpaceSize, unsigned int IRamSize, unsigned i
 }
 
 //do a single core step, (0)->a real hardware step, (1) until the uC finish the opcode! 
-int AvrDevice::Step(bool &untilCoreStepFinished, unsigned long long *nextStepIn_ns) {
+int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_ns) {
     int bpFlag=0;
     int hwWait=0;
 
@@ -369,4 +369,8 @@ unsigned char AvrDevice::GetRampz() {
 
 void AvrDevice::SetRampz(unsigned char val) {
     cerr << "Illegal use of virtual BAseClass AvrDevice";
+}
+
+void AvrDevice::DeleteAllBreakpoints() {
+    BP.erase(BP.begin(), BP.end());
 }

@@ -27,8 +27,9 @@ using namespace std;
 #include "hardware.h"
 #include "pinatport.h"
 #include "rwmem.h"
+#include "pinnotify.h"
 
-class HWMegaExtIrq: public Hardware {
+class HWMegaExtIrq: public Hardware, public HasPinNotifyFunction {
 	protected:
         unsigned char eimsk;
         unsigned char eifr;

@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
 
 #define USE_ANA
 #define USE_PWM4
-//#define USE_WEICHE8
+#define USE_WEICHE8
 #define EXPORT_CLKDATA
 int main2() {
 
@@ -277,7 +277,7 @@ int main2() {
     AvrDevice *dev1= new AvrDevice_at90s8515;
     dev1->Load("pwm4.o.go"); //fahrspannungserzeuger
     //dev1->SetClockFreq(75);    
-    dev1->SetClockFreq(250);    //4Mhz //257 is not working !!! 256 seems ok
+    dev1->SetClockFreq(125);    //4Mhz //257 is not working !!! 256 seems ok
     SystemClock::Instance().Add(dev1);
 
     clk.Add(dev1->GetPin("D2"));  //pwm

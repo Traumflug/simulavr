@@ -1127,7 +1127,6 @@ int GdbServer::gdb_parse_packet( char *pkt )
         case 'k':               /* kill request */
             /* Reset the simulator since there may be another connection
             before the simulator stops running. */
-            avr_core_reset(); 
             gdb_send_reply(  "OK" );
             return GDB_RET_KILL_REQUEST;
 
@@ -1354,7 +1353,7 @@ void GdbServer::TryConnectGdb() {
     } //time
 }
 
-int GdbServer::Step(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns) {
+int GdbServer::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
     //cout << "GdbServer Step Pointer To Instance:" << this << endl;
     if (conn<0) { // no connection established -> look for it
         TryConnectGdb();
@@ -1383,9 +1382,9 @@ void GdbServer::IdleStep() {
                 break;
 
             case GDB_RET_CTRL_C:
-                    runMode=GDB_RET_CTRL_C;
-                    SendPosition(SIGINT); //Give gdb an idea where the core is now 
-                    break;
+                runMode=GDB_RET_CTRL_C;
+                SendPosition(SIGINT); //Give gdb an idea where the core is now 
+                break;
 
             default:
                 cout << "wondering" << endl;
@@ -1395,7 +1394,7 @@ void GdbServer::IdleStep() {
 
 }
 
-int GdbServer::InternalStep(bool &untilCoreStepFinished, unsigned long long *timeToNextStepIn_ns) {
+int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *timeToNextStepIn_ns) {
     char reply[MAX_BUF+1];
     //cout << "Internal Step entered" << endl;
     //cout << "RunMode: " << dec << runMode << endl;
@@ -1433,8 +1432,11 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, unsigned long long *tim
                     break;
 
                 case GDB_RET_KILL_REQUEST:
-                    //here termination of gdb server should be handled ???
-                    //or shoudl we only reset the core? TODO
+                    avr_core_reset(); 
+                    conn= -1;   //we are not longer connected
+                    core->DeleteAllBreakpoints();
+                    return 0; 
+
                     break;
 
             } //end switch GDB_RETURN_VALUE
