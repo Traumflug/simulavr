@@ -21,6 +21,12 @@ AC_PATH_PROG(TCL_WISH, wish wish8.4 wish8.3 wish8.2)
 AC_CHECK_PROG(CCACHE, ccache, ccache, "")
 AC_SWIG
 
+if test -e ${swig_path}; then
+ echo "got swig"
+else
+ swig_path=""
+fi
+
 if (echo $CXX | grep ccache); then
 echo
 else 
@@ -112,6 +118,33 @@ if test x"$bfd_h_location" == "x"; then
   AVR_BFD_SEARCH_STEP([${libbfd_root_location}])
 fi
 
+if test x"${bfd_h_location}" == x; then
+AC_MSG_ERROR([
+
+*** ERROR ***
+
+provide --with-bfd-path=path-to-your-avr-libbfd-files or
+ensure your AVR cross-compiler toolset is in the path
+\(read-elf is used to auto-detect where your 
+AVR-build libbfd library is\)
+
+for example, user the --enable-install-libbfd flag when configuring
+binutils for AVR or execute make install_libbfd from your
+AVR-binutil's bfd subdirectory to install the AVR-binutils version of
+libbfd. Observe where the files are installed. For example:
+--with-bfd-path=/home/some_user/install/i686-pc-linux-gnu/avr
+
+This will make include/bfd.h and lib/libbfd.a available as required 
+by this package
+
+alternatively you may just keep your AVR-binutils build files around
+and point to the bfd sibdirecotry there.
+
+])
+fi
+
+AC_SUBST(bfd_h_location)
+AC_SUBST(bfd_a_location)
 
 echo set libbfd_root_location to ${libbfd_root_location}
 
@@ -147,6 +180,8 @@ AC_CONFIG_FILES([Makefile \
         examples/gui.tcl examples/anacomp/check.tcl \
         examples/anacomp/checkdebug.tcl ])
 AC_OUTPUT
+
+
 
 echo "swig_path         = " ${swig_path}
 echo "libbfd.a location = " ${bfd_a_location}

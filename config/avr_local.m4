@@ -18,8 +18,7 @@ if test x"$bfd_h_location" == "x"; then
       if test -f ${bfd_h_location}/bfd.h -a \
          -f ${bfd_a_location}/libbfd.a; then
         AC_MSG_RESULT(yes)
-        libbfd_root_location=$2
-        echo set libbfd_root_location to ${libbfd_root_location}
+        libbfd_root_location="$2"
       else
         AC_MSG_RESULT(no)
         bfd_a_location=""
@@ -55,31 +54,3 @@ AC_DEFUN([AVR_LIBIBERTY],
 AC_SUBST(libiberty_location)
 ])
 
-if test x"${bfd_h_location}" == x; then
-AC_MSG_ERROR([
-
-*** ERROR ***
-
-provide --with-bfd-path=path-to-your-avr-libbfd-files or
-ensure your AVR cross-compipler toolset is in the path
-\(read-elf is used to auto-detect where your 
-AVR-build libbfd library is\)
-
-for example, user the --enable-install-libbfd flag when configuring
-binutils for AVR or execute make install_libbfd from your
-AVR-binutil's bfd subdirectory to install the AVR-binutils version of
-libbfd. Observe where the files are installed. For example:
---with-bfd-path=/home/some_user/install/i686-pc-linux-gnu/avr
-
-This will make include/bfd.h and lib/libbfd.a available as required 
-by this package
-
-alternatively you may just keep your AVR-binutils build files around
-and point to the bfd sibdirecotry there.
-
-]
-)
- fi
-AC_SUBST(bfd_h_location)
-AC_SUBST(bfd_a_location)
-])
