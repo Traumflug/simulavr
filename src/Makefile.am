@@ -136,7 +136,7 @@ keytrans.h: kbdgentables keynumber_to_scancode.dat xcode_to_keynumber.dat
 
 kbdgentables_SOURCES = kbdgentables.cpp
 
-simulavr_SOURCES = main.cpp main3.cpp
+simulavr_SOURCES = main.cpp 
 
 
 # WAR: simulavr.so/.dll needs tp be properly integrated via the
