@@ -474,7 +474,7 @@ int GdbServer::gdb_extract_hex_num( char **pkt, char stop )
         if (i > max_shifts)
             avr_error( "number too large" );
 
-        num = (num << (i*4)) | hex2nib(*p);
+        num = (num << 4) | hex2nib(*p);
         i++;
         p++;
     }
