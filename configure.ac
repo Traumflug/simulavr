@@ -189,7 +189,9 @@ AC_CONFIG_FILES([Makefile
         regress/test_opcodes/Makefile
         examples/Makefile examples/anacomp/Makefile
         examples/gui.tcl examples/anacomp/check.tcl
-        examples/anacomp/checkdebug.tcl ])
+        examples/anacomp/checkdebug.tcl
+        examples/anacomp/checkdebug.gdb
+         ])
 AC_OUTPUT
 
 if test "x${swig_path}" == "x"; then
