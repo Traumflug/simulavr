@@ -200,3 +200,7 @@ Now you have an autoconfigured project. Follow the usual step:
         Notice that you may want to use --enable-install-libbfd when
         configuring binutils for AVR to get the libraries.
 
+
+
+bootstrap:
+  bootstrap is to be treated as a hint to how to bootstrap the autotools scripts. It works for me, but you may have to do something different. On gentoo, autmake 1.8 is available with automake-1.8, but automake by itself gave me version 1.5, which didn't have everything I wanted. (documentation generation for example )
