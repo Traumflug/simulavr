@@ -23,7 +23,6 @@
 #include "types.h"
 #include "decoder.h"
 #include "avrdevice.h"
-#include "ass_do.h"
 #include "trace.h"
 
 #include "hwsreg.h"
@@ -33,44 +32,44 @@
 
 #define MONSREG traceOut << (string)(*(core->status))  
 
-int avr_op_ADC_do_trace( AvrDevice *core, int p1, int p2)  {
+int avr_op_ADC::Trace()  {
     traceOut << "ADC R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_ADC_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_ADD_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ADD::Trace( ) {
     traceOut << "ADD R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_ADD_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_ADIW_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ADIW::Trace( ) {
     traceOut << "ADIW R" << p1 << ", " << p2 << " ";
-    int ret= avr_op_ADIW_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_AND_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_AND::Trace( ) {
     traceOut << "AND R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_AND_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_ANDI_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ANDI::Trace( ) {
     traceOut << "ANDI R" << p1 << ", " << HexChar(p2) << dec << " ";
-    int ret= avr_op_ANDI_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_ASR_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ASR::Trace( ) {
     traceOut << "ASR R" << p1 ;
-    int ret= avr_op_ASR_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
@@ -86,16 +85,16 @@ char *opcodes_bclr[8]= {
     "CLI"
 };
 
-int avr_op_BCLR_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_BCLR::Trace( ) {
     traceOut << opcodes_bclr[p1] << " ";
-    int ret= avr_op_BCLR_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_BLD_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_BLD::Trace( ) {
     traceOut << "BLD R" << p1 << ", " << p2 << " ";
-    int ret= avr_op_BLD_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
@@ -110,14 +109,14 @@ char *branch_opcodes_clear[8] = {
     "BRID"
 };
 
-int avr_op_BRBC_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_BRBC::Trace( ) {
     traceOut << branch_opcodes_clear[p1] << " ->" << HexShort((core->PC+1+p2)<<1) << dec << " ";
+    int ret=this->operator()();
 
     string sym(core->Flash->GetSymbolAtAddress(core->PC+1+p2));
     traceOut << sym << " ";
     for (int len = sym.length(); len<30;len++) { traceOut << " " ; }
 
-    int ret= avr_op_BRBC_do( core, p1, p2) ; 
     return ret;
 }
 
@@ -132,14 +131,14 @@ char *branch_opcodes_set[8] = {
     "BRIE"
 };
 
-int avr_op_BRBS_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_BRBS::Trace( ) {
     traceOut << branch_opcodes_set[p1] << " ->" << HexShort((core->PC+1+p2)<<1) << dec << " ";
+    int ret=this->operator()();
 
     string sym(core->Flash->GetSymbolAtAddress(core->PC+1+p2));
     traceOut << sym << " ";
     for (int len = sym.length(); len<30;len++) { traceOut << " " ; }
 
-    int ret= avr_op_BRBS_do( core, p1, p2) ; 
     return ret;
 }
 
@@ -154,87 +153,88 @@ char *opcodes_bset[8]= {
     "SEI"
 };
 
-int avr_op_BSET_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_BSET::Trace( ) {
     traceOut << opcodes_bset[p1] << " ";
-    int ret= avr_op_BSET_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_BST_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_BST::Trace( ) {
     traceOut << "BST R" << p1 << ", " << p2 << " ";
-    int ret= avr_op_BST_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_CALL_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_CALL::Trace( ) {
     traceOut << "CALL " << p1 << " ";
-    int ret= avr_op_CALL_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_CBI_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_CBI::Trace( ) {
     traceOut << "CBI " << HexChar(p1) << dec  << ", " << dec << p2 << " ";
-    int ret= avr_op_CBI_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_COM_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_COM::Trace( ) {
     traceOut << "COM R" << p1 << " ";
-    int ret= avr_op_COM_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_CP_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_CP::Trace( ) {
     traceOut << "CP R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_CP_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_CPC_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_CPC::Trace( ) {
     traceOut << "CPC R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_CPC_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_CPI_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_CPI::Trace( ) {
     traceOut << "CPI R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret= avr_op_CPI_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_CPSE_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_CPSE::Trace( ) {
     traceOut << "CPSE R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_CPSE_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_DEC_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_DEC::Trace( ) {
     traceOut << "DEC R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret= avr_op_DEC_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_EICALL_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_EICALL::Trace( ) {
     traceOut << "EICALL " ;
-    int ret= avr_op_EICALL_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_EIJMP_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_EIJMP::Trace( ) {
     traceOut << "EIJMP " ;
-    int ret= avr_op_EIJMP_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_ELPM_Z_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ELPM_Z::Trace( ) {
     traceOut << "ELPM R" << p1 << ", Z " ;
+    int ret=this->operator()();
 
     unsigned int Z = ((core->GetRampz() & 0x3f) << 16) +
         (((*(core->R))[31]) << 8) + 
@@ -244,12 +244,12 @@ int avr_op_ELPM_Z_do_trace( AvrDevice *core, int p1, int p2 ) {
 
     traceOut << " Flash[0x"<<hex<< (unsigned int) flash_addr<<"] ";
 
-    int ret= avr_op_ELPM_Z_do( core, p1, p2) ; 
     return ret;
 }
 
-int avr_op_ELPM_Z_incr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ELPM_Z_incr::Trace( ) {
     traceOut << "ELPM R" << p1 << ", Z+ ";
+    int ret=this->operator()();
 
     unsigned int Z = ((core->GetRampz() & 0x3f) << 16) +
         (((*(core->R))[31]) << 8) + 
@@ -261,12 +261,12 @@ int avr_op_ELPM_Z_incr_do_trace( AvrDevice *core, int p1, int p2 ) {
 
 
 
-    int ret= avr_op_ELPM_Z_incr_do( core, p1, p2) ; 
     return ret;
 }
 
-int avr_op_ELPM_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ELPM::Trace( ) {
     traceOut << "ELPM ";
+    int ret=this->operator()();
 
     unsigned int Z = ((core->GetRampz() & 0x3f) << 16) +
         (((*(core->R))[31]) << 8) + 
@@ -277,71 +277,71 @@ int avr_op_ELPM_do_trace( AvrDevice *core, int p1, int p2 ) {
     traceOut << " Flash[0x"<<hex<< (unsigned int) flash_addr<<"] ";
 
 
-    int ret= avr_op_ELPM_do( core, p1, p2) ; 
     return ret;
 }
 
-int avr_op_EOR_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_EOR::Trace( ) {
     traceOut << "EOR R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_EOR_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_ESPM_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ESPM::Trace( ) {
     traceOut << "ESPM??? " << p1 << ", " << p2 << " ";
-    int ret= avr_op_ESPM_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_FMUL_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_FMUL::Trace( ) {
     traceOut << "FMUL R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_FMUL_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_FMULS_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_FMULS::Trace( ) {
     traceOut << "FMULS R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_FMULS_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_FMULSU_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_FMULSU::Trace( ) {
     traceOut << "FMULSU R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_FMULSU_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_ICALL_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ICALL::Trace( ) {
     traceOut << "ICALL " ;
-    int ret= avr_op_ICALL_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_IJMP_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_IJMP::Trace( ) {
     traceOut << "IJMP " ;
-    int ret= avr_op_IJMP_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_IN_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_IN::Trace( ) {
     traceOut << "IN R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret= avr_op_IN_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_INC_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_INC::Trace( ) {
     traceOut << "INC R" << p1 << " ";
-    int ret= avr_op_INC_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_JMP_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_JMP::Trace( ) {
     traceOut << "JMP ";
+    int ret=this->operator()();
     word *MemPtr=(word*)core->Flash->myMemory;
     word offset=MemPtr[(core->PC)+1];         //this is k!
     offset=(offset>>8)+((offset&0xff)<<8);
@@ -351,81 +351,81 @@ int avr_op_JMP_do_trace( AvrDevice *core, int p1, int p2 ) {
     traceOut << sym << " ";
     for (int len = sym.length(); len<30;len++) { traceOut << " " ; }
 
-    int ret= avr_op_JMP_do( core, p1, p2) ; 
     return ret;
 }
 
-int avr_op_LDD_Y_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LDD_Y::Trace( ) {
     traceOut << "LD R" << p1 << ", Y+"<<p2;
-    int ret= avr_op_LDD_Y_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_LDD_Z_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LDD_Z::Trace( ) {
     traceOut << "LDD R" << p1 << ", Z ";
-    int ret= avr_op_LDD_Z_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_LDI_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LDI::Trace( ) {
     traceOut << "LDI R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret= avr_op_LDI_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_LDS_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LDS::Trace( ) {
     word *MemPtr=(word*)core->Flash->myMemory;
     word offset=MemPtr[(core->PC)+1];         //this is k!
     offset=(offset>>8)+((offset&0xff)<<8);
     traceOut << "LDS R" << p1 << ", " << hex << "0x" << offset << dec  << " ";
-    int ret= avr_op_LDS_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_LD_X_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LD_X::Trace( ) {
     traceOut << "LD R" << p1 << ", X ";
-    int ret= avr_op_LD_X_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_LD_X_decr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LD_X_decr::Trace( ) {
     traceOut << "LD R" << p1 << ", -X ";
-    int ret= avr_op_LD_X_decr_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_LD_X_incr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LD_X_incr::Trace( ) {
     traceOut << "LD R" << p1 << ", X+ ";
-    int ret= avr_op_LD_X_incr_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_LD_Y_decr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LD_Y_decr::Trace( ) {
     traceOut << "LD R" << p1 << ", -Y ";
-    int ret= avr_op_LD_Y_decr_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_LD_Y_incr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LD_Y_incr::Trace( ) {
     traceOut << "LD R" << p1 << ", Y+ " ;
-    int ret= avr_op_LD_Y_incr_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_LD_Z_incr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LD_Z_incr::Trace( ) {
     traceOut << "LD R" << p1 << ", Z+ ";
-    int ret= avr_op_LD_Z_incr_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_LD_Z_decr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LD_Z_decr::Trace( ) {
     traceOut << "LD R" << p1 << ", -Z";
-    int ret= avr_op_LD_Z_decr_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_LPM_Z_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LPM_Z::Trace( ) {
     traceOut << "LPM_Z ";
+    int ret=this->operator()();
 
     /* Z is R31:R30 */
     int Z = ((*(core->R))[ 31] << 8) + (*(core->R))[ 30];
@@ -434,12 +434,12 @@ int avr_op_LPM_Z_do_trace( AvrDevice *core, int p1, int p2 ) {
     traceOut << "FLASH[" << hex << Z << "," << sym << "] ";
 
 
-    int ret= avr_op_LPM_Z_do( core, p1, p2) ; 
     return ret;
 }
 
-int avr_op_LPM_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LPM::Trace( ) {
     traceOut << "LPM R0, Z "; 
+    int ret=this->operator()();
 
     /* Z is R31:R30 */
     int Z = ((*(core->R))[ 31] << 8) + (*(core->R))[ 30];
@@ -447,286 +447,292 @@ int avr_op_LPM_do_trace( AvrDevice *core, int p1, int p2 ) {
     string sym(core->Flash->GetSymbolAtAddress(Z));
     traceOut << "FLASH[" << hex << Z << "," << sym << "] ";
 
-    int ret= avr_op_LPM_do( core, p1, p2) ; 
     return ret;
 }
 
-int avr_op_LPM_Z_incr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LPM_Z_incr::Trace( ) {
     traceOut << "LPM R" << p1 << ", Z+ " ;
+    int ret=this->operator()();
     /* Z is R31:R30 */
     int Z = ((*(core->R))[ 31] << 8) + (*(core->R))[ 30];
     //string sym(core->Flash->GetSymbolAtAddressLpm(Z));
     string sym(core->Flash->GetSymbolAtAddress(Z));
     traceOut << "FLASH[" << hex << Z << "," << sym << "] ";
-    int ret= avr_op_LPM_Z_incr_do( core, p1, p2) ; 
     return ret;
 }
 
-int avr_op_LSR_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_LSR::Trace( ) {
     traceOut << "LSR R" << p1 << " ";
-    int ret= avr_op_LSR_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_MOV_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_MOV::Trace( ) {
     traceOut << "MOV R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_MOV_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_MOVW_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_MOVW::Trace( ) {
     traceOut << "MOVW R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_MOVW_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_MUL_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_MUL::Trace( ) {
     traceOut << "MUL R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_MUL_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_MULS_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_MULS::Trace( ) {
     traceOut << "MULS R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_MULS_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_MULSU_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_MULSU::Trace( ) {
     traceOut << "MULSU R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_MULSU_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_NEG_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_NEG::Trace( ) {
     traceOut << "NEG R" << p1 <<" ";
-    int ret= avr_op_NEG_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_NOP_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_NOP::Trace( ) {
     traceOut << "NOP ";
-    int ret= avr_op_NOP_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_OR_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_OR::Trace( ) {
     traceOut << "OR R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_OR_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_ORI_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ORI::Trace( ) {
     traceOut << "ORI R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret= avr_op_ORI_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_OUT_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_OUT::Trace( ) {
     traceOut << "OUT " << HexChar(p1) << dec  << ", R" << p2 << " ";
-    int ret= avr_op_OUT_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_POP_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_POP::Trace( ) {
     traceOut << "POP R" << p1 << " ";
-    int ret= avr_op_POP_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_PUSH_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_PUSH::Trace( ) {
     traceOut << "PUSH R" << p1 << " ";
-    int ret= avr_op_PUSH_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_RCALL_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_RCALL::Trace( ) {
     traceOut << "RCALL " << hex << ((core->PC+p1+1)<<1) << dec  << " ";
-    int ret= avr_op_RCALL_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_RET_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_RET::Trace( ) {
     traceOut << "RET " ;
-    int ret= avr_op_RET_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_RETI_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_RETI::Trace( ) {
     traceOut << "RETI ";
-    int ret= avr_op_RETI_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_RJMP_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_RJMP::Trace( ) {
     traceOut << "RJMP " << hex << ((core->PC+p1+1)<<1) << dec  << " ";
-    int ret= avr_op_RJMP_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_ROR_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ROR::Trace( ) {
     traceOut << "ROR R" << p1 << " ";
-    int ret= avr_op_ROR_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_SBC_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_SBC::Trace( ) {
     traceOut << "SBC R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_SBC_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_SBCI_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_SBCI::Trace( ) {
     traceOut << "SBCI R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret= avr_op_SBCI_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_SBI_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_SBI::Trace( ) {
     traceOut << "SBI " << HexChar(p1) << dec  << ", " << dec << p2 << " ";
-    int ret= avr_op_SBI_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_SBIC_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_SBIC::Trace( ) {
     traceOut << "SBIC " << HexChar(p1) << dec  << ", " << dec << p2 << " ";
-    int ret= avr_op_SBIC_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_SBIS_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_SBIS::Trace( ) {
     traceOut << "SBIS " << HexChar(p1) << dec  << ", " << dec << p2 << " ";
-    int ret= avr_op_SBIS_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_SBIW_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_SBIW::Trace( ) {
     traceOut << "SBIW R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret= avr_op_SBIW_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_SBRC_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_SBRC::Trace( ) {
     traceOut << "SBRC R" << p1 << ", " << p2 << " ";
-    int ret= avr_op_SBRC_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_SBRS_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_SBRS::Trace( ) {
     traceOut << "SBRS R" << p1 << ", " << p2 << " ";
-    int ret= avr_op_SBRS_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_SLEEP_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_SLEEP::Trace( ) {
     traceOut << "SLEEP " ;
-    int ret= avr_op_SLEEP_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_SPM_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_SPM::Trace( ) {
     traceOut << "SPM " ;
-    int ret= avr_op_SPM_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_STD_Y_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_STD_Y::Trace( ) {
     traceOut << "STD Y+"<<p1 <<", R" << p2 << " ";
-    int ret= avr_op_STD_Y_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_STD_Z_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_STD_Z::Trace( ) {
     traceOut << "STD Z, R" << p1 << " ";
-    int ret= avr_op_STD_Z_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_STS_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_STS::Trace( ) {
     word *MemPtr=(word*)core->Flash->myMemory;
     word offset=MemPtr[(core->PC)+1];         //this is k!
     offset=(offset>>8)+((offset&0xff)<<8);
     traceOut << "STS " << "0x" << hex << offset << dec  << ", R" << p2 << " ";
-    int ret= avr_op_STS_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_ST_X_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ST_X::Trace( ) {
     traceOut << "ST X, R" << p1 << " ";
-    int ret= avr_op_ST_X_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_ST_X_decr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ST_X_decr::Trace( ) {
     traceOut << "ST -X, R" << p1 << " ";
-    int ret= avr_op_ST_X_decr_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_ST_X_incr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ST_X_incr::Trace( ) {
     traceOut << "ST X+, R" << p1 << " ";
-    int ret= avr_op_ST_X_incr_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_ST_Y_decr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ST_Y_decr::Trace( ) {
     traceOut << "ST -Y, R" << p1 << " ";
-    int ret= avr_op_ST_Y_decr_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_ST_Y_incr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ST_Y_incr::Trace( ) {
     traceOut << "ST Y+, R" << p1 << " ";
-    int ret= avr_op_ST_Y_incr_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_ST_Z_decr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ST_Z_decr::Trace( ) {
     traceOut << "ST -Z, R" << p1 << " ";
-    int ret= avr_op_ST_Z_decr_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_ST_Z_incr_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_ST_Z_incr::Trace( ) {
     traceOut << "ST Z+, R" << p1 << " ";
-    int ret= avr_op_ST_Z_incr_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_SUB_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_SUB::Trace( ) {
     traceOut << "SUB R" << p1 << ", R" << p2 << " ";
-    int ret= avr_op_SUB_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_SUBI_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_SUBI::Trace( ) {
     traceOut << "SUBI R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret= avr_op_SUBI_do( core, p1, p2) ; 
+    int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_SWAP_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_SWAP::Trace( ) {
     traceOut << "SWAP R" << p1 << " ";
-    int ret= avr_op_SWAP_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
 
-int avr_op_WDR_do_trace( AvrDevice *core, int p1, int p2 ) {
+int avr_op_WDR::Trace( ) {
     traceOut << "WDR ";
-    int ret= avr_op_WDR_do( core, p1, p2) ; 
+    int ret=this->operator()();
     return ret;
 }
+
+int avr_op_ILLEGAL::Trace( ) {
+    traceOut << "Invalid Instruction! ";
+    int ret=this->operator()();
+    return ret;
+}
+
 
