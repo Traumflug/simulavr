@@ -36,7 +36,7 @@ class UserInterface: public SimulationMember, public Socket, public ExternalType
     protected:
         map<string, ExternalType*> extMembers;
         bool updateOn;
-        unsigned long long pollFreq;
+        SystemClockOffset pollFreq;
         string dummy; //replaces old dummy in Step which was static :-(
         map<string, char> LastState;
         int waitOnAckFromTclRequest; 

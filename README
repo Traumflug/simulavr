@@ -1,5 +1,21 @@
-This is a test...
+    *** Welcome to simulavrxx ***
 
-yes, here comes the changes :-)
+For installing this package please read INSTALL. 
 
+If you find bugs, have interesting new features or questions please write
+an EMail to: <Simulavr-devel@nongnu.org>
+
+If you want start contributing the package, please let us know what you plan to do.
+Actually the project is not really stable at all sources so a lot changes can come without
+any notice. If you start an action please let us know so that a patch could be applied before
+it is nearly impossible :-)
+
+Supported Plattforms:
+Linux/I386: yes
+Linux/otheres: ??? (if you run a system with this plattform please let us know)
+Max OSX: Sorry, not yet. We need a tester to make the build toolchain running. There should be
+    no technical problems but we have no testsystem for this. Thanks!
+Win/Mingw: No, I have no windows system for development and I will not buy one :-) If you
+           could give us some hints for this: Welcome! 
+others: ??? (if you run a system with this plattform please let us know)
 

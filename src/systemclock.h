@@ -26,14 +26,15 @@
 #include <vector>
 
 #include "avrdevice.h"
+#include "systemclocktypes.h"
 
-class SystemClock: public multimap<unsigned long, SimulationMember *> {
+class SystemClock: public multimap<SystemClockOffset, SimulationMember *> {
     private:
         SystemClock(); //never !
         SystemClock(const SystemClock &);
 
     protected:
-        unsigned long long currentTime;
+        SystemClockOffset currentTime;
         vector<SimulationMember*> asyncMembers;
 
     public:
@@ -42,11 +43,11 @@ class SystemClock: public multimap<unsigned long, SimulationMember *> {
         void Add(SimulationMember *dev);
         void AddAsyncMember(SimulationMember *dev);
         int Step(bool &untilCoreStepFinished);
-        void IncrTime(long long of) { currentTime+= of; }
-        unsigned long long GetCurrentTime();
+        void IncrTime(SystemClockOffset of) { currentTime+= of; }
+        SystemClockOffset GetCurrentTime();
         void Endless();
         static SystemClock& Instance();
-        void Rescedule( SimulationMember *sm, unsigned long long newTime);
+        void Rescedule( SimulationMember *sm, SystemClockOffset newTime);
 };
 
 #endif

@@ -35,15 +35,15 @@ using namespace std;
 class IrqStatisticEntry {
         
     public:
-        unsigned long long flagSet;
-        unsigned long long flagCleared;
-        unsigned long long handlerStarted;
-        unsigned long long handlerFinished;
+        SystemClockOffset flagSet;
+        SystemClockOffset flagCleared;
+        SystemClockOffset handlerStarted;
+        SystemClockOffset handlerFinished;
 
-        long long setClear;
-        long long setStarted;   
-        long long setFinished;  
-        long long startedFinished;
+        SystemClockOffset setClear;
+        SystemClockOffset setStarted;   
+        SystemClockOffset setFinished;  
+        SystemClockOffset startedFinished;
 
 
         IrqStatisticEntry(): flagSet(0), flagCleared(0), handlerStarted(0), handlerFinished(0){}

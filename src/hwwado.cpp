@@ -79,7 +79,7 @@ void HWWado::Reset() {
 
 
 void HWWado::Wdr() {
-	unsigned long long currentTime= SystemClock::Instance().GetCurrentTime(); 
+	SystemClockOffset currentTime= SystemClock::Instance().GetCurrentTime(); 
 	switch ( wdtcr& 0x7) {
 		case 0:
 			timeOutAt= currentTime+ 47000000; //47ms

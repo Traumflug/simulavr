@@ -207,7 +207,7 @@ Keyboard::~Keyboard() { }
 Pin *Keyboard::GetPin(const char *name) {
     return allPins[name];
 }
-void Keyboard::SetClockFreq(unsigned long f){
+void Keyboard::SetClockFreq(SystemClockOffset f){
     myClockFreq=f;
 }
 

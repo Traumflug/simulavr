@@ -40,7 +40,7 @@ SystemClock::SystemClock() {
 }
 
 void SystemClock::Add(SimulationMember *dev) {
-    insert( pair<unsigned long long, SimulationMember*>(currentTime,dev));
+    insert( pair<SystemClockOffset, SimulationMember*>(currentTime,dev));
 }
 
 void SystemClock::AddAsyncMember( SimulationMember *dev) {
@@ -84,7 +84,7 @@ int SystemClock::Step(bool &untilCoreStepFinished) { //0-> return also if cpu in
 
         //if nextStepIn_ns is < 0 remove the entry from the list and do not reenter it 
         if (nextStepIn_ns>0) {
-            insert (pair<unsigned long long, SimulationMember*>(nextStepIn_ns, core));
+            insert (pair<SystemClockOffset, SimulationMember*>(nextStepIn_ns, core));
         } 
 
         amiEnd= asyncMembers.end();
@@ -97,7 +97,7 @@ int SystemClock::Step(bool &untilCoreStepFinished) { //0-> return also if cpu in
     return res;
 }
 
-void SystemClock::Rescedule( SimulationMember *sm, unsigned long long newTime) {
+void SystemClock::Rescedule( SimulationMember *sm, SystemClockOffset newTime) {
     iterator ii;
 
     for ( ii=begin(); ii!=end(); ii++) {
@@ -107,7 +107,7 @@ void SystemClock::Rescedule( SimulationMember *sm, unsigned long long newTime) {
         }
     }
 
-    insert (pair<unsigned long long, SimulationMember*>(newTime+currentTime+1, sm));
+    insert (pair<SystemClockOffset, SimulationMember*>(newTime+currentTime+1, sm));
 }
 
 
@@ -153,5 +153,5 @@ SystemClock& SystemClock::Instance() {
 
 
 
-unsigned long long SystemClock::GetCurrentTime() { return currentTime; }
+SystemClockOffset SystemClock::GetCurrentTime() { return currentTime; }
 

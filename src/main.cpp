@@ -242,7 +242,7 @@ int main(int argc, char *argv[]) {
 #define USE_PWM4
 #define USE_WEICHE8
 #define USE_SIGNAL
-#define EXPORT_CLKDATA
+//#define EXPORT_CLKDATA
 int main2() {
 
 

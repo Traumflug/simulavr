@@ -1,0 +1,23 @@
+2004-12-23  Klaus Rudolph  <lts-rudolph@gmx.de>
+
+	First version of Change log, not of simulavrxx :-)
+    * ChangeLog 
+    * INSTALL
+    * AUTHORS
+
+    Bugfix: Simulation terminates or runs in trouble after internal
+    time exceeds "long" variable. Fixed: use long long
+    * src/avrdevice.cpp 
+    * src/avrdevice.h 
+    * src/hwwado.cpp 
+    * src/hwwado.h 
+    * src/irqsystem.h 
+    * src/keyboard.cpp 
+    * src/keyboard.h 
+    * src/main3.cpp 
+    * src/main.cpp 
+    * src/systemclock.cpp 
+    * src/systemclock.h 
+    * src/trace.cpp 
+    * src/trace.h 
+

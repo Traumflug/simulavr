@@ -145,10 +145,11 @@ void AvrDevice::Load(const char* fname) {
 }
 #endif
 
-void AvrDevice::SetClockFreq(unsigned long f) {
+void AvrDevice::SetClockFreq(SystemClockOffset f) {
     clockFreq=f;
 }
-unsigned long long AvrDevice::GetClockFreq() {
+
+SystemClockOffset AvrDevice::GetClockFreq() {
     return clockFreq;
 }
 
@@ -334,7 +335,11 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
         }
 
         cpuCycles--;
-        if (trace_on==1) traceOut << endl;
+        if (trace_on==1) {
+            traceOut << endl;
+            TraceNextLine();
+        }
+
         //if (untilCoreStepFinished == false) { //we wait not until end so reply the finish state
             untilCoreStepFinished= !((cpuCycles>0) || (hwWait>0));
             return bpFlag;

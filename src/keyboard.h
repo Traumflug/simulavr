@@ -47,7 +47,7 @@ class Keyboard : public SimulationMember, ExternalType {
         unsigned int bitCnt;
 
         //ofstream debugOut;
-        unsigned long myClockFreq;
+        SystemClockOffset myClockFreq;
 
         unsigned int buffer[KBD_BUFFER_SIZE];
         unsigned int bufferWriteIndex;
@@ -64,7 +64,7 @@ class Keyboard : public SimulationMember, ExternalType {
         void SetNewValueFromUi(const string &);
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
         Keyboard(UserInterface *, const string &name);
-        void SetClockFreq(unsigned long f);
+        void SetClockFreq(SystemClockOffset f);
         virtual ~Keyboard();
         Pin *GetPin(const char *name); 
 

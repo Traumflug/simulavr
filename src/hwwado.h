@@ -25,6 +25,7 @@
 
 #include "hardware.h"
 #include "rwmem.h"
+#include "systemclocktypes.h"
 
 class AvrDevice;
 class HWIrqSystem;
@@ -33,7 +34,7 @@ class HWWado: public Hardware {
 	protected:
 	unsigned char wdtcr;
 	unsigned char cntWde; //4 cycles counter for unsetting the wde
-	unsigned long long timeOutAt; 
+	SystemClockOffset timeOutAt; 
 	AvrDevice *core;
 
 	public:

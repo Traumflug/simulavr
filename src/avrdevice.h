@@ -47,7 +47,7 @@ using namespace std;
 
 class AvrDevice: public SimulationMember {
     protected:
-        unsigned long clockFreq;
+        SystemClockOffset clockFreq;
         map < string, Pin *> allPins; 
 
         //old static vars for Step()
@@ -91,8 +91,8 @@ class AvrDevice: public SimulationMember {
         AvrDevice(unsigned int flashSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int IoSpaceSize);
         int Step(bool &, SystemClockOffset *nextStepIn_ns =0);
         void Reset();
-        void SetClockFreq(unsigned long f);
-        unsigned long long GetClockFreq();
+        void SetClockFreq(SystemClockOffset f);
+        SystemClockOffset GetClockFreq();
 
         virtual ~AvrDevice();
         virtual unsigned char GetRampz();
