@@ -193,7 +193,8 @@ AC_CONFIG_FILES([Makefile \
         regress/modules/Makefile \
         regress/test_opcodes/Makefile \
         examples/Makefile examples/anacomp/Makefile \
-        examples/gui.tcl examples/anacomp/check.tcl  ])
+        examples/gui.tcl examples/anacomp/check.tcl \
+        examples/anacomp/checkdebug.tcl  ])
 AC_OUTPUT
 
 echo "LIBTCL_NAME        = " ${LIBTCL_NAME}

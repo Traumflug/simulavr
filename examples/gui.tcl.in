@@ -83,6 +83,40 @@ class Scope {
     }
 }
 
+class UpdateControl {
+    protected {
+        variable parent
+        variable win
+        variable objname
+        variable updateOn
+    }
+
+    public {
+        constructor {  _parent _objname _win } {
+            set parent $_parent
+            set objname $_objname
+            set win $_win
+            set updateOn 1
+
+            button .updateControl -text "Update Control" -command "$this ToggleControl" -background green
+            pack .updateControl
+
+        }
+
+        method ToggleControl { } {
+            if { $updateOn == 1 } {
+                set updateOn 0
+                .updateControl configure -background red
+            } else {
+                set updateOn 1
+                .updateControl configure -background green
+            }
+
+            $parent SendToSimulator UpdateControl $updateOn 
+        }
+    }
+}
+
 
 
 
@@ -303,20 +337,26 @@ class Master {
 
                 switch [lindex $readList 0] {
                     create {
+                        #puts "$front $this $objName $back" 
                         eval "$front $this $objName $back" 
+                        puts -nonewline $sock "__ack X "
                     }
 
                     set {
+                        #puts "[lindex $readList 1] ChangeValue [lindex $readList 2]" 
                         eval "[lindex $readList 1] ChangeValue [lindex $readList 2]"
+                        puts -nonewline $sock "__ack X "
                     }
 
 
                     default {
+                        #puts ">$x<"
                         eval $x
+                        puts -nonewline $sock "__ack X "
                     }
                 }
 
-                puts -nonewline $sock "__ack X "
+                #puts -nonewline $sock "__ack X "
                 flush $sock
                 
 

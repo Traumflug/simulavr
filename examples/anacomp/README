@@ -1,12 +1,12 @@
 In that actual directory we have two checks:
 
-make check
+make do
 
 and 
 
-make checkdebug
+make dogdb
 
-check:
+do:
 make check start a simple gui and enable the user to enter new analog
 values to the entry fields. You must press the update button!
 And "->B0" give the output state of the Port B 0 pin. The 
@@ -14,7 +14,7 @@ simple application main.c will only use the analog comparator
 and set the pib B0 the the value which is the result from analog
 comparison!
 
-checkdebug:
+dogdb:
 starts also the ddd graphical interface to avr-gdb which will then
 connected to simulavr. After the gui from ddd is available and all
 files loaded the avr programm can be started with the cont button.
