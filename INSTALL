@@ -185,6 +185,12 @@ operates.
 
 Simulavrxx notes:
 
+If you have files from CVS, then you need to generate the build scripts via autotools. usually:
+
+./bootstrap  <-- execute this in the root folder of simulavrxx
+
+Now you have an autoconfigured project. Follow the usual step:
+
 ./configure: There are many options that may be of interest.
 
 --prefix=/wherever you want to install simulavr to.
