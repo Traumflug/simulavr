@@ -12,8 +12,8 @@ EXTRA_DIST	= $(ac_aux_dir)/config.guess \
 		bootstrap
 
 # WAR: Should condition examples directories based on availability of TCL/Itcl
-SUBDIRS		= src @ac_regression_subdir@ examples
-DIST_SUBDIRS    = src regress examples
+SUBDIRS		= src @ac_regression_subdir@ examples doc
+DIST_SUBDIRS    = src regress examples doc
 
 MAINTAINERCLEANFILES = Makefile.in
 
