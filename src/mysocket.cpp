@@ -121,7 +121,14 @@ void Socket::Write(const string &s) {
 ssize_t Socket::Poll() {
     pollfd pfd= {
         conn,
-        POLLIN | POLLRDNORM | POLLRDBAND | POLLPRI,
+        POLLIN 
+#ifdef POLLRDNORM
+            | POLLRDNORM 
+#endif
+#ifdef POLLRDBAND
+            | POLLRDBAND 
+#endif
+            | POLLPRI,
         0
     };
 
