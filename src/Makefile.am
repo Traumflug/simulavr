@@ -14,6 +14,8 @@ lib_LTLIBRARIES		= libavrsim_pp.la
 bin_PROGRAMS = simulavr kbdgentables
 
 libavrsim_pp_la_SOURCES	= 	\
+	serialrx.cpp \
+	serialtx.cpp \	
 	main3.cpp \
 	application.cpp \
 	decoder_trace.cpp \
@@ -61,6 +63,10 @@ libavrsim_pp_la_SOURCES	= 	\
 	ui.cpp 			
 
 pkginclude_HEADERS = 	\
+	systemclocktypes.h \
+	serialtx.h \
+	serialrx.h \
+	pinnotify.h \	
 	application.h \
 	externaltype.h \
 	funktor.h \
