@@ -180,3 +180,17 @@ operates.
      script, and exit.
 
 `configure' also accepts some other, not widely useful, options.
+
+
+
+Simulavrxx notes:
+
+./configure: There are many options that may be of interest.
+
+--prefix=/wherever you want to install simulavr to.
+
+--with-bfd-path=/path/to/avr-compiled/tools
+
+        Notice that you may want to use --enable-install-libbfd when
+        configuring binutils for AVR to get the libraries.
+
