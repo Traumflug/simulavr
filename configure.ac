@@ -5,7 +5,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_AUX_DIR(config)
 AM_CONFIG_HEADER(src/config.h)
-AM_INIT_AUTOMAKE(simulavrxx, 0.8.002)
+AM_INIT_AUTOMAKE(simulavrxx, 0.8.003)
 AM_MAINTAINER_MODE
 
 
