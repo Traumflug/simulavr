@@ -1,7 +1,8 @@
 dnl Process this file with autoconf to produce a configure script.
 AMDEP
-AC_PREREQ(2.13)
-AC_INIT(src/main.cpp)
+AC_PREREQ(2.59)
+AC_INIT
+AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_AUX_DIR(config)
 AM_CONFIG_HEADER(src/config.h)
 AM_INIT_AUTOMAKE(simulavrxx, 0.8.002)
@@ -37,7 +38,7 @@ AC_CHECK_LIB(tcl,Tcl_Init,
 if test x"${TCL_WISH}" != "x"; then
         MY_WISH=`which ${TCL_WISH}`
         LIBTCL_NAME=`ldd ${MY_WISH} | grep libtcl | sed -e 's/[[\t ]]\+lib\(tcl[[^ \t]]\+\).so.*/\1/g'`
-AC_CHECKING([Checking for tcl via ldd wish: got ${LIBTCL_NAME}])
+AS_MESSAGE(checking Checking for tcl via ldd wish: got ${LIBTCL_NAME}...)
 else
 AC_MSG_WARN([Checking for tcl via ldd wish: no wish found])
 fi
@@ -185,14 +186,15 @@ AC_SUBST([LIBTCL_NAME])
 AC_SUBST([TCL_WISH])
 AC_SUBST([CCACHE])
 
-AC_OUTPUT(Makefile \
+AC_CONFIG_FILES([Makefile \
         src/Makefile \
         regress/Makefile \
         regress/regress.py \
         regress/modules/Makefile \
         regress/test_opcodes/Makefile \
         examples/Makefile examples/anacomp/Makefile \
-        examples/gui.tcl examples/anacomp/check.tcl  )
+        examples/gui.tcl examples/anacomp/check.tcl  ])
+AC_OUTPUT
 
 echo "LIBTCL_NAME        = " ${LIBTCL_NAME}
 echo "libbfd.la location = " ${bfd_la_location}
