@@ -1,123 +1,61 @@
-AC_DEFUN([AVR_LIBIBLIO],
+dnl I still don't understand hwo to be productive with GNU autotools...so 
+dnl I'm sure I'm rolling my own when I shouldn't here...
+dnl
+dnl If you would like to work with me on doing things better here, pleae 
+dnl let me know!
+
+
+dnl AVR_CHECK_FOR_BFD( msg, root_path, relative_include_path, relative_lib_path )
+dnl - defines AVR_LIBBFD_INCLUDE_DIR to detected include directory
+dnl - defines AVR_LIBBFD_LIBDIR to detected library directory
+dnl
+AC_DEFUN([AVR_CHECK_FOR_BFD],
+[ 
+if test x"$bfd_h_location" == "x"; then
+  AC_MSG_CHECKING($1 $2 in "$3" and "$4")
+      bfd_h_location=$2/$3
+      bfd_a_location=$2/$4
+      if test -f ${bfd_h_location}/bfd.h -a \
+         -f ${bfd_a_location}/libbfd.a; then
+        AC_MSG_RESULT(yes)
+        libbfd_root_location=$2
+        echo set libbfd_root_location to ${libbfd_root_location}
+      else
+        AC_MSG_RESULT(no)
+        bfd_a_location=""
+        bfd_h_location=""
+      fi
+fi
+])
+
+dnl AVR_BFD_SEARCH_STEP(root_path)
+AC_DEFUN([AVR_BFD_SEARCH_STEP],
 [
-   AC_ARG_WITH( bfd-path,--with-bfd-path=path location of AVR-binutils version of libbfd,
-   [if test x"${withval}" != ""; then
-      bfd_dir=${withval}
-      libbfd_root_location=${bfd_dir}/${host}/avr
-      AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path subtree...) 
-      bfd_h_location=${libbfd_root_location}/include
-      bfd_a_location=${libbfd_root_location}/lib
-      if test -f ${bfd_h_location}/bfd.h -a \
-         -f ${bfd_a_location}/libbfd.a; then
-        echo "yes"
-      else
-        echo "no"
-        bfd_h_location=""
-      fi
-     if test x"${bfd_h_location}" == x; then
-      libbfd_root_location=${bfd_dir}
-      AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path directory...) 
-      bfd_h_location=${libbfd_root_location}/include
-      bfd_a_location=${libbfd_root_location}/lib
-      if test -f ${bfd_h_location}/bfd.h -a \
-         -f ${bfd_a_location}/libbfd.a; then
-        echo "yes"
-      else
-        echo "no"
-        bfd_h_location=""
-      fi
-     fi
-     if test x"${bfd_h_location}" == x; then
-      libbfd_root_location=${bfd_dir}/avr
-      AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path (2) directory...) 
-      bfd_h_location=${libbfd_root_location}/include
-      bfd_a_location=${libbfd_root_location}/lib
-      if test -f ${bfd_h_location}/bfd.h -a \
-         -f ${bfd_a_location}/libbfd.a; then
-        echo "yes"
-      else
-        echo "no"
-        bfd_h_location=""
-      fi
-     fi
-     if test x"${bfd_h_location}" == x; then
-      libbfd_root_location=${bfd_dir}
-      AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path (3) directory...) 
-      bfd_h_location=${libbfd_root_location}
-      bfd_a_location=${libbfd_root_location}
-      if test -f ${bfd_h_location}/bfd.h -a \
-         -f ${bfd_a_location}/libbfd.a; then
-        echo "yes"
-      else
-        echo "no"
-        bfd_h_location=""
-      fi
-     fi
-     if test x"${bfd_h_location}" == x; then
-      libbfd_root_location=${bfd_dir}
-      AC_MSG_CHECKING(Any likely AVR-libbfd available via --with-bfd-path (4) directory...) 
-      bfd_h_location=${libbfd_root_location}/bfd
-      bfd_a_location=${libbfd_root_location}/bfd
-      if test -f ${bfd_h_location}/bfd.h -a \
-         -f ${bfd_a_location}/libbfd.a; then
-        echo "yes"
-      else
-        echo "no"
-        bfd_h_location=""
-      fi
-     fi
-   fi
-   ])
-   
-  libbfd_root_location=$(which avr-readelf | sed -e ['s/\/[^\/]*\/[^\/]*$//']) 2> /dev/null
-  if test x"${libbfd_root_location=$}" != x; then
-   libiberty_location="${libbfd_root_location}/lib"
-   AC_MSG_CHECKING(Any likely libiberty available via system path...) 
+   AVR_CHECK_FOR_BFD([bfd search-],[$1/${host}/avr],[include],[lib])
+   AVR_CHECK_FOR_BFD([bfd search-],[$1/avr],[include],[lib])
+   AVR_CHECK_FOR_BFD([bfd search-],[$1],[],[])
+   AVR_CHECK_FOR_BFD([bfd search-],[$1],[bfd],[bfd])
+   AVR_CHECK_FOR_BFD([bfd search-],[$1],[include],[lib])
+])
+
+AC_DEFUN([AVR_LIBIBERTY],
+[
+ if test x"$libiberty_location" == "x"; then
+  if test x"$1" != x; then
+   libiberty_location=$1
+   AC_MSG_CHECKING(Any likely libiberty available via $1...) 
    if test -f ${libiberty_location}/libiberty.a; then
-     echo "yes"
+     AC_MSG_RESULT(yes)
    else
-     echo "no"
+     AC_MSG_RESULT(no)
      libiberty_location=""
    fi
   fi 
+ fi
 AC_SUBST(libiberty_location)
 ])
 
-AC_DEFUN([AVR_BFD_LIB],
-[
- if test x"${bfd_h_location}" == x; then
-  if test x"${prefix}" != xNONE; then
-   libbfd_root_location=${prefix}/${host}/avr
-   AC_MSG_CHECKING(Any likely AVR-libbfd available via --prefix...) 
-   bfd_h_location=${libbfd_root_location}/include
-   bfd_a_location=${libbfd_root_location}/lib
-   if test -f ${bfd_h_location}/bfd.h -o \
-      -f ${bfd_a_location}/libbfd.a; then
-     echo "yes"
-   else
-     echo "no"
-     bfd_h_location=""
-   fi
-  fi
- fi
- if test x"${bfd_h_location}" == x; then
-  libbfd_root_location=$(which avr-readelf | sed -e ['s/\/[^\/]*\/[^\/]*$//']) 2> /dev/null
-  if test x"${libbfd_root_location}" != x; then
-   libbfd_root_location="${libbfd_root_location}/${host}/avr"
-   AC_MSG_CHECKING(any likely AVR-libbfd available via avr-binutils install path..) 
-   bfd_h_location=${libbfd_root_location}/include
-   bfd_a_location=${libbfd_root_location}/lib
-   if test -f ${bfd_h_location}/include/bfd.h -o \
-      -f ${bfd_a_location}/libbfd.a; then
-     echo "yes"
-   else
-     echo "no"
-     bfd_h_location=""
-   fi
-  fi 
- fi
-
- if test x"${bfd_h_location}" == x; then
+if test x"${bfd_h_location}" == x; then
 AC_MSG_ERROR([
 
 *** ERROR ***
