@@ -171,6 +171,7 @@ AC_SUBST([CCACHE])
 AC_SUBST([MYTCL_LIB_SPEC])
 
 AC_CONFIG_FILES([Makefile \
+        doc/Makefile \
         src/Makefile \
         regress/Makefile \
         regress/regress.py \
