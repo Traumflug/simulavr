@@ -19,8 +19,9 @@
 #define USE_PWM4
 #define USE_WEICHE8
 #define EXPORT_CLKDATA
+#define USE_SIGNAL
 
-int main3() {
+int main3(bool globalWaitForGdbConnection) {
     //start the wish interpreter with gui application
 #ifdef STARTWISHFROMMAIN
     pid_t pid= fork();
@@ -57,8 +58,8 @@ int main3() {
     AvrDevice *dev1= new AvrDevice_at90s8515;
     dev1->Load("pwm4.o.go"); //fahrspannungserzeuger
     //dev1->SetClockFreq(75);    
-    dev1->SetClockFreq(250);    //4Mhz //257 is not working !!! 256 seems ok
-    GdbServer gdb1(dev1, 1212, true);
+    dev1->SetClockFreq(125);    //4Mhz //257 is not working !!! 256 seems ok
+    GdbServer gdb1(dev1, 1212, true, globalWaitForGdbConnection);
     //SystemClock::Instance().Add(dev1);
     SystemClock::Instance().Add(&gdb1);
 
@@ -189,7 +190,10 @@ int main3() {
     AvrDevice *dev5= new AvrDevice_at90s8515;
     dev5->Load("weiche8.o.go"); //Master
     dev5->SetClockFreq(125);    //125 ns per Cycle -> 8Mhz
+    //GdbServer gdb5(dev5, 1214, true, globalWaitForGdbConnection);
     SystemClock::Instance().Add(dev5);
+    //SystemClock::Instance().Add(&gdb5);
+
 
     OpenDrain odWeicheDataW( dev5->GetPin("D4") ); //weiche data write
     data.Add(&odWeicheDataW);
@@ -197,12 +201,12 @@ int main3() {
     data.Add(dev5->GetPin("D3")); //weiche data read
 #endif
     AvrDevice *dev2= new AvrDevice_atmega128;
-    GdbServer gdb2(dev2, 1213, true);
+    //GdbServer gdb2(dev2, 1213, true, globalWaitForGdbConnection);
     dev2->Load("test.o.go"); //Master
-    //dev2->SetClockFreq(200);    //200 ns per Cycle -> 5Mhz
-    //dev2->SetClockFreq(250);    //200 ns per Cycle -> 5Mhz
     dev2->SetClockFreq(272);     //3.66 Mhz
-    SystemClock::Instance().Add(&gdb2);
+    //SystemClock::Instance().Add(&gdb2);
+    SystemClock::Instance().Add(dev2);
+
 
     OpenDrain odMasterDataW( dev2->GetPin("B4") ); //master
     data.Add(&odMasterDataW);   //master
@@ -283,6 +287,22 @@ int main3() {
 
 
 #endif
+
+#ifdef USE_SIGNAL
+    AvrDevice *dev_signal= new AvrDevice_at90s8515;
+    dev_signal->Load("signal.o.go"); //Master
+    dev_signal->SetClockFreq(250);    //250 ns per Cycle -> 4Mhz
+    SystemClock::Instance().Add(dev_signal);
+
+    OpenDrain odSignalDataW( dev_signal->GetPin("D4") ); //weiche data write
+    data.Add(&odSignalDataW);
+    clk.Add(dev_signal->GetPin("D2")); //weiche
+    data.Add(dev_signal->GetPin("D3")); //weiche data read
+
+
+
+#endif
+
 
     {
         //(*ui) << "frame .master" << endl;

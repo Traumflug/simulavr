@@ -48,7 +48,6 @@ using namespace std;
 #include "avrdevice_impl.h"
 #include "gdb.h"
 
-
 #ifndef DOXYGEN /* have doxygen system ignore this. */
 enum {
     //    MAX_BUF        = 400,         /* Maximum size of read/write buffers. */
@@ -73,7 +72,7 @@ enum {
 #endif /* not DOXYGEN */
 
 
-GdbServer::GdbServer(AvrDevice *c, int _port, int debug): core(c), port(_port), global_debug_on(debug) {
+GdbServer::GdbServer(AvrDevice *c, int _port, int debug, int _waitForGdbConnection): core(c), port(_port), global_debug_on(debug), waitForGdbConnection(_waitForGdbConnection) {
     last_reply=NULL; //init static var for last_reply()
     //is_running=0;    //init static var for continue()
     block_on=1;      //init static var for pre_parse_packet()
@@ -96,7 +95,7 @@ GdbServer::GdbServer(AvrDevice *c, int _port, int debug): core(c), port(_port), 
     to time out. */
     i = 1;  
     setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &i, sizeof(i) );
-    fcntl( sock, F_SETFL, fcntl(conn, F_GETFL, 0) | O_NONBLOCK); //dont know 
+    fcntl( sock, F_SETFL, fcntl(sock, F_GETFL, 0) | O_NONBLOCK); //dont know 
 
     address->sin_family = AF_INET;
     address->sin_port = htons(port);
@@ -945,87 +944,6 @@ void GdbServer::gdb_break_point( char *pkt )
 If addr is given, resume at that address, otherwise, resume at current
 address. */
 
-#ifdef OLDSTUFF
-
-void GdbServer::gdb_continue( char *pkt )
-{
-    char reply[MAX_BUF+1];
-    int  res;
-    int  pc;
-    char step = *(pkt-1);       /* called from 'c' or 's'? */
-    int  signo = SIGTRAP;
-
-
-    /* This allows gdb_continue to be reentrant while it's running. */
-    if (is_running == 1)
-    {
-        return;
-    }
-    is_running = 1;
-
-    memset( reply, 0, sizeof(reply) );
-
-    if (*pkt != '\0')
-    {
-        /* NOTE: from what I've read on the gdb lists, gdb never uses the
-        "continue at address" functionality. That may change, so let's
-        catch that case. */
-
-        /* get addr to resume at */
-        avr_error( "attempt to resume at other than current" );
-    }
-
-    while (1)
-    {
-        res = SystemClock::Instance().Step(1);
-
-        if (res == BREAK_POINT)
-            break;
-
-        if (res == INVALID_OPCODE)
-        {
-            snprintf( reply, MAX_BUF, "S%02x", SIGILL );
-            gdb_send_reply( reply );
-            break;
-        }
-
-        /* check if gdb sent any messages */
-        res = gdb_pre_parse_packet( GDB_BLOCKING_OFF);
-        if ( res < 0 )
-        {
-            if (res == GDB_RET_CTRL_C)
-            {
-                signo = SIGINT;
-            }
-            break;
-        }
-
-        /* If called from 's' or 'S', only want to step once */
-        if ( (step == 's') || (step == 'S') )
-            break;
-    }
-
-    {
-        /* Send gdb PC, FP, SP */
-        int bytes = 0;
-
-        pc = core->PC * 2;
-
-        bytes = snprintf( reply, MAX_BUF, "T%02x", signo );
-
-        /* SREG, SP & PC */
-        snprintf( reply+bytes, MAX_BUF-bytes,
-                "20:%02x;" "21:%02x%02x;" "22:%02x%02x%02x%02x;",
-                ((int)(*(core->status))),
-                core->stack->GetSpl(), core->stack->GetSph(),
-                pc & 0xff, (pc >> 8) & 0xff, (pc >> 16) & 0xff, (pc >> 24) & 0xff );
-    }
-
-
-    is_running = 0;
-}
-
-#endif //OLDSTUFF
 
 /* Continue with signal command format: "C<sig>;<addr>" or "S<sig>;<addr>"
 "<sig>" should always be 2 hex digits, possibly zero padded.
@@ -1064,29 +982,6 @@ int GdbServer::gdb_get_signal( char *pkt )
     return signo;
 
 }
-
-#ifdef OLDSTUFF
-
-/* Modify pkt to look like what gdb_continue() expects and send it to
-gdb_continue(): *pkt should now be either '\0' or ';' */
-
-if (*pkt == '\0')
-{
-    *(pkt-1) = step;
-}
-else if (*pkt == ';')
-{
-    *pkt = step;
-}
-else
-{
-    avr_warning( "Malformed packet: \"%s\"\n", pkt );
-    gdb_send_reply( "" );
-    return;
-}
-
-}
-#endif
 
 /* Parse the packet. Assumes that packet is null terminated.
 Return GDB_RET_KILL_REQUEST if packet is 'kill' command,
@@ -1354,11 +1249,12 @@ void GdbServer::TryConnectGdb() {
 }
 
 int GdbServer::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
-    //cout << "GdbServer Step Pointer To Instance:" << this << endl;
     if (conn<0) { // no connection established -> look for it
         TryConnectGdb();
         //if (timeToNextStepIn_ns!=0) *timeToNextStepIn_ns=core->GetClockFreq();
-        core->Step(trueHwStep, timeToNextStepIn_ns);    //if not connected to gdb simple run it  
+        if (!waitForGdbConnection) {
+            core->Step(trueHwStep, timeToNextStepIn_ns);    //if not connected to gdb simple run it  
+        }
         return 0;
     } else {
         return InternalStep(trueHwStep, timeToNextStepIn_ns);

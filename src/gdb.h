@@ -43,7 +43,6 @@ class GdbServer: public SimulationMember {
     protected: 
 
         static vector<GdbServer*> allGdbServers;
-
         AvrDevice *core;
         int port;       //internet port number
         int sock;       //the opened os-net-socket
@@ -55,6 +54,7 @@ class GdbServer: public SimulationMember {
                             //last time. Only one try per second
  
         int global_debug_on;    //debugging the debugger
+        int waitForGdbConnection;
         int runMode;
         //bool untilCoreStepFinished; //we must ever run until a complete step, taht is requred by
                                     //gdb, but we should never ask gdb for enything until the step really done
@@ -109,12 +109,9 @@ class GdbServer: public SimulationMember {
         void TryConnectGdb();
         void SendPosition(int signal); //send gdb the actual position where the simulation is stopped
         int SleepStep();
-        GdbServer( AvrDevice*, int port, int debugOn);
+        GdbServer( AvrDevice*, int port, int debugOn, int WaitForGdbConnection=true);
         virtual ~GdbServer();
         void Run();      //helper, would be removed in the future
-
-
-
 };
 
 #endif /* SIM_GDB_H */

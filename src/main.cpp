@@ -55,18 +55,18 @@ using namespace std;
 extern int trace_on;
 
 int main2();
-int main3();
+int main3(bool waitForGdbConnection);
 int main4();
 
 int main(int argc, char *argv[]) {
     int c;
-    //int digit_optind = 0;
     bool gdbserver_flag=0;
     string filename("unknown");
     string devicename("unknown");
     string tracefilename("unknown");
     int global_gdbserver_port    = 1212;
     int global_gdb_debug         = 0;
+    bool globalWaitForGdbConnection=true; //please wait for gdb connection
     int extended_tests=0;
     int userinterface_flag=0;
     UserInterface *ui;
@@ -83,10 +83,11 @@ int main(int argc, char *argv[]) {
             {"gdbserver", 1, 0, 'g'},
             {"trace", 1, 0, 't'},
             {"version",0,0,'v'},
+            {"nogdbwait",0,0,'n'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long (argc, argv, "f:d:gGd:p:t:uxyzhv", long_options, &option_index);
+        c = getopt_long (argc, argv, "f:d:gGd:p:t:uxyzhvn", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -151,6 +152,13 @@ int main(int argc, char *argv[]) {
                 }
                 break;
 
+            case 'n':
+                { 
+                    cout << "We will NOT wait for a gdb connection, simulation starts now!" << endl;
+                    globalWaitForGdbConnection=false;
+                }
+                break;
+
 
             default:
                 cout << "AVR-Simulator" << endl;
@@ -161,6 +169,7 @@ int main(int argc, char *argv[]) {
                 cout << "-G                           running as gdb-server and write debug info for gdb-connection" << endl;                             
                 cout << "-p  <port>                   change <port> for gdb server to port" << endl;
                 cout << "-t --trace <file name>       enable trace outputs into <file name>" << endl;
+                cout << "-n --nogdbwait               do not wait for gdb connection" << endl;
                 cout << endl;
                 cout << "Supported devices:" << endl;
                 cout << "at90s8515" << endl;
@@ -175,13 +184,11 @@ int main(int argc, char *argv[]) {
 
     if (extended_tests==1) {
         main2();
-        //#warning NOW COMPILED FOR IO TEST ONLY NOT NORMAL -X OPERATION
-        //main3();
         return 0;
     } 
 
     if (extended_tests ==2) {
-        //main3();
+        main3(globalWaitForGdbConnection);
         return 0;
     }
 
@@ -225,18 +232,16 @@ int main(int argc, char *argv[]) {
         }
     } else { //gdb should be activated
         cout << "Going to gdb..." << endl;
-        GdbServer gdb1(dev1, global_gdbserver_port, global_gdb_debug);
-        //gdb1.Run();
+        GdbServer gdb1(dev1, global_gdbserver_port, global_gdb_debug, globalWaitForGdbConnection);
         SystemClock::Instance().Add(&gdb1);
         SystemClock::Instance().Endless();
-
-        //gdb_interact( dev1, global_gdbserver_port, global_gdb_debug );
     } 
 }
 
 #define USE_ANA
 #define USE_PWM4
 #define USE_WEICHE8
+#define USE_SIGNAL
 #define EXPORT_CLKDATA
 int main2() {
 
@@ -413,6 +418,21 @@ int main2() {
     data.Add(&odWeicheDataW);
     clk.Add(dev5->GetPin("D2")); //weiche
     data.Add(dev5->GetPin("D3")); //weiche data read
+#endif
+
+#ifdef USE_SIGNAL
+    AvrDevice *dev_signal= new AvrDevice_at90s8515;
+    dev_signal->Load("signal.o.go"); //Master
+    dev_signal->SetClockFreq(250);    //250 ns per Cycle -> 4Mhz
+    SystemClock::Instance().Add(dev_signal);
+
+    OpenDrain odSignalDataW( dev_signal->GetPin("D4") ); //weiche data write
+    data.Add(&odSignalDataW);
+    clk.Add(dev_signal->GetPin("D2")); //weiche
+    data.Add(dev_signal->GetPin("D3")); //weiche data read
+
+
+
 #endif
 
     AvrDevice *dev2= new AvrDevice_atmega128;
