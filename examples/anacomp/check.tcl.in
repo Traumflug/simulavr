@@ -10,7 +10,7 @@ load @my_top_builddir@src/simulavr.so
 puts "simulavr loaded"
 
 #now start external generic gui server 
-exec wish ../gui.tcl &
+exec @TCL_WISH@ ../gui.tcl &
 
 #start the trace output to given filename
 StartTrace $traceFile
