@@ -1255,9 +1255,10 @@ void GdbServer::TryConnectGdb() {
 int GdbServer::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
     if (conn<0) { // no connection established -> look for it
         TryConnectGdb();
-        //if (timeToNextStepIn_ns!=0) *timeToNextStepIn_ns=core->GetClockFreq();
         if (!waitForGdbConnection) {
             core->Step(trueHwStep, timeToNextStepIn_ns);    //if not connected to gdb simple run it  
+        } else {
+            if (timeToNextStepIn_ns!=0) *timeToNextStepIn_ns=core->GetClockFreq();
         }
         return 0;
     } else {
