@@ -1003,6 +1003,7 @@ void HWMegaTimer1::CheckForMode() {
 
 	timerMode= (WGMn3<<3) + (WGMn2 <<2) + (WGMn1 << 1) + WGMn0;
 
+    //cout << "TimerMode selected:" << dec << (unsigned int)timerMode << endl;
 	switch (timerMode) {
 
 		case 0:
@@ -1223,8 +1224,8 @@ unsigned char RWOcrbhM::operator=(unsigned char val) { trioaccess("OcrbhM",val);
 unsigned char RWOcrblM::operator=(unsigned char val) { trioaccess("OcrblM",val);timer1->SetOcr1bl(val); return val; }
 unsigned char RWOcrchM::operator=(unsigned char val) { trioaccess("OcrchM",val);timer1->SetOcr1ch(val); return val; }
 unsigned char RWOcrclM::operator=(unsigned char val) { trioaccess("OcrclM",val);timer1->SetOcr1cl(val); return val; }
-unsigned char RWIcrhM::operator=(unsigned char val) { trioaccess("IcrhM",val);cout << "Write To Read Only Register ICR1H";  return val; }
-unsigned char RWIcrlM::operator=(unsigned char val) { trioaccess("IcrlM",val);cout << "Write To Read Only Register ICR1L";  return val; }
+unsigned char RWIcrhM::operator=(unsigned char val) { trioaccess("IcrhM",val);timer1->SetIcrh(val);  return val; }
+unsigned char RWIcrlM::operator=(unsigned char val) { trioaccess("IcrlM",val);timer1->SetIcrl(val);  return val; }
 unsigned char RWEtimskM::operator=(unsigned char val) { trioaccess("EtimskM",val);hwTimer01Irq->SetTimsk(val);  return val; }
 unsigned char RWEtifrM::operator=(unsigned char val) { trioaccess("EtifrM",val);hwTimer01Irq->SetTifr(val);  return val; }
 unsigned char RWTimskM::operator=(unsigned char val) { trioaccess("TimskM",val);hwTimer01Irq->SetTimsk(val);  return val; }

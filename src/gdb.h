@@ -29,6 +29,8 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 
+#include <vector>
+using namespace std;
 
 #include "avrdevice.h"
 #include "types.h"
@@ -39,6 +41,8 @@
 
 class GdbServer: public SimulationMember {
     protected: 
+
+        static vector<GdbServer*> allGdbServers;
 
         AvrDevice *core;
         int port;       //internet port number
@@ -97,6 +101,7 @@ class GdbServer: public SimulationMember {
         int gdb_pre_parse_packet( int blocking );
         void gdb_main_loop(); 
         void gdb_interact( int port, int debug_on );
+        void IdleStep();
 
     public:
         int Step(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns=0) ;

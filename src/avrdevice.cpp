@@ -222,7 +222,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, unsigned long long *nextStepIn_
     int bpFlag=0;
     int hwWait=0;
 
-    do {
+//    do {
 
         if (trace_on==1) {
             traceOut << actualFilename << " ";
@@ -248,6 +248,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, unsigned long long *nextStepIn_
                 if(trace_on)traceOut << "CPU-Hold by IO-Hardware ";
             } else {
                 //check for enabled breakpoints here
+                
                 if (BP.end()!=find(BP.begin(), BP.end(), PC)) {
                     if(trace_on)traceOut << "Breakpoint found at 0x" << hex << PC << dec << endl;
                     bpFlag=BREAK_POINT;
@@ -257,6 +258,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, unsigned long long *nextStepIn_
                     untilCoreStepFinished= !((cpuCycles>0) || (hwWait>0));
                     return bpFlag;
                 }
+                
 
                 if (newIrqPc!= 0xffffffff) {
                     if (noDirectIrqJump==0) {
@@ -324,14 +326,13 @@ int AvrDevice::Step(bool &untilCoreStepFinished, unsigned long long *nextStepIn_
 
         cpuCycles--;
         if (trace_on==1) traceOut << endl;
-        if (untilCoreStepFinished == false) { //we wait not until end so reply the finish state
+        //if (untilCoreStepFinished == false) { //we wait not until end so reply the finish state
             untilCoreStepFinished= !((cpuCycles>0) || (hwWait>0));
             return bpFlag;
-        }
-    } while ( untilCoreStepFinished && ((cpuCycles>0) || (hwWait>0)));
+        //}
+    //} while ( untilCoreStepFinished && ((cpuCycles>0) || (hwWait>0)));
 
-
-    return bpFlag;
+    //return bpFlag;
 }
 
 void AvrDevice::Reset() {

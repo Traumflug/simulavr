@@ -112,8 +112,10 @@ GdbServer::GdbServer(AvrDevice *c, int _port, int debug): core(c), port(_port), 
 
     fprintf( stderr, "Waiting on port %d for gdb client to connect...\n", port );
 
-
 }
+
+//make the instance of static list of all gdb servers here
+vector<GdbServer*> GdbServer::allGdbServers;
 
 GdbServer::~GdbServer() {
     close(conn);
@@ -1345,23 +1347,57 @@ void GdbServer::TryConnectGdb() {
 
             fprintf( stderr, "Connection opened by host %s, port %hd.\n",
                     inet_ntoa(address->sin_addr), ntohs(address->sin_port) );
+
+
+            allGdbServers.push_back(this);  //remark that we now must called everytime
         }   //new open (conn is >0 now!) 
     } //time
 }
 
 int GdbServer::Step(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns) {
+    //cout << "GdbServer Step Pointer To Instance:" << this << endl;
     if (conn<0) { // no connection established -> look for it
         TryConnectGdb();
-        if (timeToNextStepIn_ns!=0) *timeToNextStepIn_ns=core->GetClockFreq();
+        //if (timeToNextStepIn_ns!=0) *timeToNextStepIn_ns=core->GetClockFreq();
+        core->Step(trueHwStep, timeToNextStepIn_ns);    //if not connected to gdb simple run it  
         return 0;
     } else {
         return InternalStep(trueHwStep, timeToNextStepIn_ns);
     }
 }
 
+void GdbServer::IdleStep() {
+    int gdbRet=gdb_pre_parse_packet(GDB_BLOCKING_OFF);
+    cout << "IdleStep Instance" << this << " RunMode:" << dec << runMode << endl;
+
+    if (lastCoreStepFinished) {
+        switch(gdbRet) {
+            case GDB_RET_NOTHING_RECEIVED:
+                break;
+
+            case GDB_RET_OK:
+                break;
+
+            case GDB_RET_CONTINUE:
+                runMode=GDB_RET_CONTINUE;
+                break;
+
+            case GDB_RET_CTRL_C:
+                    runMode=GDB_RET_CTRL_C;
+                    SendPosition(SIGINT); //Give gdb an idea where the core is now 
+                    break;
+
+            default:
+                cout << "wondering" << endl;
+
+        }
+    }
+
+}
+
 int GdbServer::InternalStep(bool &untilCoreStepFinished, unsigned long long *timeToNextStepIn_ns) {
     char reply[MAX_BUF+1];
-    //cout << "Internal Step entered" << endl;
+    cout << "Internal Step entered" << endl;
     //cout << "RunMode: " << dec << runMode << endl;
 
     if (lastCoreStepFinished) {
@@ -1412,6 +1448,12 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, unsigned long long *tim
             if(!leave) { //we can´t leave the loop so we have to request the other gdb instances now!
                 // step through all gdblist members WITHOUT my self!
                 //cout << "we do not leave and check for gdb events" << endl;
+                vector<GdbServer*>::iterator ii;
+                for (ii=allGdbServers.begin(); ii!=allGdbServers.end(); ii++) {
+                    if (*ii!=this) { //run other instances but not me 
+                        (*ii)->IdleStep();
+                    }
+                }
             }
         } while (leave==false);
 

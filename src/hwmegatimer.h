@@ -164,19 +164,21 @@ class HWMegaTimer1 : public Hardware {
 		unsigned char tccr1c;
 
 		unsigned short tcnt1;
-		unsigned char tcnt1htemp;
+		//unsigned char tcnt1htemp;
 
 		unsigned short ocr1a;
-		unsigned char ocr1ahtemp;
+		//unsigned char ocr1ahtemp;
 
 		unsigned short ocr1b;
-		unsigned char ocr1bhtemp;
+		//unsigned char ocr1bhtemp;
 
 		unsigned short ocr1c;
-		unsigned char ocr1chtemp;
+		//unsigned char ocr1chtemp;
 
 		unsigned short icr1;
-		unsigned char icr1htemp;
+		//unsigned char icr1htemp;
+
+        unsigned char allTemp; //there is only one temp register for all!!! 16 registers here
 
 		//affected external pins
 		//bool t1;
@@ -226,16 +228,16 @@ class HWMegaTimer1 : public Hardware {
 		unsigned char GetTccr1b() { return tccr1b;}
 		unsigned char GetTccr1c() { return tccr1c;}
 
-		unsigned char GetTcnt1h() { return tcnt1htemp;}
-		unsigned char GetTcnt1l() { return tcnt1&0xff; tcnt1htemp=tcnt1>>8;}
+		unsigned char GetTcnt1h() { return allTemp; /*tcnt1htemp;*/}
+		unsigned char GetTcnt1l() { return tcnt1&0xff; /*tcnt1htemp*/ allTemp=tcnt1>>8;}
 		unsigned char GetOcr1ah() { return ocr1a>>8;}
 		unsigned char GetOcr1al() { return ocr1a&0xff;}
 		unsigned char GetOcr1bh() { return ocr1b>>8;}
 		unsigned char GetOcr1bl() { return ocr1b&0xff;}
 		unsigned char GetOcr1ch() { return ocr1c>>8;}
 		unsigned char GetOcr1cl() { return ocr1c&0xff;}
-		unsigned char GetIcr1h() { return icr1htemp;}
-		unsigned char GetIcr1l() { return icr1&0xff; icr1htemp=icr1>>8;}
+		unsigned char GetIcr1h() { return allTemp; /*icr1htemp;*/}
+		unsigned char GetIcr1l() { return icr1&0xff; /*icr1htemp*/allTemp=icr1>>8;}
 
 		static const unsigned short top0=0x0000;
 		static const unsigned short topFFFF=0xffff;
@@ -253,14 +255,16 @@ class HWMegaTimer1 : public Hardware {
 		void SetTccr1a(unsigned char val) { tccr1a=val;	CheckForMode(); }
 		void SetTccr1b(unsigned char val) ;
 		void SetTccr1c(unsigned char val) { tccr1c=val; CheckForMode(); }
-		void SetTcnt1h(unsigned char val) { tcnt1htemp=val;}
-		void SetTcnt1l(unsigned char val) { tcnt1=val+(tcnt1htemp<<8);}
-		void SetOcr1ah(unsigned char val) { ocr1ahtemp=val;}
-		void SetOcr1al(unsigned char val) { ocr1a=val+(ocr1ahtemp<<8);}
-		void SetOcr1bh(unsigned char val) { ocr1bhtemp=val;}
-		void SetOcr1bl(unsigned char val) { ocr1b=val+(ocr1bhtemp<<8);}
-		void SetOcr1ch(unsigned char val) { ocr1chtemp=val;}
-		void SetOcr1cl(unsigned char val) { ocr1c=val+(ocr1bhtemp<<8);}
+		void SetTcnt1h(unsigned char val) { /*tcnt1htemp*/allTemp=val;}
+		void SetTcnt1l(unsigned char val) { tcnt1=val+(/*tcnt1htemp*/allTemp<<8);}
+		void SetOcr1ah(unsigned char val) { /*ocr1ahtemp*/ allTemp=val;}
+		void SetOcr1al(unsigned char val) { ocr1a=val+(/*ocr1ahtemp*/allTemp<<8);}
+		void SetOcr1bh(unsigned char val) { /*ocr1bhtemp*/ allTemp=val;}
+		void SetOcr1bl(unsigned char val) { ocr1b=val+(/*ocr1bhtemp*/allTemp<<8);}
+		void SetOcr1ch(unsigned char val) { /*ocr1chtemp*/ allTemp=val;}
+		void SetOcr1cl(unsigned char val) { ocr1c=val+(/*ocr1bhtemp*/allTemp<<8);}
+        void SetIcrh  (unsigned char val) { /*icr1htemp*/ allTemp=val; } //dont know if a write goes through temp here?
+        void SetIcrl  (unsigned char val) { icr1=val+(/*icr1htemp*/allTemp<<8); }
 
 		void CheckForMode();
 };
