@@ -1,4 +1,4 @@
-AC_DEFUN(AC_SWIG, 
+AC_DEFUN([AC_SWIG],
 [
    AC_ARG_WITH(swig,[ --with-swig=PATH_TO_SWIG],
       [swig_path="$withval"]
