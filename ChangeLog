@@ -1,3 +1,12 @@
+2005-03-03    <no.mail@please.com>
+
+	* examples/anacomp/Makefile.am (do_python): Added do_python target
+
+2005-03-03    <rivetwa@member.fsf.org>
+
+	* configure.ac: Added src/python/Makefile 
+	* src/python/Makefile.am: created. (hack to make $(distdir)/src/python)
+
 2005-02-26    <rivetwa@member.fsf.org>
 
 	* src/Makefile.am: (elonen's patch) Accepted the addition of SWIG
