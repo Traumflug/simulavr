@@ -63,7 +63,6 @@ int main(int argc, char *argv[]) {
     int global_gdbserver_port    = 1212;
     int global_gdb_debug         = 0;
     bool globalWaitForGdbConnection=true; //please wait for gdb connection
-    int extended_tests=0;
     int userinterface_flag=0;
     UserInterface *ui;
 

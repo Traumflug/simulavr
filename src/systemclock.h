@@ -28,7 +28,11 @@
 #include "avrdevice.h"
 #include "systemclocktypes.h"
 
-class SystemClock: public multimap<SystemClockOffset, SimulationMember *> {
+class SystemClock
+#ifndef SWIG
+: public multimap<SystemClockOffset, SimulationMember *> 
+#endif
+{
     private:
         SystemClock(); //never !
         SystemClock(const SystemClock &);

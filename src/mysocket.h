@@ -44,7 +44,11 @@
 
 using namespace std;
 
-class sockbuf : public streambuf {
+class sockbuf 
+#ifndef SWIG
+: public streambuf
+#endif
+{
     protected:
         int *conn;
 
@@ -60,7 +64,12 @@ class sockbuf : public streambuf {
         }
 };
 
-class sockstream: public ostream {
+class sockstream
+#ifndef SWIG
+:public ostream 
+#endif 
+{
+
     private:
         sockbuf buffer; 
 

@@ -85,8 +85,9 @@ class AvrDevice: public SimulationMember {
         void Load(const char* n);
 
         Pin *GetPin(const char *name);
-
+#ifndef SWIG
         MemoryOffsets &operator->*(MemoryOffsets *m) { return *m;}
+#endif
 
         AvrDevice(unsigned int flashSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int IoSpaceSize);
         int Step(bool &, SystemClockOffset *nextStepIn_ns =0);

@@ -53,30 +53,6 @@ class SerialTx: public SimulationMember, public ExternalType {
         unsigned int bitCnt;
         unsigned int maxBitCnt;
 
-#if 0
-
-        
-        unsigned char udrWrite;
-        unsigned char udrRead;
-        unsigned char usr;
-        unsigned char ucr;
-        unsigned short ubrr; //16 bit ubrr to fit also 4433 device
-
-
-
-        int cntRxSamples;
-        int rxLowCnt;
-        int rxHighCnt;
-        unsigned int rxDataTmp;
-        int rxBitCnt;
-
-        int baudCnt16;
-        unsigned char txDataTmp;
-        int txBitCnt;
-
-#endif
-
-
     public:
         SerialTx(UserInterface *_ui, const char *_name, const char *baseWindow);
         unsigned int CpuCycle();

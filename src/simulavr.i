@@ -1,4 +1,5 @@
 %module simulavr
+
 %{
 #include "avrdevice.h"
 #include "at8515.h"
@@ -19,6 +20,10 @@
 SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %}
 
+%include "simulationmember.h"
+%include "externaltype.h"
+%include "mysocket.h"
+%include "pinnotify.h"
 %include "avrdevice.h"
 %include "at8515.h"
 %include "atmega128.h"

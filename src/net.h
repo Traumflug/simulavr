@@ -35,7 +35,12 @@ class NetInterface {
     virtual ~NetInterface();
 };
 
-class Net: public vector <Pin *>, public NetInterface  {
+class Net:
+#ifndef SWIG
+public vector <Pin *>,
+#endif
+    public NetInterface 
+{
     public:
         void Add(Pin *p);
         void Delete(Pin *p);

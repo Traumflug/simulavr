@@ -69,11 +69,13 @@ class Pin {
         Pin(T_Pinstate ps);
         Pin();
         Pin( unsigned char *parentPin, unsigned char mask); 
+#ifndef SWIG
         operator unsigned char() const;
         virtual Pin &operator= (unsigned char);
         virtual operator bool() const;
         virtual Pin operator+ (const Pin& p);
         virtual Pin operator+= (const Pin& p);
+#endif
         virtual void RegisterNet(Net *n);
         virtual Pin GetPin() { return *this;}
         virtual ~Pin(){}
@@ -87,7 +89,7 @@ class Pin {
 
 };
 
-class ExtPin : public Pin, ExternalType {
+class ExtPin : public Pin, public ExternalType {
     protected:
         UserInterface *ui;
         string extName;
@@ -100,7 +102,7 @@ class ExtPin : public Pin, ExternalType {
         void SetInState(const Pin& p);
 };
 
-class ExtAnalogPin : public Pin, ExternalType {
+class ExtAnalogPin : public Pin, public ExternalType {
     protected:
         UserInterface *ui;
         string extName;
@@ -119,9 +121,11 @@ class OpenDrain: public Pin {
 
     public:
         OpenDrain(Pin *p) { pin=p;}
+#ifndef SWIG
         virtual operator bool() const;
         virtual Pin operator+ (const Pin& p);
         virtual Pin operator+= (const Pin& p);
+#endif
         virtual Pin GetPin();
         void RegisterNet(Net *n) { pin->RegisterNet(n);}
         virtual ~OpenDrain() {}

@@ -1,3 +1,21 @@
+2004-12-24  Klaus Rudolph  <lts-rudolph@gmx.de>
+    Cleanup for swig warnings
+    * src/avrdevice.h 
+    * src/main.cpp
+    * src/mysocket.h
+    * src/net.h
+    * src/pin.h
+    * src/serialtx.h
+    * src/simulavr.i
+    * src/systemclock.h
+
+2004-12-23(2)  Klaus Rudolph  <lts-rudolph@gmx.de> 
+
+    Remove private testcode
+    * main.cpp
+    * main3.cpp removed!
+    * Makefile.am
+
 2004-12-23  Klaus Rudolph  <lts-rudolph@gmx.de>
 
 	First version of Change log, not of simulavrxx :-)
