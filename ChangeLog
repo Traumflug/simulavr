@@ -1,4 +1,12 @@
-2005-02-23    <no.mail@please.com>
+2005-02-26    <rivetwa@member.fsf.org>
+
+	* src/Makefile.am: (elonen's patch) Accepted the addition of SWIG
+	generated Python bindings.
+
+	* examples/anacomp/checkdebug.py: ported from Klaus's TCL version.
+
+
+2005-02-23    <rivetwa@member.fsf.org>
 
 	* doc/Makefile.am: Added default pdf and info  generation rule
 

@@ -1,8 +1,19 @@
 Developer:
-	Klaus Rudolph       <lts-rudolph@gmx.de>    
+	Klaus Rudolph       <lts-rudolph@gmx.de>  
+
+        rivetwa says: Klaus is the guy to thank for simulavrxx. He
+        has single-handedly taken on the entire coding task of the
+        survivor to simulavr to date. He has added many real-world
+        capabilities that have made simulavr useful as a simulator. He
+        has provided methods to interact with multiple independent
+        simulavr instances and simulated hardware. I can't wait to see
+        where else he takes this project.
+
 
 Build-System & Maintenance 
     Bill Rivet <rivetwa@member.fsf.org>
+
+
 
 
 Patches submitted by Oleg Batrashev:
@@ -13,3 +24,7 @@ Patched submitted by Russell Shaw:
     - bootstrap & configure.ac patch to cleanup use of autotools. It
         was very welcome to see tcl features updated to use
         tclConfig.sh and my silly echo's replaced as well.
+
+Patches submitted by elonen:
+    - initial Python bindings via SWIG
+    - change to SystemClock submitted too (not yet accepted)

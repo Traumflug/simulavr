@@ -156,8 +156,9 @@ INCLUDES		= -I$(bfd_h_location) -I$(top_srcdir)/src -I $(top_builddir)/src
 # WAR:: should not build if no swig is detected...
 
 # This is a cheat! Hopefully it works ok...
-all-am: simulavr.so
+all-am: simulavr.so python/_simulavr.so
 
+# TCL bindings
 simulavr_wrap.cpp: $(srcdir)/simulavr.i
 	$(swig_path) -c++ -o $@ $<
 
@@ -167,4 +168,16 @@ simulavr.so: simulavr_wrap.o simulavr
 clean_simulavr.so:
 	$(RM) simulavr.so 
 
-clean : clean_simulavr.so
+
+# Python bindings
+python/simulavr_wrap.cpp: $(srcdir)/simulavr.i
+	$(swig_path) -c++ -python -outdir python/ -o $@ $?
+
+python/_simulavr.so: python/simulavr_wrap.cpp simulavr
+	g++ -I$(srcdir) -I/usr/include/python2.3 $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o $@
+
+clean_python_simulavr:
+	$(RM) python/_simulavr.so python/simulavr.py python/simulavr_wrap.cpp
+
+
+clean : clean_simulavr.so clean_python_simulavr
