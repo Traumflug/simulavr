@@ -102,11 +102,11 @@ backend so that gdb can be used as a source level debugger for AVR
 programs.
 
 Simulavrxx is derived from Theodore Roth´s simulavr. The hardware simulation part is
-comletly written new in c++, only the instruction decoder and the gdb interface are
-mostly copied to the actual simulavrxx sources.
+comletly written new in C++, only the instruction decoder and the gdb interface are
+mostly copied from the original simulavr sources.
 
-Why I have wrote it again:
-I need some more hardware modells like timers, spi, uart and others which where not available
+Why I have written it again:
+I need some more hardware models like timers, spi, uart and others which where not available
 at the point I have started. And my biggest problem was the missing IO Port functionality.
 For my personal needs I must have the ability to connect the avr io ports to other devices like
 other avr devices or lcd, leds and other components. After looking into the original code 
@@ -204,7 +204,7 @@ Attention: In the actual impementation there is a known bug:
 If you start in GDB mode and give no file to execute @command{-f filename} you will run into an @command{"Illegal Instruction"}. The reason is that simulavrxx runs directly after with interpretation the now empty flash. But gdb is not connected and could stop the core. Solution:
 Please start with @command{simulavrxx -g -f <filename>}. The problem will be fixed later. It doesn´t matter if you give the same file on command line and the gdb file command. The gdb download the file itself to the simulator. And after downloading the core will reset complete so it is not a real problem.
 
-Connecting multiple devices via multiple sockets is siscussed in the scripting section.
+Connecting multiple devices via multiple sockets is discussed in the scripting section.
 
 
 @comment  node-name,  next,  previous,  up
@@ -241,31 +241,31 @@ What is written to trace output: @*
 What the coloms mean:
 
 @itemize @bullet
-@item abolut time value, it is measured in us
+@item absolute time value, it is measured in microseconds (us)
 @item the core you simulate, normally shown as the file name of the loaded executable file. 
     If your simulation runs multiple cores with multiple files you can see which core is stepping with which instruction.
     @item actual PC, meaning bytes not instructions! The original avr documentation often writes in 
     instructions, but here we write number of flash bytes.
-    @item label which is located to the address. The label is shown for all known labels from the loaded elf file.
+    @item label corresponding to the address. The label is shown for all known labels from the loaded elf file.
     If multiple labels are located to one address all labels are printed. In future releases it is maybe possible to give some
-    flags for the labels which would be printed. This is dependend on the elf file and bfd-library.
-    @item after the label an potential offset to that label is printed. This showns  @command{main+0x6} which means 6 instructions after
-    the @command{main} label is defined. In the moment I write this documentation I am wondering why I write instructions not
-    bytes offset? This will be changed next time :-). Seems to be not very sensefull to write address in bytes and offset in 
+    flags for the labels which would be printed. This is dependent on the elf file and bfd-library.
+    @item after the label a potential offset to that label is printed. For example @command{main+0x6} which means 6 instructions after
+    the @command{main} label is defined. At the moment I am wondering why I write instructions not
+    bytes offset? This will be changed next time :-). Seems to be not very sensible to write address in bytes and offset in 
     instruction (words). Ok, will be fixed...
-    @item The decoded avr instruction. If you wondering why you write an assembler source and get other assembler instructions
-   you have to think about the atmel avr instruction set. Some instructions are not really available in the avr-core. This instructions 
-  are only supported for convinience not in real hardware. As example: @command{ CLR R16} is in the real world on the avr core:
+    @item The decoded avr instruction. Keep in mind pseudo-opcodes. If you wonder why you write an assembler instruction one way and get another assembler instruction here
+   you have to think about the atmel avr instruction set. Some instructions are not really available in the avr-core. These instructions 
+  are only supported for convinience (i.e. are pseudo-ops) not actual opcodes for the hardware. For example: @command{ CLR R16} is in the real world on the avr core:
  @command{EOR R16,R16} which means exclusive or with itself which results also in zero.
-  @item operands for the instruction. If the operands excess memory or registers the actual values of the operands will also be shown.
-  if the operands access memory (flash, ram) also the labels of the excessed addresses will be written for convinience. 
-  if a register is able to build a special value with 16 bits range (X,Y,Z) also the new value for this pseudo register is printed.
-  if a branch/jump instruction is decoded the branch or jump target is also decoded with the label name and abolute address also if the branch
-  or jump is relativ.
-  a special instruction @command{CPU-waitstate} will written to the output if the core needs more then one cycle for the instruction.
+  @item operands for the instruction. If the operands access memory or registers the actual values of the operands will also be shown.
+  If the operands access memory (flash, ram) also the labels of the accessed addresses will be written for convinience. 
+  If a register is able to build a special value with 16 bits range (X,Y,Z) also the new value for this pseudo register is printed.
+  If a branch/jump instruction is decoded the branch or jump target is also decoded with the label name and abolute address also if the branch
+  or jump is relative.
+  A special instruction @command{CPU-waitstate} will be written to the output if the core needs more then one cycle for the instruction.
   Sometimes a lot of waitstates will be generated e.g. for eeprom access.
-  if a hardware register like the UDR in the uart is affected the name of the register is also printed (in the future :-)
-  @item if the status register is effected also the @command{SREG=[------Z-]} is shown.
+  If a hardware register like the UDR in the uart is affected the name of the register is also printed (in the future :-)
+  @item if the status register is affected also the @command{SREG=[------Z-]} is shown.
 
   
 
