@@ -3,6 +3,7 @@ bfd_h_location  = @bfd_h_location@
 libiberty_location = @libiberty_location@
 swig_path = @swig_path@
 CCACHE = @CCACHE@
+MYTCL_LIB_SPEC=@MYTCL_LIB_SPEC@
 
 MAINTAINERCLEANFILES 	= Makefile.in
 
@@ -48,7 +49,6 @@ libavrsim_pp_la_SOURCES	= 	\
 	irqsystem.cpp		\
 	keyboard.cpp		\
 	lcd.cpp			\
-	main3.cpp       \
 	memory.cpp		\
 	mysocket.cpp		\
 	net.cpp			\
@@ -136,7 +136,7 @@ keytrans.h: kbdgentables keynumber_to_scancode.dat xcode_to_keynumber.dat
 
 kbdgentables_SOURCES = kbdgentables.cpp
 
-simulavr_SOURCES = main.cpp
+simulavr_SOURCES = main.cpp main3.cpp
 
 
 # WAR: simulavr.so/.dll needs tp be properly integrated via the
@@ -160,7 +160,7 @@ simulavr_wrap.cpp: $(srcdir)/simulavr.i
 	$(swig_path) -c++ -o $@ $<
 
 simulavr.so: simulavr_wrap.o simulavr
-	g++ -I$(srcdir) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) -l$(LIBTCL_NAME) $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o simulavr.so
+	g++ -I$(srcdir) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) $(MYTCL_LIB_SPEC) $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o simulavr.so
 
 clean_simulavr.so:
 	$(RM) simulavr.so 
