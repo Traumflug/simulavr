@@ -7,7 +7,8 @@ AUX_DIST	= $(ac_aux_dir)/config.guess \
 		$(ac_aux_dir)/ltmain.sh \
 		$(ac_aux_dir)/missing \
 		$(ac_aux_dir)/mkinstalldirs\
-		$(ac_aux_dir)/avr_local.m4
+		$(ac_aux_dir)/avr_local.m4\
+		$(ac_aux_dir)/depcomp
 
 
 EXTRA_DIST	= bootstrap
