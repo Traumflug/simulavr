@@ -109,6 +109,10 @@ pkginclude_HEADERS = 	\
 	simulationmember.h breakpoint.h config_deprecated.h \
 	global.h avrdevice_impl.h gdb.h keynumber_to_scancode.dat  xcode_to_keynumber.dat 
 
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLINK = $(LIBTOOL) --mode=link --tag=CXX $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+
 # WAR: Hmm...how do we auto-depend on this generated file? Seems we
 # should be able to auto-generate at least first-generation include
 # dependencies whether or not those files exist...;-( 
