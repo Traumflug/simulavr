@@ -1,0 +1,284 @@
+\input texinfo
+@paragraphindent none
+@setfilename simulavrxx.info
+@settitle Simulavrxx++ Documentation
+
+@c This is a dir.info fragment to support semi-automated addition of
+@c manuals to an info tree.
+@dircategory AVR Programming & development tools.
+@direntry
+* Simulavrxx++: (simulavrxx++).          A simulator for Atmel AVR microcontrollers.
+@end direntry
+
+@ifinfo
+This file documents the simulavrxx program.
+
+For simulavrxx version @value{VERSION}, @value{UPDATED}.
+
+Copyright @copyright{} 2001, 2002, 2003, 2004 Theodore A. Roth, Klaus Rudolph
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+@ignore
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries copying permission
+notice identical to this one except for the removal of this paragraph
+(this paragraph not being relevant to the printed manual).
+
+@end ignore
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation approved
+by the Free Software Foundation.
+@end ifinfo
+
+@titlepage
+@title Simulavrxx++
+@subtitle A simulator for the Atmel AVR family of microcontrollers.
+@subtitle For simulavrxx++ version @value{VERSION}, @value{UPDATED}.
+@author by Theodore A. Roth, Klaus Rudolph
+
+@page
+@hfill Send bugs and comments on Simulavrxx to@*
+@hfill @w{@email{simulavr-devel@@nongnu.org}}
+@vskip 0pt plus 1filll
+Copyright @copyright{} 2004 Theodore A. Roth, Klaus Rudolph
+@sp 2
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation approved
+by the Free Software Foundation.
+@end titlepage
+
+
+
+
+@contents
+@ifnottex
+@node Top
+@top Short Sample
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Introduction::                What is simulavrxx?
+* Invoking::                    How to run simulavrxx
+* Using with GDB::              How to use simulavrxx with gdb
+@* Tracing::           How to generate and interpret avr-core traces
+@* Internals::                   Developing simulavrxx
+@* Problems::                    Reporting bugs
+@* Concept Index::               
+@end menu
+
+
+
+@comment  node-name,  next,  previous,  up
+@node Introduction, , Top, Top
+@chapter Introduction & History
+@cindex Introduction
+@cindex History
+
+The simulavrxx program is a simulator for the Atmel AVR family of
+microcontrollers.  Simulavrxx can be used either standalone or as a remote
+target for gdb.  When used in gdbserver mode, the simulator is used as a
+backend so that gdb can be used as a source level debugger for AVR 
+programs.
+
+Simulavrxx is derived from Theodore Roth´s simulavr. The hardware simulation part is
+comletly written new in c++, only the instruction decoder and the gdb interface are
+mostly copied to the actual simulavrxx sources.
+
+Why I have wrote it again:
+I need some more hardware modells like timers, spi, uart and others which where not available
+at the point I have started. And my biggest problem was the missing IO Port functionality.
+For my personal needs I must have the ability to connect the avr io ports to other devices like
+other avr devices or lcd, leds and other components. After looking into the original code 
+I was really unable to understand it and add the functionality I need. So I started nearly from
+scratch but used the instruction decoder and the gdb server interface which helps me a lot.
+
+What features are new:
+ @itemize @bullet
+ @item run multiple avr devices in one simulation
+@item connect multiple avr core pins to other devices like lcd, led and others
+@item connect multiple avr cores to multiple gdb instances (each on own socket/port no)
+@item write simulation scripts in tcl/tk, other languages could be added by simply adding swig scripts!
+@item tracing the execution of the program
+   @item these traces supports all debugging information directly from the elf-file
+    @item the traces run step by step for each device so you see all actions in the multiple devices in time correct order
+    @item every interrupt call is visible
+@item interrupt statistics with latency, longest and shortest execution time and some more
+@item multiple cores can run where each has a differnt clock frequency
+@item you have a simple text based ui interface to add lcd, switches, leds or other components and can modify it
+  during simulation, so there is no longer a need to enter a pin value during execution.
+@item execution timing should be nearly acurate :-), different access times for ram/extram/eeprom and other
+  hardware components are simulated.
+@item a pseudo core hardware component is introduced to do "printf" debugging. This "device" is connected to
+  a normal named unix socket so you have not to waste a uart or other hardware in your test environment.
+@item elf file loading is supported, no objcopy needed anymore
+@item execution speed is tuned a lot, most hardware simulations are now only done if needed
+@item external io pins which are not ports are also available
+@item simulavrxx.so provides a "loadable" tcl/tk library to write simulation sessions without compiling simulator sources
+@end itemize
+
+  
+@comment  node-name,  next,  previous,  up
+@node Invoking, , , Top
+@chapter Invoking simulavrxx
+@cindex Invoking simulavrxx
+
+Options for simulavrxx:
+
+@table @samp
+@item -u  
+run with user interface for external pin handling at port 7777
+@item -f --file <name>
+load elf-file <name> for simulation in simulated target
+@item -d --device <device name>
+simulate <device name> 
+The following devices are supported:
+at90s8515
+at90s4433
+atmega128
+@item -g --gdbserver
+running as gdb-server
+@item -G
+running as gdb-server and write debug info for gdb-connection
+@item -p  <port>
+change <port> for gdb server to port
+@item -t --trace <file name>
+enable trace outputs into <file name>
+@end table
+
+@comment  node-name,  next,  previous,  up
+@comment @node Invoking, Using with GDB, Introduction, Top
+@node Using with GDB, , , Top
+@chapter Using with GDB  
+@cindex GDB, using with
+
+Using the simulator with GDB is very simple. Start simulavrxx with:
+
+@command{simulavr -g}
+
+Now simulavr opens a socket on port 1212. If you need another port give the portnumber
+with
+
+@command{simulavrxx -p5566}
+
+which will start simulavrxx with gdb socket at port 5566.
+
+After that you can start avr-gdb or ddd with avr-gdb.
+
+@command{avr-gdb}
+
+@command{ddd --debugger avr-gdb}
+
+In the comandline of ddd or gdb you can now enter your debug commands:
+@command{
+    @*
+    file a.out @*
+    target remote localhost:1212 @*
+    load @*
+    step @*
+    step @*
+    .... @*
+}
+
+Attention: In the actual impementation there is a known bug:
+If you start in GDB mode and give no file to execute @command{-f filename} you will run into an @command{"Illegal Instruction"}. The reason is that simulavrxx runs directly after with interpretation the now empty flash. But gdb is not connected and could stop the core. Solution:
+Please start with @command{simulavrxx -g -f <filename>}. The problem will be fixed later. It doesn´t matter if you give the same file on command line and the gdb file command. The gdb download the file itself to the simulator. And after downloading the core will reset complete so it is not a real problem.
+
+Connecting multiple devices via multiple sockets is siscussed in the scripting section.
+
+
+@comment  node-name,  next,  previous,  up
+@comment @node Invoking, Using with GDB, Introduction, Top
+@chapter Tracing 
+@cindex Tracing
+
+One of the core features is tracing one or multiple avr cores in the simulator. 
+To enable the trace feature you have simply to add the @command{-t} option to the command line.
+If the elf file you load into the simulator have debug information the trace output will
+also contain the label informations from the elf file. This information is printed for
+all variables in flash, ram, ext-ram and also for all known hardware registers. 
+Also all code labels will be written to the trace output.
+
+What is written to trace output: @*
+@command{
+2000 a.out 0x0026: __do_copy_data                 LDI R17, 0x00 R17=0x00 @*
+2250 a.out 0x0028: __do_copy_data+0x1             LDI R26, 0x60 R26=0x60 X=0x0060 @*
+2500 a.out 0x002a: __do_copy_data+0x2             LDI R27, 0x00 R27=0x00 X=0x0060 @*
+2750 a.out 0x002c: __do_copy_data+0x3             LDI R30, 0x22 R30=0x22 Z=0x0022 @*
+3000 a.out 0x002e: __do_copy_data+0x4             LDI R31, 0x01 R31=0x01 Z=0x0122 @*
+3250 a.out 0x0030: __do_copy_data+0x5             RJMP 38 @*
+3500 a.out 0x0038: .do_copy_data_start            CPU-waitstate@*
+3750 a.out 0x0038: .do_copy_data_start            CPI R26, 0x60 SREG=[------Z-] @*
+4000 a.out 0x003a: .do_copy_data_start+0x1        CPC R27, R17 SREG=[------Z-] @*
+4250 a.out 0x003c: __SP_L__                       BRNE ->0x0032 .do_copy_data_loop             @*
+4500 a.out 0x003e: __SREG__,__SP_H__,__do_clear_bss LDI R17, 0x00 R17=0x00 @*
+4750 a.out 0x0040: __SREG__,__SP_H__,__do_clear_bss+0x1 LDI R26, 0x60 R26=0x60 X=0x0060 @*
+5000 a.out 0x0042: __SREG__,__SP_H__,__do_clear_bss+0x2 LDI R27, 0x00 R27=0x00 X=0x0060 @*
+5250 a.out 0x0044: __SREG__,__SP_H__,__do_clear_bss+0x3 RJMP 48 @*
+5500 a.out 0x0048: .do_clear_bss_start            CPU-waitstate@*
+}
+
+What the coloms mean:
+
+@itemize @bullet
+@item abolut time value, it is measured in us
+@item the core you simulate, normally shown as the file name of the loaded executable file. 
+    If your simulation runs multiple cores with multiple files you can see which core is stepping with which instruction.
+    @item actual PC, meaning bytes not instructions! The original avr documentation often writes in 
+    instructions, but here we write number of flash bytes.
+    @item label which is located to the address. The label is shown for all known labels from the loaded elf file.
+    If multiple labels are located to one address all labels are printed. In future releases it is maybe possible to give some
+    flags for the labels which would be printed. This is dependend on the elf file and bfd-library.
+    @item after the label an potential offset to that label is printed. This showns  @command{main+0x6} which means 6 instructions after
+    the @command{main} label is defined. In the moment I write this documentation I am wondering why I write instructions not
+    bytes offset? This will be changed next time :-). Seems to be not very sensefull to write address in bytes and offset in 
+    instruction (words). Ok, will be fixed...
+    @item The decoded avr instruction. If you wondering why you write an assembler source and get other assembler instructions
+   you have to think about the atmel avr instruction set. Some instructions are not really available in the avr-core. This instructions 
+  are only supported for convinience not in real hardware. As example: @command{ CLR R16} is in the real world on the avr core:
+ @command{EOR R16,R16} which means exclusive or with itself which results also in zero.
+  @item operands for the instruction. If the operands excess memory or registers the actual values of the operands will also be shown.
+  if the operands access memory (flash, ram) also the labels of the excessed addresses will be written for convinience. 
+  if a register is able to build a special value with 16 bits range (X,Y,Z) also the new value for this pseudo register is printed.
+  if a branch/jump instruction is decoded the branch or jump target is also decoded with the label name and abolute address also if the branch
+  or jump is relativ.
+  a special instruction @command{CPU-waitstate} will written to the output if the core needs more then one cycle for the instruction.
+  Sometimes a lot of waitstates will be generated e.g. for eeprom access.
+  if a hardware register like the UDR in the uart is affected the name of the register is also printed (in the future :-)
+  @item if the status register is effected also the @command{SREG=[------Z-]} is shown.
+
+  
+
+@end itemize
+  Attention: If you want to run the simulator in connection to the gdb interface and run the trace in parallel you have to keep in
+  mind that you MUST load the file in gdb and also in the simulator from commandline or script. It is not possible to transfer
+  the symbols from the elf file through the gdb interface. For that reason you allways must give the same elf file for gdb and
+  for simulavr. If you load another elf file via the gdb interface to the simulator the symbols for tracing could not be updated 
+  which means that the label information in the trace output is wrong. That is not a bug, this is related to the 
+  possibilities of the gdb interface.
+
+                                                                              
+
+
+
+@bye
