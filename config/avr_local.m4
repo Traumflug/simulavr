@@ -1,4 +1,4 @@
-AC_DEFUN(AVR_LIBIBLIO,
+AC_DEFUN([AVR_LIBIBLIO],
 [
   libbfd_root_location=$(which avr-readelf | sed -e ['s/\/[^\/]*\/[^\/]*$//']) 2> /dev/null
   if test x"${libbfd_root_location=$}" != x; then
@@ -14,7 +14,7 @@ AC_DEFUN(AVR_LIBIBLIO,
 AC_SUBST(libiberty_location)
 ])
 
-AC_DEFUN(AVR_BFD_LIB,
+AC_DEFUN([AVR_BFD_LIB],
 [
  if test x"${bfd_h_location}" == x; then
   if test x"${prefix}" != xNONE; then
