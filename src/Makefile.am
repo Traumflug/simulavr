@@ -7,7 +7,7 @@ MYTCL_LIB_SPEC=@MYTCL_LIB_SPEC@
 
 MAINTAINERCLEANFILES 	= Makefile.in
 
-DISTCLEANFILES=$DISTCLEANFILES simulavr.so keytrans.h simulavr_wrap.cpp
+DISTCLEANFILES:=${DISTCLEANFILES} simulavr.so keytrans.h simulavr_wrap.cpp
 
 EXTRA_DIST           = simulavr.i 
 

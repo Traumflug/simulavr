@@ -1,3 +1,8 @@
+2005-02-04    <rivetwa@member.fsf.org>
+
+	* Added documentation support. Try "make pdf" and "make info" now ;-).
+	* Cleaned up macro quoting.
+
 2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
     Add additional debug output in case of termination 
     * src/avrdevice.cpp 
