@@ -1,7 +1,51 @@
-#! /bin/sh
-set -x
-aclocal-1.8 -I config
+#!/bin/sh
+# Run this to generate all the initial makefiles, etc.
+# For debug, do: ./configure CFLAGS="-O0 -g
+# Takes file/dir as parameter for a directory, and extra params for "configure"
+srcdir=`dirname $0`
+
+test -z "$srcdir" && srcdir=.
+
+ORIGDIR=`pwd`
+cd $srcdir
+
+PROJECT=simulavrxx
+TEST_TYPE=-d
+FILE=src
+
+(autoconf --version) < /dev/null > /dev/null 2>&1 || {
+    echo
+    echo "You must have autoconf installed to compile $PROJECT."
+    exit 1
+}
+
+(libtool --version) < /dev/null > /dev/null 2>&1 || {
+    echo
+    echo "You must have libtool installed to compile $PROJECT."
+    exit 1
+}
+		  
+(automake --version) < /dev/null > /dev/null 2>&1 || {
+    echo
+    echo "You should use automake 1.8 or later to compile $PROJECT."
+    exit 1
+}
+
+test $TEST_TYPE $FILE || {
+    echo "You must run this script in the top-level $PROJECT directory"
+    exit 1
+}
+
+aclocal -I config
 autoheader
 libtoolize --force
-automake-1.8 --add-missing --copy
+automake --add-missing --copy
 autoconf
+
+cd $ORIGDIR
+
+		  
+echo
+echo "Now type './configure' to configure $PROJECT."
+
+

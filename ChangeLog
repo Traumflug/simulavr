@@ -1,9 +1,22 @@
-2005-02-08   
+2005-02-09    <no.mail@please.com>
+
+	* INSTALL (bootstrap): Updated bootstrap notes
+
+	* configure.ac: (Russell Shaw patch) Incorporated use of
+	tclConfig.sh to gather information about TCL, as well as several
+	modifications to check for more tools and features. Cleaned up
+	quoting and replaced my silly "echo" with AC_MSG_NOTICE, for
+	example. Thanks Russell!
+
+	* bootstrap: some nice mods also courtesy of Russell Shaw (check
+	that automake, libtool and autoconf are available)
+
+2005-02-08   <rivetwa@member.fsf.org>
 
 	* src/Makefile.am: (Oled Batrashev patch) Added flow in of
 	TCL_INCLUDE_SPEC variable, added to CPPFLAGS. Thanks again Oleg!
 
-2005-02-08    
+2005-02-08    <rivetwa@member.fsf.org>
 
 	* configure.ac: (Oleg Batrashev patch) Added flow of
 	TCL_INCLUDE_SPEC to Makefile, added warning message if swig is not

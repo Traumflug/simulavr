@@ -201,6 +201,18 @@ Now you have an autoconfigured project. Follow the usual step:
         configuring binutils for AVR to get the libraries.
 
 
+If you are pulling files from CVS, these notes may be important to you:
 
 bootstrap:
-  bootstrap is to be treated as a hint to how to bootstrap the autotools scripts. It works for me, but you may have to do something different. On gentoo, autmake 1.8 is available with automake-1.8, but automake by itself gave me version 1.5, which didn't have everything I wanted. (documentation generation for example )
+    automake 1.8 is needed for all t work (documentation seems to
+    require 1.8). On my (Gentoo) system, this required me to
+    arrange for version 1.8 to be selected instead of the default (1.5
+    when I did it) I ended up setting "WANT_AUTOMAKE=1.8" to
+    accomplish this. Alternatively, you might also invoke aclocal-1.8
+    and automake-1.8 the first time. After that, the 1.8 versions
+    continued to be invoked, even if you simply use automake/aclocal. 
+
+    bootstrap is to be treated as a hint to how to bootstrap the
+    autotools scripts. It works for me, but you may have to do
+    something different.
+

@@ -8,3 +8,8 @@ Build-System & Maintenance
 Patches submitted by Oleg Batrashev:
     - configure.ac & src/Makefile.am to complain about missing swig,
         and to flow TCL_INCLUDE_SPEC to output makefile.
+
+Patched submitted by Russell Shaw:
+    - bootstrap & configure.ac patch to cleanup use of autotools. It
+        was very welcome to see tcl features updated to use
+        tclConfig.sh and my silly echo's replaced as well.
