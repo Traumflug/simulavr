@@ -36,7 +36,9 @@ PinAtPort::PinAtPort( HWPort *p, unsigned char pn)
     pinNo=pn;
 }
 
-
+Pin& PinAtPort::GetPin() {
+    return port->GetPin(pinNo);
+}
 
 void PinAtPort::SetPort(bool val) {
     unsigned char *adr=&port->port;

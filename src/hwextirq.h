@@ -48,7 +48,6 @@ class HWExtIrq: public Hardware {
 		unsigned int vectorInt0;
 		unsigned int vectorInt1;
 
-
 	public:
 		HWExtIrq(AvrDevice *core, HWIrqSystem *, PinAtPort p0, PinAtPort p2, unsigned int, unsigned int);
 		unsigned char GetGimsk();
@@ -59,7 +58,11 @@ class HWExtIrq: public Hardware {
 		//bool IsIrqFlagSet(unsigned int vector);
 		void ClearIrqFlag(unsigned int vector);
 		unsigned int CpuCycle();
-        void CheckForIrq();
+        void CheckForNewSetIrq(unsigned char);
+        void CheckForNewClearIrq(unsigned char);
+
+        void PinStateHasChanged(Pin *);
+        void Reset();
 };
 
 

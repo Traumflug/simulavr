@@ -36,8 +36,9 @@
 
 HWAcomp::HWAcomp(AvrDevice *core, HWIrqSystem *irqsys, PinAtPort ain0, PinAtPort ain1, unsigned int _irqVec):
 Hardware(core), irqSystem(irqsys), pinAin0(ain0), pinAin1(ain1), irqVec(_irqVec) {
-    core->AddToCycleList(this);
-//    irqSystem->RegisterIrqPartner(this, _irqVec);
+    ain0.GetPin().RegisterCallback(this);
+    ain1.GetPin().RegisterCallback(this);
+    Reset();
 }
 
 
@@ -66,6 +67,10 @@ unsigned char HWAcomp::GetAcsr() {
 }
 
 unsigned int HWAcomp::CpuCycle() {
+    return 0;
+}
+
+void HWAcomp::PinStateHasChanged(Pin *p) {
     //cout << "HWAComp: acsr: start" << hex << (unsigned int ) acsr << endl;
     bool oldComp=(acsr & ACO);
 
@@ -95,7 +100,7 @@ unsigned int HWAcomp::CpuCycle() {
 
     //cout << "HWAComp: acsr: end" << hex << (unsigned int ) acsr << endl;
 
-    return 0;
+    //return 0;
 }
 
 #if 0
@@ -103,13 +108,13 @@ unsigned int HWAcomp::CpuCycle() {
 bool HWAcomp::IsIrqFlagSet(unsigned int vec) {
     /* XXX remove that function next time
     if (vec== irqVec) {
-        if ( (acsr & ( ACI | ACIE) ) == ( ACI | ACIE) ) { //irq flag and irq enabled?
-            return true;
-        } else {
-            return false;
-        }
+    if ( (acsr & ( ACI | ACIE) ) == ( ACI | ACIE) ) { //irq flag and irq enabled?
+    return true;
     } else {
-        return false;
+    return false;
+    }
+    } else {
+    return false;
     }
     */
 

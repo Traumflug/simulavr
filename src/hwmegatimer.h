@@ -38,9 +38,11 @@ class HWMegaTimer0: public Hardware {
 		unsigned char tcnt;
 		unsigned char ocr;
 
+        AvrDevice *core;
 		HWPrescaler *prescaler;
 		HWMegaTimer0123Irq *timer01irq;
 		PinAtPort pin_oc;
+
 
 		bool t0_old; 	//last state of external t0 pin
 		bool last_oc;
@@ -81,7 +83,7 @@ class HWMegaTimer0: public Hardware {
 
 		}
 		virtual unsigned int CpuCycle();
-		void SetTccr(unsigned char val) { tccr=val; CheckForMode();}
+		void SetTccr(unsigned char val);
 		void SetTcnt(unsigned char val) { tcnt=val; }
 		void SetOcr(unsigned char val) {ocr=val; } //double buffering is missing TODO
 		unsigned char GetTccr() { return tccr; }
@@ -95,6 +97,7 @@ class HWMegaTimer2: public Hardware {
 		unsigned char tcnt;
 		unsigned char ocr;
 
+        AvrDevice *core;
 		HWPrescaler *prescaler;
 		HWMegaTimer0123Irq *timer01irq;
 		PinAtPort pin_t0;
@@ -139,7 +142,7 @@ class HWMegaTimer2: public Hardware {
 
 		}
 		virtual unsigned int CpuCycle();
-		void SetTccr(unsigned char val) { tccr=val; CheckForMode();}
+		void SetTccr(unsigned char val);
 		void SetTcnt(unsigned char val) { tcnt=val; }
 		void SetOcr(unsigned char val) {ocr=val; } //double buffering is missing TODO
 		unsigned char GetTccr() { return tccr; }
@@ -150,6 +153,8 @@ class HWMegaTimer2: public Hardware {
 
 class HWMegaTimer1 : public Hardware {
 	protected:
+
+        AvrDevice *core;
 		HWPrescaler *prescaler;
 		//HWIrqSystem *irqSystem;
 		HWMegaTimer0123Irq *timer01irq;
@@ -246,7 +251,7 @@ class HWMegaTimer1 : public Hardware {
 
 
 		void SetTccr1a(unsigned char val) { tccr1a=val;	CheckForMode(); }
-		void SetTccr1b(unsigned char val) { tccr1b=val; CheckForMode(); }
+		void SetTccr1b(unsigned char val) ;
 		void SetTccr1c(unsigned char val) { tccr1c=val; CheckForMode(); }
 		void SetTcnt1h(unsigned char val) { tcnt1htemp=val;}
 		void SetTcnt1l(unsigned char val) { tcnt1=val+(tcnt1htemp<<8);}

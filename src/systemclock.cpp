@@ -1,4 +1,4 @@
- /*
+/*
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -24,6 +24,9 @@
 #include "simulationmember.h"
 #include "helper.h"
 #include "trace.h"
+#include "application.h"
+
+#include "signal.h"
 
 SystemClock::SystemClock() { currentTime=0; }
 
@@ -79,19 +82,60 @@ int SystemClock::Step(int untilCoreStepFinished) { //0-> return also if cpu in w
     return res;
 }
 
+void SystemClock::Rescedule( SimulationMember *sm, unsigned long long newTime) {
+    iterator ii;
+
+    for ( ii=begin(); ii!=end(); ii++) {
+        if ( ii->second== sm) {
+            erase(ii); 
+            break;
+        }
+    }
+
+    insert (pair<unsigned long long, SimulationMember*>(newTime+currentTime+1, sm));
+}
+
+
+
+int breakMessage=0;
+
+void OnBreak(int s) 
+{
+    signal(SIGINT, SIG_DFL);
+    signal(SIGTERM, SIG_DFL);
+    breakMessage=1;
+}
+
+
+
 void SystemClock::Endless() {
+    int steps=0;
+    signal(SIGINT, OnBreak);
+    signal(SIGTERM, OnBreak);
+
 #ifdef PROF
     for (unsigned long long tt=0; tt<1000000LL; tt++) {
         Step(0);
+        if (breakMessage!=0) break;
     }
 #else
     cout << "normal loop" << endl;
-    for (;;) Step(0);
+    while( breakMessage==0) {
+        steps++;
+        Step(0);
+    }
 #endif
-
+    cout << "SystemClock::Endless stopped" << endl;
+    cout << "number of cpu cycles simulated: " << dec << steps << endl;
+    Application::GetInstance()->PrintResults();
 }
+
+SystemClock& SystemClock::Instance() {
+    static SystemClock obj;
+    return obj;
+}
+
 
 
 unsigned long long SystemClock::GetCurrentTime() { return currentTime; }
 
-SystemClock systemClock; //the singleton here

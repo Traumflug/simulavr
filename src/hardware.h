@@ -23,6 +23,7 @@
 #ifndef HARDWARE
 #define HARDWARE
 
+class Pin;
 class AvrDevice;
 
 class Hardware {
@@ -30,9 +31,9 @@ class Hardware {
         Hardware(AvrDevice *hw);
         virtual unsigned int CpuCycle(){return 0;}
         virtual void Reset() {}; //reset the hardware, used by constructor & wado
-        //virtual bool IsIrqFlagSet(unsigned int vector);
         virtual void ClearIrqFlag(unsigned int vector);
         virtual ~Hardware(){}
+        virtual void PinStateHasChanged(Pin*){};
 };
 
 #endif

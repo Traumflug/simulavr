@@ -50,7 +50,8 @@ class HWTimer01Irq: public Hardware {
 		void AddFlagToTifr(unsigned char val); // { tifr|=val; }
 		//bool IsIrqFlagSet(unsigned int vector);
 		void ClearIrqFlag(unsigned int vector);
-        void CheckForIrq();
+        void CheckForNewSetIrq(unsigned char);
+        void CheckForNewClearIrq(unsigned char);
 };
 
 #endif

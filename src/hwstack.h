@@ -25,12 +25,17 @@
 
 #include "rwmem.h"
 #include "hardware.h"
+#include "funktor.h"
+
+#include <map>
+
 
 class HWStack: public Hardware {
 	protected:
 		MemoryOffsets *mem;
 		unsigned int stackPointer;
         unsigned int stackMask;
+        multimap<unsigned int , Funktor* > breakPointList; //later the second parameter should be a function Pointer!
 
 	public:
         //the mask give the max width of the stack pointer, in smaller devices there are not all 16 bits available!
@@ -44,6 +49,9 @@ class HWStack: public Hardware {
 		unsigned char GetSph();
 		void Reset();
         ~HWStack() {}
+        unsigned int GetStackPointer() const { return stackPointer; }
+        void SetBreakPoint(unsigned int stackPointer, Funktor *);
+        void CheckBreakPoints();
 };
 
 class RWSph: public RWMemoryMembers {

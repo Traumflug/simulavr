@@ -44,17 +44,28 @@ void HWStack::Reset() {
 	stackPointer=0;
 }
 
+void HWStack::CheckBreakPoints() {
+    typedef multimap<unsigned int, Funktor *>::iterator I;
+    pair<I,I> l= breakPointList.equal_range(stackPointer);
+    for (I i=l.first; i!=l.second; i++) {
+        (*(i->second))(); //execute Funktor
+        delete i->second; //and delete it
+    }
+    breakPointList.erase(l.first, l.second);
+}
 
 void HWStack::Push(unsigned char val){
 	(*mem)[stackPointer]=val;
 	stackPointer--;
     stackPointer&=stackMask;
 	if (trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ;
+    CheckBreakPoints();
 }
 unsigned char HWStack::Pop(){
 	stackPointer++;
     stackPointer&=stackMask;
 	if (trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ;
+    CheckBreakPoints();
 	return (*mem)[stackPointer];
 }
 
@@ -63,6 +74,7 @@ void HWStack::SetSpl(unsigned char val) {
 	stackPointer+=val;
     stackPointer&=stackMask;
 	if (trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
+    CheckBreakPoints();
 }
 
 void HWStack::SetSph(unsigned char val) {
@@ -70,6 +82,7 @@ void HWStack::SetSph(unsigned char val) {
 	stackPointer+=(val<<8);
     stackPointer&=stackMask;
 	if (trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
+    CheckBreakPoints();
 }
 
 unsigned char HWStack::GetSph() {
@@ -80,3 +93,7 @@ unsigned char HWStack::GetSpl() {
 	return (stackPointer&0xff);
 }
 
+//Attention! SetBreakPoint must get a copy!! of a Funktor because he selft destroy it after usage!!!
+void HWStack::SetBreakPoint(unsigned int stackPointer, Funktor *f) {
+    breakPointList.insert(make_pair(stackPointer,f));
+}

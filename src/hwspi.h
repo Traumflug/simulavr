@@ -37,7 +37,7 @@ class HWSpi: public Hardware {
 		unsigned char spsr;
 		unsigned char spcr;
 
-
+        AvrDevice *core;
 		HWIrqSystem *irqSystem;
 
 		PinAtPort pinMosi;
@@ -63,6 +63,9 @@ class HWSpi: public Hardware {
 		void ror(unsigned char *);
 		bool spifWeak; 
 		bool oldSck; //remember old sck for edge detection of sck in slave mode
+
+        int bitCnt;
+        int clkCnt;
 
 	public:
 		HWSpi(AvrDevice *core, HWIrqSystem *, PinAtPort mo, PinAtPort mi, PinAtPort sc, PinAtPort s, unsigned int vfs); 

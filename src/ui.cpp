@@ -23,69 +23,101 @@
 
 using namespace std;
 
-
+#include "externaltype.h"
 #include "ui.h"
 #include "trace.h"
 #include "hardware.h"
 #include "pin.h"
+#include "systemclock.h"
 
-int waitOnAckFromTcl=0;
 
-UserInterface::UserInterface(int port): Socket(port) {
+UserInterface::UserInterface(int port, bool _withUpdateControl): Socket(port), updateOn(1), pollFreq(100000)  {
+    if (_withUpdateControl) {
+        waitOnAckFromTclRequest=0;
+        waitOnAckFromTclDone=0;
+        ostringstream os;
+        os << "create UpdateControl dummy dummy " << endl; 
+        Write(os.str());
+        AddExternalType("UpdateControl", this);
+
+    }
+
 }
 
 UserInterface::~UserInterface() {
 }
 
+void UserInterface::SwitchUpdateOnOff(bool yesNo) {
+    updateOn=yesNo;
+}
+
 
 int UserInterface::Step(bool dummy1, unsigned long long *nextStepIn_ns) {
-    if (nextStepIn_ns!=0) *nextStepIn_ns=0;
-    do { 
-        if (Poll()!=0) {
-            ssize_t len = 0;
-            static string dummy;
-            len=Read(dummy);
+    if (nextStepIn_ns!=0) {
+        *nextStepIn_ns=pollFreq;
+    }
 
-            string debug=dummy;
+    static time_t oldTime=0;
+    time_t newTime=time(NULL);
 
-            while (len>0) {
-                
-                string::size_type pos;
+    if (updateOn || (newTime!=oldTime)) {
+        oldTime=newTime;
 
-                pos=dummy.find(" ");
-                
-                string net=dummy.substr(0, pos);
-                string rest=dummy.substr(pos+1); //vfrom pos+1 to end
+        do { 
+            if (Poll()!=0) {
+                ssize_t len = 0;
+                len=Read(dummy);
 
-                string par;
-                int pos2=rest.find(" ");
+                //string debug=dummy;
 
-                if (pos2<=0) break;
+                while (len>0) {
 
-                par= rest.substr(0, pos2);
-                dummy=rest.substr(pos2+1);
+                    string::size_type pos;
 
-                if (net == "__ack" ) {
-                    waitOnAckFromTcl=0;
-                } else {
-                    map<string, ExternalType*>::iterator ii;
-                    ii=extPins.find(net);
-                    if (ii != extPins.end() ) {
-                        (ii->second)->SetNewValueFromUi(par);
+                    pos=dummy.find(" ");
+
+                    string net=dummy.substr(0, pos);
+                    string rest=dummy.substr(pos+1); //vfrom pos+1 to end
+
+                    string par;
+                    int pos2=rest.find(" ");
+
+                    if (pos2<=0) break;
+
+                    par= rest.substr(0, pos2);
+                    dummy=rest.substr(pos2+1);
+                    //cout << "debugstring: " << debug ;
+
+                    if (net == "__ack" ) {
+                        waitOnAckFromTclDone++;
                     } else {
-                        cerr << "Netz nicht gefunden:" << net << endl;
-                        cerr << "Start with string >>" << debug << "<<" << endl;
-                    }
+                        map<string, ExternalType*>::iterator ii;
+                        ii=extPins.find(net);
+                        if (ii != extPins.end() ) {
+                            (ii->second)->SetNewValueFromUi(par);
+                        } else {
+                            cerr << "Netz nicht gefunden:" << net << endl;
+                            //cerr << "Start with string >>" << debug << "<<" << endl;
+                        }
 
-                    if (trace_on!=0) traceOut << "Net: " << net << "changed to " << par << endl;
+                        if (trace_on!=0) traceOut << "Net: " << net << "changed to " << par << endl;
 
-                } //__ack
+                    } //__ack
 
-                len=dummy.size(); //recalc size from rest of string
+                    len=dummy.size(); //recalc size from rest of string
 
-            } // len > 0
-        } //poll
-    }while (waitOnAckFromTcl!=0); 
+                } // len > 0
+            } //poll
+            //cout.setf( ios_base::dec);
+            //cout << "UserInterface::Step Req: " <<  waitOnAckFromTclRequest << " Done:" << waitOnAckFromTclDone << endl; 
+        }while (waitOnAckFromTclRequest > waitOnAckFromTclDone+500); 
+
+
+        if (waitOnAckFromTclRequest!=waitOnAckFromTclDone) {
+            waitOnAckFromTclRequest=waitOnAckFromTclDone=0;
+        }
+
+    } //if (update_on  | look for reenable again)
 
     return 0;
 }
@@ -94,7 +126,7 @@ int UserInterface::Step(bool dummy1, unsigned long long *nextStepIn_ns) {
 
 void UserInterface::SendUiNewState(const string &s, const char &c)  {
     ostringstream os;
-    static map<string, char> LastState;
+    //static map<string, char> LastState;
 
     if (LastState[s]==c) {
         return;
@@ -104,7 +136,29 @@ void UserInterface::SendUiNewState(const string &s, const char &c)  {
     os << "set " << s << " " << c << endl;
     Write(os.str());
 
-    waitOnAckFromTcl=1;
+    //    SystemClock::Instance().Rescedule(this, 1000); //read ack back as fast as possible
 }
 
+void UserInterface::SetNewValueFromUi(const string &value){
+    if (value=="0") {
+        cout << "Set update to 0" << endl;
+        updateOn=false;
+    } else {
+        cout << "Set update to 1" << endl;
+        updateOn=true;
+    }
+
+}
+
+void UserInterface::Write(const string &s) {
+    if (updateOn) {
+
+        for (unsigned int tt = 0; tt< s.length() ; tt++) {
+            if (s[tt]=='\n') {
+                waitOnAckFromTclRequest++;
+            }
+        }
+        Socket::Write(s);
+    }
+} 
 

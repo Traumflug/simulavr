@@ -59,6 +59,11 @@ class Lcd : public SimulationMember {
         //ofstream debugOut;
         void SendCursorPosition();
 
+        unsigned char lastPortValue;
+        int readLow;
+        unsigned char command;
+        int enableOld;
+
     public:
         virtual int Step(bool trueHwStep, unsigned long long *timeToNextStepIn_ns=0);
         Lcd(UserInterface *ui, const string &name, const string &baseWindow);

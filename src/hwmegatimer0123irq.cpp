@@ -20,7 +20,8 @@
  *
  ****************************************************************************
  */
-
+#include <iostream>
+using namespace std;
 #include "hwmegatimer0123irq.h"
 #include "irqsystem.h"
 
@@ -59,7 +60,7 @@ HWMegaTimer0123Irq::HWMegaTimer0123Irq(AvrDevice *core, HWIrqSystem *is,
         unsigned int t3capt, 
         unsigned int t3ovf): 
 Hardware(core), irqSystem(is), 
-    vectorTimer0Comp( t0Ovf),
+    vectorTimer0Comp( t0Comp),
     vectorTimer0Ovf( t0Ovf),
     vectorTimer1CompA( t1compa),
     vectorTimer1CompB( t1compb),
@@ -76,23 +77,6 @@ vectorTimer3Ovf(t3ovf)
 
 
 {	
-    /* 
-    irqSystem->RegisterIrqPartner(this, vectorTimer0Comp );
-    irqSystem->RegisterIrqPartner(this, vectorTimer0Ovf );
-    irqSystem->RegisterIrqPartner(this, vectorTimer1CompA );
-    irqSystem->RegisterIrqPartner(this, vectorTimer1CompB );
-    irqSystem->RegisterIrqPartner(this, vectorTimer1CompC );
-    irqSystem->RegisterIrqPartner(this, vectorTimer1Capt );
-    irqSystem->RegisterIrqPartner(this, vectorTimer1Ovf );
-    irqSystem->RegisterIrqPartner(this, vectorTimer2Comp );
-    irqSystem->RegisterIrqPartner(this, vectorTimer2Ovf );
-    irqSystem->RegisterIrqPartner(this, vectorTimer3CompA );
-    irqSystem->RegisterIrqPartner(this, vectorTimer3CompB );
-    irqSystem->RegisterIrqPartner(this, vectorTimer3CompC );
-    irqSystem->RegisterIrqPartner(this, vectorTimer3Capt );
-    irqSystem->RegisterIrqPartner(this, vectorTimer3Ovf );
-    */
-
     tifr=0;
     timsk=0;
     etimsk=0;
@@ -103,61 +87,75 @@ vectorTimer3Ovf(t3ovf)
 
 void HWMegaTimer0123Irq::AddFlagToTifr(unsigned char val){
     tifr|=val;
-    CheckForIrq();
+
+    switch (val&timsk) 
+    {
+        case 0: break; //nothing to set, (flag & mask) -> 0
+        case (1<<OCF0): { irqSystem->SetIrqFlag(this, vectorTimer0Comp); }   break;
+        case (1<<TOV0): { irqSystem->SetIrqFlag(this, vectorTimer0Ovf); }    break;
+        case (1<<OCF1A): { irqSystem->SetIrqFlag(this, vectorTimer1CompA); } break;
+        case (1<<OCF1B): { irqSystem->SetIrqFlag(this, vectorTimer1CompB); } break;
+        case (1<<ICF1): { irqSystem->SetIrqFlag(this, vectorTimer1Capt); }   break;
+        case (1<<TOV1): { irqSystem->SetIrqFlag(this, vectorTimer1Ovf); }    break;
+        case (1<<OCF2): { irqSystem->SetIrqFlag(this, vectorTimer2Comp); }   break;
+        case (1<<TOV2): { irqSystem->SetIrqFlag(this, vectorTimer2Ovf); }    break;
+        default: cerr<< "HWMegaTimer0123Irq::AddFlagToTifr" << ":WrongValue for AddFlag 0x"<<hex<<(unsigned int)val<< endl; exit(0);                
+    }
 }
 
 void HWMegaTimer0123Irq::AddFlagToEtifr(unsigned char val){
     etifr|=val; 
-    CheckForIrq();
+    switch(val&etimsk) {
+        case 0: break; //nothing to set, (flag & mask) -> 0
+        case (1<<OCF1C): { irqSystem->SetIrqFlag(this, vectorTimer1CompC); } break;
+        case (1<<OCF3A): { irqSystem->SetIrqFlag(this, vectorTimer3CompA); } break;
+        case (1<<OCF3B): { irqSystem->SetIrqFlag(this, vectorTimer3CompB); } break;
+        case (1<<OCF3C): { irqSystem->SetIrqFlag(this, vectorTimer3CompC); } break;
+        case (1<<ICF3): { irqSystem->SetIrqFlag(this, vectorTimer3Capt); }   break;
+        case (1<<TOV3): { irqSystem->SetIrqFlag(this, vectorTimer3Ovf); }    break;
+        default: cerr<< "HWMegaTimer0123Irq::AddFlagToEtifr" << ":WrongValue for AddFlag 0x"<<hex<<(unsigned int)val<< endl; exit(0);                
+    }
 }
 
-void HWMegaTimer0123Irq::CheckForIrq() {
-    unsigned char tiac= timsk&tifr;
-    unsigned char etiac= etimsk&etifr;
-
-    if (tiac&(1<<OCF0)) { irqSystem->SetIrqFlag(this, vectorTimer0Comp); }  else { irqSystem->ClearIrqFlag(vectorTimer0Comp); }
-    if (tiac&(1<<TOV0)) { irqSystem->SetIrqFlag(this, vectorTimer0Ovf); } else { irqSystem->ClearIrqFlag(vectorTimer0Ovf); }
-    if (tiac&(1<<OCF1A)) { irqSystem->SetIrqFlag(this, vectorTimer1CompA); } else { irqSystem->ClearIrqFlag(vectorTimer1CompA); }
-    if (tiac&(1<<OCF1B)) { irqSystem->SetIrqFlag(this, vectorTimer1CompB); } else { irqSystem->ClearIrqFlag(vectorTimer1CompB); }
-    if (etiac&(1<<OCF1C)) { irqSystem->SetIrqFlag(this, vectorTimer1CompC); } else { irqSystem->ClearIrqFlag(vectorTimer1CompC); }
-    if (tiac&(1<<ICF1)) { irqSystem->SetIrqFlag(this, vectorTimer1Capt); } else { irqSystem->ClearIrqFlag(vectorTimer1Capt); }
-    if (tiac&(1<<TOV1)) { irqSystem->SetIrqFlag(this, vectorTimer1Ovf); } else { irqSystem->ClearIrqFlag(vectorTimer1Ovf); }
-    if (tiac&(1<<OCF2)) { irqSystem->SetIrqFlag(this, vectorTimer2Comp); } else { irqSystem->ClearIrqFlag(vectorTimer2Comp); }
-    if (tiac&(1<<TOV2)) { irqSystem->SetIrqFlag(this, vectorTimer2Ovf); } else { irqSystem->ClearIrqFlag(vectorTimer2Ovf); }
-    if (etiac&(1<<OCF3A)) { irqSystem->SetIrqFlag(this, vectorTimer3CompA); } else { irqSystem->ClearIrqFlag(vectorTimer3CompA); }
-    if (etiac&(1<<OCF3B)) { irqSystem->SetIrqFlag(this, vectorTimer3CompB); } else { irqSystem->ClearIrqFlag(vectorTimer3CompB); }
-    if (etiac&(1<<OCF3C)) { irqSystem->SetIrqFlag(this, vectorTimer3CompC); } else { irqSystem->ClearIrqFlag(vectorTimer3CompC); }
-    if (etiac&(1<<ICF3)) { irqSystem->SetIrqFlag(this, vectorTimer3Capt); } else { irqSystem->ClearIrqFlag(vectorTimer3Capt); }
-    if (etiac&(1<<TOV3)) { irqSystem->SetIrqFlag(this, vectorTimer3Ovf); } else { irqSystem->ClearIrqFlag(vectorTimer3Ovf); }
+void HWMegaTimer0123Irq::CheckForNewSetIrq(unsigned char tiac) {
+    if (tiac&(1<<OCF0)) { irqSystem->SetIrqFlag(this, vectorTimer0Comp); }  
+    if (tiac&(1<<TOV0)) { irqSystem->SetIrqFlag(this, vectorTimer0Ovf); } 
+    if (tiac&(1<<OCF1A)) { irqSystem->SetIrqFlag(this, vectorTimer1CompA); }
+    if (tiac&(1<<OCF1B)) { irqSystem->SetIrqFlag(this, vectorTimer1CompB); }
+    if (tiac&(1<<ICF1)) { irqSystem->SetIrqFlag(this, vectorTimer1Capt); } 
+    if (tiac&(1<<TOV1)) { irqSystem->SetIrqFlag(this, vectorTimer1Ovf); } 
+    if (tiac&(1<<OCF2)) { irqSystem->SetIrqFlag(this, vectorTimer2Comp); } 
+    if (tiac&(1<<TOV2)) { irqSystem->SetIrqFlag(this, vectorTimer2Ovf); } 
 }
 
-#if 0
-bool HWMegaTimer0123Irq::IsIrqFlagSet(unsigned int vector) {
-    //XXX remove that function later!
-    return 1;
-    /*
-
-    unsigned char tiac= timsk&tifr;
-    unsigned char etiac= etimsk&etifr;
-
-    if ((vector == vectorTimer0Comp ) && (tiac&(1<<OCF0))) { return 1; }
-    if ((vector == vectorTimer0Ovf) && (tiac&(1<<TOV0))) { return 1; }
-    if ((vector == vectorTimer1CompA) && (tiac&(1<<OCF1A))) { return 1; }
-    if ((vector == vectorTimer1CompB) && (tiac&(1<<OCF1B))) { return 1; }
-    if ((vector == vectorTimer1CompC) && (etiac&(1<<OCF1C))) { return 1; }
-    if ((vector == vectorTimer1Capt) && (tiac&(1<<ICF1))) { return 1; }
-    if ((vector == vectorTimer1Ovf) && (tiac&(1<<TOV1))) { return 1; }
-    if ((vector == vectorTimer2Comp) && (tiac&(1<<OCF2))) { return 1; }
-    if ((vector == vectorTimer2Ovf) && (tiac&(1<<TOV2))) { return 1; }
-    if ((vector == vectorTimer3CompA) && (etiac&(1<<OCF3A))) { return 1; }
-    if ((vector == vectorTimer3CompB) && (etiac&(1<<OCF3B))) { return 1; }
-    if ((vector == vectorTimer3CompC) && (etiac&(1<<OCF3C))) { return 1; }
-    if ((vector == vectorTimer3Capt) && (etiac&(1<<ICF3))) { return 1; }
-    if ((vector == vectorTimer3Ovf) && (etiac&(1<<TOV3))) { return 1; }
-    return 0;
-    */
+void HWMegaTimer0123Irq::CheckForNewClearIrq(unsigned char tiac) {
+    if (tiac&(1<<OCF0))  { irqSystem->ClearIrqFlag(vectorTimer0Comp); }
+    if (tiac&(1<<TOV0))  { irqSystem->ClearIrqFlag(vectorTimer0Ovf); }
+    if (tiac&(1<<OCF1A)) { irqSystem->ClearIrqFlag(vectorTimer1CompA); }
+    if (tiac&(1<<OCF1B)) { irqSystem->ClearIrqFlag(vectorTimer1CompB); }
+    if (tiac&(1<<ICF1))  { irqSystem->ClearIrqFlag(vectorTimer1Capt); }
+    if (tiac&(1<<TOV1))  { irqSystem->ClearIrqFlag(vectorTimer1Ovf); }
+    if (tiac&(1<<OCF2))  { irqSystem->ClearIrqFlag(vectorTimer2Comp); }
+    if (tiac&(1<<TOV2))  { irqSystem->ClearIrqFlag(vectorTimer2Ovf); }
 }
-#endif
+
+void HWMegaTimer0123Irq::CheckForNewSetIrqE(unsigned char etiac) {
+    if (etiac&(1<<OCF1C)) { irqSystem->SetIrqFlag(this, vectorTimer1CompC); } 
+    if (etiac&(1<<OCF3A)) { irqSystem->SetIrqFlag(this, vectorTimer3CompA); }
+    if (etiac&(1<<OCF3B)) { irqSystem->SetIrqFlag(this, vectorTimer3CompB); }
+    if (etiac&(1<<OCF3C)) { irqSystem->SetIrqFlag(this, vectorTimer3CompC); }
+    if (etiac&(1<<ICF3)) { irqSystem->SetIrqFlag(this, vectorTimer3Capt); } 
+    if (etiac&(1<<TOV3)) { irqSystem->SetIrqFlag(this, vectorTimer3Ovf); } 
+}
+
+void HWMegaTimer0123Irq::CheckForNewClearIrqE(unsigned char etiac) {
+    if (etiac&(1<<OCF1C)) { irqSystem->ClearIrqFlag(vectorTimer1CompC); }
+    if (etiac&(1<<OCF3A)) { irqSystem->ClearIrqFlag(vectorTimer3CompA); }
+    if (etiac&(1<<OCF3B)) { irqSystem->ClearIrqFlag(vectorTimer3CompB); }
+    if (etiac&(1<<OCF3C)) { irqSystem->ClearIrqFlag(vectorTimer3CompC); }
+    if (etiac&(1<<ICF3))  { irqSystem->ClearIrqFlag(vectorTimer3Capt); }
+    if (etiac&(1<<TOV3))  { irqSystem->ClearIrqFlag(vectorTimer3Ovf); }
+}
 
 void HWMegaTimer0123Irq::ClearIrqFlag(unsigned int vector) {
     if (vector == vectorTimer0Comp ) {tifr&=0xff-(1<<OCF0);irqSystem->ClearIrqFlag(vectorTimer0Comp);}
@@ -182,23 +180,51 @@ unsigned char HWMegaTimer0123Irq::GetEtimsk() { return etimsk;}
 unsigned char HWMegaTimer0123Irq::GetEtifr() {return etifr;}
 
 void HWMegaTimer0123Irq::SetTimsk(unsigned char val) {
+    unsigned char tiacOld= timsk&tifr;
     timsk=val;
-    CheckForIrq();
+    unsigned char tiacNew= timsk&tifr;
+
+    unsigned char changed=tiacNew^tiacOld;
+    unsigned char setnew= changed&tiacNew;
+    unsigned char clearnew= changed& (~tiacNew);
+
+    CheckForNewSetIrq(setnew);
+    CheckForNewClearIrq(clearnew);
 }
 
 void HWMegaTimer0123Irq::SetTifr(unsigned char val) { 
+    unsigned char tiacOld= timsk&tifr;
     tifr&=~val;
-    CheckForIrq();
+    unsigned char tiacNew= timsk&tifr;
+
+    unsigned char changed=tiacNew^tiacOld;
+    unsigned char clearnew= changed& (~tiacNew);
+
+    CheckForNewClearIrq(clearnew);
 }
 
 void HWMegaTimer0123Irq::SetEtimsk(unsigned char val) { 
+    unsigned char tiacOld= timsk&tifr;
     etimsk=val;
-    CheckForIrq();
+    unsigned char tiacNew= timsk&tifr;
+
+    unsigned char changed=tiacNew^tiacOld;
+    unsigned char setnew= changed&tiacNew;
+    unsigned char clearnew= changed& (~tiacNew);
+
+    CheckForNewSetIrqE(setnew);
+    CheckForNewClearIrqE(clearnew);
 }
 
 void HWMegaTimer0123Irq::SetEtifr(unsigned char val) { 
+    unsigned char tiacOld= timsk&tifr;
     etifr&=~val; 
-    CheckForIrq();
+    unsigned char tiacNew= timsk&tifr;
+
+    unsigned char changed=tiacNew^tiacOld;
+    unsigned char clearnew= changed& (~tiacNew);
+
+    CheckForNewClearIrqE(clearnew);
 }
 
 

@@ -88,7 +88,10 @@ class HWMegaTimer0123Irq: public Hardware {
 		void AddFlagToEtifr(unsigned char val); //{ etifr|=val; }
 		//bool IsIrqFlagSet(unsigned int vector);
 		void ClearIrqFlag(unsigned int vector);
-        void CheckForIrq();
+        void CheckForNewSetIrq(unsigned char);
+        void CheckForNewClearIrq(unsigned char);
+        void CheckForNewSetIrqE(unsigned char);
+        void CheckForNewClearIrqE(unsigned char);
 };
 
 #endif

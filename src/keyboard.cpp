@@ -38,7 +38,7 @@ map<int, const int* > keynumberToScancode3;
 int Keyboard::Step(bool trueHwStep, unsigned long long *timeToNextStepIn_ns) {
 
     //static string scanString("");  //now we use the buffer
-    static unsigned char actualChar;
+    //unsigned char actualChar;
 
     static enum {
         IDLE,
@@ -48,7 +48,7 @@ int Keyboard::Step(bool trueHwStep, unsigned long long *timeToNextStepIn_ns) {
         READ
     } myState = IDLE;
 
-    static unsigned char lastPortValue=0;
+    //static unsigned char lastPortValue=0;
 
     switch (myState ) {
         case IDLE:
@@ -199,7 +199,7 @@ bufferWriteIndex(0), bufferReadIndex(0)
     ui->Write(os.str());
 
     ui->AddExternalType(name, this);
-
+    lastPortValue=0;
 #include "keytrans.h"
 }
 

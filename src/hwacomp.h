@@ -45,6 +45,7 @@ class HWAcomp: public Hardware {
         void Reset(); 
         //bool IsIrqFlagSet(unsigned int vec);
         void ClearIrqFlag(unsigned int vec);
+        void PinStateHasChanged(Pin *);
 };
 
 class RWAcsr: public RWMemoryMembers {

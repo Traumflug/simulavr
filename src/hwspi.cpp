@@ -88,7 +88,21 @@ void HWSpi::SetSpsr(unsigned char val) {
 
 
 void HWSpi::SetSpcr(unsigned char val) { 
+    unsigned char spcrold=spcr;
     spcr=val;
+
+    if ( ( spcr & SPE) != (spcrold & SPE) ) 
+    {
+        if (spcr & SPE) 
+        {
+            core->AddToCycleList(this);
+        } else {
+            core->RemoveFromCycleList(this);
+        }
+    }
+        
+
+    
 
     if ( spcr & SPE) { //SPI is enabled
         if (spcr & MSTR) { //master
@@ -136,10 +150,6 @@ void HWSpi::SetSpcr(unsigned char val) {
 }
 
 unsigned int HWSpi::CpuCycle() {
-    static int bitCnt;
-    static int clkCnt=0;
-
-
     //check for external SS activation
     if (spcr & SPE ) { //spi is enabled
         if ( spcr & MSTR) { //we are currently master
@@ -353,10 +363,10 @@ unsigned int HWSpi::CpuCycle() {
     return 0;
 }
 
-    HWSpi::HWSpi( AvrDevice *core, HWIrqSystem *is, PinAtPort mo, PinAtPort mi, PinAtPort sc, PinAtPort s, unsigned int vfs): 
-Hardware(core), irqSystem(is), pinMosi(mo), pinMiso(mi), pinSck(sc), pinSs(s), vectorForSpif(vfs) 
+    HWSpi::HWSpi( AvrDevice *_c, HWIrqSystem *is, PinAtPort mo, PinAtPort mi, PinAtPort sc, PinAtPort s, unsigned int vfs): 
+Hardware(_c), core(_c), irqSystem(is), pinMosi(mo), pinMiso(mi), pinSck(sc), pinSs(s), vectorForSpif(vfs) 
 {
-    core->AddToCycleList(this);
+    //core->AddToCycleList(this);
     //irqSystem->RegisterIrqPartner(this, vfs);	//we are assigned for handling irq's with vector no vfs here!
     Reset();
 }
@@ -369,6 +379,7 @@ void HWSpi::Reset() {
 }
 
 unsigned char HWSpi::GetSpdr() {
+    clkCnt=0;
     if (spsr&SPIF) {
         if (spifWeak==1) {
             spsr&=0xff-SPIF-WCOL; 	//if status is read with SPIF == 1

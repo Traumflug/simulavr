@@ -29,70 +29,73 @@ using namespace std;
 #include "irqsystem.h"
 #include "trace.h"
 
+//#define NEW
+
 #define    INT1         7
 #define    INT0         6
 HWExtIrq::HWExtIrq(AvrDevice *core, HWIrqSystem *i, PinAtPort p0, PinAtPort p1, unsigned int iv0, unsigned int iv1):
 Hardware(core), irqSystem(i), pinI0(p0), pinI1(p1), vectorInt0(iv0), vectorInt1(iv1){
-    core->AddToCycleList(this);
     //irqSystem->RegisterIrqPartner(this, iv0);
     //irqSystem->RegisterIrqPartner(this, iv1);
+#ifdef NEW
+    p0.GetPin().RegisterCallback(this);
+    p1.GetPin().RegisterCallback(this);
+#else
+    core->AddToCycleList(this);
+#endif
+    Reset();
+}
+
+void HWExtIrq::Reset() {
     gimsk=0;
     gifr=0;
 }
+
+
 unsigned char  HWExtIrq::GetGimsk(){ return gimsk;}
 unsigned char  HWExtIrq::GetGifr(){return gifr;}
+
+void HWExtIrq::CheckForNewSetIrq(unsigned char giac) 
+{
+    if (giac&(1<<INT0)) { irqSystem->SetIrqFlag(this, vectorInt0); }
+    if (giac&(1<<INT1)) { irqSystem->SetIrqFlag(this, vectorInt1); }
+}
+
+void HWExtIrq::CheckForNewClearIrq(unsigned char giac) 
+{
+    if (giac&(1<<INT0)) { irqSystem->ClearIrqFlag(vectorInt0); }
+    if (giac&(1<<INT1)) { irqSystem->ClearIrqFlag(vectorInt1); }
+}
+
 void  HWExtIrq::SetGimsk(unsigned char val){ 
+    unsigned char giacOld= gimsk&gifr;
     gimsk=val;
-    CheckForIrq();
+    unsigned char giacNew= gimsk&gifr;
+
+    unsigned char changed=giacNew^giacOld;
+    unsigned char setnew= changed&giacNew;
+    unsigned char clearnew= changed& (~giacNew);
+
+    CheckForNewSetIrq(setnew);
+    CheckForNewClearIrq(clearnew);
 }
 
 void  HWExtIrq::SetGifr(unsigned char val){ 
+    unsigned char giacOld= gimsk&gifr;
     val&=0xc0; 
     val^=0xc0; //invert the bits, if set 1 clear the flag
     gifr&=val;
-    CheckForIrq(); 
+    unsigned char giacNew= gimsk&gifr;
+
+    unsigned char changed=giacNew^giacOld;
+    unsigned char setnew= changed&giacNew;
+    unsigned char clearnew= changed& (~giacNew);
+
+    CheckForNewSetIrq(setnew);
+    CheckForNewClearIrq(clearnew);
 }
 
 void HWExtIrq::SetMcucrCopy(unsigned char val) { mcucrCopy=val; }
-
-void HWExtIrq::CheckForIrq() {
-    unsigned char giac= gimsk&gifr;
-
-    if (giac&(1<<INT0)) { 
-        irqSystem->SetIrqFlag(this, vectorInt0);
-    } else {
-        irqSystem->ClearIrqFlag(vectorInt0);
-    }
-
-
-    if (giac&(1<<INT1)) { 
-        irqSystem->SetIrqFlag(this, vectorInt1);
-    } else {
-        irqSystem->ClearIrqFlag(vectorInt1);
-    }
-}
-
-#if 0
-//XXX remove this function later!
-bool HWExtIrq::IsIrqFlagSet(unsigned int vector) {
-    /*
-    unsigned char giac= gimsk&gifr;
-
-    if (vector == vectorInt0) {
-        if (giac&(1<<INT0)) { return 1; }
-    }
-
-    if (vector == vectorInt1) {
-        if (giac&(1<<INT1)) { return 1;}
-    }
-
-    return 0; 
-
-*/
-    return 1; //function must be removed XXX later, now irqflag is allways set because the 
-                //vector is only registered if the irq flag was set
-}
-#endif
 
 
 void HWExtIrq::ClearIrqFlag(unsigned int vector) {
@@ -105,8 +108,14 @@ void HWExtIrq::ClearIrqFlag(unsigned int vector) {
     }
 }
 
-
+//not longer in use!
 unsigned int HWExtIrq::CpuCycle(){
+#ifndef NEW
+    PinStateHasChanged(NULL);
+#endif
+    return 0;    
+}
+void HWExtIrq::PinStateHasChanged(Pin *p) {
     //cout << "GEt M C U C R Copy for Int1 :" << hex << (unsigned int)(mcucrCopy&0x03)<<" " << endl;
     //cout << "Get Pin for this event: " << hex << (unsigned int) pinI0 << " " << endl; 
     //cout << "New: " << pinI0 << " Old: " << int0_old <<" ";
@@ -165,7 +174,7 @@ unsigned int HWExtIrq::CpuCycle(){
             break;
     }
     int1_old=pinI1;
-    return 0;
+    //return 0;
 }		
 
 

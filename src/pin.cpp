@@ -24,6 +24,7 @@
 #include "pin.h"
 #include "net.h"
 #include "ui.h"
+#include "hardware.h"
 
 #include <sstream>
 using namespace std;
@@ -54,9 +55,12 @@ int Pin::GetAnalog() const {
     }
 }
 
-
+void Pin::RegisterCallback(Hardware *h) {
+    notifyList.push_back(h);
+}
 void Pin::SetInState ( const Pin &p) { 
     analogValue=p.analogValue;
+
     if (pinOfPort!=0) {
         if (p) {       //is (bool)(Pin) -> is LOW or HIGH for the pin
             *pinOfPort |=mask;
@@ -64,6 +68,14 @@ void Pin::SetInState ( const Pin &p) {
             *pinOfPort &=0xff-mask;
         }
     }
+
+    vector<Hardware*>::iterator ii;
+    vector<Hardware*>::iterator ee;
+
+    ee=notifyList.end();
+    for (ii=notifyList.begin(); ii!=ee; ii++) {
+        (*ii)->PinStateHasChanged(this);
+    } 
 }
 
 Pin::Pin(T_Pinstate ps) { 

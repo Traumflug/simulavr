@@ -40,6 +40,26 @@ HWPort::HWPort(AvrDevice *core, const string &name):Hardware(core),myName(name) 
 }
 
 
+void HWPort::Reset() {
+    port=0;
+    pin=0;
+    ddr=0;
+
+    alternateDdr=0;
+    useAlternateDdr=0;
+
+    alternatePort=0;
+    useAlternatePort=0;
+
+    useAlternatePortIfDdrSet=0; //special case for the ocr1a&b is selected on pin
+    //which only be send to pin if ddr is set to output
+    CalcOutputs();
+}
+
+Pin& HWPort::GetPin(unsigned char pinNo) {
+    return p[pinNo];
+}
+
 void HWPort::CalcPin() {
     //    cout << "Calc Pin for Port " << myName << endl;
     //calculating the value for register "pin" from the Pin p[] array

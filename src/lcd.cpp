@@ -75,11 +75,9 @@ void Lcd::LcdWriteCommand(unsigned char command) {
 } 
 
 int Lcd::Step(bool trueHwStep, unsigned long long *timeToNextStepIn_ns) {
-    static unsigned char lastPortValue=0;
-
-    static int readLow = 0;
-
-    static unsigned char command=0;
+    //static unsigned char lastPortValue=0;
+    //static int readLow = 0;
+    //static unsigned char command=0;
 
     if (lastPortValue!= myPortValue) {
         lastPortValue=myPortValue;
@@ -97,7 +95,7 @@ int Lcd::Step(bool trueHwStep, unsigned long long *timeToNextStepIn_ns) {
         if (myPortValue&64) debugOut << "COMMAND" << endl;
         else debugOut <<"DATA   " << endl;
         */ 
-        static int enableOld=0;
+        //static int enableOld=0;
         if (enableOld!= ( myPortValue& 16)) {
             enableOld= ( myPortValue& 16);
 
@@ -139,6 +137,11 @@ ui(_ui), name(_name),
 commandData( &myPortValue, 64)
     //debugOut("./curses")
 {
+    lastPortValue=0;
+    readLow=0;
+    command=0;
+    enableOld=0;
+
     allPins["d0"]=&d0;
     allPins["d1"]=&d1;
     allPins["d2"]=&d2;

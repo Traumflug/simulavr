@@ -1,4 +1,4 @@
- /*
+/*
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -32,70 +32,84 @@ class AvrDevice;
 class HWIrqSystem;
 
 class HWUart: public Hardware {
-	protected:
-		unsigned char udrWrite;
-		unsigned char udrRead;
-		unsigned char usr;
-		unsigned char ucr;
-		unsigned short ubrr; //16 bit ubrr to fit also 4433 device
+    protected:
+        unsigned char udrWrite;
+        unsigned char udrRead;
+        unsigned char usr;
+        unsigned char ucr;
+        unsigned short ubrr; //16 bit ubrr to fit also 4433 device
 
-		HWIrqSystem *irqSystem;
+        HWIrqSystem *irqSystem;
 
-		PinAtPort pinTx;
-		PinAtPort pinRx;
+        PinAtPort pinTx;
+        PinAtPort pinRx;
 
-		unsigned int vectorRx;
-		unsigned int vectorUdre;
-		unsigned int vectorTx;
+        unsigned int vectorRx;
+        unsigned int vectorUdre;
+        unsigned int vectorTx;
 
-		int rxBitCnt;
+        int baudCnt;
 
-		int txBitCnt;
 
-		enum T_RxState {
-			RX_DISABLED,
-			RX_WAIT_FOR_HIGH,
-			RX_WAIT_FOR_LOWEDGE,
-			RX_READ_STARTBIT,
-			RX_READ_DATABIT,
-			RX_READ_STOPBIT
-		} ;
+        enum T_RxState {
+            RX_DISABLED,
+            RX_WAIT_FOR_HIGH,
+            RX_WAIT_FOR_LOWEDGE,
+            RX_READ_STARTBIT,
+            RX_READ_DATABIT,
+            RX_READ_STOPBIT
+        } ;
 
-		enum T_TxState{
-			TX_DISABLED,
-			TX_SEND_STARTBIT,
-			TX_SEND_DATABIT,
-			TX_SEND_STOPBIT,
-			TX_AFTER_STOPBIT
-		} ;
+        enum T_TxState{
+            TX_DISABLED,
+            TX_SEND_STARTBIT,
+            TX_SEND_DATABIT,
+            TX_SEND_STOPBIT,
+            TX_AFTER_STOPBIT
+        } ;
 
-		T_RxState rxState;
-		T_TxState txState;
-
+        T_RxState rxState;
+        T_TxState txState;
 
 
 
+        unsigned int CpuCycleRx();
+        unsigned int CpuCycleTx();
 
-	public:
-		HWUart(AvrDevice *core, HWIrqSystem *, PinAtPort tx, PinAtPort rx, unsigned int vrx, unsigned int vudre, unsigned int vtx); // { irqSystem= s;}
-		virtual unsigned int CpuCycle();
-		void Reset();
+        int cntRxSamples;
+        int rxLowCnt;
+        int rxHighCnt;
+        unsigned int rxDataTmp;
+        int rxBitCnt;
 
-		void SetUdr(unsigned char val);  
-		void SetUsr(unsigned char val);  
-		void SetUcr(unsigned char val);  
-		void SetUbrr(unsigned char val);  
-		void SetUbrrhi(unsigned char val);  
+        int baudCnt16;
+        unsigned char txDataTmp;
+        int txBitCnt;
 
-		unsigned char GetUdr();
-		unsigned char GetUsr();
-		unsigned char GetUcr();
-		unsigned char GetUbrr();
-		unsigned char GetUbrrhi();
 
-		 //bool IsIrqFlagSet(unsigned int);
-		 void ClearIrqFlag(unsigned int);
-         void CheckForIrq();
+
+    public:
+        HWUart(AvrDevice *core, HWIrqSystem *, PinAtPort tx, PinAtPort rx, unsigned int vrx, unsigned int vudre, unsigned int vtx); // { irqSystem= s;}
+        virtual unsigned int CpuCycle();
+
+        void Reset();
+
+        void SetUdr(unsigned char val);  
+        void SetUsr(unsigned char val);  
+        void SetUcr(unsigned char val);  
+        void SetUbrr(unsigned char val);  
+        void SetUbrrhi(unsigned char val);  
+
+        unsigned char GetUdr();
+        unsigned char GetUsr();
+        unsigned char GetUcr();
+        unsigned char GetUbrr();
+        unsigned char GetUbrrhi();
+
+        //bool IsIrqFlagSet(unsigned int);
+        void ClearIrqFlag(unsigned int);
+        void CheckForNewSetIrq(unsigned char);
+        void CheckForNewClearIrq(unsigned char);
 };
 
 

@@ -25,12 +25,6 @@
 
 Hardware::Hardware(AvrDevice *core) { core->AddToResetList(this);}
 
-/*
-bool Hardware::IsIrqFlagSet(unsigned int vector) {
-    return 0;
-}
-*/
-
 void Hardware::ClearIrqFlag(unsigned int) {
 }
 

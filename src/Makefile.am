@@ -14,8 +14,9 @@ lib_LTLIBRARIES		= libavrsim_pp.la
 bin_PROGRAMS = simulavr kbdgentables
 
 libavrsim_pp_la_SOURCES	= 	\
-	ass_do.cpp      	\
-	ass_do_trace.cpp	\
+	application.cpp \
+	decoder_trace.cpp \
+	printable.cpp \
 	at4433.cpp		\
 	at8515.cpp		\
 	at8515special.cpp	\
@@ -59,8 +60,10 @@ libavrsim_pp_la_SOURCES	= 	\
 	ui.cpp 			
 
 pkginclude_HEADERS = 	\
-	ass_do.h      		\
-	ass_do_trace.h		\
+	application.h \
+	externaltype.h \
+    funktor.h \
+	printable.h \	
 	at4433.h		\
 	at8515.h		\
 	at8515special.h		\

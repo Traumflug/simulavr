@@ -24,12 +24,17 @@
 #ifndef PIN
 #define PIN
 #include <string>
+#include <vector>
+
+
+#include "externaltype.h"
 using namespace std;
 
 class NetInterface;
 class OpenDrain;
 class Net;
 class UserInterface;
+class Hardware;
 
 class Pin {
     protected:
@@ -53,6 +58,7 @@ class Pin {
         }T_Pinstate;
 
         T_Pinstate outState;
+        vector<Hardware*> notifyList;
 
     public:
         void SetOutState( T_Pinstate s);
@@ -71,17 +77,13 @@ class Pin {
         virtual ~Pin(){}
         //T_Pinstate GetOutState();
         int GetAnalog() const;
+        void RegisterCallback( Hardware *);
+
 
         friend class HWPort;
         friend class Net;
 
 };
-
-class ExternalType {
-    public:
-        virtual void SetNewValueFromUi(const string &)=0;
-};
-
 
 class ExtPin : public Pin, ExternalType {
     protected:

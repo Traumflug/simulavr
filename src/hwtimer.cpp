@@ -45,16 +45,14 @@ HWTimer0::HWTimer0(AvrDevice *c, HWPrescaler *p, HWTimer01Irq *s, PinAtPort pi):
 }
 
 void HWTimer0::SetTccr(unsigned char val) {
-    static int isEnabled=false;
+    unsigned char tccrold=tccr;
     tccr=val; 
 
-    if (tccr& 0x07 == 0x00) { //disable timer
-        if (isEnabled) {
-            core->RemoveFromCycleList(this);
-        }
-    } else {
-        if (!isEnabled) {
+    if ((tccr & 0x07 ) != ( tccrold & 0x07)) {
+        if ( tccr & 0x07) {
             core->AddToCycleList(this);
+        } else {
+            core->RemoveFromCycleList(this);
         }
     }
 }
@@ -357,21 +355,16 @@ unsigned int HWTimer1::CpuCycle(){
 }
 
 void HWTimer1::SetTccr1b(unsigned char val) {
-    static int timerEnabled=0;
+    unsigned char tccrold=tccr1b;
     tccr1b=val;
-   
-    if (tccr1b& 0x07 == 0x00) { //if timer is of
-        if (timerEnabled) {
-            core->RemoveFromCycleList(this);
-            timerEnabled=false;
-        }
-    } else { //timer is enabled
-        if (!timerEnabled) {
+
+    if ((tccr1b & 0x07 ) != ( tccrold & 0x07 ) ) {
+        if (tccr1b & 0x07) {
             core->AddToCycleList(this);
-            timerEnabled=true;
+        } else {
+            core->RemoveFromCycleList(this);
         }
     }
-        
 }
 
 void HWTimer1::SetTccr1a(unsigned char val) { 

@@ -55,6 +55,9 @@ class Keyboard : public SimulationMember, ExternalType {
         void InsertMakeCodeToBuffer(int);
         void InsertBreakCodeToBuffer(int);
         int InsertScanCodeToBuffer( unsigned char scan);
+
+        unsigned char actualChar;
+         unsigned char lastPortValue;
         
     public:
         void SetNewValueFromUi(const string &);

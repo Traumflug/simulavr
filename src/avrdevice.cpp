@@ -36,7 +36,7 @@ void AvrDevice::RemoveFromCycleList(Hardware *hw) {
     vector<Hardware*>::iterator element;
 
     element=find(hwCycleList.begin(), hwCycleList.end(), hw);
-    hwCycleList.erase(element);
+    if (element != hwCycleList.end()) hwCycleList.erase(element);
 }
 
 void AvrDevice::Load(const char* fname) {
@@ -111,35 +111,39 @@ void AvrDevice::Load(const char* fname) {
             else {
                 cerr << "Unknown symbol address range found!" << endl;
             }
+            }
         }
+
+        sec= abfd->sections;
+
+        while (sec!=0)  { 
+            if (sec->flags&SEC_LOAD && sec->vma<0x80ffff) { //only read flash bytes and data
+                int size;
+                size=sec->_cooked_size;
+                unsigned char *tmp=(unsigned char *)malloc(size);
+                bfd_get_section_contents(abfd, sec, tmp, 0, size);
+                Flash->WriteMem( tmp, sec->lma, size);
+                free(tmp);
+            }
+
+            if (sec->flags&SEC_LOAD && sec->vma>=0x810000) {
+                int size;
+                size=sec->_cooked_size;
+                unsigned char *tmp=(unsigned char *)malloc(size);
+                bfd_get_section_contents(abfd, sec, tmp, 0, size);
+                unsigned int offset=sec->vma-0x810000;
+                eeprom->WriteMem(tmp, offset, size);
+                free(tmp);
+            }
+            sec=sec->next;
+        }
+
+        bfd_close(abfd);
     }
 
-    sec= abfd->sections;
-
-    while (sec!=0)  { 
-        if (sec->flags&SEC_LOAD && sec->vma<0x80ffff) { //only read flash bytes and data
-            int size;
-            size=sec->_cooked_size;
-            unsigned char *tmp=(unsigned char *)malloc(size);
-            bfd_get_section_contents(abfd, sec, tmp, 0, size);
-            Flash->WriteMem( tmp, sec->lma, size);
-            free(tmp);
-        }
-
-        if (sec->flags&SEC_LOAD && sec->vma>=0x810000) {
-            int size;
-            size=sec->_cooked_size;
-            unsigned char *tmp=(unsigned char *)malloc(size);
-            bfd_get_section_contents(abfd, sec, tmp, 0, size);
-            unsigned int offset=sec->vma-0x810000;
-            eeprom->WriteMem(tmp, offset, size);
-            free(tmp);
-        }
-        sec=sec->next;
-    }
-
-    bfd_close(abfd);
+#ifdef VI_BUG
 }
+#endif
 
 void AvrDevice::SetClockFreq(unsigned long f) {
     clockFreq=f;
@@ -178,7 +182,7 @@ AvrDevice::AvrDevice(unsigned int ioSpaceSize, unsigned int IRamSize, unsigned i
     if (Sram==0) { cerr << "Not enough memory for Sram in AvrDevice::AvrDevice" << endl; exit(0); }
 
     //create the flash area with specified size
-    Flash=new AvrFlash(flashSize);
+    Flash=new AvrFlash(this, flashSize);
     if (Flash==0) { cerr << "Not enough memory for Flash in AvrDevice::AvrDevice" << endl; exit(0); }
 
     //create all registers
@@ -227,8 +231,8 @@ int AvrDevice::Step(bool untilCoreStepFinished, unsigned long long *nextStepIn_n
         }
 
         hwWait=0;
-        static vector<Hardware *>::iterator ii;
-        static vector<Hardware *>::iterator end;
+        vector<Hardware *>::iterator ii;
+        vector<Hardware *>::iterator end;
         end= hwCycleList.end();
 
         for (ii=hwCycleList.begin(); ii!=end; ii++) {
@@ -252,6 +256,10 @@ int AvrDevice::Step(bool untilCoreStepFinished, unsigned long long *nextStepIn_n
                         if (trace_on){
                             traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;
                         }
+
+                        irqSystem->IrqHandlerStarted(actualIrqVector);    //what vector we raise?
+                        //Funktor* fkt=new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
+                        stack->SetBreakPoint(stack->GetStackPointer(),IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector).clone());
 
                         //pushing the stack
                         unsigned long val=PC;
@@ -278,9 +286,15 @@ int AvrDevice::Step(bool untilCoreStepFinished, unsigned long long *nextStepIn_n
                         }
                         exit(0);
                     }
-                    DecodedEntry *de= &(Flash->DecodedMem[PC]);
-
-                    cpuCycles=de->OpcodeFunction(this, de->p1, de->p2);
+                    
+                    DecodedInstruction *de= (Flash->DecodedMem[PC]);
+                    if (trace_on) {
+                    cpuCycles= de->Trace();
+                    } else {
+                    cpuCycles=(*de)(); 
+                    }
+                    
+                   // cpuCycles=(*(Flash->DecodedMem[PC]))();
                 }
 
                 if (cpuCycles<0) bpFlag=cpuCycles;
@@ -288,12 +302,12 @@ int AvrDevice::Step(bool untilCoreStepFinished, unsigned long long *nextStepIn_n
 
 
                 if (((status->I)==1) && (newIrqPc==0xffffffff)) {
-                    newIrqPc= irqSystem->GetNewPc(); //If any interrupt is pending get new PC 
+                    newIrqPc= irqSystem->GetNewPc(actualIrqVector); //If any interrupt is pending get new PC 
                     noDirectIrqJump=1;
                 }
 
             }
-        } else {
+        } else { //cpuCycles>0
             if (trace_on==1) traceOut << "CPU-waitstate";
         }
 

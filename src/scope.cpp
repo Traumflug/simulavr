@@ -62,7 +62,7 @@ Pin *Scope::GetPin(unsigned int n) {
 void Scope::SetInStateForChannel(unsigned int channel, const Pin& p) {
     if ( lastVal[channel]!= p.GetAnalog() ) {
         ostringstream os;
-        os << name << " ChangeValue " << systemClock.GetCurrentTime() << " " << channel << " " << p.GetAnalog()<<endl;
+        os << name << " ChangeValue " << SystemClock::Instance().GetCurrentTime() << " " << channel << " " << p.GetAnalog()<<endl;
 
         ui->Write(os.str());
         cout << "Set last val for channel " << channel << " value " << p.GetAnalog() << endl;

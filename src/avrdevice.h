@@ -47,15 +47,16 @@ using namespace std;
 class AvrDevice: public SimulationMember {
     protected:
         unsigned long clockFreq;
-        string actualFilename;
         map < string, Pin *> allPins; 
 
         //old static vars for Step()
         int cpuCycles;
         unsigned int newIrqPc;
+        unsigned int actualIrqVector;
         int noDirectIrqJump;
 
     public:
+        string actualFilename;
         Breakpoints BP;
         word PC;
         int PC_size;
@@ -98,6 +99,8 @@ class AvrDevice: public SimulationMember {
         void RegisterPin(const string &name, Pin *p) {
             allPins.insert(pair<string, Pin*>(name, p));
         }
+
+        const string &GetFname() { return actualFilename; }
 };
 
 

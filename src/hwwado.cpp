@@ -57,7 +57,7 @@ unsigned int HWWado::CpuCycle() {
 
 	if (cntWde==0) wdtcr&=(0xff-WDTOE); //clear WDTOE after 4 cpu cycles
 
-	if ((( wdtcr& WDE )!= 0 ) && (timeOutAt < systemClock.GetCurrentTime() )) {
+	if ((( wdtcr& WDE )!= 0 ) && (timeOutAt < SystemClock::Instance().GetCurrentTime() )) {
 		//cout << "Wado overflow!";
 		core->Reset();
 	}
@@ -79,7 +79,7 @@ void HWWado::Reset() {
 
 
 void HWWado::Wdr() {
-	unsigned long long currentTime= systemClock.GetCurrentTime(); 
+	unsigned long long currentTime= SystemClock::Instance().GetCurrentTime(); 
 	switch ( wdtcr& 0x7) {
 		case 0:
 			timeOutAt= currentTime+ 47000000; //47ms

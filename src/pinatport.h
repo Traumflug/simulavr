@@ -24,6 +24,7 @@
 #define PINATPORT
 
 class HWPort;
+class Pin;
 
 class PinAtPort {
     protected:
@@ -35,14 +36,6 @@ class PinAtPort {
     public:
         PinAtPort(); //dummy only used by admux !!!!!
         PinAtPort( HWPort *p, unsigned char pn);
-        /*
-        {
-            port=p;
-            pinNo=pn;
-        }
-        */
-
-
         void SetPort(bool val);
         void SetDdr(bool val); 
 
@@ -61,10 +54,10 @@ class PinAtPort {
         bool GetAlternatePort(); 
         bool GetUseAlternatePort(); 
         bool GetUseAlternatePortIfDdrSet(); 
+        Pin& GetPin();
 
         operator bool(); 
         int GetAnalog() const;
-
 
     protected:
         void SetVal( unsigned char *adr, bool val);

@@ -64,6 +64,29 @@ void HWMegaTimer0::OcrResetPin(unsigned char &ocr, bool &lastOcr, PinAtPort &pin
 	pinOc.SetAlternatePort(lastOcr);	
 }
 
+#define CS00 0
+#define CS01 1
+#define CS02 2
+
+
+void HWMegaTimer0::SetTccr(unsigned char val)
+{
+    unsigned char cksourceold=tccr&((1<<CS02)|(1<<CS01)|(1<<CS00));
+
+    tccr=val; 
+    CheckForMode();
+
+    unsigned char cksource= tccr&((1<<CS02)|(1<<CS01)|(1<<CS00));
+
+    if (cksourceold!=cksource) {
+        if (cksource) { //switch of cpu cycle, counter is stopped 
+            core->AddToCycleList(this);
+        } else {
+            core->RemoveFromCycleList(this);
+        }
+    }
+}
+
 bool HWMegaTimer0::OcrWork(unsigned char &ocr, bool &lastOcr, PinAtPort &pinOc, unsigned char ocrMode) {
 	if (ocr==tcnt) {
 		switch (timerMode) {
@@ -190,8 +213,8 @@ void HWMegaTimer0::TimerCompareAfterCount() {
 
 
 
-HWMegaTimer0::HWMegaTimer0(AvrDevice *core, HWPrescaler *p, HWMegaTimer0123Irq *s, PinAtPort oc): Hardware(core), pin_oc(oc){
-	core->AddToCycleList(this);
+HWMegaTimer0::HWMegaTimer0(AvrDevice *_c, HWPrescaler *p, HWMegaTimer0123Irq *s, PinAtPort oc): Hardware(_c), core(_c), pin_oc(oc){
+	//_c->AddToCycleList(this);
 	prescaler=p;
 	timer01irq= s;
 	Reset();
@@ -340,6 +363,22 @@ void HWMegaTimer2::OcrResetPin(unsigned char &ocr, bool &lastOcr, PinAtPort &pin
 	pinOc.SetAlternatePort(lastOcr);	
 }
 
+void HWMegaTimer2::SetTccr(unsigned char val) 
+{
+    unsigned char cksourceold=tccr&((1<<CS02)|(1<<CS01)|(1<<CS00));
+    tccr=val;
+    CheckForMode();
+    unsigned char cksource= tccr&((1<<CS02)|(1<<CS01)|(1<<CS00));
+
+    if (cksourceold!=cksource) {
+        if (cksource) { //switch of cpu cycle, counter is stopped 
+            core->AddToCycleList(this);
+        } else {
+            core->RemoveFromCycleList(this);
+        }
+    }
+}
+
 bool HWMegaTimer2::OcrWork(unsigned char &ocr, bool &lastOcr, PinAtPort &pinOc, unsigned char ocrMode) {
 	if (ocr==tcnt) {
 		switch (timerMode) {
@@ -465,8 +504,8 @@ void HWMegaTimer2::TimerCompareAfterCount() {
 
 
 
-HWMegaTimer2::HWMegaTimer2(AvrDevice *core, HWPrescaler *p, HWMegaTimer0123Irq *s, PinAtPort pi, PinAtPort oc): Hardware(core),pin_t0(pi), pin_oc(oc){
-	core->AddToCycleList(this);
+HWMegaTimer2::HWMegaTimer2(AvrDevice *_c, HWPrescaler *p, HWMegaTimer0123Irq *s, PinAtPort pi, PinAtPort oc): Hardware(_c), core(_c), pin_t0(pi), pin_oc(oc){
+	//_c->AddToCycleList(this);
 	prescaler=p;
 	timer01irq= s;
 	Reset();
@@ -596,15 +635,14 @@ unsigned int HWMegaTimer2::CpuCycle(){
 //--------------------------------------------------------------------------------------
 
 HWMegaTimer1::HWMegaTimer1
-(AvrDevice *core, HWPrescaler *p, HWMegaTimer0123Irq *s, bool isT1, PinAtPort t1, PinAtPort oca, PinAtPort ocb, PinAtPort occ) :
-Hardware(core), isTimer1(isT1), pin_t1(t1), pin_oc1a(oca), pin_oc1b(ocb), pin_oc1c(occ) { 
-	core->AddToCycleList(this);
+(AvrDevice *_c, HWPrescaler *p, HWMegaTimer0123Irq *s, bool isT1, PinAtPort t1, PinAtPort oca, PinAtPort ocb, PinAtPort occ) :
+Hardware(_c), core(_c), isTimer1(isT1), pin_t1(t1), pin_oc1a(oca), pin_oc1b(ocb), pin_oc1c(occ) { 
+	//_c->AddToCycleList(this);
 	cntDir=1;
 	prescaler=p, 
 	timer01irq=s;
 	Reset();
 }
-
 
 void HWMegaTimer1::Reset()
 {
@@ -620,6 +658,23 @@ void HWMegaTimer1::Reset()
 	last_ocr1b=0;
 	last_ocr1c=0;
 	pointerToTop=&topFFFF;
+}
+
+
+void HWMegaTimer1::SetTccr1b(unsigned char val)
+{
+    unsigned char cksourceold=tccr1b&((1<<CS02)|(1<<CS01)|(1<<CS00));
+    tccr1b=val; 
+    CheckForMode(); 
+    unsigned char cksource= tccr1b&((1<<CS02)|(1<<CS01)|(1<<CS00));
+
+    if (cksourceold!=cksource) {
+        if (cksource) { //switch of cpu cycle, counter is stopped 
+            core->AddToCycleList(this);
+        } else {
+            core->RemoveFromCycleList(this);
+        }
+    }
 }
 
 void HWMegaTimer1::OcrResetPin(unsigned short &ocr, bool &lastOcr, PinAtPort &pinOc, unsigned char ocrMode) {

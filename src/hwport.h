@@ -62,32 +62,17 @@ class HWPort: public Hardware {
 
     public:
         HWPort(AvrDevice *core, const string &name);
-        void Reset() {
-            port=0;
-            pin=0;
-            ddr=0;
-
-            alternateDdr=0;
-            useAlternateDdr=0;
-
-            alternatePort=0;
-            useAlternatePort=0;
-
-            useAlternatePortIfDdrSet=0; //special case for the ocr1a&b is selected on pin
-            //which only be send to pin if ddr is set to output
-            CalcOutputs();
-        }
-
-
+        void Reset();
         void SetPort(unsigned char val) { port=val; CalcOutputs();}
         void SetDdr(unsigned char val) { ddr=val;CalcOutputs();}
+        Pin& GetPin(unsigned char pinNo) ;
         void CalcPin();
 
         unsigned char GetPort() { return port; }
         unsigned char GetDdr() { return ddr;}
         unsigned char GetPin() { /*CalcPin(); */ return pin; } 
-        friend class PinAtPort;
 
+        friend class PinAtPort;
 };
 
 

@@ -26,23 +26,31 @@
 
 #include "simulationmember.h"
 #include "mysocket.h"
+#include "pin.h"
 
 using namespace std;
 
-class Pin;
-class ExternalType;
 
-class UserInterface: public SimulationMember, public Socket {
+class UserInterface: public SimulationMember, public Socket, public ExternalType {
     protected:
         map<string, ExternalType*> extPins;
+        bool updateOn;
+        unsigned long long pollFreq;
+        string dummy; //replaces old dummy in Step which was static :-(
+        map<string, char> LastState;
+        int waitOnAckFromTclRequest; 
+        int waitOnAckFromTclDone;
 
     public:
+        void SetNewValueFromUi(const string &); //this is mainly for conroling the ui interface itself from the gui
         void AddExternalType(const string &name, ExternalType *p) { extPins[name]=p;}
-        UserInterface(int port);
+        UserInterface(int port, bool withUpdateControl=true);
         ~UserInterface();
         void SendUiNewState(const string &s, const char &c);
 
         int Step(bool, unsigned long long *nextStepIn_ns=0);
+        void SwitchUpdateOnOff(bool PollFreq);
+        void Write(const string &s);
 
 };
 

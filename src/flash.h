@@ -24,18 +24,31 @@
 #define FLASH
 #include <string>
 #include <map>
+#include <vector>
 
 #include "decoder.h"
 #include "memory.h"
 
-class AvrFlash: public Memory {
-    public:
-        DecodedEntry *DecodedMem; 
+class DecodedInstruction;
 
-        void Decode();
-        void Decode(int addr);
+class AvrFlash: public Memory {
+    protected:
+        AvrDevice *core;
+        vector <DecodedInstruction*> DecodedMem;
+
+    friend int avr_op_CPSE::operator()();
+    friend int avr_op_SBIC::operator()();
+    friend int avr_op_SBIS::operator()();
+    friend int avr_op_SBRC::operator()();
+    friend int avr_op_SBRS::operator()();
+    friend int AvrDevice::Step(bool, long long unsigned int*);
+    
+
+    public:
+        void Decode();                          //Decode comple memory
+        void Decode(int addr );                 //Decode only instruction at addr
         void WriteMem(unsigned char*, unsigned int, unsigned int);
-        AvrFlash(int size);
+        AvrFlash(AvrDevice *c, int size);
         unsigned int GetSize();
 };
 #endif

@@ -41,6 +41,8 @@ class SystemClock: public multimap<unsigned long, SimulationMember *> {
         void IncrTime(long long of) { currentTime+= of; }
         unsigned long long GetCurrentTime();
         void Endless();
+        static SystemClock& Instance();
+        void Rescedule( SimulationMember *sm, unsigned long long newTime);
 };
 
 extern SystemClock systemClock; //the only instance in the complete simulavr

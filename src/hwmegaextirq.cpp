@@ -25,6 +25,9 @@
 #include "irqsystem.h"
 #include "trace.h"
 
+//#define NEW
+
+
 HWMegaExtIrq::HWMegaExtIrq(AvrDevice *core, HWIrqSystem *i,
         PinAtPort p0, PinAtPort p1, PinAtPort p2, PinAtPort p3,
         PinAtPort p4, PinAtPort p5, PinAtPort p6, PinAtPort p7,
@@ -50,24 +53,30 @@ Hardware(core), irqSystem(i)
     vectorInt.push_back(iv6);
     vectorInt.push_back(iv7);
 
-
-
+#ifdef NEW
+    p0.GetPin().RegisterCallback(this);
+    p1.GetPin().RegisterCallback(this);
+    p2.GetPin().RegisterCallback(this);
+    p3.GetPin().RegisterCallback(this);
+    p4.GetPin().RegisterCallback(this);
+    p5.GetPin().RegisterCallback(this);
+    p6.GetPin().RegisterCallback(this);
+    p7.GetPin().RegisterCallback(this);
+#else
     core->AddToCycleList(this);
-    /*
-    irqSystem->RegisterIrqPartner(this, iv0);
-    irqSystem->RegisterIrqPartner(this, iv1);
-    irqSystem->RegisterIrqPartner(this, iv2);
-    irqSystem->RegisterIrqPartner(this, iv3);
-    irqSystem->RegisterIrqPartner(this, iv4);
-    irqSystem->RegisterIrqPartner(this, iv5);
-    irqSystem->RegisterIrqPartner(this, iv6);
-    irqSystem->RegisterIrqPartner(this, iv7);
-    */
+#endif
+
+    Reset();
+}
+
+void HWMegaExtIrq::Reset() {
     eimsk=0;
     eifr=0;
     eicra=0;
     eicrb=0;
+    for (int tt=0; tt<8; tt++) { int_old[tt]= pinI[tt]; }
 }
+
 
 unsigned char  HWMegaExtIrq::GetEimsk(){ return eimsk;}
 unsigned char  HWMegaExtIrq::GetEifr(){return eifr;}
@@ -77,52 +86,46 @@ unsigned char HWMegaExtIrq::GetEicrb() { return eicrb;}
 void  HWMegaExtIrq::SetEicra(unsigned char val){ eicra=val;}
 void  HWMegaExtIrq::SetEicrb(unsigned char val){ eicrb=val;}
 
+void HWMegaExtIrq::CheckForNewSetIrq(unsigned char giac) {
+    for (int tt =0; tt<8; tt++) {
+        if (giac&(1<<tt)) { irqSystem->SetIrqFlag(this, vectorInt[tt]); } 
+    }
+}
+
+
+void HWMegaExtIrq::CheckForNewClearIrq(unsigned char giac) {
+    for (int tt =0; tt<8; tt++) {
+        if (giac&(1<<tt)) { irqSystem->ClearIrqFlag(vectorInt[tt]); }
+    }
+}
+
+
 void  HWMegaExtIrq::SetEimsk(unsigned char val){
+    unsigned char giacOld= eimsk&eifr;
     eimsk=val;
-    CheckForIrq();
+    unsigned char giacNew= eimsk&eifr;
+
+    unsigned char changed=giacNew^giacOld;
+    unsigned char setnew= changed&giacNew;
+    unsigned char clearnew= changed& (~giacNew);
+
+    CheckForNewSetIrq(setnew);
+    CheckForNewClearIrq(clearnew);
 }
 
 void HWMegaExtIrq::SetEifr(unsigned char val){ 
+    unsigned char giacOld= eimsk&eifr;
     val^=0xff; //invert the bits, if set 1 clear the flag
     eifr&=val;
-    CheckForIrq();
+    unsigned char giacNew= eimsk&eifr;
+
+    unsigned char changed=giacNew^giacOld;
+    unsigned char setnew= changed&giacNew;
+    unsigned char clearnew= changed& (~giacNew);
+
+    CheckForNewSetIrq(setnew);
+    CheckForNewClearIrq(clearnew);
 }
-
-void HWMegaExtIrq::CheckForIrq() {
-    unsigned char giac= eimsk&eifr;
-
-    for (int tt =0; tt<8; tt++) {
-        if (giac&(1<<tt)) { 
-            irqSystem->SetIrqFlag(this, vectorInt[tt]);
-        } else {
-            irqSystem->ClearIrqFlag(vectorInt[tt]);
-        }
-    }
-}
-
-#if 0
-bool HWMegaExtIrq::IsIrqFlagSet(unsigned int vector) {
-    cout << "MEGAEXTIRQ IsIrqFlag was called" << endl;
-    return 1;
-
-    /* function should be removed XXX !!!! 
-
-    unsigned char giac= eimsk&eifr;
-    if (giac!=0) { //that should make the compare a bit faster :-), while a setted
-        //flag should be seldom
-
-        for (int tt =0; tt<8; tt++) {
-            if (vector== vectorInt[tt]) {
-                if (giac&(1<<tt)) { return 1; }
-            }
-        }
-    }
-
-    return 0; 
-    */
-}
-#endif
-
 
 void HWMegaExtIrq::ClearIrqFlag(unsigned int vector) {
     for (int tt =0; tt<8; tt++) {
@@ -135,6 +138,13 @@ void HWMegaExtIrq::ClearIrqFlag(unsigned int vector) {
 
 
 unsigned int HWMegaExtIrq::CpuCycle(){
+#ifndef NEW
+    PinStateHasChanged(NULL);
+#endif
+    return 0;
+}
+
+void HWMegaExtIrq::PinStateHasChanged(Pin *p) {
     for (int xx =0; xx<2; xx++) { // we run for eicr(a+b) :-)
         unsigned char eicr;
         unsigned char offset;
@@ -185,7 +195,7 @@ unsigned int HWMegaExtIrq::CpuCycle(){
         } //2*4 pins
     } //xx eicra/b
 
-    return 0;
+    //return 0;
 }		
 
 
