@@ -11,7 +11,7 @@ AUX_DIST	= $(ac_aux_dir)/config.guess \
 		$(ac_aux_dir)/depcomp
 
 
-EXTRA_DIST	= bootstrap
+EXTRA_DIST	= bootstrap $(ac_aux_dir)/depcomp
 
 # WAR: Should condition examples directories based on availability of TCL/Itcl
 SUBDIRS		= src @ac_regression_subdir@ examples
