@@ -3,7 +3,7 @@ AMDEP
 AC_INIT(src/main.cpp)
 AC_CONFIG_AUX_DIR(config)
 AM_CONFIG_HEADER(src/config.h)
-AM_INIT_AUTOMAKE(avrsim_pp, 0.8.001)
+AM_INIT_AUTOMAKE(simulavrxx, 0.8.002)
 AM_MAINTAINER_MODE
 
 
