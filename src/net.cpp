@@ -26,6 +26,7 @@
 
 NetInterface::~NetInterface() {}
 
+
 void Net::Add(Pin *p) {
     push_back(p); 
     p->RegisterNet(this);

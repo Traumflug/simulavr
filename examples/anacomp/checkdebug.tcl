@@ -5,11 +5,11 @@ set traceFile trace
 package require Itcl
 
 #load the avr-simulator package
-load ../../src/simulavr.so
+load @my_top_builddir@src/simulavr.so
 puts "simulavr loaded"
 
 #now start external generic gui server 
-exec wish ../../tests/gui.tcl &
+exec @TCL_WISH@ ../gui.tcl &
 
 #start the trace output to given filename
 StartTrace $traceFile
@@ -27,10 +27,10 @@ AvrDevice_Load $dev1 "./anacomp"
 AvrDevice_SetClockFreq $dev1 250
 
 #systemclock must know that this device will be stepped from application
-$systemClock Add $dev1
+set sc [SystemClock GetInstance]
 
 #also the gui updates after each cycle
-$systemClock AddAsyncMember $ui
+$sc AddAsyncMember $ui
 
 
 #create some external pins
@@ -57,7 +57,11 @@ portb Add [AvrDevice_GetPin $dev1 "B0"]
 
 puts "Simulation runs endless, please press CTRL-C to abort"
 
+GdbServer gdb1 $dev1 1212 0
+$sc Add gdb1
+
 exec ddd --debugger avr-gdb --command checkdebug.gdb &
 
-#Now start the gdb-server inside the simulav.so lib.
-gdb_interact $dev1 1212 0
+#now run simulation
+$sc Endless
+

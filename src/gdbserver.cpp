@@ -1397,7 +1397,7 @@ void GdbServer::IdleStep() {
 
 int GdbServer::InternalStep(bool &untilCoreStepFinished, unsigned long long *timeToNextStepIn_ns) {
     char reply[MAX_BUF+1];
-    cout << "Internal Step entered" << endl;
+    //cout << "Internal Step entered" << endl;
     //cout << "RunMode: " << dec << runMode << endl;
 
     if (lastCoreStepFinished) {

@@ -28,10 +28,11 @@ AvrDevice_Load $dev1 "./anacomp"
 AvrDevice_SetClockFreq $dev1 250
 
 #systemclock must know that this device will be stepped from application
-$systemClock Add $dev1
+set sc [SystemClock GetInstance]
+$sc Add $dev1
 
 #also the gui updates after each cycle
-$systemClock AddAsyncMember $ui
+$sc AddAsyncMember $ui
 
 
 #create some external pins
@@ -58,4 +59,5 @@ portb Add [AvrDevice_GetPin $dev1 "B0"]
 
 puts "Simulation runs endless, please press CTRL-C to abort"
 #lets the simulation run until CTRL-C
-SystemClock_Endless $systemClock
+$sc Endless
+exit

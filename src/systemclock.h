@@ -45,5 +45,4 @@ class SystemClock: public multimap<unsigned long, SimulationMember *> {
         void Rescedule( SimulationMember *sm, unsigned long long newTime);
 };
 
-extern SystemClock systemClock; //the only instance in the complete simulavr
 #endif

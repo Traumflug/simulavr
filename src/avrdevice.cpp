@@ -153,7 +153,16 @@ unsigned long long AvrDevice::GetClockFreq() {
 }
 
 Pin *AvrDevice::GetPin(const char *name) {
-    return allPins[name];
+    Pin *ret;
+    ret=allPins[name];
+    if (!ret) {
+        cerr << "unknown Pin requested! -> " << name << " is not available" << endl;
+        cerr << "Application terminated!" << endl;
+        exit(0);
+    }
+
+    
+    return ret;
 }
 
 AvrDevice::~AvrDevice() {}

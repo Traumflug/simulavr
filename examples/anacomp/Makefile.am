@@ -10,6 +10,9 @@ EXTRA_DIST           = main.c
 if HAVE_WISH
 do: anacomp
 	$(TCL_WISH) check.tcl
+
+dogdb: anacomp
+	$(TCL_WISH) checkdebug.tcl
 endif
 
 # WAR: should detect avr-toolset first!
