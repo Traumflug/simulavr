@@ -48,6 +48,7 @@ libavrsim_pp_la_SOURCES	= 	\
 	irqsystem.cpp		\
 	keyboard.cpp		\
 	lcd.cpp			\
+	main3.cpp       \
 	memory.cpp		\
 	mysocket.cpp		\
 	net.cpp			\
