@@ -42,139 +42,16 @@ using namespace std;
 
 #include "systemclock.h"
 
-//#include "trace.h" //only for debugging here please remove!
 
 /* only for compilation ... later to be removed */
-#define AvrCore AvrDevice
 #include "avrdevice.h"
 #include "avrdevice_impl.h"
-//  #define IO_REG_ADDR_BEGIN 0x100 //Whats this ??? -> remove it for now
-
-byte avr_core_gpwr_get( AvrDevice *core, byte regnr ) {
-    return (*(core->R))[regnr];
-}
-int	avr_core_sreg_get( AvrDevice *core ) {
-    return *(core->status);
-}
-
-byte avr_core_mem_read(AvrDevice *core, int addr) {
-    return	(*(core->Sram))[addr];
-}
-
-dword avr_core_PC_get( AvrDevice *core) {
-    return core->PC;
-}
-
-void avr_core_gpwr_set(AvrDevice *core, int regnr, byte val) {
-    (*(core->R))[regnr]=val;
-}
-
-void avr_core_sreg_set(AvrDevice *core, byte val) {
-    *(core->status)=val;
-}
-
-void avr_core_mem_write(AvrCore *core, int addr, byte val) {
-    (*(core->Sram))[addr]=val;
-}
-
-void avr_core_PC_set(AvrCore *core, int pc) {
-    core->PC=pc;
-}
-
-word avr_core_flash_read(AvrDevice *core, int addr) {
-    return (core->Flash->myMemory[addr*2]<<8)+core->Flash->myMemory[addr*2+1];
-}
-
-void avr_core_flash_write(AvrDevice *core, int addr, word val) {
-    if ((addr*2+1)>= (int)core->Flash->GetSize()) {
-        cerr << "try to write in flash after last valid address!" << endl;
-        exit(0);
-    }
-
-    core->Flash->myMemory[addr*2+1]=val&0xff;
-    core->Flash->myMemory[addr*2]=val>>8;
-    core->Flash->Decode(addr*2);
-}
-
-void avr_core_flash_write_hi8( AvrDevice *core, int addr, byte val) {
-    if ((addr*2)>= (int)core->Flash->GetSize()) {
-        cerr << "try to write in flash after last valid address!" << endl;
-        exit(0);
-    }
-    core->Flash->myMemory[addr*2]=val;
-    core->Flash->Decode();
-}
-
-void avr_core_flash_write_lo8( AvrDevice *core, int addr, byte val) {
-    if ((addr*2+1)>= (int)core->Flash->GetSize()) {
-        cerr << "try to write in flash after last valid address!" << endl;
-        exit(0);
-    }
-    core->Flash->myMemory[addr*2+1]=val;
-    core->Flash->Decode();
-}
-
-dword avr_core_PC_max(AvrDevice *core) { return core->Flash->GetSize(); } 
-
-void avr_core_remove_breakpoint(AvrDevice *core, dword pc) {
-    Breakpoints::iterator ii;
-    if ((ii= find(core->BP.begin(), core->BP.end(), pc)) != core->BP.end()) core->BP.erase(ii);
-}
-
-void avr_core_insert_breakpoint(AvrDevice *core, dword pc) {
-    core->BP.push_back(pc);
-}
-
-void avr_core_io_fetch( AvrCore *core, int reg, byte *val, char *buf, int bufsiz ){}
-int signal_has_occurred(int signo) {return 0;}
-
-
-void signal_watch_start(int signo){};
-void signal_watch_stop(int signo){};
-
-int avr_core_step(AvrDevice *core) {
-    /*
-    systemClock.IncrTime(250); //this is a simple bugfix for eeprom write access which is
-    //waiting for the gloabl system clock. But systemclock was not handled
-    //from gdb so we need this workaround. It is very ugly so we should
-    //make it a better solution at all. Normally we need here a systemClock Step
-    //and get the timing values from main and so on..... fix it later please !!! BUG BUG BUG
-    //
-    return core->Step(1);  //until the complete core step with all waitstates finished
-    */
-    return SystemClock::Instance().Step(1);
-}
-
-int avr_core_reset( AvrCore *core ){return 0;}
-
-/*
-
-#include "avrclass.h"
-#include "utils.h"
-#include "callback.h"
-#include "op_names.h"
-
-#include "storage.h"
-#include "flash.h"
-
-#include "vdevs.h"
-#include "memory.h"
-#include "stack.h"
-#include "register.h"
-#include "sram.h"
-#include "eeprom.h"
-#include "timers.h"
-#include "ports.h"
-
-#include "avrcore.h"
-
 #include "gdb.h"
-#include "sig.h"
-*/
+
 
 #ifndef DOXYGEN /* have doxygen system ignore this. */
 enum {
-    MAX_BUF        = 400,         /* Maximum size of read/write buffers. */
+    //    MAX_BUF        = 400,         /* Maximum size of read/write buffers. */
     MAX_READ_RETRY = 50,          /* Maximum number of retries if a read is incomplete. */
 
     MEM_SPACE_MASK = 0x00ff0000,  /* mask to get bits which determine memory space */
@@ -185,33 +62,119 @@ enum {
     GDB_BLOCKING_OFF = 0,         /* Signify that a read is non-blocking. */
     GDB_BLOCKING_ON  = 1,         /* Signify that a read will block. */
 
+    GDB_RET_NOTHING_RECEIVED = -5, /* if the read in non blocking receives nothing, we have nothing todo */ 
+    GDB_RET_SINGLE_STEP = -4,     /* do one single step in gdb loop */
+    GDB_RET_CONTINUE    = -3,     /* step until another command from gdb is received */
     GDB_RET_CTRL_C       = -2,    /* gdb has sent Ctrl-C to interrupt what is doing */
     GDB_RET_KILL_REQUEST = -1,    /* gdb has requested that sim be killed */
-    GDB_RET_OK           =  0     /* continue normal processing of gdb requests */
+    GDB_RET_OK           =  0     /* continue normal processing of gdb requests */ 
+        /* means that we should NOT execute any step!!! */
 };
 #endif /* not DOXYGEN */
 
 
-/* Use HEX_DIGIT as a lookup table to convert a nibble to hex 
-digit. */
+GdbServer::GdbServer(AvrDevice *c, int _port, int debug): core(c), port(_port), global_debug_on(debug) {
+    last_reply=NULL; //init static var for last_reply()
+    //is_running=0;    //init static var for continue()
+    block_on=1;      //init static var for pre_parse_packet()
+    conn=-1;        //no connection opened 
+    runMode= GDB_RET_NOTHING_RECEIVED;
+    lastCoreStepFinished=true;
+    //untilCoreStepFinished=true; //last core step must be finished :-) else we got never gdb into action
+
+
+    int i;
+
+
+
+
+    if ( (sock = socket( PF_INET, SOCK_STREAM, 0 )) < 0 )
+        avr_error( "Can't create socket: %s", strerror(errno) );
+
+    /* Let the kernel reuse the socket address. This lets us run
+    twice in a row, without waiting for the (ip, port) tuple
+    to time out. */
+    i = 1;  
+    setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &i, sizeof(i) );
+    fcntl( sock, F_SETFL, fcntl(conn, F_GETFL, 0) | O_NONBLOCK); //dont know 
+
+    address->sin_family = AF_INET;
+    address->sin_port = htons(port);
+    memset( &address->sin_addr, 0, sizeof(address->sin_addr) );
+
+    if ( bind( sock, (struct sockaddr *)address, sizeof(address) ) )
+        avr_error( "Can not bind socket: %s", strerror(errno) );
+
+    if ( listen(sock, 1) < 0)
+    {
+        cerr << "Can not listen on socket: " <<  strerror(errno) << endl;
+    }
+
+    fprintf( stderr, "Waiting on port %d for gdb client to connect...\n", port );
+
+
+}
+
+GdbServer::~GdbServer() {
+    close(conn);
+    close(sock);
+}
+
+
+
+word GdbServer::avr_core_flash_read(int addr) {
+    return (core->Flash->myMemory[addr*2]<<8)+core->Flash->myMemory[addr*2+1];
+}
+
+void GdbServer::avr_core_flash_write(int addr, word val) {
+    if ((addr*2+1)>= (int)core->Flash->GetSize()) {
+        cerr << "try to write in flash after last valid address!" << endl;
+        exit(0);
+    }
+
+    core->Flash->myMemory[addr*2+1]=val&0xff;
+    core->Flash->myMemory[addr*2]=val>>8;
+    core->Flash->Decode(addr*2);
+}
+
+void GdbServer::avr_core_flash_write_hi8( int addr, byte val) {
+    if ((addr*2)>= (int)core->Flash->GetSize()) {
+        cerr << "try to write in flash after last valid address!" << endl;
+        exit(0);
+    }
+    core->Flash->myMemory[addr*2]=val;
+    core->Flash->Decode();
+}
+
+void GdbServer::avr_core_flash_write_lo8( int addr, byte val) {
+    if ((addr*2+1)>= (int)core->Flash->GetSize()) {
+        cerr << "try to write in flash after last valid address!" << endl;
+        exit(0);
+    }
+    core->Flash->myMemory[addr*2+1]=val;
+    core->Flash->Decode();
+}
+
+void GdbServer::avr_core_remove_breakpoint(dword pc) {
+    Breakpoints::iterator ii;
+    if ((ii= find(core->BP.begin(), core->BP.end(), pc)) != core->BP.end()) core->BP.erase(ii);
+}
+
+void GdbServer::avr_core_insert_breakpoint(dword pc) {
+    core->BP.push_back(pc);
+}
+
+int GdbServer::signal_has_occurred(int signo) {return 0;}
+void GdbServer::signal_watch_start(int signo){};
+void GdbServer::signal_watch_stop(int signo){};
+int GdbServer::avr_core_reset( ){return 0;}
+
+
 static char HEX_DIGIT[] = "0123456789abcdef";
-
-/* There are a couple of nested infinite loops, this allows escaping them
-all. */
-static int global_server_quit = 0;
-
-/* Flag if debug messages should be printed out. */
-static int global_debug_on;
-
-/* prototypes */
-
-static int gdb_pre_parse_packet( AvrCore *core, int fd, int blocking );
-
-
 /* Wrap read(2) so we can read a byte without having
 to do a shit load of error checking every time. */
 
-static int gdb_read_byte( int fd )
+int GdbServer::gdb_read_byte( )
 {
     char c;
     int res;
@@ -219,7 +182,7 @@ static int gdb_read_byte( int fd )
 
     while (cnt--)
     {
-        res = read( fd, &c, 1 );
+        res = read( conn, &c, 1 );
         if (res < 0)
         {
             if (errno == EAGAIN)
@@ -234,7 +197,6 @@ static int gdb_read_byte( int fd )
             avr_warning( "incomplete read\n" );
             continue;
         }
-        //cout << c ; //trace gdb input reads
         return c;
     }
     avr_error( "Maximum read reties reached" );
@@ -244,7 +206,7 @@ static int gdb_read_byte( int fd )
 
 /* Convert a hexidecimal digit to a 4 bit nibble. */
 
-static int hex2nib( char hex )
+int GdbServer::hex2nib( char hex )
 {
     if ( (hex >= 'A') && (hex <= 'F') )
         return (10 + (hex - 'A'));
@@ -264,11 +226,11 @@ static int hex2nib( char hex )
 /* Wrapper for write(2) which hides all the repetitive error
 checking crap. */
 
-static void gdb_write( int fd, const void *buf, size_t count )
+void GdbServer::gdb_write( const void *buf, size_t count )
 {
     int res;
 
-    res = write( fd, buf, count );
+    res = write(  conn, buf, count );
 
     /* FIXME: should we try and catch interrupted system calls here? */
 
@@ -286,9 +248,8 @@ static void gdb_write( int fd, const void *buf, size_t count )
 If reply is NULL, return pointer to the last reply saved.
 Otherwise, make a copy of the buffer pointed to by reply. */
 
-static char *gdb_last_reply( char *reply )
+char* GdbServer::gdb_last_reply( char *reply )
 {
-    static char *last_reply = NULL;
 
     if (reply == NULL)
     {
@@ -306,22 +267,20 @@ static char *gdb_last_reply( char *reply )
 
 /* Acknowledge a packet from GDB */
 
-static void gdb_send_ack( int fd )
+void GdbServer::gdb_send_ack( )
 {
     if (global_debug_on)
         fprintf( stderr, " Ack -> gdb\n");
 
-    gdb_write( fd, "+", 1 );
+    gdb_write( "+", 1 );
 }
 
 /* Send a reply to GDB. */
 
-static void gdb_send_reply( int fd, char *reply )
+void GdbServer::gdb_send_reply( char *reply )
 {
     int cksum = 0;
     int bytes;
-
-    static char buf[MAX_BUF];
 
     /* Save the reply to last reply so we can resend if need be. */
     gdb_last_reply( reply );
@@ -331,7 +290,7 @@ static void gdb_send_reply( int fd, char *reply )
 
     if (*reply == '\0')
     {
-        gdb_write( fd, "$#00", 4 );
+        gdb_write( "$#00", 4 );
 
         if (global_debug_on)
             fprintf( stderr, "%02x\n", cksum & 0xff );
@@ -365,7 +324,7 @@ static void gdb_send_reply( int fd, char *reply )
         buf[bytes++] = HEX_DIGIT[(cksum >> 4) & 0xf];
         buf[bytes++] = HEX_DIGIT[cksum & 0xf];
 
-        gdb_write( fd, buf, bytes );
+        gdb_write( buf, bytes );
     }
 }
 
@@ -375,7 +334,7 @@ static void gdb_send_reply( int fd, char *reply )
 r00, r01, ..., r31, SREG, SPL, SPH, PCL, PCH
 Low bytes before High since AVR is little endian. */
 
-static void gdb_read_registers( AvrCore *core, int fd )
+void GdbServer::gdb_read_registers( )
 {
     int   i;
     dword val;                  /* ensure it's 32 bit value */
@@ -389,13 +348,13 @@ static void gdb_read_registers( AvrCore *core, int fd )
     /* 32 gen purpose working registers */
     for ( i=0; i<32; i++ )
     {
-        val = avr_core_gpwr_get( core, i );
+        val = (*(core->R))[i];
         buf[i*2]   = HEX_DIGIT[(val >> 4) & 0xf];
         buf[i*2+1] = HEX_DIGIT[val & 0xf];
     }
 
     /* GDB thinks SREG is register number 32 */
-    val = avr_core_sreg_get( core );
+    val = *(core->status);
     buf[i*2]   = HEX_DIGIT[(val >> 4) & 0xf];
     buf[i*2+1] = HEX_DIGIT[val & 0xf];
     i++;
@@ -417,7 +376,7 @@ static void gdb_read_registers( AvrCore *core, int fd )
     GDB stores PC in a 32 bit value (only uses 23 bits though).
     GDB thinks PC is bytes into flash, not words like in simulavr. */
 
-    val = avr_core_PC_get(core) * 2;
+    val = core->PC * 2;
     buf[i*2]   = HEX_DIGIT[(val >> 4)  & 0xf];
     buf[i*2+1] = HEX_DIGIT[val & 0xf];
 
@@ -433,14 +392,14 @@ static void gdb_read_registers( AvrCore *core, int fd )
     buf[i*2+6] = HEX_DIGIT[(val >> 4) & 0xf];
     buf[i*2+7] = HEX_DIGIT[val & 0xf];
 
-    gdb_send_reply( fd, buf );
+    gdb_send_reply(  buf );
     avr_free( buf );
 }
 
 /* GDB is sending values to be written to the registers. Registers are the
 same and in the same order as described in gdb_read_registers() above. */
 
-static void gdb_write_registers( AvrCore *core, int fd, char *pkt )
+void GdbServer::gdb_write_registers( char *pkt )
 {
     int   i;
     byte  bval;
@@ -451,14 +410,14 @@ static void gdb_write_registers( AvrCore *core, int fd, char *pkt )
     {
         bval  = hex2nib(*pkt++) << 4;
         bval += hex2nib(*pkt++);
-        avr_core_gpwr_set( core, i, bval );
+        (*(core->R))[i]=bval;
 
     }
 
     /* GDB thinks SREG is register number 32 */
     bval  = hex2nib(*pkt++) << 4;
     bval += hex2nib(*pkt++);
-    avr_core_sreg_set( core, bval );
+    *(core->status)=bval;
 
     /* GDB thinks SP is register number 33 */
     bval  = hex2nib(*pkt++) << 4;
@@ -488,9 +447,9 @@ static void gdb_write_registers( AvrCore *core, int fd, char *pkt )
 
     val += ((dword)hex2nib(*pkt++)) << 28;
     val += ((dword)hex2nib(*pkt++)) << 24;
-    avr_core_PC_set( core, val/2 );
+    core->PC=val/2;
 
-    gdb_send_reply( fd, "OK" );
+    gdb_send_reply( "OK" );
 }
 
 /* Extract a hexidecimal number from the pkt. Keep scanning pkt until stop char
@@ -501,7 +460,7 @@ Use this function to extract a num with an arbitrary num of hex
 digits. This should _not_ be used to extract n digits from a m len string
 of digits (n <= m). */
 
-static int gdb_extract_hex_num( char **pkt, char stop )
+int GdbServer::gdb_extract_hex_num( char **pkt, char stop )
 {
     int i = 0;
     int num = 0;
@@ -525,7 +484,7 @@ static int gdb_extract_hex_num( char **pkt, char stop )
 /* Read a single register. Packet form: 'pn' where n is a hex number with no
 zero padding. */
 
-static void gdb_read_register( AvrCore *core, int fd, char *pkt )
+void GdbServer::gdb_read_register( char *pkt )
 {
     int reg;
 
@@ -537,12 +496,12 @@ static void gdb_read_register( AvrCore *core, int fd, char *pkt )
 
     if ( (reg >= 0) && (reg < 32) )
     {                           /* general regs */
-        byte val = avr_core_gpwr_get( core, reg );
+        byte val = (*(core->R))[reg];
         snprintf( reply, sizeof(reply)-1, "%02x", val );
     }
     else if (reg == 32)         /* sreg */
     {
-        byte val = avr_core_sreg_get( core );
+        byte val = *(core->status);
         snprintf( reply, sizeof(reply)-1, "%02x", val );
     }
     else if (reg == 33)         /* SP */
@@ -556,7 +515,7 @@ static void gdb_read_register( AvrCore *core, int fd, char *pkt )
     }
     else if (reg == 34)         /* PC */
     {
-        dword val = avr_core_PC_get( core ) * 2;
+        dword val = core->PC * 2;
         snprintf( reply, sizeof(reply)-1,
                 "%02x%02x" "%02x%02x", 
                 val & 0xff, (val >> 8) & 0xff,
@@ -565,17 +524,17 @@ static void gdb_read_register( AvrCore *core, int fd, char *pkt )
     else
     {
         avr_warning( "Bad register value: %d\n", reg );
-        gdb_send_reply( fd, "E00" );
+        gdb_send_reply( "E00" );
         return;
     }
-    gdb_send_reply( fd, reply );
+    gdb_send_reply( reply );
 }
 
 /* Write a single register. Packet form: 'Pn=r' where n is a hex number with
 no zero padding and r is two hex digits for each byte in register (target
 byte order). */
 
-static void gdb_write_register( AvrCore *core, int fd, char *pkt )
+void GdbServer::gdb_write_register( char *pkt )
 {
     int reg;
     int val, hval;
@@ -593,11 +552,11 @@ static void gdb_write_register( AvrCore *core, int fd, char *pkt )
         /* r0 to r31 and SREG */
         if (reg == 32)          /* gdb thinks SREG is register 32 */
         {
-            avr_core_sreg_set( core, val & 0xff );
+            *(core->status)=val&0xff;
         }
         else
         {
-            avr_core_gpwr_set( core, reg, val & 0xff );
+            (*(core->R))[reg]=val&0xff;
         }
     }
     else if (reg == 33)
@@ -629,16 +588,16 @@ static void gdb_write_register( AvrCore *core, int fd, char *pkt )
 
         dval += ((dword)hex2nib(*pkt++)) << 28;
         dval += ((dword)hex2nib(*pkt++)) << 24;
-        avr_core_PC_set( core, dval/2 );
+        core->PC=dval/2;
     }
     else
     {
         avr_warning( "Bad register value: %d\n", reg );
-        gdb_send_reply( fd, "E00" );
+        gdb_send_reply(  "E00" );
         return;
     }
 
-    gdb_send_reply( fd, "OK" );
+    gdb_send_reply( "OK" );
 }
 
 /* Parse the pkt string for the addr and length.
@@ -646,8 +605,7 @@ a_end is first char after addr.
 l_end is first char after len.
 Returns number of characters to advance pkt. */
 
-static int gdb_get_addr_len( char *pkt, char a_end, char l_end,
-        int *addr, int *len )
+int GdbServer::gdb_get_addr_len( char *pkt, char a_end, char l_end, unsigned int *addr, int *len )
 {
     char *orig_pkt = pkt;
 
@@ -670,9 +628,9 @@ static int gdb_get_addr_len( char *pkt, char a_end, char l_end,
     return (pkt - orig_pkt);
 }
 
-static void gdb_read_memory( AvrCore *core, int fd, char *pkt )
+void GdbServer::gdb_read_memory( char *pkt )
 {
-    int   addr = 0;
+    unsigned int   addr = 0;
     int   len  = 0;
     byte *buf;
     byte  bval;
@@ -722,7 +680,7 @@ static void gdb_read_memory( AvrCore *core, int fd, char *pkt )
         {
             for ( i=0; i<len; i++ )
             {
-                bval = avr_core_mem_read( core, addr+i );
+                bval = (*(core->Sram))[addr+i];
                 buf[i*2]   = HEX_DIGIT[bval >> 4];
                 buf[i*2+1] = HEX_DIGIT[bval & 0xf];
             }
@@ -739,7 +697,7 @@ static void gdb_read_memory( AvrCore *core, int fd, char *pkt )
 
         if (is_odd_addr)
         {
-            bval = avr_core_flash_read( core, addr/2 ) >> 8;
+            bval = avr_core_flash_read( addr/2 ) >> 8;
             buf[i++] = HEX_DIGIT[bval >> 4];
             buf[i++] = HEX_DIGIT[bval & 0xf];
             addr++;
@@ -748,7 +706,7 @@ static void gdb_read_memory( AvrCore *core, int fd, char *pkt )
 
         while (len > 1)
         {
-            wval = avr_core_flash_read( core, addr/2 );
+            wval = avr_core_flash_read( addr/2 );
 
             bval = wval & 0xff;
             buf[i++] = HEX_DIGIT[bval >> 4];
@@ -764,7 +722,7 @@ static void gdb_read_memory( AvrCore *core, int fd, char *pkt )
 
         if (len == 1)
         {
-            bval = avr_core_flash_read( core, addr/2 ) & 0xff;
+            bval = avr_core_flash_read( addr/2 ) & 0xff;
             buf[i++] = HEX_DIGIT[bval >> 4];
             buf[i++] = HEX_DIGIT[bval & 0xf];
         }
@@ -777,19 +735,19 @@ static void gdb_read_memory( AvrCore *core, int fd, char *pkt )
     }
 
 
-    gdb_send_reply( fd, (char*)buf );
+    gdb_send_reply( (char*)buf );
 
     avr_free( buf );
 }
 
-static void gdb_write_memory( AvrCore *core, int fd, char *pkt )
+void GdbServer::gdb_write_memory( char *pkt )
 {
-    int  addr = 0;
+    unsigned int  addr = 0;
     int  len  = 0;
     byte bval;
     word wval;
     int  is_odd_addr;
-    int  i;
+    unsigned int  i;
     char reply[10];
 
     /* Set the default reply. */
@@ -838,7 +796,7 @@ static void gdb_write_memory( AvrCore *core, int fd, char *pkt )
             {
                 bval  = hex2nib(*pkt++) << 4;
                 bval += hex2nib(*pkt++);
-                avr_core_mem_write(core, i, bval);
+                (*(core->Sram))[i]=bval;
             }
         }
     }
@@ -854,7 +812,7 @@ static void gdb_write_memory( AvrCore *core, int fd, char *pkt )
         {
             bval  = hex2nib(*pkt++) << 4;
             bval += hex2nib(*pkt++);
-            avr_core_flash_write_hi8(core, addr/2, bval);
+            avr_core_flash_write_hi8(addr/2, bval);
             len--;
             addr++;
         }
@@ -865,7 +823,7 @@ static void gdb_write_memory( AvrCore *core, int fd, char *pkt )
             wval += hex2nib(*pkt++);
             wval += hex2nib(*pkt++) << 12; /* high byte last */
             wval += hex2nib(*pkt++) << 8;
-            avr_core_flash_write(core, addr/2, wval);
+            avr_core_flash_write( addr/2, wval);
             len  -= 2;
             addr += 2;
         }
@@ -875,7 +833,7 @@ static void gdb_write_memory( AvrCore *core, int fd, char *pkt )
             /* one more byte to write */
             bval  = hex2nib(*pkt++) << 4;
             bval += hex2nib(*pkt++);
-            avr_core_flash_write_lo8( core, addr/2, bval );
+            avr_core_flash_write_lo8( addr/2, bval );
         }
     }
     else
@@ -885,7 +843,7 @@ static void gdb_write_memory( AvrCore *core, int fd, char *pkt )
         snprintf( reply, sizeof(reply), "E%02x", EIO );
     }
 
-    gdb_send_reply( fd, reply );
+    gdb_send_reply( reply );
 }
 
 /* Format of breakpoint commands (both insert and remove):
@@ -908,26 +866,26 @@ be patched. For hardware breakpoints and watchpoints, length specifies the
 memory region to be monitored. To avoid potential problems, the operations
 should be implemented in an idempotent way. -- GDB 5.0 manual. */
 
-static void gdb_break_point( AvrCore *core, int fd, char *pkt )
+void GdbServer::gdb_break_point( char *pkt )
 {
-    int addr = 0;
+    unsigned int addr = 0;
     int len  = 0;
 
     char z = *(pkt-1);          /* get char parser already looked at */
     char t = *pkt++;
     pkt++;                      /* skip over first ',' */
 
-    cout << "###############################################" << endl;
+    //cout << "###############################################" << endl;
 
     gdb_get_addr_len( pkt, ',', '\0', &addr, &len );
 
     switch (t) {
         case '0':               /* software breakpoint */
             /* addr/2 since addr refers to PC */
-            if ( (addr/2) >= avr_core_PC_max(core) )
+            if ( (addr/2) >= core->Flash->GetSize() )
             {
                 avr_warning( "Attempt to set break at invalid addr\n" );
-                gdb_send_reply( fd, "E01" );
+                gdb_send_reply( "E01" );
                 return;
             }
 
@@ -936,117 +894,48 @@ static void gdb_break_point( AvrCore *core, int fd, char *pkt )
 
             if (z == 'z') 
             {
-                cout << "Try to UNSET a software breakpoint" << endl;
-                cout << "at address :" << addr << " with len " << len << endl;
-                avr_core_remove_breakpoint( core, addr/2 );
+                //cout << "Try to UNSET a software breakpoint" << endl;
+                //cout << "at address :" << addr << " with len " << len << endl;
+                avr_core_remove_breakpoint( addr/2 );
             }
             else
             {
-                cout << "Try to SET a software breakpoint" << endl;
-                cout << "at address :" << addr << " with len " << len << endl;
-                avr_core_insert_breakpoint( core, addr/2 );
+                //cout << "Try to SET a software breakpoint" << endl;
+                //cout << "at address :" << addr << " with len " << len << endl;
+                avr_core_insert_breakpoint( addr/2 );
             }
             break;
 
         case '1':               /* hardware breakpoint */
-            cout << "Try to set a hardware breakpoint" << endl;
-            cout << "at address :" << addr << " with len " << len << endl;
+            //cout << "Try to set a hardware breakpoint" << endl;
+            //cout << "at address :" << addr << " with len " << len << endl;
 
-            gdb_send_reply( fd, "" );
+            gdb_send_reply( "" );
             return;
             break;
 
         case '2':               /* write watchpoint */
-            cout << "Try to set a watchpoint" << endl;
-            cout << "at address :" << addr << " with len " << len << endl;
-            gdb_send_reply( fd, "" );
+            //cout << "Try to set a watchpoint" << endl;
+            //cout << "at address :" << addr << " with len " << len << endl;
+            gdb_send_reply( "" );
             return;
             break;
 
         case '3':               /* read watchpoint */
-            cout << "Try to set a read watchpoint" << endl;
-            cout << "at address :" << addr << " with len " << len << endl;
-            gdb_send_reply( fd, "" );
+            //cout << "Try to set a read watchpoint" << endl;
+            //cout << "at address :" << addr << " with len " << len << endl;
+            gdb_send_reply( "" );
             return;
             break;
 
         case '4':               /* access watchpoint */
-            cout << "try to set a access watchpoint" << endl;
-            cout << "at address :" << addr << " with len " << len << endl;
-            gdb_send_reply( fd, "" );
+            //cout << "try to set a access watchpoint" << endl;
+            //cout << "at address :" << addr << " with len " << len << endl;
+            gdb_send_reply( "" );
             return;             /* unsupported yet */
     }
 
-    gdb_send_reply( fd, "OK" );
-}
-
-#ifdef OLD_STUFF
-/* Handle an io registers query. Query has two forms:
-"avr.io_reg" and "avr.io_reg:addr,len".
-
-The "avr.io_reg" has already been stripped off at this point. 
-
-The first form means, "return the number of io registers for this target
-device." Second form means, "send data len io registers starting with
-register addr." */
-static void gdb_fetch_io_registers( AvrCore *core, int fd, char *pkt )
-{
-    int  addr, len;
-    int  i;
-    byte val;
-    char reply[400];
-    char reg_name[80];
-    int  pos = 0;
-
-    if ( pkt[0] == '\0' )
-    {
-        /* gdb is asking how many io registers the device has. */
-        gdb_send_reply( fd, "40" );
-    }
-
-    else if ( pkt[0] == ':' )
-    {
-        /* gdb is asking for io registers addr to (addr + len) */
-
-        gdb_get_addr_len( pkt+1, ',', '\0', &addr, &len );
-
-        memset( reply, '\0', sizeof(reply) );
-
-        for ( i=0; i<len; i++ )
-        {
-            avr_core_io_fetch( core, addr+IO_REG_ADDR_BEGIN+i, &val, 
-                    reg_name, sizeof(reg_name) );
-            pos += snprintf( reply+pos, sizeof(reply)-pos,
-                    "%s,%x;", reg_name, val );
-        }
-
-        gdb_send_reply( fd, reply ); /* do nothing for now */
-    }
-
-    else
-        gdb_send_reply( fd, "E01" ); /* An error occurred */
-}
-#endif
-
-/* Dispatch various query request to specific handler functions. If a query is
-not handled, send an empry reply. */
-static void gdb_query_request( AvrCore *core, int fd, char *pkt )
-{
-#ifdef OLD_STUFF
-    int len;
-
-    switch (*pkt++) {
-        case 'R':
-            len = strlen("avr.io_reg");
-            if ( strncmp(pkt, "avr.io_reg", len) == 0 )
-            {
-                gdb_fetch_io_registers( core, fd, pkt+len );
-                return ;
-            }
-    }
-#endif
-
-    gdb_send_reply( fd, "" );
+    gdb_send_reply( "OK" );
 }
 
 /* Continue command format: "c<addr>" or "s<addr>"
@@ -1054,7 +943,9 @@ static void gdb_query_request( AvrCore *core, int fd, char *pkt )
 If addr is given, resume at that address, otherwise, resume at current
 address. */
 
-static void gdb_continue( AvrCore *core, int fd, char *pkt )
+#ifdef OLDSTUFF
+
+void GdbServer::gdb_continue( char *pkt )
 {
     char reply[MAX_BUF+1];
     int  res;
@@ -1062,7 +953,6 @@ static void gdb_continue( AvrCore *core, int fd, char *pkt )
     char step = *(pkt-1);       /* called from 'c' or 's'? */
     int  signo = SIGTRAP;
 
-    static int is_running = 0;
 
     /* This allows gdb_continue to be reentrant while it's running. */
     if (is_running == 1)
@@ -1085,14 +975,7 @@ static void gdb_continue( AvrCore *core, int fd, char *pkt )
 
     while (1)
     {
-        if ( signal_has_occurred(SIGINT) )
-        {
-            global_server_quit = 1;
-            break;
-        }
-
-
-        res = avr_core_step(core);
+        res = SystemClock::Instance().Step(1);
 
         if (res == BREAK_POINT)
             break;
@@ -1100,11 +983,12 @@ static void gdb_continue( AvrCore *core, int fd, char *pkt )
         if (res == INVALID_OPCODE)
         {
             snprintf( reply, MAX_BUF, "S%02x", SIGILL );
+            gdb_send_reply( reply );
             break;
         }
 
         /* check if gdb sent any messages */
-        res = gdb_pre_parse_packet(core, fd, GDB_BLOCKING_OFF);
+        res = gdb_pre_parse_packet( GDB_BLOCKING_OFF);
         if ( res < 0 )
         {
             if (res == GDB_RET_CTRL_C)
@@ -1119,29 +1003,27 @@ static void gdb_continue( AvrCore *core, int fd, char *pkt )
             break;
     }
 
-    /* If reply hasn't been set, respond as if a breakpoint was hit. */
-    if (reply[0] == '\0')
     {
         /* Send gdb PC, FP, SP */
         int bytes = 0;
 
-        pc = avr_core_PC_get(core)*2;
+        pc = core->PC * 2;
 
         bytes = snprintf( reply, MAX_BUF, "T%02x", signo );
 
         /* SREG, SP & PC */
         snprintf( reply+bytes, MAX_BUF-bytes,
                 "20:%02x;" "21:%02x%02x;" "22:%02x%02x%02x%02x;",
-                avr_core_sreg_get(core),
-                //avr_core_mem_read(core,SPL_ADDR), avr_core_mem_read(core,SPH_ADDR),
+                ((int)(*(core->status))),
                 core->stack->GetSpl(), core->stack->GetSph(),
                 pc & 0xff, (pc >> 8) & 0xff, (pc >> 16) & 0xff, (pc >> 24) & 0xff );
     }
 
-    gdb_send_reply( fd, reply );
 
     is_running = 0;
 }
+
+#endif //OLDSTUFF
 
 /* Continue with signal command format: "C<sig>;<addr>" or "S<sig>;<addr>"
 "<sig>" should always be 2 hex digits, possibly zero padded.
@@ -1150,10 +1032,10 @@ static void gdb_continue( AvrCore *core, int fd, char *pkt )
 If addr is given, resume at that address, otherwise, resume at current
 address. */
 
-static void gdb_continue_with_signal( AvrCore *core, int fd, char *pkt )
+int GdbServer::gdb_get_signal( char *pkt )
 {
     int signo;
-    char step = *(pkt-1);
+    //char step = *(pkt-1);
 
     /* strip out the signal part of the packet */
 
@@ -1173,113 +1055,126 @@ static void gdb_continue_with_signal( AvrCore *core, int fd, char *pkt )
             /* Gdb user issuing the 'signal SIGHUP' command tells sim to reset
             itself. We reply with a SIGTRAP the same as we do when gdb
             makes first connection with simulator. */
-            avr_core_reset( core );
-            gdb_send_reply( fd, "S05" );
-            return;
+            avr_core_reset( );
+            gdb_send_reply( "S05" );
     }
 
-    /* Modify pkt to look like what gdb_continue() expects and send it to
-    gdb_continue(): *pkt should now be either '\0' or ';' */
+    return signo;
 
-    if (*pkt == '\0')
-    {
-        *(pkt-1) = step;
-    }
-    else if (*pkt == ';')
-    {
-        *pkt = step;
-    }
-    else
-    {
-        avr_warning( "Malformed packet: \"%s\"\n", pkt );
-        gdb_send_reply( fd, "" );
-        return;
-    }
-
-    gdb_continue( core, fd, pkt );
 }
+
+#ifdef OLDSTUFF
+
+/* Modify pkt to look like what gdb_continue() expects and send it to
+gdb_continue(): *pkt should now be either '\0' or ';' */
+
+if (*pkt == '\0')
+{
+    *(pkt-1) = step;
+}
+else if (*pkt == ';')
+{
+    *pkt = step;
+}
+else
+{
+    avr_warning( "Malformed packet: \"%s\"\n", pkt );
+    gdb_send_reply( "" );
+    return;
+}
+
+}
+#endif
 
 /* Parse the packet. Assumes that packet is null terminated.
 Return GDB_RET_KILL_REQUEST if packet is 'kill' command,
 GDB_RET_OK otherwise. */
 
-static int gdb_parse_packet( AvrCore *core, int fd, char *pkt )
+int GdbServer::gdb_parse_packet( char *pkt )
 {
     switch (*pkt++) {
         case '?':               /* last signal */
-            gdb_send_reply( fd, "S05" ); /* signal # 5 is SIGTRAP */
+            gdb_send_reply( "S05" ); /* signal # 5 is SIGTRAP */
             break;
 
         case 'g':               /* read registers */
-            gdb_read_registers( core, fd );
+            gdb_read_registers(  );
             break;
 
         case 'G':               /* write registers */
-            gdb_write_registers( core, fd, pkt );
+            gdb_write_registers(  pkt );
             break;
 
         case 'p':               /* read a single register */
-            gdb_read_register( core, fd, pkt );
+            gdb_read_register(  pkt );
             break;
 
         case 'P':               /* write single register */
-            gdb_write_register( core, fd, pkt );
+            gdb_write_register(  pkt );
             break;
 
         case 'm':               /* read memory */
-            gdb_read_memory( core, fd, pkt );
+            gdb_read_memory(  pkt );
             break;
 
         case 'M':               /* write memory */
-            gdb_write_memory( core, fd, pkt );
+            gdb_write_memory(  pkt );
             break;
 
+        case 'D':               /* detach the debugger */
         case 'k':               /* kill request */
             /* Reset the simulator since there may be another connection
             before the simulator stops running. */
-            avr_core_reset( core );
-
-            gdb_send_reply( fd, "OK" );
+            avr_core_reset(); 
+            gdb_send_reply(  "OK" );
             return GDB_RET_KILL_REQUEST;
 
-        case 'C':               /* continue with signal */
-        case 'S':               /* step with signal */
-            gdb_continue_with_signal( core, fd, pkt );
+        case 'c':               /* continue */
+            return GDB_RET_CONTINUE;
             break;
 
-        case 'c':               /* continue */
+        case 'C':               /* continue with signal */
+            gdb_get_signal(pkt);
+            return GDB_RET_CONTINUE;
+            break;
+
         case 's':               /* step */
-            gdb_continue( core, fd, pkt );
+            return GDB_RET_SINGLE_STEP;
+            break;
+
+        case 'S':               /* step with signal */
+            gdb_get_signal(pkt);
+            return GDB_RET_SINGLE_STEP;
             break;
 
         case 'z':               /* remove break/watch point */
         case 'Z':               /* insert break/watch point */
-            gdb_break_point( core, fd, pkt );
+            gdb_break_point(  pkt );
             break;
 
         case 'q':               /* query requests */
-            gdb_query_request( core, fd, pkt );
+            gdb_send_reply(  "" );
             break;
 
         default:
-            gdb_send_reply( fd, "" );
+            gdb_send_reply(  "" );
     }
 
     return GDB_RET_OK;
 }
 
-static void gdb_set_blocking_mode( int fd, int mode )
+void GdbServer::gdb_set_blocking_mode( int mode )
 {
     if (mode)
     {
         /* turn non-blocking mode off */
-        if (fcntl( fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK) < 0)
+        if (fcntl( conn, F_SETFL, fcntl(conn, F_GETFL, 0) & ~O_NONBLOCK) < 0)
             avr_warning( "fcntl failed: %s\n", strerror(errno) );
     }
     else
     {
         /* turn non-blocking mode on */
-        if (fcntl( fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK) < 0)
+        if (fcntl( conn, F_SETFL, fcntl(conn, F_GETFL, 0) | O_NONBLOCK) < 0)
             avr_warning( "fcntl failed: %s\n", strerror(errno) );
     }
 }
@@ -1290,21 +1185,24 @@ outside the realm of packets or prepare a packet for parsing.
 Use the static block_on flag to reduce the over head of turning blocking on
 and off every time this function is called. */
 
-static int gdb_pre_parse_packet( AvrCore *core, int fd, int blocking )
+int GdbServer::gdb_pre_parse_packet( int blocking )
 {
     int  i, res;
     int  c;
     char pkt_buf[MAX_BUF+1];
     int  cksum, pkt_cksum;
-    static int block_on = 1;       /* default is blocking mode */
 
+    gdb_set_blocking_mode( blocking);
+
+    /*
     if ( block_on != blocking )
     {
-        gdb_set_blocking_mode( fd, blocking );
-        block_on = blocking;
+    gdb_set_blocking_mode( blocking );
+    block_on = blocking;
     }
+    */
     //cout << endl; //trace
-    c = gdb_read_byte( fd );
+    c = gdb_read_byte( );
 
     switch (c) {
         case '$':           /* read a packet */
@@ -1312,19 +1210,19 @@ static int gdb_pre_parse_packet( AvrCore *core, int fd, int blocking )
             memset( pkt_buf, 0, sizeof(pkt_buf) );
 
             /* make sure we block on fd */
-            gdb_set_blocking_mode( fd, GDB_BLOCKING_ON );
+            gdb_set_blocking_mode( GDB_BLOCKING_ON );
 
             pkt_cksum = i = 0;
-            c = gdb_read_byte(fd);
+            c = gdb_read_byte();
             while ( (c != '#') && (i < MAX_BUF) )
             {
                 pkt_buf[i++] = c;
                 pkt_cksum += (unsigned char)c;
-                c = gdb_read_byte(fd);
+                c = gdb_read_byte();
             }
 
-            cksum  = hex2nib( gdb_read_byte(fd) ) << 4;
-            cksum |= hex2nib( gdb_read_byte(fd) );
+            cksum  = hex2nib( gdb_read_byte() ) << 4;
+            cksum |= hex2nib( gdb_read_byte() );
 
             /* FIXME: Should send "-" (Nak) instead of aborting when we get
             checksum errors. Leave this as an error until it is actually
@@ -1340,9 +1238,9 @@ static int gdb_pre_parse_packet( AvrCore *core, int fd, int blocking )
                 fprintf( stderr, "Recv: \"$%s#%02x\"\n", pkt_buf, cksum );
 
             /* always acknowledge a well formed packet immediately */
-            gdb_send_ack( fd );
+            gdb_send_ack( );
 
-            res = gdb_parse_packet( core, fd, pkt_buf );
+            res = gdb_parse_packet( pkt_buf );
             if (res < 0 )
                 return res;
 
@@ -1351,7 +1249,7 @@ static int gdb_pre_parse_packet( AvrCore *core, int fd, int blocking )
         case '-':
             if (global_debug_on)
                 fprintf( stderr, " gdb -> Nak\n" );
-            gdb_send_reply( fd, gdb_last_reply(NULL) );
+            gdb_send_reply(  gdb_last_reply(NULL) );
             break;
 
         case '+':
@@ -1367,6 +1265,7 @@ static int gdb_pre_parse_packet( AvrCore *core, int fd, int blocking )
 
         case -1:
             /* fd is non-blocking and no data to read */
+            return GDB_RET_NOTHING_RECEIVED;
             break;
 
         default:
@@ -1374,31 +1273,6 @@ static int gdb_pre_parse_packet( AvrCore *core, int fd, int blocking )
     }
 
     return GDB_RET_OK;
-}
-
-static void gdb_main_loop( AvrCore *core, int fd )
-{
-    int res;
-    char reply[MAX_BUF];
-
-    while (1)
-    {
-        res = gdb_pre_parse_packet(core, fd, GDB_BLOCKING_ON);
-        switch (res)
-        {
-            case GDB_RET_KILL_REQUEST:
-                return;
-
-            case GDB_RET_CTRL_C:
-                gdb_send_ack( fd );
-                snprintf( reply, MAX_BUF, "S%02x", SIGINT );
-                gdb_send_reply( fd, reply );
-                break;
-
-            default:
-                break;
-        }
-    }
 }
 
 /**
@@ -1412,98 +1286,186 @@ static void gdb_main_loop( AvrCore *core, int fd )
  * process command requests from gdb using the remote serial protocol. Only a
  * single connection is allowed at a time.
  */
-void gdb_interact( AvrCore *core, int port, int debug_on )
+void GdbServer::Run( )
 {
-    struct sockaddr_in address[1];
-    int                sock, conn, i;
-    socklen_t          addrLength[1];
+    int res;
+    char reply[MAX_BUF];
 
-    global_debug_on = debug_on;
-
-    if ( (sock = socket( PF_INET, SOCK_STREAM, 0 )) < 0 )
-        avr_error( "Can't create socket: %s", strerror(errno) );
-
-    /* Let the kernel reuse the socket address. This lets us run
-    twice in a row, without waiting for the (ip, port) tuple
-    to time out. */
-    i = 1;
-    setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &i, sizeof(i) );
-
-    address->sin_family = AF_INET;
-    address->sin_port = htons(port);
-    memset( &address->sin_addr, 0, sizeof(address->sin_addr) );
-
-    if ( bind( sock, (struct sockaddr *)address, sizeof(address) ) )
-        avr_error( "Can not bind socket: %s", strerror(errno) );
-
-    signal_watch_start(SIGINT);
-
-    while (global_server_quit == 0)
+    while (1)
     {
-        if ( listen(sock, 1) )
+        res = gdb_pre_parse_packet( GDB_BLOCKING_ON);
+        switch (res)
         {
-            int saved_errno = errno;
+            case GDB_RET_KILL_REQUEST:
+                return;
 
-            if ( signal_has_occurred(SIGINT) )
-            {
-                break;          /* SIGINT will cause listen to be interrupted */
-            }
-            avr_error( "Can not listen on socket: %s", strerror(saved_errno) );
+            case GDB_RET_CTRL_C:
+                gdb_send_ack( );
+                snprintf( reply, MAX_BUF, "S%02x", SIGINT );
+                gdb_send_reply( reply );
+                break;
+
+            default:
+                break;
         }
+    }
+}
 
-        fprintf( stderr, "Waiting on port %d for gdb client to connect...\n", port );
+/* try to open a new connection to gdb */
+
+void GdbServer::TryConnectGdb() {
+    int i;
+    time_t newTime=time(NULL);
+
+    if (oldTime!=newTime) {
+        oldTime=newTime;
+
+
+        //cout << core->actualFilename << "--------- debugger not connected ------------" << endl;
 
         /* accept() needs this set, or it fails (sometimes) */
         addrLength[0] = sizeof(struct sockaddr *);
 
         /* We only want to accept a single connection, thus don't need a loop. */
+        /* Wait until we have a connection */
         conn = accept( sock, (struct sockaddr *)address, addrLength );
-        if (conn < 0)
-        {
-            int saved_errno = errno;
+        if (conn>0) {
+            /* Tell TCP not to delay small packets.  This greatly speeds up
+            interactive response. WARNING: If TCP_NODELAY is set on, then gdb
+            may timeout in mid-packet if the (gdb)packet is not sent within a
+            single (tcp)packet, thus all outgoing (gdb)packets _must_ be sent
+            with a single call to write. (see Stevens "Unix Network
+            Programming", Vol 1, 2nd Ed, page 202 for more info) */
 
-            if ( signal_has_occurred(SIGINT) )
-            {
-                break;          /* SIGINT will cause accept to be interrupted */
-            }
-            avr_error( "Accept connection failed: %s", strerror(saved_errno) );
-        }
+            i = 1;
+            setsockopt (conn, IPPROTO_TCP, TCP_NODELAY, &i, sizeof (i));
 
-        /* Tell TCP not to delay small packets.  This greatly speeds up
-        interactive response. WARNING: If TCP_NODELAY is set on, then gdb
-        may timeout in mid-packet if the (gdb)packet is not sent within a
-        single (tcp)packet, thus all outgoing (gdb)packets _must_ be sent
-        with a single call to write. (see Stevens "Unix Network
-        Programming", Vol 1, 2nd Ed, page 202 for more info) */
+            /* If we got this far, we now have a client connected and can start 
+            processing. */
 
-        i = 1;
-        setsockopt (conn, IPPROTO_TCP, TCP_NODELAY, &i, sizeof (i));
-
-        /* If we got this far, we now have a client connected and can start 
-        processing. */
-
-        fprintf( stderr, "Connection opened by host %s, port %hd.\n",
-                inet_ntoa(address->sin_addr), ntohs(address->sin_port) );
-
-        gdb_main_loop(core, conn);
-        avr_core_reset(core);
-
-        close(conn);
-
-        /* FIXME: How do we correctly break out of this loop? This keeps the
-        simulator server up so you don't have to restart it with every gdb
-        session. To exit the server loop, you have to hit C-c or send some
-        signal which causes the program to terminate, in which case, you
-        won't get a dump of the simulator's state. This might actually be
-        acceptable behavior. */
-        if ( signal_has_occurred(SIGINT) )
-        {
-            break;
-        }
-    }
-
-    signal_watch_stop(SIGINT);
-
-    close(sock);
+            fprintf( stderr, "Connection opened by host %s, port %hd.\n",
+                    inet_ntoa(address->sin_addr), ntohs(address->sin_port) );
+        }   //new open (conn is >0 now!) 
+    } //time
 }
 
+int GdbServer::Step(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns) {
+    if (conn<0) { // no connection established -> look for it
+        TryConnectGdb();
+        if (timeToNextStepIn_ns!=0) *timeToNextStepIn_ns=core->GetClockFreq();
+        return 0;
+    } else {
+        return InternalStep(trueHwStep, timeToNextStepIn_ns);
+    }
+}
+
+int GdbServer::InternalStep(bool &untilCoreStepFinished, unsigned long long *timeToNextStepIn_ns) {
+    char reply[MAX_BUF+1];
+    //cout << "Internal Step entered" << endl;
+    //cout << "RunMode: " << dec << runMode << endl;
+
+    if (lastCoreStepFinished) {
+        bool leave;
+
+        do {
+            //cout << "Loop" << endl;
+            int gdbRet=gdb_pre_parse_packet(GDB_BLOCKING_OFF);
+
+            switch (gdbRet) { //GDB_RESULT TYPES
+                case GDB_RET_NOTHING_RECEIVED:  //nothing changes here
+                    break;
+
+                case GDB_RET_OK:    //dont change any modes
+                    runMode=GDB_RET_OK;
+                    break;
+
+                case GDB_RET_CONTINUE:
+                    //cout << "############################################################ gdb continue" << endl;
+                    runMode=GDB_RET_CONTINUE;       //lets continue until we receive something from gdb (normal CTRL-C)
+                    break;                          //or we run into a break point or illegal instruction
+
+                case GDB_RET_SINGLE_STEP:
+                    //cout << "############################################################# Single Step" << endl;
+                    runMode=GDB_RET_SINGLE_STEP;
+                    break;
+
+
+                case GDB_RET_CTRL_C:
+                    //cout << "############################################################# CTRL C" << endl;
+                    runMode=GDB_RET_CTRL_C;
+                    SendPosition(SIGINT); //Give gdb an idea where the core is now 
+                    break;
+
+                case GDB_RET_KILL_REQUEST:
+                    //here termination of gdb server should be handled ???
+                    //or shoudl we only reset the core? TODO
+                    break;
+
+            } //end switch GDB_RETURN_VALUE
+
+            if ((runMode!= GDB_RET_SINGLE_STEP ) && ( runMode!= GDB_RET_CONTINUE) ) {
+                leave=false;
+            } else {
+                leave=true;
+            }
+
+            if(!leave) { //we can´t leave the loop so we have to request the other gdb instances now!
+                // step through all gdblist members WITHOUT my self!
+                //cout << "we do not leave and check for gdb events" << endl;
+            }
+        } while (leave==false);
+
+    } //last core step finished
+
+    //cout << "Stepping the real core" << endl;
+    int res=core->Step(untilCoreStepFinished, timeToNextStepIn_ns);
+    lastCoreStepFinished=untilCoreStepFinished;
+    //cout << "Core Step done, was finished:" << untilCoreStepFinished<< endl;
+
+    if (res == BREAK_POINT) {
+        //cout << "Run on Breakpoint" << endl;
+        runMode=GDB_RET_OK; //we will stop next call from GdbServer::Step
+        SendPosition(SIGTRAP);
+    }
+
+    if (res == INVALID_OPCODE)
+    {
+        //why we send here another reply??? is it not better to send it later
+        //the signo is set correct.... TODO
+        snprintf( reply, MAX_BUF, "S%02x", SIGILL );
+        gdb_send_reply( reply );
+        runMode=GDB_RET_OK;
+        SendPosition(SIGILL);
+
+    }
+
+    if (runMode==GDB_RET_SINGLE_STEP) {
+        runMode=GDB_RET_OK;
+        SendPosition(SIGTRAP);
+    }
+
+    return 0;
+}
+
+void GdbServer::SendPosition(int signo) {
+    /* Send gdb PC, FP, SP */
+    int bytes = 0;
+    char reply[MAX_BUF+1];
+
+    int pc = core->PC * 2;
+
+    bytes = snprintf( reply, MAX_BUF, "T%02x", signo );
+
+    /* SREG, SP & PC */
+    snprintf( reply+bytes, MAX_BUF-bytes,
+            "20:%02x;" "21:%02x%02x;" "22:%02x%02x%02x%02x;",
+            ((int)(*(core->status))),
+            core->stack->GetSpl(), core->stack->GetSph(),
+            pc & 0xff, (pc >> 8) & 0xff, (pc >> 16) & 0xff, (pc >> 24) & 0xff );
+
+    gdb_send_reply(reply);
+}
+
+int GdbServer::SleepStep() {
+    return 0;
+}

@@ -48,7 +48,7 @@ void SystemClock::AddAsyncMember( SimulationMember *dev) {
 //So this version is only made for running the regression tests and stepping in gdb. Normal operation/simulation
 //is not affected.
 
-int SystemClock::Step(int untilCoreStepFinished) { //0-> return also if cpu in waitstate 1-> return if cpu is really finished
+int SystemClock::Step(bool &untilCoreStepFinished) { //0-> return also if cpu in waitstate 1-> return if cpu is really finished
     int res=0; //returns the state from a core step. Needed by gdb-server to wathc for breakpoints
     unsigned long long nextStepIn_ns;
 
@@ -75,7 +75,8 @@ int SystemClock::Step(int untilCoreStepFinished) { //0-> return also if cpu in w
 
         amiEnd= asyncMembers.end();
         for (ami= asyncMembers.begin(); ami!=amiEnd ; ami++) {
-            (*ami)->Step(0,0);
+            bool untilCoreStepFinished=false;
+            (*ami)->Step(untilCoreStepFinished,0);
         }
     }
 
@@ -122,7 +123,8 @@ void SystemClock::Endless() {
     cout << "normal loop" << endl;
     while( breakMessage==0) {
         steps++;
-        Step(0);
+        bool untilCoreStepFinished=false;
+        Step(untilCoreStepFinished);
     }
 #endif
     cout << "SystemClock::Endless stopped" << endl;

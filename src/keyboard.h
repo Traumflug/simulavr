@@ -61,7 +61,7 @@ class Keyboard : public SimulationMember, ExternalType {
         
     public:
         void SetNewValueFromUi(const string &);
-        virtual int Step(bool trueHwStep, unsigned long long *timeToNextStepIn_ns=0);
+        virtual int Step(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns=0);
         Keyboard(UserInterface *, const string &name);
         void SetClockFreq(unsigned long f);
         virtual ~Keyboard();

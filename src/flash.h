@@ -41,7 +41,7 @@ class AvrFlash: public Memory {
     friend int avr_op_SBIS::operator()();
     friend int avr_op_SBRC::operator()();
     friend int avr_op_SBRS::operator()();
-    friend int AvrDevice::Step(bool, long long unsigned int*);
+    friend int AvrDevice::Step(bool &, long long unsigned int*);
     
 
     public:

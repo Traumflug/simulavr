@@ -52,7 +52,7 @@ void UserInterface::SwitchUpdateOnOff(bool yesNo) {
 }
 
 
-int UserInterface::Step(bool dummy1, unsigned long long *nextStepIn_ns) {
+int UserInterface::Step(bool &dummy1, unsigned long long *nextStepIn_ns) {
     if (nextStepIn_ns!=0) {
         *nextStepIn_ns=pollFreq;
     }

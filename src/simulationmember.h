@@ -25,7 +25,7 @@
 
 class SimulationMember {
     public:
-        virtual int Step(bool trueHwStep, unsigned long long *timeToNextStepIn_ns=0)=0;
+        virtual int Step(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns=0)=0;
 };
 
 #endif 

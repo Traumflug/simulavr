@@ -88,9 +88,10 @@ class AvrDevice: public SimulationMember {
         MemoryOffsets &operator->*(MemoryOffsets *m) { return *m;}
 
         AvrDevice(unsigned int flashSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int IoSpaceSize);
-        int Step(bool, unsigned long long *nextStepIn_ns =0);
+        int Step(bool &, unsigned long long *nextStepIn_ns =0);
         void Reset();
         void SetClockFreq(unsigned long f);
+        unsigned long long GetClockFreq();
 
         virtual ~AvrDevice();
         virtual unsigned char GetRampz();

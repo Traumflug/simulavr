@@ -35,7 +35,7 @@ map<int, const int* > keynumberToScancode3;
 
 #include "keyboard.h"
 
-int Keyboard::Step(bool trueHwStep, unsigned long long *timeToNextStepIn_ns) {
+int Keyboard::Step(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns) {
 
     //static string scanString("");  //now we use the buffer
     //unsigned char actualChar;

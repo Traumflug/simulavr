@@ -48,7 +48,7 @@ class UserInterface: public SimulationMember, public Socket, public ExternalType
         ~UserInterface();
         void SendUiNewState(const string &s, const char &c);
 
-        int Step(bool, unsigned long long *nextStepIn_ns=0);
+        int Step(bool &, unsigned long long *nextStepIn_ns=0);
         void SwitchUpdateOnOff(bool PollFreq);
         void Write(const string &s);
 

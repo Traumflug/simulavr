@@ -65,7 +65,7 @@ class Lcd : public SimulationMember {
         int enableOld;
 
     public:
-        virtual int Step(bool trueHwStep, unsigned long long *timeToNextStepIn_ns=0);
+        virtual int Step(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns=0);
         Lcd(UserInterface *ui, const string &name, const string &baseWindow);
         virtual ~Lcd();
         Pin *GetPin(const char *name); 

@@ -74,7 +74,7 @@ void Lcd::LcdWriteCommand(unsigned char command) {
     }       
 } 
 
-int Lcd::Step(bool trueHwStep, unsigned long long *timeToNextStepIn_ns) {
+int Lcd::Step(bool &trueHwStep, unsigned long long *timeToNextStepIn_ns) {
     //static unsigned char lastPortValue=0;
     //static int readLow = 0;
     //static unsigned char command=0;

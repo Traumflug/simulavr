@@ -55,6 +55,7 @@ using namespace std;
 extern int trace_on;
 
 int main2();
+int main3();
 int main4();
 
 int main(int argc, char *argv[]) {
@@ -85,7 +86,7 @@ int main(int argc, char *argv[]) {
             {0, 0, 0, 0}
         };
 
-        c = getopt_long (argc, argv, "f:d:gGd:p:t:uxzhv", long_options, &option_index);
+        c = getopt_long (argc, argv, "f:d:gGd:p:t:uxyzhv", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -113,6 +114,7 @@ int main(int argc, char *argv[]) {
             case 'G':
                 cout << "Running with debug informations from gdbserver" << endl;
                 global_gdb_debug = 1;
+                gdbserver_flag=1;
                 break;
 
             case 'p':
@@ -130,6 +132,11 @@ int main(int argc, char *argv[]) {
                 extended_tests=1;
                 break;
 
+            case 'y':
+                cout << "Running in other main loop for tests only! DO NOT USE" << endl;
+                extended_tests=2;
+                break;
+
             case 'z':
                 cout << "Running in other main loop for tests only! DO NOT USE" << endl;
                 extended_tests=3;
@@ -137,12 +144,13 @@ int main(int argc, char *argv[]) {
 
             case 'v':
                 {
-                    std::cout << "Simulavr++ " << VERSION << std::endl;
-                    std::cout << "See documentation for copyright and distribution terms" << std::endl;
-                    std::cout << std::endl;
+                    cout << "Simulavr++ " << VERSION << endl;
+                    cout << "See documentation for copyright and distribution terms" << endl;
+                    cout << endl;
                     exit(0);
                 }
                 break;
+
 
             default:
                 cout << "AVR-Simulator" << endl;
@@ -150,6 +158,7 @@ int main(int argc, char *argv[]) {
                 cout << "-f --file <name>             load elf-file <name> for simulation in simulated target" << endl; 
                 cout << "-d --device <device name>    simulate <device name> " << endl;
                 cout << "-g --gdbserver               running as gdb-server" << endl;
+                cout << "-G                           running as gdb-server and write debug info for gdb-connection" << endl;                             
                 cout << "-p  <port>                   change <port> for gdb server to port" << endl;
                 cout << "-t --trace <file name>       enable trace outputs into <file name>" << endl;
                 cout << endl;
@@ -171,6 +180,11 @@ int main(int argc, char *argv[]) {
         return 0;
     } 
 
+    if (extended_tests ==2) {
+        main3();
+        return 0;
+    }
+
     if (extended_tests==3) {
         main4();
         return 0;
@@ -191,8 +205,6 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
 
-    dev1->SetClockFreq(250); //4 Mhz for dummy
-    SystemClock::Instance().Add(dev1);
 
 
     if (filename != "unknown" ) {
@@ -202,26 +214,26 @@ int main(int argc, char *argv[]) {
     if (userinterface_flag==1) {
         ui=new UserInterface(7777); //if not gdb, the ui will be master controller :-)
     }
+    
+    dev1->SetClockFreq(250); //4 Mhz for dummy
 
-    if (gdbserver_flag==1) {
-        cout << "Going to gdb..." << endl;
-        gdb_interact( dev1, global_gdbserver_port, global_gdb_debug );
-    } else {
+    if (gdbserver_flag==0) {
         SystemClock::Instance().Add(dev1);
-
         while (1) { //for ever
-            SystemClock::Instance().Step(0);
+            bool untilCoreStepFinished=false;
+            SystemClock::Instance().Step(untilCoreStepFinished);
         }
+    } else { //gdb should be activated
+        cout << "Going to gdb..." << endl;
+        GdbServer gdb1(dev1, global_gdbserver_port, global_gdb_debug);
+        //gdb1.Run();
+        SystemClock::Instance().Add(&gdb1);
+        SystemClock::Instance().Endless();
 
-    }
+        //gdb_interact( dev1, global_gdbserver_port, global_gdb_debug );
+    } 
+}
 
-}
-/*
-void ChildExit(int a) {
-cout << "Child ends.... so we go away, thank you for using me :-)" << endl;
-kill(getpid(), SIGQUIT);
-}
-*/
 #define USE_ANA
 #define USE_PWM4
 //#define USE_WEICHE8
@@ -265,7 +277,7 @@ int main2() {
     AvrDevice *dev1= new AvrDevice_at90s8515;
     dev1->Load("pwm4.o.go"); //fahrspannungserzeuger
     //dev1->SetClockFreq(75);    
-    dev1->SetClockFreq(256);    //4Mhz //257 is not working !!! 
+    dev1->SetClockFreq(250);    //4Mhz //257 is not working !!! 256 seems ok
     SystemClock::Instance().Add(dev1);
 
     clk.Add(dev1->GetPin("D2"));  //pwm
@@ -593,7 +605,7 @@ int main2() {
 
 int main4() {
 
-    cout << "Starting with gui for main3" << endl;
+    cout << "Starting with gui for main4" << endl;
     UserInterface *ui=new UserInterface(7777);
     SystemClock::Instance().AddAsyncMember(ui);
 
@@ -613,7 +625,8 @@ int main4() {
     SystemClock::Instance().Add(dev1);
     cout << "Device setup complete" << endl;
     while(1) {
-        SystemClock::Instance().Step(0);
+        bool untilCoreStepFinished=false;
+        SystemClock::Instance().Step(untilCoreStepFinished);
     }
 
 
@@ -621,6 +634,4 @@ int main4() {
 
     return 0;
 }
-
-
 

@@ -148,6 +148,9 @@ void AvrDevice::Load(const char* fname) {
 void AvrDevice::SetClockFreq(unsigned long f) {
     clockFreq=f;
 }
+unsigned long long AvrDevice::GetClockFreq() {
+    return clockFreq;
+}
 
 Pin *AvrDevice::GetPin(const char *name) {
     return allPins[name];
@@ -215,7 +218,7 @@ AvrDevice::AvrDevice(unsigned int ioSpaceSize, unsigned int IRamSize, unsigned i
 }
 
 //do a single core step, (0)->a real hardware step, (1) until the uC finish the opcode! 
-int AvrDevice::Step(bool untilCoreStepFinished, unsigned long long *nextStepIn_ns) {
+int AvrDevice::Step(bool &untilCoreStepFinished, unsigned long long *nextStepIn_ns) {
     int bpFlag=0;
     int hwWait=0;
 
@@ -248,6 +251,10 @@ int AvrDevice::Step(bool untilCoreStepFinished, unsigned long long *nextStepIn_n
                 if (BP.end()!=find(BP.begin(), BP.end(), PC)) {
                     if(trace_on)traceOut << "Breakpoint found at 0x" << hex << PC << dec << endl;
                     bpFlag=BREAK_POINT;
+                    if(nextStepIn_ns!=0) {
+                        *nextStepIn_ns=clockFreq;
+                    }
+                    untilCoreStepFinished= !((cpuCycles>0) || (hwWait>0));
                     return bpFlag;
                 }
 
@@ -286,15 +293,15 @@ int AvrDevice::Step(bool untilCoreStepFinished, unsigned long long *nextStepIn_n
                         }
                         exit(0);
                     }
-                    
+
                     DecodedInstruction *de= (Flash->DecodedMem[PC]);
                     if (trace_on) {
-                    cpuCycles= de->Trace();
+                        cpuCycles= de->Trace();
                     } else {
-                    cpuCycles=(*de)(); 
+                        cpuCycles=(*de)(); 
                     }
-                    
-                   // cpuCycles=(*(Flash->DecodedMem[PC]))();
+
+                    // cpuCycles=(*(Flash->DecodedMem[PC]))();
                 }
 
                 if (cpuCycles<0) bpFlag=cpuCycles;
@@ -317,6 +324,10 @@ int AvrDevice::Step(bool untilCoreStepFinished, unsigned long long *nextStepIn_n
 
         cpuCycles--;
         if (trace_on==1) traceOut << endl;
+        if (untilCoreStepFinished == false) { //we wait not until end so reply the finish state
+            untilCoreStepFinished= !((cpuCycles>0) || (hwWait>0));
+            return bpFlag;
+        }
     } while ( untilCoreStepFinished && ((cpuCycles>0) || (hwWait>0)));
 
 

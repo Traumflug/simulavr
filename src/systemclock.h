@@ -37,7 +37,7 @@ class SystemClock: public multimap<unsigned long, SimulationMember *> {
 
         void Add(SimulationMember *dev);
         void AddAsyncMember(SimulationMember *dev);
-        int Step(int untilCoreStepFinished);
+        int Step(bool &untilCoreStepFinished);
         void IncrTime(long long of) { currentTime+= of; }
         unsigned long long GetCurrentTime();
         void Endless();
