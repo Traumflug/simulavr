@@ -1586,6 +1586,7 @@ int avr_op_RCALL::operator()()
 
     avr_core_stack_push( core, pc_bytes, pc+1 );
     core->PC+=K;
+    core->PC&=(core->Flash->GetSize()-1)>>1;
 
     return pc_bytes+1;
 }
@@ -1634,6 +1635,7 @@ int avr_op_RJMP::operator()()
 {
 
     core->PC+=K;
+    core->PC&=(core->Flash->GetSize()-1)>>1;
 
     return 2;
 }

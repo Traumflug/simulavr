@@ -299,9 +299,10 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                 if (cpuCycles<=0) {
                     if ((unsigned int)(PC<<1) >= (unsigned int)Flash->GetSize() ) {
                         if (trace_on) {
-                            traceOut << "Simulation runs out of Flash Space" << endl;
+                            traceOut << actualFilename << " Simulation runs out of Flash Space at" << hex << (PC << 1) << endl;
+                            traceOut.flush();
                         } else {
-                            cerr << "Simulation runs out of Flash Space" << endl;
+                            cerr << actualFilename << " Simulation runs out of Flash Space at " << hex << (PC << 1) << endl;
                         }
                         exit(0);
                     }

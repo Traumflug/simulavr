@@ -61,7 +61,8 @@ AvrDevice(224, 4096, 0xef00, 128*1024) {
 	prescaler123=new HWPrescaler(this);
 	prescaler0=new HWPrescaler(this);
 
-
+    usart0=new HWUsart(this, irqSystem, PinAtPort(porte,1), PinAtPort(porte,0), PinAtPort(porte, 2), 18, 19, 20);
+    usart1=new HWUsart(this, irqSystem, PinAtPort(portd,3), PinAtPort(portd,2), PinAtPort(portd, 5), 30, 31, 32);
 
 	timer0123irq= new HWMegaTimer0123Irq( this, irqSystem,
 			15 , /*tpComp*/
@@ -93,12 +94,12 @@ AvrDevice(224, 4096, 0xef00, 128*1024) {
 
 
 			for (int ii=0x9e; ii<=0xff; ii++) { rw[ii]=new RWReserved; }
-			rw[0x9d]= new RWReserved; //RWucsrc;
-			rw[0x9c]= new RWReserved; //RWUdr;
-			rw[0x9b]= new RWReserved; //RWUcsra;
-			rw[0x9a]= new RWReserved; //RWUcsrb;
-			rw[0x99]= new RWReserved; //RWUbbrl;
-			rw[0x98]= new RWReserved; //RWUbbrh;
+			rw[0x9d]= new RWUcsrc(usart1); //RWucsrc;
+			rw[0x9c]= new RWUdr(usart1); //RWUdr;
+			rw[0x9b]= new RWUcsra(usart1); //RWUcsra;
+			rw[0x9a]= new RWUcsrb(usart1); //RWUcsrb;
+			rw[0x99]= new RWUbrr(usart1); //RWUbbrl;
+			rw[0x98]= new RWUbrrhi(usart1); //RWUbbrh;
 			rw[0x97]= new RWReserved;
 			rw[0x96]= new RWReserved;
 			rw[0x95]= new RWReserved; //RWUcsrc
@@ -106,7 +107,7 @@ AvrDevice(224, 4096, 0xef00, 128*1024) {
 			rw[0x93]= new RWReserved;
 			rw[0x92]= new RWReserved;
 			rw[0x91]= new RWReserved;
-			rw[0x90]= new RWReserved; //RWUbrrh;
+			rw[0x90]= new RWUbrrhi(usart0); //RWUbrrh;
 			rw[0x8f]= new RWReserved; //RWReserved;
 			rw[0x8e]= new RWReserved; //RWReserved;
 			rw[0x8d]= new RWReserved; //RWReserved;
@@ -230,10 +231,10 @@ AvrDevice(224, 4096, 0xef00, 128*1024) {
 			rw[0x2e]= new RWSpcr(spi); //RWSpcr();
 			rw[0x2d]= new RWSpsr(spi); //RWSpsr();
 
-			rw[0x2c]= new RWReserved; //RWUdr0();
-			rw[0x2b]= new RWReserved; //RWUcsra();
-			rw[0x2a]= new RWReserved; //RWUcsrb();
-			rw[0x29]= new RWReserved; //RWUbrrl();
+			rw[0x2c]= new RWUdr(usart0); //RWUdr0();
+			rw[0x2b]= new RWUcsra(usart0); //RWUcsra();
+			rw[0x2a]= new RWUcsrb(usart0); //RWUcsrb();
+			rw[0x29]= new RWUbrr(usart0); //RWUbrrl();
 			rw[0x28]= new RWReserved; //RWAcsr();
 			rw[0x27]= new RWReserved; //RWAdmux();
 			rw[0x26]= new RWReserved; //RWAdcsra();

@@ -40,19 +40,11 @@ void AvrFlash::Decode(){
 }
 
 AvrFlash::AvrFlash(AvrDevice *c, int _size):Memory(_size), core(c), DecodedMem(size) {
-    //DecodedMem=(DecodedEntry*) malloc((size>>1)*sizeof(DecodedEntry));
-    /*
-    if (DecodedMem==0 ) {
-        cerr << "Could not allocate Flash memory" << endl;
-        exit(0);
-    }
-    */
     for (unsigned int tt=0; tt<size; tt++) { 
         myMemory[tt]=0xff;
     }
 
     Decode();
-
 }
 
 unsigned int AvrFlash::GetSize() { return size; }
@@ -64,6 +56,7 @@ void AvrFlash::WriteMem( unsigned char *src, unsigned int offset, unsigned int s
             *(myMemory+tt+1+offset)=src[tt];
         } 
     }
+
     Decode();
 }
 
@@ -75,6 +68,6 @@ void AvrFlash::Decode(int addr ) {
     word opcode;
 
     opcode=((MemPtr[addr])>>8)+((MemPtr[addr]&0xff)<<8);
-    if (DecodedMem[addr]!=0) delete DecodedMem[addr];       //delete old Instruction here
+    if (DecodedMem[addr]!=0) delete DecodedMem[addr];       //delete old Instruction here 
     DecodedMem[addr]= lookup_opcode(opcode, core);          //and set new one
 }

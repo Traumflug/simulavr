@@ -28,6 +28,7 @@
 #include "hardware.h"
 #include "hwmegatimer.h"
 #include "hwmegaextirq.h"
+#include "hwuart.h"
 
 #include "ioregs.h" //only for rampz here
 
@@ -56,6 +57,8 @@ class AvrDevice_atmega128:public AvrDevice {
 		HWMegaTimer2 *timer2;
 		HWMegaTimer0123Irq *timer0123irq;
         HWMegaSpi *spi;
+        HWUsart *usart0;
+        HWUsart *usart1;
 	public:
 		AvrDevice_atmega128();
 		~AvrDevice_atmega128(); 

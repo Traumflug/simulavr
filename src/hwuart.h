@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005   Klaus Rudolph		
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,9 +35,15 @@ class HWUart: public Hardware {
     protected:
         unsigned char udrWrite;
         unsigned char udrRead;
-        unsigned char usr;
-        unsigned char ucr;
+        unsigned char usr;  //also used as ucsra
+        unsigned char ucr;  //also used as ucsrb
+        unsigned char ucsrc; 
         unsigned short ubrr; //16 bit ubrr to fit also 4433 device
+
+        bool readParity;    //the parity for usart
+        bool writeParity;
+
+        int frameLength;
 
         HWIrqSystem *irqSystem;
 
@@ -57,14 +63,18 @@ class HWUart: public Hardware {
             RX_WAIT_FOR_LOWEDGE,
             RX_READ_STARTBIT,
             RX_READ_DATABIT,
-            RX_READ_STOPBIT
+            RX_READ_PARITY,
+            RX_READ_STOPBIT,
+            RX_READ_STOPBIT2
         } ;
 
         enum T_TxState{
             TX_DISABLED,
             TX_SEND_STARTBIT,
             TX_SEND_DATABIT,
+            TX_SEND_PARITY,
             TX_SEND_STOPBIT,
+            TX_SEND_STOPBIT2,
             TX_AFTER_STOPBIT,
             TX_FIRST_RUN
         } ;
@@ -111,10 +121,22 @@ class HWUart: public Hardware {
         void ClearIrqFlag(unsigned int);
         void CheckForNewSetIrq(unsigned char);
         void CheckForNewClearIrq(unsigned char);
+
+    protected:
+        void SetFrameLengthFromRegister();
 };
 
+class HWUsart: public HWUart {
+    protected:
+        PinAtPort pinXck;
 
+    public:
+        HWUsart(AvrDevice *core, HWIrqSystem *, PinAtPort tx, PinAtPort rx, PinAtPort xck, unsigned int vrx, unsigned int vudre, unsigned int vtx);
 
+        void SetUcsrc(unsigned char val);
+
+        unsigned char GetUcsrc();
+};
 
 class RWUdr: public RWMemoryMembers {
     protected:
@@ -140,6 +162,38 @@ class RWUcr: public RWMemoryMembers {
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
+
+/* config registers for usart */
+
+class RWUcsra: public RWMemoryMembers {
+    protected:
+        HWUsart* uart;
+    public:
+        RWUcsra(HWUsart *u) : uart(u) {}
+        virtual unsigned char operator=(unsigned char);
+        virtual operator unsigned char() const;
+};
+
+class RWUcsrb: public RWMemoryMembers {
+    protected:
+        HWUsart* uart;
+    public:
+        RWUcsrb(HWUsart *u) : uart(u) {}
+        virtual unsigned char operator=(unsigned char);
+        virtual operator unsigned char() const;
+};
+
+class RWUcsrc: public RWMemoryMembers {
+    protected:
+        HWUsart* uart;
+    public:
+        RWUcsrc(HWUsart *u) : uart(u) {}
+        virtual unsigned char operator=(unsigned char);
+        virtual operator unsigned char() const;
+};
+
+/* baudrate registers general */
+
 class RWUbrr: public RWMemoryMembers {
     protected:
         HWUart* uart;

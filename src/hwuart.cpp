@@ -25,20 +25,37 @@
 #include "irqsystem.h"
 
 
-
-#define UDRE 0x20
-#define TXEN 0x08
-#define RXEN 0x10
-#define RXB8 0x02
-#define FE 0x10
-#define CHR9 0x04
+//usr & ucsra
 #define RXC 0x80
 #define TXC 0x40
-#define TXB8 0x01
+#define UDRE 0x20
+#define FE 0x10
+#define OR 0x08
+#define DOR 0x08 //same for usart
+#define UPE 0x04    //only usart
+#define U2X 0x02    //only usart
+#define MPCM 0x01   //only usart
 
+
+//ucr & ucsrb
 #define RXCIE 0x80
 #define TXCIE 0x40
 #define UDRIE 0x20
+#define RXEN 0x10
+#define TXEN 0x08
+#define CHR9 0x04 //same as ucsz2
+#define UCSZ2 0x04
+#define RXB8 0x02
+#define TXB8 0x01
+
+//ussrc usart only
+#define UMSEL 0x40
+#define UPM1  0x20
+#define UPM0  0x10
+#define USBS  0x08
+#define UCSZ1 0x04
+#define UCSZ0 0x02
+#define UCPOL 0x01
 
 void HWUart::SetUdr(unsigned char val) { 
     udrWrite=val;
@@ -65,16 +82,47 @@ void HWUart::SetUsr(unsigned char val) {
 
     CheckForNewSetIrq(setnew);
     CheckForNewClearIrq(clearnew);
-
-
 } 
+
+void HWUsart::SetUcsrc(unsigned char val) {
+    ucsrc=val;
+    SetFrameLengthFromRegister();
+}
+
 
 void HWUart::SetUbrr(unsigned char val) { ubrr=(ubrr&0xff00)|val; } 
 void HWUart::SetUbrrhi( unsigned char val) { ubrr=(ubrr&0xff)|(val<<8); }
 
+void HWUart::SetFrameLengthFromRegister() {
+    if ( ucr&UCSZ2) {
+        frameLength=9;
+    } else {
+        switch (ucsrc & (UCSZ1|UCSZ0) ) {
+            case 0:
+                frameLength=5;
+                break;
+
+            case UCSZ0:
+                frameLength=6;
+                break;
+
+            case UCSZ1:
+                frameLength=7;
+                break;
+
+            case UCSZ0|UCSZ1:
+                frameLength=8;
+                break;
+        }
+    }
+
+    frameLength--; // all compares run from 0..frameLength -> -1
+}
+
 void HWUart::SetUcr(unsigned char val) { 
     unsigned char ucrold=ucr;
     ucr=val;
+    SetFrameLengthFromRegister();
 
     if (ucr & TXEN) {
         if (txState == TX_FIRST_RUN || txState == TX_SEND_STARTBIT) {
@@ -92,6 +140,7 @@ void HWUart::SetUcr(unsigned char val) {
         pinRx.SetUseAlternateDdr(1);
         pinRx.SetAlternateDdr(0);		// input 
     }
+
     //prepared for later remove from hwuart from every cpu cycle (only on demand)
 #if 0
     //Check if one of Rx or Tx is enabled NEW!
@@ -177,6 +226,7 @@ unsigned int HWUart::CpuCycleRx() {
                 if (cntRxSamples>15) {
                     if ( rxLowCnt<rxHighCnt) { //the bit was high
                         rxDataTmp|=(1<<rxBitCnt);
+                        readParity^=1; 
                     }
 
                     rxBitCnt++;
@@ -184,18 +234,50 @@ unsigned int HWUart::CpuCycleRx() {
                     rxLowCnt=0;
                     rxHighCnt=0;
 
-                    if ((rxBitCnt>7) && ( (ucr & CHR9) ==0)) {	//8 bits received
-                        rxState=RX_READ_STOPBIT;
+                    if (rxBitCnt>frameLength) {
+                        if (ucsrc&UPM1) {
+                            rxState=RX_READ_PARITY;
+                        } else {
+                            rxState=RX_READ_STOPBIT;
+                        }
                     }
-
-                    if (rxBitCnt>8) {		// 9 bits received
-                        rxState=RX_READ_STOPBIT;
-                    }
-
 
                 }	
 
                 break;
+
+            case RX_READ_PARITY:
+                cntRxSamples++;
+                if (cntRxSamples>=8 && cntRxSamples<=10) {
+                    if (pinRx==0) {
+                        rxLowCnt++;
+                    } else {
+                        rxHighCnt++;
+                    }
+                }
+
+                if (cntRxSamples>15) {
+                    bool actParity;
+
+                    if ( rxLowCnt<rxHighCnt) { //the bit was high 
+                        actParity=1; 
+                    } else {
+                        actParity=0;
+                    }
+
+                    if (ucsrc & UPM0) { //odd parity
+                        actParity=!actParity;
+                    }
+
+                    if (readParity==actParity) {
+                        usr&=0xff-UPE; //clear parity error
+                    } else {
+                        usr|=UPE;
+                    }
+                }
+                break;
+
+
 
             case RX_READ_STOPBIT:
                 cntRxSamples++;
@@ -208,7 +290,6 @@ unsigned int HWUart::CpuCycleRx() {
                 }
 
                 if (cntRxSamples>15) {
-                    usr|=RXC; //receiving is complete, regardless of framing error!
 
                     if ( rxLowCnt<rxHighCnt) { //the bit was high this is ok
                         udrRead=rxDataTmp&0xff;
@@ -224,9 +305,44 @@ unsigned int HWUart::CpuCycleRx() {
                     } else { //stopbit was low so set framing error
                         usr|=FE;
                     }
-                    rxState= RX_WAIT_FOR_HIGH;
-
+                    if (ucsrc&USBS) {
+                        cntRxSamples=0;
+                        rxLowCnt=0;
+                        rxHighCnt=0;
+                        rxState= RX_READ_STOPBIT2;  
+                    } else {
+                        if (usr|RXC) { //RXC is allready set->Overrun Error
+                            usr|=OR;
+                        }
+                        usr|=RXC; //receiving is complete, regardless of framing error!
+                        rxState= RX_WAIT_FOR_HIGH;
+                    }
                 }	
+                break;
+
+            case RX_READ_STOPBIT2:
+                {
+                    cntRxSamples++;
+                    if (cntRxSamples>=8 && cntRxSamples<=10) {
+                        if (pinRx==0) {
+                            rxLowCnt++;
+                        } else {
+                            rxHighCnt++;
+                        }
+                    }
+
+                    if (cntRxSamples>15) {
+                        if ( rxLowCnt<rxHighCnt) { //the bit was high this is ok
+                            usr&=0xff-FE;
+                        }
+                    } else { //stopbit was low so set framing error
+                        usr|=FE;
+                    }
+
+                    usr|=RXC; //receiving is complete, regardless of framing error!
+                    rxState= RX_WAIT_FOR_HIGH;
+                }	
+
 
                 break;
 
@@ -262,10 +378,6 @@ unsigned int HWUart::CpuCycleTx() {
                 } // end of transmitter empty
             } // end of new data in udr
 
-
-
-
-
             switch (txState) {
                 case TX_SEND_STARTBIT:
                     pinTx.SetAlternatePort(0);
@@ -275,19 +387,56 @@ unsigned int HWUart::CpuCycleTx() {
 
                 case TX_SEND_DATABIT:
                     pinTx.SetAlternatePort((txDataTmp&(1<<txBitCnt))>>txBitCnt);
+                    writeParity^= (txDataTmp&(1<<txBitCnt))>>txBitCnt;
                     txBitCnt++;
 
-                    if ((txBitCnt>7) && ((ucr & CHR9)==0)) {
-                        txState=TX_SEND_STOPBIT;
-                    }
-
-                    if (txBitCnt>8) {
-                        txState=TX_SEND_STOPBIT;
+                    if (txBitCnt>frameLength)  {
+                        if (ucsrc & (UPM0|UPM1) ) {
+                            txState=TX_SEND_PARITY;
+                        } else {
+                            txState=TX_SEND_STOPBIT;
+                        }
                     }
 
                     break;
 
+                case TX_SEND_PARITY:
+                    if( ucsrc & UPM0) { 
+                        //even parity to send
+                        pinTx.SetAlternatePort(writeParity);
+                    } else {
+                        //odd parity to send
+                        pinTx.SetAlternatePort(!writeParity);
+                    }
+                    txState=TX_SEND_STOPBIT;
+                    break;
+
+
                 case TX_SEND_STOPBIT:
+                    pinTx.SetAlternatePort(1);
+
+                    if (ucsrc & USBS) { //two stop bits needed?
+                        txState=TX_SEND_STOPBIT2;
+                    } else {
+                        //check for new data
+                        if (!(usr & UDRE)) { // there is new data in udr
+                            //shift data from udr->transmit shift register
+                            txDataTmp=udrWrite;
+                            if (ucr & TXB8) { // there is a 1 in txb8
+                                txDataTmp|=0x100; // this is bit 9 in the datastream
+                            }
+
+                            usr|=UDRE; // set UDRE, UDR is empty now
+                            txState=TX_SEND_STARTBIT;
+                        } // end of new data in udr
+                        else 
+                        { 
+                            txState=TX_AFTER_STOPBIT;
+                        }
+                    }
+                    break;
+
+                case TX_SEND_STOPBIT2:
                     pinTx.SetAlternatePort(1);
                     //check for new data
                     if (!(usr & UDRE)) { // there is new data in udr
@@ -346,14 +495,27 @@ Hardware(core), irqSystem(s), pinTx(tx), pinRx(rx), vectorRx(vrx), vectorUdre(vu
     Reset();
 }
 
+HWUsart::HWUsart( AvrDevice *core, HWIrqSystem *s, PinAtPort tx, PinAtPort rx, PinAtPort xck, unsigned int vrx, unsigned int vudre, unsigned int vtx): HWUart( core, s, tx, rx, vrx, vudre, vtx), pinXck(xck) {
+    core->AddToCycleList(this);
+    //irqSystem->RegisterIrqPartner(this, vectorRx);
+    //irqSystem->RegisterIrqPartner(this, vectorUdre);
+    //irqSystem->RegisterIrqPartner(this, vectorTx);
+
+    Reset();
+}
+
 void HWUart::Reset() {
     udrWrite=0;
     udrRead=0;
     usr=UDRE; //UDRE in USR is set 1 on reset
     ucr=0;
+    ucsrc=UCSZ1|UCSZ0;
     ubrr=0;
+
     rxState=RX_WAIT_FOR_LOWEDGE;
     txState=TX_FIRST_RUN;
+
+    SetFrameLengthFromRegister(); 
 }
 
 unsigned char HWUart::GetUdr() { 
@@ -364,6 +526,9 @@ unsigned char HWUart::GetUsr() { return usr; }
 unsigned char HWUart::GetUcr() { return ucr; }
 unsigned char HWUart::GetUbrr() { return ubrr&0xff; }
 unsigned char HWUart::GetUbrrhi() { return (ubrr&0xff00)>>8; }
+
+unsigned char HWUsart::GetUcsrc() { return ucsrc; }
+
 
 void HWUart::ClearIrqFlag(unsigned int vector){
     //other Uart IRQ Flags can't be cleared by executing the vector here
@@ -398,3 +563,12 @@ RWUsr::operator unsigned char() const { return uart->GetUsr(); }
 RWUcr::operator unsigned char() const { return uart->GetUcr(); } 
 RWUbrr::operator unsigned char() const { return uart->GetUbrr(); } 
 RWUbrrhi::operator unsigned char() const { return uart->GetUbrrhi(); } 
+
+unsigned char RWUcsra::operator=(unsigned char val) { trioaccess("Ucsra",val);uart->SetUsr(val);  return val; }
+unsigned char RWUcsrb::operator=(unsigned char val) { trioaccess("Ucsrb",val);uart->SetUcr(val);  return val; }
+unsigned char RWUcsrc::operator=(unsigned char val) { trioaccess("Ucsrc",val);uart->SetUcsrc(val);  return val; }
+
+RWUcsra::operator unsigned char() const { return uart->GetUsr(); } 
+RWUcsrb::operator unsigned char() const { return uart->GetUcr(); } 
+RWUcsrc::operator unsigned char() const { return uart->GetUcsrc(); } 
+

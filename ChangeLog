@@ -1,3 +1,27 @@
+2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
+    Add additional debug output in case of termination 
+    * src/avrdevice.cpp 
+
+2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
+    Bugfix: PC now has only as many bits as needed for flash size
+    * src/decoder.cpp 
+
+2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
+    remove old unused source lines
+    * src/flash.cpp 
+
+2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
+    Bugfix: systemclocktypes was unknown to simulavr.so
+    * src/simulavr.i
+
+2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
+    adding usart to atmega128, not complete: synchronos mode missing
+    double/tripple rx buffer missing
+    * src/atmega128.cpp 
+    * src/atmega128.h 
+    * src/hwuart.cpp 
+    * src/hwuart.h
+
 2004-12-24  Klaus Rudolph  <lts-rudolph@gmx.de>
     Cleanup for swig warnings
     * src/avrdevice.h 
