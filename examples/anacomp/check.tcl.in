@@ -5,7 +5,7 @@ set traceFile trace
 package require Itcl
 
 #load the avr-simulator package
-load @top_builddir@src/simulavr.so
+load @my_top_builddir@src/simulavr.so
 
 puts "simulavr loaded"
 
