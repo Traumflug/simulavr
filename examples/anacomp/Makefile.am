@@ -1,6 +1,7 @@
 bfd_la_location = @bfd_la_location@
 bfd_h_location  = @bfd_h_location@
 libiberty_location = @libiberty_location@
+PYTHON = python
 
 MAINTAINERCLEANFILES 	= Makefile.in
 
@@ -13,6 +14,10 @@ do: anacomp
 
 dogdb: anacomp
 	$(TCL_WISH) checkdebug.tcl
+
+do_python: anacomp
+	$(PYTHON) $(srcdir)/checkdebug.py
+
 endif
 
 # WAR: should detect avr-toolset first!
