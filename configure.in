@@ -13,9 +13,16 @@ AC_PROG_LIBTOOL
 
 AC_CHECK_PROG(AVR_AS, avr-as, avr-as)
 AC_CHECK_PROG(AVR_LD, avr-ld, avr-ld)
+AC_CHECK_PROG(AVR_GCC, avr-gcc, avr-gcc)
+AC_CHECK_PROG(AVR_GXX, avr-g++, avr-g++)
+AC_CHECK_PROG(TCL_WISH,wish,wish)
+
 
 AC_SUBST([AVR_AS])
 AC_SUBST([AVR_LD])
+AC_SUBST([AVR_GCC])
+AC_SUBST([AVR_GXX])
+AC_SUBST([TCL_WISH])
 
 dnl This macro searches for python version 2.1.1 or newer
 AC_CACHE_CHECK(for python >= 2.1.1, _cv_python_211, [
@@ -128,8 +135,12 @@ fi
 AVR_BFD_LIB
 AVR_LIBIBLIO
 
-
+dnl WAR:::hack in where wish is...should detect
 wish_location=/usr/bin/wish
+
+dnl some systems don't make "-ltcl" link to the version of tcl that
+dnl the source code includes...so we try to detect it's installed name.
+
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -141,7 +152,9 @@ AC_C_CONST
 dnl Checks for library functions.
 AC_FUNC_VPRINTF
 
-AC_SUBST(ac_aux_dir)
+AC_SUBST([ac_aux_dir])
+my_top_builddir=`pwd`/
+AC_SUBST([my_top_builddir])
 
 AC_OUTPUT(Makefile \
         src/Makefile \
