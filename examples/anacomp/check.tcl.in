@@ -28,7 +28,7 @@ AvrDevice_Load $dev1 "./anacomp"
 AvrDevice_SetClockFreq $dev1 250
 
 #systemclock must know that this device will be stepped from application
-set sc [SystemClock GetInstance]
+set sc [GetSystemClock]
 $sc Add $dev1
 
 #also the gui updates after each cycle
