@@ -174,8 +174,7 @@ AC_OUTPUT(Makefile \
         regress/modules/Makefile \
         regress/test_opcodes/Makefile \
         examples/Makefile examples/anacomp/Makefile \
-        examples/gui.tcl examples/anacomp/check.tcl \
-        src/config.h )
+        examples/gui.tcl examples/anacomp/check.tcl  )
 
 echo "LIBTCL_NAME        = " ${LIBTCL_NAME}
 echo "libbfd.la location = " ${bfd_la_location}
