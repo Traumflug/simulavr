@@ -14,6 +14,7 @@ lib_LTLIBRARIES		= libavrsim_pp.la
 bin_PROGRAMS = simulavr kbdgentables
 
 libavrsim_pp_la_SOURCES	= 	\
+	main3.cpp \
 	application.cpp \
 	decoder_trace.cpp \
 	printable.cpp \
