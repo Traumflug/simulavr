@@ -20,7 +20,6 @@
  *
  ****************************************************************************
  */
-#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
@@ -136,14 +135,14 @@ int main(int argc, char *argv[]) {
                 extended_tests=3;
                 break;
 
-           case 'v':
-              {
-              std::cout << "Simulavr++ " << VERSION << std::endl;
-              std::cout << "See documentation for copyright and distribution terms" << std::endl;
-              std::cout << std::endl;
-              exit(0);
-              }
-              break;
+            case 'v':
+                {
+                    std::cout << "Simulavr++ " << VERSION << std::endl;
+                    std::cout << "See documentation for copyright and distribution terms" << std::endl;
+                    std::cout << std::endl;
+                    exit(0);
+                }
+                break;
 
             default:
                 cout << "AVR-Simulator" << endl;
@@ -193,7 +192,7 @@ int main(int argc, char *argv[]) {
     }
 
     dev1->SetClockFreq(250); //4 Mhz for dummy
-    systemClock.Add(dev1);
+    SystemClock::Instance().Add(dev1);
 
 
     if (filename != "unknown" ) {
@@ -208,10 +207,10 @@ int main(int argc, char *argv[]) {
         cout << "Going to gdb..." << endl;
         gdb_interact( dev1, global_gdbserver_port, global_gdb_debug );
     } else {
-        systemClock.Add(dev1);
+        SystemClock::Instance().Add(dev1);
 
         while (1) { //for ever
-            systemClock.Step(0);
+            SystemClock::Instance().Step(0);
         }
 
     }
@@ -231,6 +230,7 @@ int main2() {
 
 
     //start the wish interpreter with gui application
+#ifdef STARTWISHFROMMAIN
     pid_t pid= fork();
 
     char *args[3];
@@ -241,6 +241,7 @@ int main2() {
     if (pid==0) { //the child
         execve( PRG_WISH , args, environ); //no return from here!
     }
+#endif
     /*
     //if child dies we also want to exit
     struct sigaction snew;
@@ -259,22 +260,29 @@ int main2() {
     Net clk;                        //the net
     Net data; //all dataRead and dataWrite are connected!
 
-    UserInterface *ui=new UserInterface(7777);
+    UserInterface *ui=new UserInterface(7777, true ); //true->withUpdateControl 
 #ifdef USE_PWM4
     AvrDevice *dev1= new AvrDevice_at90s8515;
     dev1->Load("pwm4.o.go"); //fahrspannungserzeuger
     //dev1->SetClockFreq(75);    
-    dev1->SetClockFreq(257);    //4Mhz
-    systemClock.Add(dev1);
-    
+    dev1->SetClockFreq(256);    //4Mhz //257 is not working !!! 
+    SystemClock::Instance().Add(dev1);
+
     clk.Add(dev1->GetPin("D2"));  //pwm
     OpenDrain odPwmDataW( dev1->GetPin("D4") ); // pwm data write
     data.Add(&odPwmDataW);
     data.Add(dev1->GetPin("D3"));  //pwm read
 
-
+    /*
     (*ui)<<"frame .pwm4"<<endl;
     (*ui)<<"pack .pwm4" << endl;
+    */
+    {
+        ostringstream os;
+        os <<"frame .pwm4"<<endl;
+        os <<"pack .pwm4" << endl;
+        ui->Write(os.str());
+    }
 
 
 
@@ -305,7 +313,7 @@ int main2() {
     Net pwm2;
     Net pwm3;
 
-/*    pwm0.Add(sc0.GetPin(0));
+    /*    pwm0.Add(sc0.GetPin(0));
     pwm1.Add(sc0.GetPin(1));
     pwm2.Add(sc0.GetPin(2));
     pwm3.Add(sc0.GetPin(3));
@@ -387,7 +395,7 @@ int main2() {
     AvrDevice *dev5= new AvrDevice_at90s8515;
     dev5->Load("weiche8.o.go"); //Master
     dev5->SetClockFreq(125);    //125 ns per Cycle -> 8Mhz
-    systemClock.Add(dev5);
+    SystemClock::Instance().Add(dev5);
 
     OpenDrain odWeicheDataW( dev5->GetPin("D4") ); //weiche data write
     data.Add(&odWeicheDataW);
@@ -400,7 +408,7 @@ int main2() {
     //dev2->SetClockFreq(200);    //200 ns per Cycle -> 5Mhz
     //dev2->SetClockFreq(250);    //200 ns per Cycle -> 5Mhz
     dev2->SetClockFreq(272);     //3.66 Mhz
-    systemClock.Add(dev2);
+    SystemClock::Instance().Add(dev2);
 
     OpenDrain odMasterDataW( dev2->GetPin("B4") ); //master
     data.Add(&odMasterDataW);   //master
@@ -413,8 +421,8 @@ int main2() {
     dev3->Load("monispecial.o.go"); //Debugger
     //dev3->SetClockFreq(200);    //200 ns per Cycle -> 5Mhz
     dev3->SetClockFreq(250);    //200 ns per Cycle -> 5Mhz
-    systemClock.Add(dev3);
-    
+    SystemClock::Instance().Add(dev3);
+
     clk.Add(dev3->GetPin("D2"));    //moni
     data.Add(dev3->GetPin("D3")); //moni read
     OpenDrain odMoniDataW( dev3->GetPin("D4") ); //moni
@@ -425,15 +433,19 @@ int main2() {
     AvrDevice *dev4= new AvrDevice_at90s4433;
     dev4->Load("ana.o.go"); //analog control 
     dev4->SetClockFreq(250); //4MHz
-    systemClock.Add(dev4);
+    SystemClock::Instance().Add(dev4);
 
     clk.Add(dev4->GetPin("D2"));  //ana
     OpenDrain odAnaDataW( dev4->GetPin("D4") ); // ana data write
     data.Add(&odAnaDataW);
     data.Add(dev4->GetPin("D3")); //ana read
 
-    (*ui) << "frame .ana" << endl;
-    (*ui) << "pack .ana" << endl;
+    {
+        ostringstream os;
+        os << "frame .ana" << endl;
+        os << "pack .ana" << endl;
+        ui->Write(os.str());
+    }
 
     ExtAnalogPin evref( INT_MAX, ui, "vref", ".ana");
     ExtAnalogPin ev0( 0, ui, "v0", ".ana");
@@ -478,13 +490,20 @@ int main2() {
 
 #endif
 
-    (*ui) << "frame .master" << endl;
-    (*ui) << "pack .master" << endl;
+    {
+        //(*ui) << "frame .master" << endl;
+        //(*ui) << "pack .master" << endl;
+        ostringstream os;
+        os  << "frame .master" << endl;
+        os << "pack .master" << endl;
+        ui->Write(os.str());
+    }
 
-    systemClock.AddAsyncMember(ui);
+    //SystemClock::Instance().AddAsyncMember(ui);
+    SystemClock::Instance().Add(ui);
 
     Lcd lcd(ui, "lcd1", ".master");
-    systemClock.AddAsyncMember(&lcd);
+    SystemClock::Instance().AddAsyncMember(&lcd);
 
 #ifdef EXPORT_CLKDATA
     ExtPin extClk(Pin::TRISTATE, ui, "clk", ".master");      //this pin is the external representation via the ui (ui.cpp)
@@ -557,7 +576,7 @@ int main2() {
     //now add a keyboard there :-)
     Keyboard kbd(ui, "kbd1");
     kbd.SetClockFreq(40000); //30..50 us is normal clocking rate so we use midrange device here :-)
-    systemClock.Add(&kbd);
+    SystemClock::Instance().Add(&kbd);
 
     key_data.Add(dev2->GetPin("D4"));
     key_data.Add(kbd.GetPin("data"));
@@ -566,7 +585,7 @@ int main2() {
     key_clk.Add(kbd.GetPin("clk"));
     key_clk.Add(&extKbdClk);
 
-    systemClock.Endless();
+    SystemClock::Instance().Endless();
 
     cout << "End of simulation" << endl;
     return 0;
@@ -576,7 +595,7 @@ int main4() {
 
     cout << "Starting with gui for main3" << endl;
     UserInterface *ui=new UserInterface(7777);
-    systemClock.AddAsyncMember(ui);
+    SystemClock::Instance().AddAsyncMember(ui);
 
     Net neta;
 
@@ -591,10 +610,10 @@ int main4() {
     ExtPin ep(Pin::TRISTATE, ui, "bO", ".x");
     neta.Add(&ep);
 
-    systemClock.Add(dev1);
+    SystemClock::Instance().Add(dev1);
     cout << "Device setup complete" << endl;
     while(1) {
-        systemClock.Step(0);
+        SystemClock::Instance().Step(0);
     }
 
 
