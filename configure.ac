@@ -47,6 +47,7 @@ AC_HEADER_STDBOOL
 AC_C_CONST
 AC_TYPE_SIZE_T
 AC_C_VOLATILE
+AC_C_BIGENDIAN
 
 if test -e ${swig_path}; then
  AC_MSG_NOTICE([got swig])
