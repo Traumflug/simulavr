@@ -133,11 +133,19 @@ string HWPort::GetPortString() {
 }
 
 
-unsigned char RWPort::operator=(unsigned char val) { trioaccess("Port",val);hwport->SetPort(val); return val; } 
+unsigned char RWPort::operator=(unsigned char val) { if (core->trace_on) trioaccess("Port",val);hwport->SetPort(val); return val; } 
 
-unsigned char RWPin::operator=(unsigned char val) { trioaccess("Pin",val);cerr << "Not allowed to write to Pin! Read-Only!" << endl; return 0;} 
+unsigned char RWPin::operator=(unsigned char val) { 
+    if (core->trace_on) {
+        trioaccess("Pin",val);
+        traceOut << "Not allowed to write to Pin! Read-Only!" << endl;
+    }
+    
+    cerr << "Not allowed to write to Pin! Read-Only!" << endl; 
+    return 0;
+} 
 
-unsigned char RWDdr::operator=(unsigned char val) { trioaccess("Ddr",val);hwport->SetDdr(val); return val; } 
+unsigned char RWDdr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ddr",val);hwport->SetDdr(val); return val; } 
 
 
 RWPort::operator unsigned char() const { return  hwport->GetPort(); } 

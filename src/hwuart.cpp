@@ -61,7 +61,11 @@ void HWUart::SetUdr(unsigned char val) {
     udrWrite=val;
     if ( usr&UDRE) { //the data register was empty
         usr &=0xff-UDRE; //so we are not able to send another value now 
+        if (ucr & UDRIE) { // UDRE irq was allready set, so clear it
+            irqSystem->ClearIrqFlag(vectorUdre);
+        }
     }
+
 } 
 
 
@@ -364,7 +368,7 @@ unsigned int HWUart::CpuCycleTx() {
 
         if (ucr & TXEN ) {	//transmitter enabled
             if (!(usr & UDRE) ) { // there is new data in udr
-                if ((usr & TXC)| (txState==TX_FIRST_RUN)) { //transmitter is empty
+                if ((usr & TXC)| (txState==TX_FIRST_RUN)|txState==TX_FINISH) { //transmitter is empty
                     //shift data from udr->transmit shift register
                     txDataTmp=udrWrite;
                     if (ucr & TXB8) { // there is a 1 in txb8
@@ -456,14 +460,15 @@ unsigned int HWUart::CpuCycleTx() {
                     break;
 
                 case TX_AFTER_STOPBIT: //transmit complete and no new data
-                    //leave state untouched
                     usr|=TXC; 			//set the txc 
+                    txState=TX_FINISH; 
                     break;
 
 
 
                 case TX_DISABLED:
                 case TX_FIRST_RUN:
+                case TX_FINISH:
                     break;
 
             } //end of switch tx state
@@ -488,19 +493,10 @@ unsigned int HWUart::CpuCycleTx() {
 HWUart::HWUart( AvrDevice *core, HWIrqSystem *s, PinAtPort tx, PinAtPort rx, unsigned int vrx, unsigned int vudre, unsigned int vtx):
 Hardware(core), irqSystem(s), pinTx(tx), pinRx(rx), vectorRx(vrx), vectorUdre(vudre), vectorTx(vtx) {
     core->AddToCycleList(this);
-    //irqSystem->RegisterIrqPartner(this, vectorRx);
-    //irqSystem->RegisterIrqPartner(this, vectorUdre);
-    //irqSystem->RegisterIrqPartner(this, vectorTx);
-
     Reset();
 }
 
 HWUsart::HWUsart( AvrDevice *core, HWIrqSystem *s, PinAtPort tx, PinAtPort rx, PinAtPort xck, unsigned int vrx, unsigned int vudre, unsigned int vtx): HWUart( core, s, tx, rx, vrx, vudre, vtx), pinXck(xck) {
-    core->AddToCycleList(this);
-    //irqSystem->RegisterIrqPartner(this, vectorRx);
-    //irqSystem->RegisterIrqPartner(this, vectorUdre);
-    //irqSystem->RegisterIrqPartner(this, vectorTx);
-
     Reset();
 }
 
@@ -551,11 +547,11 @@ void HWUart::CheckForNewClearIrq(unsigned char val) {
 }
 
 
-unsigned char RWUdr::operator=(unsigned char val) { trioaccess("Udr",val);uart->SetUdr(val);  return val; } 
-unsigned char RWUsr::operator=(unsigned char val) { trioaccess("Usr",val);uart->SetUsr(val);  return val; } 
-unsigned char RWUcr::operator=(unsigned char val) { trioaccess("Ucr",val);uart->SetUcr(val);  return val; } 
-unsigned char RWUbrr::operator=(unsigned char val) { trioaccess("Ubrr",val);uart->SetUbrr(val); return val; } 
-unsigned char RWUbrrhi::operator=(unsigned char val) { trioaccess("Ubrrhi",val);uart->SetUbrrhi(val); return val; } 
+unsigned char RWUdr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Udr",val);uart->SetUdr(val);  return val; } 
+unsigned char RWUsr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Usr",val);uart->SetUsr(val);  return val; } 
+unsigned char RWUcr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ucr",val);uart->SetUcr(val);  return val; } 
+unsigned char RWUbrr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ubrr",val);uart->SetUbrr(val); return val; } 
+unsigned char RWUbrrhi::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ubrrhi",val);uart->SetUbrrhi(val); return val; } 
 
 
 RWUdr::operator unsigned char() const { return uart->GetUdr(); } 
@@ -564,9 +560,9 @@ RWUcr::operator unsigned char() const { return uart->GetUcr(); }
 RWUbrr::operator unsigned char() const { return uart->GetUbrr(); } 
 RWUbrrhi::operator unsigned char() const { return uart->GetUbrrhi(); } 
 
-unsigned char RWUcsra::operator=(unsigned char val) { trioaccess("Ucsra",val);uart->SetUsr(val);  return val; }
-unsigned char RWUcsrb::operator=(unsigned char val) { trioaccess("Ucsrb",val);uart->SetUcr(val);  return val; }
-unsigned char RWUcsrc::operator=(unsigned char val) { trioaccess("Ucsrc",val);uart->SetUcsrc(val);  return val; }
+unsigned char RWUcsra::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ucsra",val);uart->SetUsr(val);  return val; }
+unsigned char RWUcsrb::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ucsrb",val);uart->SetUcr(val);  return val; }
+unsigned char RWUcsrc::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ucsrc",val);uart->SetUcsrc(val);  return val; }
 
 RWUcsra::operator unsigned char() const { return uart->GetUsr(); } 
 RWUcsrb::operator unsigned char() const { return uart->GetUcr(); } 

@@ -91,7 +91,7 @@ class RWAdmux: public RWMemoryMembers {
         HWAdmux *admux;
 
     public:
-        RWAdmux(HWAdmux *a): admux(a) {}
+        RWAdmux(AvrDevice *c, HWAdmux *a): RWMemoryMembers(c), admux(a) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -101,7 +101,7 @@ class RWAdch: public RWMemoryMembers {
         HWAd *ad;
 
     public:
-        RWAdch( HWAd *a): ad(a) {}
+        RWAdch(AvrDevice *c,  HWAd *a): RWMemoryMembers(c), ad(a) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -111,7 +111,7 @@ class RWAdcl: public RWMemoryMembers {
         HWAd *ad;
 
     public:
-        RWAdcl( HWAd *a): ad(a) {}
+        RWAdcl(AvrDevice *c,  HWAd *a): RWMemoryMembers(c), ad(a) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -121,7 +121,7 @@ class RWAdcsr: public RWMemoryMembers {
         HWAd *ad;
 
     public:
-        RWAdcsr( HWAd *a): ad(a) {}
+        RWAdcsr(AvrDevice *c,  HWAd *a):RWMemoryMembers(c), ad(a) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };

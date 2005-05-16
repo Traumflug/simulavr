@@ -27,6 +27,8 @@
 
 class SimulationMember {
     public:
+        int trace_on;
+        SimulationMember(): trace_on(0) {}
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0)=0;
 };
 

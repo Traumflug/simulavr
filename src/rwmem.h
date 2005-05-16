@@ -22,6 +22,8 @@
  */
 #ifndef RWMEM
 #define RWMEM
+
+#include "avrdevice.h"
 /*
  * All here defined types are used to simulate the 
  * read write address space. This means also registers
@@ -29,7 +31,12 @@
  */
 
 class RWMemoryMembers{
+    protected:
+        AvrDevice *core;
+
     public:
+        RWMemoryMembers(AvrDevice *c): core(c) {}
+
         virtual unsigned char operator=(unsigned char val) =0;
         virtual operator unsigned char() const =0 ;
         void operator=(const RWMemoryMembers &mm);
@@ -43,7 +50,7 @@ class RWMemoryWithOwnMemory: public RWMemoryMembers {
         unsigned char value;
 
     public:
-        RWMemoryWithOwnMemory() {
+        RWMemoryWithOwnMemory(AvrDevice *c):RWMemoryMembers(c) {
             value=0;
         }
 
@@ -55,10 +62,9 @@ class AvrDevice;
 
 class CPURegister: public RWMemoryWithOwnMemory {
     unsigned int myNumber;
-    AvrDevice *core;
 
     public:
-    CPURegister(AvrDevice *c, unsigned int number);
+    CPURegister(AvrDevice *c, unsigned int number): RWMemoryWithOwnMemory(c), myNumber(number){}
 
     unsigned char operator=(unsigned char val);
     operator unsigned char() const;
@@ -67,12 +73,8 @@ class CPURegister: public RWMemoryWithOwnMemory {
 
 class IRam: public RWMemoryWithOwnMemory {
     unsigned int myAddress;
-    AvrDevice *core;
     public:
-    IRam(AvrDevice *c, unsigned int number) {
-        core=c;
-        myAddress=number;
-    }
+    IRam(AvrDevice *c, unsigned int number):RWMemoryWithOwnMemory(c), myAddress(number) { }
     unsigned char operator=(unsigned char val); 
     operator unsigned char() const;
 };
@@ -81,18 +83,14 @@ class IRam: public RWMemoryWithOwnMemory {
 class ERam: public RWMemoryWithOwnMemory {
     unsigned int myAddress;
     public:
-    ERam(unsigned int number) {
-        myAddress=number;
-    }
+    ERam(AvrDevice *c, unsigned int number): RWMemoryWithOwnMemory(c), myAddress(number) { }
     unsigned char operator=(unsigned char val);
 };
 
 class NotAvailableIo: public RWMemoryMembers {
     unsigned int myAddress;
     public:
-    NotAvailableIo(unsigned int number) {
-        myAddress=number;
-    }
+    NotAvailableIo(AvrDevice* c, unsigned int number):RWMemoryMembers(c), myAddress(number) { }
 
     unsigned char operator=(unsigned char val); 
     operator unsigned char() const;
@@ -100,7 +98,7 @@ class NotAvailableIo: public RWMemoryMembers {
 
 class RWReserved: public RWMemoryMembers {
     public:
-        RWReserved() { }
+        RWReserved(AvrDevice *c): RWMemoryMembers(c) { }
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -132,7 +130,7 @@ class RWWriteToPipe: public RWMemoryMembers {
         ofstream os;
 
     public:
-        RWWriteToPipe(const string &name): os(name.c_str()) { 
+        RWWriteToPipe(AvrDevice *c, const string &name): RWMemoryMembers(c), os(name.c_str()) { 
             pipeName=name;
         }
         virtual ~RWWriteToPipe() {}

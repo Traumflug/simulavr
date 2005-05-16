@@ -62,7 +62,7 @@ int HWAdmux::GetMuxOutput() {
     return ad[admux&(MUX2|MUX1|MUX0)].GetAnalog();
 }
 
-unsigned char RWAdmux::operator=(unsigned char val) { trioaccess("Admux",val); admux->SetAdmux(val);  return val; } 
+unsigned char RWAdmux::operator=(unsigned char val) { if (core->trace_on) trioaccess("Admux",val); admux->SetAdmux(val);  return val; } 
 RWAdmux::operator unsigned char() const { return admux->GetAdmux(); } 
 
 //---------------------------------------------------------------------------------
@@ -228,7 +228,7 @@ unsigned int HWAd::CpuCycle() {
                         //calc sample to go to 10 bit value
                         adSample= adSample>>(sizeof(int)*8 -(10+1)); 
                         if (adchLocked) {
-                            if (trace_on) {
+                            if (core->trace_on) {
                                 traceOut<< "AD-Result lost adch is locked!" << endl;
                             } else {
                                 cerr << "AD-Result lost adch is locked!" << endl;
@@ -272,9 +272,9 @@ unsigned int HWAd::CpuCycle() {
 
 
 
-unsigned char RWAdch::operator=(unsigned char val) { trioaccess("Write to adch not supported!",val);  return val; } 
-unsigned char RWAdcl::operator=(unsigned char val) { trioaccess("Write to adcl not supported!",val);  return val; } 
-unsigned char RWAdcsr::operator=(unsigned char val) { trioaccess("Adcsr",val); ad->SetAdcsr(val);  return val; } 
+unsigned char RWAdch::operator=(unsigned char val) { if (core->trace_on) trioaccess("Write to adch not supported!",val);  return val; } 
+unsigned char RWAdcl::operator=(unsigned char val) { if (core->trace_on) trioaccess("Write to adcl not supported!",val);  return val; } 
+unsigned char RWAdcsr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Adcsr",val); ad->SetAdcsr(val);  return val; } 
 RWAdcsr::operator unsigned char() const { return ad->GetAdcsr(); } 
 RWAdcl::operator unsigned char() const { return ad->GetAdcl(); } 
 RWAdch::operator unsigned char() const { return ad->GetAdch(); } 

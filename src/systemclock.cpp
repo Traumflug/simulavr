@@ -39,6 +39,14 @@ SystemClock::SystemClock() {
     }
 }
 
+void SystemClock::SetTraceModeForAllMembers(int trace_on) {
+    iterator mi;
+    for (mi=begin(); mi!=end(); mi++) {
+       mi->second->trace_on=trace_on;
+    }
+} 
+
+
 void SystemClock::Add(SimulationMember *dev) {
     insert( pair<SystemClockOffset, SimulationMember*>(currentTime,dev));
 }
@@ -69,7 +77,7 @@ int SystemClock::Step(bool &untilCoreStepFinished) { //0-> return also if cpu in
         core=begin()->second;
         currentTime=begin()->first; 
         erase(begin());
-        if (trace_on) traceOut << DecLong(currentTime)<<" ";
+        if (core->trace_on) traceOut << DecLong(currentTime)<<" ";
         res=core->Step(untilCoreStepFinished, &nextStepIn_ns);
         if (nextStepIn_ns==0) { //insert the next step behind the following!
             SystemClock::iterator ii=begin();

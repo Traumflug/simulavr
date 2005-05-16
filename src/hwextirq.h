@@ -72,7 +72,7 @@ class RWGimsk: public RWMemoryMembers {
         HWExtIrq *hwExtIrq;
         HWPort *port;
     public:
-        RWGimsk(HWExtIrq *s, HWPort *p) { hwExtIrq=s;port= p; }
+        RWGimsk(AvrDevice *c, HWExtIrq *s, HWPort *p): RWMemoryMembers(c), hwExtIrq(s), port(p) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -82,7 +82,7 @@ class RWGifr: public RWMemoryMembers {
         HWExtIrq *hwExtIrq;
         HWPort *port;
     public:
-        RWGifr(HWExtIrq *s, HWPort *p) { hwExtIrq=s;port=p;}
+        RWGifr(AvrDevice *c, HWExtIrq *s, HWPort *p): RWMemoryMembers(c), hwExtIrq(s), port(p) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };

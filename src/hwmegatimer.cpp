@@ -1213,29 +1213,29 @@ void HWMegaTimer1::CheckForMode() {
 }
 
 
-unsigned char RWTccraM::operator=(unsigned char val) { trioaccess("TccraM",val);timer1->SetTccr1a(val); return val; }
-unsigned char RWTccrbM::operator=(unsigned char val) { trioaccess("TccrbM",val);timer1->SetTccr1b(val); return val; }
-unsigned char RWTccrcM::operator=(unsigned char val) { trioaccess("TccrcM",val);timer1->SetTccr1c(val); return val; }
-unsigned char RWTcnthM::operator=(unsigned char val) { trioaccess("TcnthM",val);timer1->SetTcnt1h(val); return val; }
-unsigned char RWTcntlM::operator=(unsigned char val) { trioaccess("TcntlM",val);timer1->SetTcnt1l(val); return val; }
-unsigned char RWOcrahM::operator=(unsigned char val) { trioaccess("OcrahM",val);timer1->SetOcr1ah(val); return val; }
-unsigned char RWOcralM::operator=(unsigned char val) { trioaccess("OcralM",val);timer1->SetOcr1al(val); return val; }
-unsigned char RWOcrbhM::operator=(unsigned char val) { trioaccess("OcrbhM",val);timer1->SetOcr1bh(val); return val; }
-unsigned char RWOcrblM::operator=(unsigned char val) { trioaccess("OcrblM",val);timer1->SetOcr1bl(val); return val; }
-unsigned char RWOcrchM::operator=(unsigned char val) { trioaccess("OcrchM",val);timer1->SetOcr1ch(val); return val; }
-unsigned char RWOcrclM::operator=(unsigned char val) { trioaccess("OcrclM",val);timer1->SetOcr1cl(val); return val; }
-unsigned char RWIcrhM::operator=(unsigned char val) { trioaccess("IcrhM",val);timer1->SetIcrh(val);  return val; }
-unsigned char RWIcrlM::operator=(unsigned char val) { trioaccess("IcrlM",val);timer1->SetIcrl(val);  return val; }
-unsigned char RWEtimskM::operator=(unsigned char val) { trioaccess("EtimskM",val);hwTimer01Irq->SetTimsk(val);  return val; }
-unsigned char RWEtifrM::operator=(unsigned char val) { trioaccess("EtifrM",val);hwTimer01Irq->SetTifr(val);  return val; }
-unsigned char RWTimskM::operator=(unsigned char val) { trioaccess("TimskM",val);hwTimer01Irq->SetTimsk(val);  return val; }
-unsigned char RWTifrM::operator=(unsigned char val) { trioaccess("TifrM",val);hwTimer01Irq->SetTifr(val);  return val; }
-unsigned char RWTcnt0::operator=(unsigned char val) { trioaccess("Tcnt0",val);timer0->SetTcnt(val);  return val; }
-unsigned char RWOcr0::operator=(unsigned char val) { trioaccess("Ocr0",val);timer0->SetOcr(val);  return val; }
-unsigned char RWTccr0::operator=(unsigned char val) { trioaccess("Tccr0",val);timer0->SetTccr(val);  return val; }
-unsigned char RWTccr2::operator=(unsigned char val) { trioaccess("Tccr2",val);timer0->SetTccr(val);  return val; }
-unsigned char RWTcnt2::operator=(unsigned char val) { trioaccess("Tcnt2",val);timer0->SetTcnt(val);  return val; }
-unsigned char RWOcr2::operator=(unsigned char val) { trioaccess("Ocr2",val);timer0->SetOcr(val);  return val; }
+unsigned char RWTccraM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TccraM",val);timer1->SetTccr1a(val); return val; }
+unsigned char RWTccrbM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TccrbM",val);timer1->SetTccr1b(val); return val; }
+unsigned char RWTccrcM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TccrcM",val);timer1->SetTccr1c(val); return val; }
+unsigned char RWTcnthM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TcnthM",val);timer1->SetTcnt1h(val); return val; }
+unsigned char RWTcntlM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TcntlM",val);timer1->SetTcnt1l(val); return val; }
+unsigned char RWOcrahM::operator=(unsigned char val) { if (core->trace_on) trioaccess("OcrahM",val);timer1->SetOcr1ah(val); return val; }
+unsigned char RWOcralM::operator=(unsigned char val) { if (core->trace_on) trioaccess("OcralM",val);timer1->SetOcr1al(val); return val; }
+unsigned char RWOcrbhM::operator=(unsigned char val) { if (core->trace_on) trioaccess("OcrbhM",val);timer1->SetOcr1bh(val); return val; }
+unsigned char RWOcrblM::operator=(unsigned char val) { if (core->trace_on) trioaccess("OcrblM",val);timer1->SetOcr1bl(val); return val; }
+unsigned char RWOcrchM::operator=(unsigned char val) { if (core->trace_on) trioaccess("OcrchM",val);timer1->SetOcr1ch(val); return val; }
+unsigned char RWOcrclM::operator=(unsigned char val) { if (core->trace_on) trioaccess("OcrclM",val);timer1->SetOcr1cl(val); return val; }
+unsigned char RWIcrhM::operator=(unsigned char val) { if (core->trace_on) trioaccess("IcrhM",val);timer1->SetIcrh(val);  return val; }
+unsigned char RWIcrlM::operator=(unsigned char val) { if (core->trace_on) trioaccess("IcrlM",val);timer1->SetIcrl(val);  return val; }
+unsigned char RWEtimskM::operator=(unsigned char val) { if (core->trace_on) trioaccess("EtimskM",val);hwTimer01Irq->SetTimsk(val);  return val; }
+unsigned char RWEtifrM::operator=(unsigned char val) { if (core->trace_on) trioaccess("EtifrM",val);hwTimer01Irq->SetTifr(val);  return val; }
+unsigned char RWTimskM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TimskM",val);hwTimer01Irq->SetTimsk(val);  return val; }
+unsigned char RWTifrM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TifrM",val);hwTimer01Irq->SetTifr(val);  return val; }
+unsigned char RWTcnt0::operator=(unsigned char val) { if (core->trace_on) trioaccess("Tcnt0",val);timer0->SetTcnt(val);  return val; }
+unsigned char RWOcr0::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ocr0",val);timer0->SetOcr(val);  return val; }
+unsigned char RWTccr0::operator=(unsigned char val) { if (core->trace_on) trioaccess("Tccr0",val);timer0->SetTccr(val);  return val; }
+unsigned char RWTccr2::operator=(unsigned char val) { if (core->trace_on) trioaccess("Tccr2",val);timer0->SetTccr(val);  return val; }
+unsigned char RWTcnt2::operator=(unsigned char val) { if (core->trace_on) trioaccess("Tcnt2",val);timer0->SetTcnt(val);  return val; }
+unsigned char RWOcr2::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ocr2",val);timer0->SetOcr(val);  return val; }
 
 
 

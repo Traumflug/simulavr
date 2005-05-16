@@ -100,7 +100,7 @@ class RWSpdr: public RWMemoryMembers {
     protected:
         HWSpi* spi;
     public:
-        RWSpdr(HWSpi *s) { spi=s; }
+        RWSpdr(AvrDevice *c, HWSpi *s): RWMemoryMembers(c), spi(s) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -109,7 +109,7 @@ class RWSpsr: public RWMemoryMembers {
     protected:
         HWSpi* spi;
     public:
-        RWSpsr(HWSpi *s) { spi=s; }
+        RWSpsr(AvrDevice *c, HWSpi *s): RWMemoryMembers(c), spi(s) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -118,7 +118,7 @@ class RWSpcr: public RWMemoryMembers {
     protected:
         HWSpi* spi;
     public:
-        RWSpcr(HWSpi *s) { spi=s; }
+        RWSpcr(AvrDevice *c, HWSpi *s): RWMemoryMembers(c), spi(s) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };

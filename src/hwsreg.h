@@ -26,6 +26,7 @@
 using namespace std;
 
 #include "rwmem.h"
+#include "avrdevice.h"
 /* maybe the faster solution... */
 class HWSreg_bool {
 	public:
@@ -70,7 +71,7 @@ class RWSreg: public RWMemoryMembers {
     protected:
         HWSreg *status;
     public:
-        RWSreg(HWSreg *s) { status=s;}
+        RWSreg(AvrDevice *c, HWSreg *s) :RWMemoryMembers(c), status(s) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };

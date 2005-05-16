@@ -134,5 +134,5 @@ void HWAcomp::ClearIrqFlag(unsigned int vector){
 }
 
 
-unsigned char RWAcsr::operator=(unsigned char val) { trioaccess("Acsr",val); acomp->SetAcsr(val);  return val; } 
+unsigned char RWAcsr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Acsr",val); acomp->SetAcsr(val);  return val; } 
 RWAcsr::operator unsigned char() const { return acomp->GetAcsr(); } 

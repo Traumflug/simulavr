@@ -29,12 +29,10 @@ unsigned char RWSph::operator=(unsigned char val) { hwstack->SetSph(val); return
 unsigned char RWSpl::operator=(unsigned char val) { hwstack->SetSpl(val); return val;} 
 RWSpl::operator unsigned char() const { return hwstack->GetSpl();  } 
 RWSph::operator unsigned char() const { return hwstack->GetSph();  } 
-RWSph::RWSph(HWStack *stack) { hwstack=stack;}
-RWSpl::RWSpl(HWStack *stack) { hwstack = stack; }
 
 
 
-HWStack::HWStack(AvrDevice *core, MemoryOffsets *sr, unsigned int mask):Hardware(core) {
+HWStack::HWStack(AvrDevice *c, MemoryOffsets *sr, unsigned int mask):Hardware(c), core(c) {
     stackMask=mask;
 	mem=sr;
 	Reset();
@@ -58,13 +56,13 @@ void HWStack::Push(unsigned char val){
 	(*mem)[stackPointer]=val;
 	stackPointer--;
     stackPointer&=stackMask;
-	if (trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ;
+	if (core->trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ;
     CheckBreakPoints();
 }
 unsigned char HWStack::Pop(){
 	stackPointer++;
     stackPointer&=stackMask;
-	if (trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ;
+	if (core->trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ;
     CheckBreakPoints();
 	return (*mem)[stackPointer];
 }
@@ -73,7 +71,7 @@ void HWStack::SetSpl(unsigned char val) {
 	stackPointer=stackPointer&0xffff00;
 	stackPointer+=val;
     stackPointer&=stackMask;
-	if (trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
+	if (core->trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
     CheckBreakPoints();
 }
 
@@ -81,7 +79,7 @@ void HWStack::SetSph(unsigned char val) {
 	stackPointer=stackPointer&0xff00ff;
 	stackPointer+=(val<<8);
     stackPointer&=stackMask;
-	if (trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
+	if (core->trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
     CheckBreakPoints();
 }
 

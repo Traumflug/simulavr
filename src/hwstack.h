@@ -26,12 +26,14 @@
 #include "rwmem.h"
 #include "hardware.h"
 #include "funktor.h"
+#include "avrdevice.h"
 
 #include <map>
 
 
 class HWStack: public Hardware {
 	protected:
+        AvrDevice *core;
 		MemoryOffsets *mem;
 		unsigned int stackPointer;
         unsigned int stackMask;
@@ -58,7 +60,7 @@ class RWSph: public RWMemoryMembers {
 	protected: 
 		HWStack *hwstack;
 	public:
-		RWSph(HWStack *stack); // { hwstack=stack;}
+		RWSph(AvrDevice *c, HWStack *stack): RWMemoryMembers(c), hwstack(stack){}
 		virtual unsigned char operator=(unsigned char) ;
 		virtual operator unsigned char() const;
 };
@@ -67,7 +69,7 @@ class RWSpl: public RWMemoryMembers {
 	protected:
 		HWStack *hwstack;
 	public:
-		RWSpl(HWStack *stack); // { hwstack = stack; }
+		RWSpl(AvrDevice *c, HWStack *stack): RWMemoryMembers(c), hwstack(stack){} 
 		virtual unsigned char operator=(unsigned char) ;
 		virtual operator unsigned char() const;
 };

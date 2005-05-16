@@ -181,5 +181,5 @@ void HWExtIrq::PinStateHasChanged(Pin *p) {
 RWGimsk::operator unsigned char() const { return hwExtIrq->GetGimsk(); }
 RWGifr::operator unsigned char() const { return hwExtIrq->GetGifr(); }
 
-unsigned char RWGimsk::operator=(unsigned char val) { trioaccess("Gimsk",val);hwExtIrq->SetGimsk(val);  return val; }
-unsigned char RWGifr::operator=(unsigned char val) { trioaccess("Gifr",val);hwExtIrq->SetGifr(val);  return val; }
+unsigned char RWGimsk::operator=(unsigned char val) { if (core->trace_on) trioaccess("Gimsk",val);hwExtIrq->SetGimsk(val);  return val; }
+unsigned char RWGifr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Gifr",val);hwExtIrq->SetGifr(val);  return val; }

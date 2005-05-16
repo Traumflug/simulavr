@@ -52,6 +52,7 @@ class SystemClock
         void Endless();
         static SystemClock& Instance();
         void Rescedule( SimulationMember *sm, SystemClockOffset newTime);
+        void SetTraceModeForAllMembers(int trace_on);
 };
 
 #endif

@@ -53,23 +53,23 @@ unsigned char HWEeprom::GetEecr() { return eecr; }
 void HWEeprom::SetEearl(unsigned char val) {
     eear=eear&0xff00;
     eear+=val;
-    if (trace_on==1) traceOut << "EEAR=0x"<<hex << eear<<dec;
+    if (core->trace_on==1) traceOut << "EEAR=0x"<<hex << eear<<dec;
 }
 
 void HWEeprom::SetEearh(unsigned char val) {
     eear=eear&0x00ff;
     eear+=(val<<8);
-    if (trace_on==1) traceOut << "EEAR=0x"<<hex << eear<<dec;
+    if (core->trace_on==1) traceOut << "EEAR=0x"<<hex << eear<<dec;
 }
 
 void HWEeprom::SetEedr(unsigned char val) {
     eedr=val;
-    if (trace_on==1) traceOut << "EEDR=0x"<<hex << (unsigned int) eedr<<dec;
+    if (core->trace_on==1) traceOut << "EEDR=0x"<<hex << (unsigned int) eedr<<dec;
 }
 
 void HWEeprom::SetEecr(unsigned char newval) {
     unsigned char localIrqFlag=newval&0x08;
-    if (trace_on==1) traceOut << "EECR=0x"<<hex << (unsigned int) newval<<dec;
+    if (core->trace_on==1) traceOut << "EECR=0x"<<hex << (unsigned int) newval<<dec;
 
 
     if (((newval&0x07)==0x04) && (state==READY)) {
@@ -77,7 +77,7 @@ void HWEeprom::SetEecr(unsigned char newval) {
         core->AddToCycleList(this);
         writeEnableCycles=4;
         eecr=0x04 | localIrqFlag;
-        if (trace_on==1) traceOut << " EEPROM: Master Write Enabled ";
+        if (core->trace_on==1) traceOut << " EEPROM: Master Write Enabled ";
         return ;
     }
 
@@ -86,7 +86,7 @@ void HWEeprom::SetEecr(unsigned char newval) {
         cpuHoldCycles=2;
         eecr=0x02 | localIrqFlag;
         writeStartTime=SystemClock::Instance().GetCurrentTime();
-        if (trace_on==1) traceOut << " EEPROM: Write started ";
+        if (core->trace_on==1) traceOut << " EEPROM: Write started ";
         return;
     }
 
@@ -95,7 +95,7 @@ void HWEeprom::SetEecr(unsigned char newval) {
             state=READY;
             core->RemoveFromCycleList(this);
             eecr=localIrqFlag;
-            if (trace_on==1) {
+            if (core->trace_on==1) {
                 traceOut << " EEPROM Write fails while try to read!" << endl;
             } else {
                 cerr << " EEPROM Write fails while try to read!" << endl;
@@ -108,7 +108,7 @@ void HWEeprom::SetEecr(unsigned char newval) {
             }
 
             eecr=0x01 | localIrqFlag;
-            if (trace_on==1) traceOut << " EEPROM: Read ";
+            if (core->trace_on==1) traceOut << " EEPROM: Read ";
 
         }
         return;
@@ -117,7 +117,7 @@ void HWEeprom::SetEecr(unsigned char newval) {
     if ((newval & 0x07) != 0x00) {
         state=READY;
         core->RemoveFromCycleList(this);
-        if( trace_on==1) {
+        if( core->trace_on==1) {
             traceOut << "Illegal EEPROM access!" << endl;
         } else {
             cerr<< "Illegal EEPROM access!" << endl;
@@ -135,7 +135,7 @@ unsigned int HWEeprom::CpuCycle() {
             if (writeEnableCycles == 0) {
                 eecr=0;
                 state= READY;
-                if (trace_on==1) traceOut << " EEPROM: WriteEnable cleared :-( ";
+                if (core->trace_on==1) traceOut << " EEPROM: WriteEnable cleared :-( ";
             }
             break;
 
@@ -145,7 +145,7 @@ unsigned int HWEeprom::CpuCycle() {
                 state=READY;
                 eecr=0;
                 myMemory[eear]=eedr;
-                if (trace_on==1) traceOut << " EEPROM: Write finished ";
+                if (core->trace_on==1) traceOut << " EEPROM: Write finished ";
             }
             break;
 
@@ -155,7 +155,7 @@ unsigned int HWEeprom::CpuCycle() {
                 eedr=myMemory[eear];
                 state=READY;
                 eecr=0;
-                if (trace_on==1) traceOut << "EEPROM["<< hex << eear << "," << GetSymbolAtAddress(eear) << "]->EEDR=0x"<< hex << (unsigned int)myMemory[eear] << " : finished  |" << dec;
+                if (core->trace_on==1) traceOut << "EEPROM["<< hex << eear << "," << GetSymbolAtAddress(eear) << "]->EEDR=0x"<< hex << (unsigned int)myMemory[eear] << " : finished  |" << dec;
             }
             break;
 
@@ -226,7 +226,7 @@ unsigned int HWMegaEeprom::CpuCycle() {
             if (writeEnableCycles == 0) {
                 eecr&=0xf8;
                 state= READY;
-                if (trace_on==1) traceOut << " EEPROM: WriteEnable cleared :-( ";
+                if (core->trace_on==1) traceOut << " EEPROM: WriteEnable cleared :-( ";
             }
             break;
 
@@ -236,7 +236,7 @@ unsigned int HWMegaEeprom::CpuCycle() {
                 state=READY;
                 eecr&=0xf8;
                 myMemory[eear]=eedr;
-                if (trace_on==1) traceOut << " EEPROM: Write finished ";
+                if (core->trace_on==1) traceOut << " EEPROM: Write finished ";
                 //now raise irq if enabled
                 if ((eecr&0x08)!=0x00) {
                     irqFlag=true;
@@ -251,7 +251,7 @@ unsigned int HWMegaEeprom::CpuCycle() {
                 eedr=myMemory[eear];
                 state=READY;
                 eecr&=0xf8;
-                if (trace_on==1) traceOut << "EEPROM["<< hex << eear << "," << GetSymbolAtAddress(eear) << "]->EEDR=0x"<< hex << (unsigned int)myMemory[eear] << " : finished  |" << dec;
+                if (core->trace_on==1) traceOut << "EEPROM["<< hex << eear << "," << GetSymbolAtAddress(eear) << "]->EEDR=0x"<< hex << (unsigned int)myMemory[eear] << " : finished  |" << dec;
             }
             break;
 
@@ -278,7 +278,3 @@ RWEearl::operator unsigned char() const { return ee->GetEearl();  }
 RWEearh::operator unsigned char() const { return ee->GetEearh();  } 
 RWEedr::operator unsigned char() const { return ee->GetEedr();  } 
 RWEecr::operator unsigned char() const { return ee->GetEecr();  } 
-RWEearl::RWEearl(HWEeprom *eep) { ee=eep;}
-RWEearh::RWEearh(HWEeprom *eep) { ee=eep; }
-RWEedr::RWEedr(HWEeprom *eep) { ee=eep; }
-RWEecr::RWEecr(HWEeprom *eep) { ee=eep; }

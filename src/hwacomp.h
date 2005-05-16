@@ -53,7 +53,7 @@ class RWAcsr: public RWMemoryMembers {
     protected:
         HWAcomp* acomp;
     public:
-        RWAcsr(HWAcomp *a) { acomp=a; }
+        RWAcsr(AvrDevice *c, HWAcomp *a):RWMemoryMembers(c), acomp(a) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };

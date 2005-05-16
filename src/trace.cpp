@@ -7,13 +7,11 @@ using namespace std;
 #include "helper.h"
 
 ofstream traceOut;
-int trace_on=0;
+int global_trace_on=0;
 
 
 void trioaccess(const char *t, unsigned char val) {
-    if (trace_on) {
         traceOut << t << "=" << HexChar(val) << " ";
-    }
 }
 
 string traceFname;
@@ -21,7 +19,7 @@ string traceFname;
 void StartTrace(const char *fname) {
     traceFname=fname;
     traceOut.open(fname);
-    trace_on=1;
+    global_trace_on=1;
 }
 
 void TraceNextLine() {

@@ -157,7 +157,7 @@ ostream& operator<<(ostream &os, const IrqStatisticPerVector &ispv) {
     os << "Set->Clear <" << ispv.short_SetClear << endl;
     os << "Set->HandlerStarted >" << ispv.long_SetStarted << endl; 
     os << "Set->HandlerStarted <" << ispv.short_SetStarted << endl;
-    
+
     os << "Set->HandlerFinished >" << ispv.long_SetFinished << endl; 
     os << "Set->HandlerFinished <" << ispv.short_SetFinished << endl;
     os << "Handler Start->Finished >" << ispv.long_StartedFinished << endl; 
@@ -169,7 +169,7 @@ ostream& operator<<(ostream &os, const IrqStatisticPerVector &ispv) {
 
 ostream& operator<<(ostream &os, const IrqStatistic& is) {
     map<unsigned int, IrqStatisticPerVector>::const_iterator ii;
-    
+
     os << "IRQ STATISTIC" << endl;
     os << "\tFlagSet\tflagCleared\tHandlerStarted\tHandlerFinished\tSet->Clear\tSet->Started\tSet->Finished\tStarted->Finished"<<endl;
     for (ii=is.entries.begin(); ii!= is.entries.end(); ii++) {
@@ -206,7 +206,7 @@ unsigned int HWIrqSystem::GetNewPc(unsigned int &actualVector) {
 
 void HWIrqSystem::SetIrqFlag(Hardware *hwp, unsigned int vector) {
     irqPartnerList[vector]=hwp;
-    if (trace_on) {
+    if (core->trace_on) {
         traceOut << core->GetFname() << " IrqSystem: IrqFlagSet Vec: " << vector << endl;
     }
 
@@ -218,13 +218,11 @@ void HWIrqSystem::SetIrqFlag(Hardware *hwp, unsigned int vector) {
 
 void HWIrqSystem::ClearIrqFlag(unsigned int vector) {
     irqPartnerList.erase(vector);
-    if (trace_on) 
-    {
+    if (core->trace_on) {
         traceOut << core->GetFname() << " IrqSystem: IrqFlagCleared Vec: " << vector << endl;
     }
 
-    if (irqStatistic.entries[vector].actual.flagCleared==0)
-    {
+    if (irqStatistic.entries[vector].actual.flagCleared==0) {
         irqStatistic.entries[vector].actual.flagCleared=SystemClock::Instance().GetCurrentTime();
     }
 
@@ -232,30 +230,27 @@ void HWIrqSystem::ClearIrqFlag(unsigned int vector) {
 } 
 
 
-
-    void HWIrqSystem::IrqHandlerStarted(unsigned int vector) {
-        if (trace_on) 
-        {
-            traceOut << core->GetFname() << " IrqSystem: IrqHandlerStarted Vec: " << vector << endl;
-        }
-
-        if (irqStatistic.entries[vector].actual.handlerStarted==0) {
-            irqStatistic.entries[vector].actual.handlerStarted=SystemClock::Instance().GetCurrentTime();
-        }
-        irqStatistic.entries[vector].CheckComplete();
+void HWIrqSystem::IrqHandlerStarted(unsigned int vector) {
+    if (core->trace_on) {
+        traceOut << core->GetFname() << " IrqSystem: IrqHandlerStarted Vec: " << vector << endl;
     }
 
-    void HWIrqSystem::IrqHandlerFinished(unsigned int vector) {
-        if (trace_on) 
-        {
-            traceOut << core->GetFname() << " IrqSystem: IrqHandler Finished Vec: " << vector << endl;
-        }
-
-        if (irqStatistic.entries[vector].actual.handlerFinished==0) {
-            irqStatistic.entries[vector].actual.handlerFinished=SystemClock::Instance().GetCurrentTime();
-        }
-        irqStatistic.entries[vector].CheckComplete();
+    if (irqStatistic.entries[vector].actual.handlerStarted==0) {
+        irqStatistic.entries[vector].actual.handlerStarted=SystemClock::Instance().GetCurrentTime();
     }
+    irqStatistic.entries[vector].CheckComplete();
+}
+
+void HWIrqSystem::IrqHandlerFinished(unsigned int vector) {
+    if (core->trace_on) {
+        traceOut << core->GetFname() << " IrqSystem: IrqHandler Finished Vec: " << vector << endl;
+    }
+
+    if (irqStatistic.entries[vector].actual.handlerFinished==0) {
+        irqStatistic.entries[vector].actual.handlerFinished=SystemClock::Instance().GetCurrentTime();
+    }
+    irqStatistic.entries[vector].CheckComplete();
+}
 
 
 IrqStatistic::IrqStatistic (AvrDevice *c):Printable(cout), core(c) {

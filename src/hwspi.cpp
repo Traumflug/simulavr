@@ -79,7 +79,7 @@ void HWSpi::SetSpdr(unsigned char val) {
 } 
 
 void HWSpi::SetSpsr(unsigned char val) { 
-    if (trace_on) {
+    if (core->trace_on) {
         traceOut << "spsr is read onyl! ";
     } else {
         cerr << "spsr is read only! ";
@@ -511,9 +511,9 @@ void HWMegaSpi::SetSpsr(unsigned char val) {
 
 } 
 
-unsigned char RWSpdr::operator=(unsigned char val) { trioaccess("Spdr",val);spi->SetSpdr(val);  return val; } 
-unsigned char RWSpsr::operator=(unsigned char val) { trioaccess("Spsr",val);spi->SetSpsr(val);  return val; } 
-unsigned char RWSpcr::operator=(unsigned char val) { trioaccess("Spcr",val);spi->SetSpcr(val);  return val; } 
+unsigned char RWSpdr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Spdr",val);spi->SetSpdr(val);  return val; } 
+unsigned char RWSpsr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Spsr",val);spi->SetSpsr(val);  return val; } 
+unsigned char RWSpcr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Spcr",val);spi->SetSpcr(val);  return val; } 
 
 RWSpdr::operator unsigned char() const { return spi->GetSpdr(); } 
 RWSpsr::operator unsigned char() const { return spi->GetSpsr(); }

@@ -41,7 +41,7 @@ class RWRampz: public RWMemoryMembers {
     protected:
         HWRampz* ad;
     public:
-        RWRampz(HWRampz *a) { ad=a; }
+        RWRampz(AvrDevice *c, HWRampz *a): RWMemoryMembers(c), ad(a) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -66,7 +66,7 @@ class RWMcucr: public RWMemoryMembers {
         HWMcucr *hwMcucr;
         HWExtIrq *hwExtIrq;
     public:
-        RWMcucr(HWMcucr *m, HWExtIrq *e) { hwMcucr=m; hwExtIrq=e;}
+        RWMcucr(AvrDevice *c, HWMcucr *m, HWExtIrq *e) : RWMemoryMembers(c), hwMcucr(m), hwExtIrq(e) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };

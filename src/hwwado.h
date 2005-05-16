@@ -53,7 +53,7 @@ class RWWdtcr: public RWMemoryMembers {
     protected:
         HWWado* wado;
     public:
-        RWWdtcr(HWWado* w) { wado=w;}
+        RWWdtcr(AvrDevice *c, HWWado* w): RWMemoryMembers(c), wado(w) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };

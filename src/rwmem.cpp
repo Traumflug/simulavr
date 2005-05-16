@@ -53,27 +53,27 @@ RWMemoryWithOwnMemory::operator unsigned char() const {
 
 unsigned char IRam::operator=(unsigned char val) {
     value=val;
-    if (trace_on==1) traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress)<<"]="<<HexChar(val)<<dec<<" ";
+    if (core->trace_on==1) traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress)<<"]="<<HexChar(val)<<dec<<" ";
     return val;
 }
 IRam::operator unsigned char() const {
-    if (trace_on==1) traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress)<<"]-->"<<HexChar(value)<<dec<<"--> ";
+    if (core->trace_on==1) traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress)<<"]-->"<<HexChar(value)<<dec<<"--> ";
     return value;
 }
 
 unsigned char ERam::operator=(unsigned char val) {
     value=val;
-    if (trace_on==1) traceOut << "ERAM[0x"<<hex<<myAddress<<"]=0x"<<hex<<(unsigned int)val<<dec<<" ";
+    if (core->trace_on==1) traceOut << "ERAM[0x"<<hex<<myAddress<<"]=0x"<<hex<<(unsigned int)val<<dec<<" ";
     return val;
 }
 
 unsigned char NotAvailableIo::operator=(unsigned char val) {
-    if (trace_on==1) traceOut << "NOT AVAILABLE RAM[0x"<<hex<<myAddress<<"]=0x"<<hex<<(unsigned int)val<<dec<<" ";
+    if (core->trace_on==1) traceOut << "NOT AVAILABLE RAM[0x"<<hex<<myAddress<<"]=0x"<<hex<<(unsigned int)val<<dec<<" ";
     return val;
 }
 
 NotAvailableIo::operator unsigned char() const {
-    if (trace_on==1) traceOut << "NOT AVAILABLE RAM[0x"<<hex<<myAddress<<"] accessed ERROR!"<<dec;
+    if (core->trace_on==1) traceOut << "NOT AVAILABLE RAM[0x"<<hex<<myAddress<<"] accessed ERROR!"<<dec;
     return 0;
 }
 
@@ -86,14 +86,9 @@ RWMemoryMembers &MemoryOffsets::operator[](unsigned int externOffset) const{
 
 
 
-CPURegister::CPURegister(AvrDevice *c, unsigned int number) {
-    myNumber=number;
-    core=c;
-}
-
 unsigned char CPURegister::operator=(unsigned char val) {
     value=val;
-    if (trace_on==1) {
+    if (core->trace_on==1) {
         traceOut << "R" << dec<< myNumber << "=" << HexChar(val) << " ";
 
         switch (myNumber) {
@@ -120,7 +115,10 @@ CPURegister::operator unsigned char() const {
 }
 
 
-unsigned char RWReserved::operator=(unsigned char val) { trioaccess("Reserved",val);
+unsigned char RWReserved::operator=(unsigned char val) { 
+    if (core->trace_on) {
+        trioaccess("Reserved",val);
+    }
     return val;
 }
 

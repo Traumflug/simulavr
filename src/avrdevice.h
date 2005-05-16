@@ -55,6 +55,7 @@ class AvrDevice: public SimulationMember {
         unsigned int newIrqPc;
         unsigned int actualIrqVector;
         int noDirectIrqJump;
+        
 
     public:
         string actualFilename;

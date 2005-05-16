@@ -25,10 +25,10 @@
 #include "trace.h"
 unsigned int HWMcucr::CpuCycle(){return 0;}
 
-unsigned char RWRampz::operator=(unsigned char val) { trioaccess("Rampz",val);ad->SetRampz(val); return val; } 
+unsigned char RWRampz::operator=(unsigned char val) { if (core->trace_on) trioaccess("Rampz",val);ad->SetRampz(val); return val; } 
 RWRampz::operator unsigned char() const { return ad->GetRampz(); } 
 
 
-unsigned char RWMcucr::operator=(unsigned char val) { trioaccess("Mcucr",val);hwMcucr->SetMcucr(val); hwExtIrq->SetMcucrCopy(val); return val; } 
+unsigned char RWMcucr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Mcucr",val);hwMcucr->SetMcucr(val); hwExtIrq->SetMcucrCopy(val); return val; } 
 
 RWMcucr::operator unsigned char() const { return hwMcucr->GetMcucr(); } 

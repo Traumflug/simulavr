@@ -119,8 +119,7 @@ void AvrDevice::Load(const char* fname) {
         while (sec!=0)  { 
             if (sec->flags&SEC_LOAD && sec->vma<0x80ffff) { //only read flash bytes and data
                 int size;
-                //size=sec->_cooked_size;
-                size=sec->rawsize;
+                size=sec->size;
                 unsigned char *tmp=(unsigned char *)malloc(size);
                 bfd_get_section_contents(abfd, sec, tmp, 0, size);
                 Flash->WriteMem( tmp, sec->lma, size);
@@ -129,7 +128,7 @@ void AvrDevice::Load(const char* fname) {
 
             if (sec->flags&SEC_LOAD && sec->vma>=0x810000) {
                 int size;
-                size=sec->rawsize;
+                size=sec->size;
                 unsigned char *tmp=(unsigned char *)malloc(size);
                 bfd_get_section_contents(abfd, sec, tmp, 0, size);
                 unsigned int offset=sec->vma-0x810000;
@@ -216,13 +215,13 @@ AvrDevice::AvrDevice(unsigned int ioSpaceSize, unsigned int IRamSize, unsigned i
 
     //create the external ram handlers, TODO: make the configuration from mcucr available here
     for (unsigned int ii=0; ii<ERamSize; ii++ ) {
-        rw[currentOffset]=new ERam(currentOffset);
+        rw[currentOffset]=new ERam(this, currentOffset);
         currentOffset++;
     }
 
     //fill the rest of the adress space with error handlers
     for ( ; currentOffset<totalIoSpace;  ) {
-        rw[currentOffset]=new NotAvailableIo(currentOffset);
+        rw[currentOffset]=new NotAvailableIo(this, currentOffset);
         currentOffset++;
     }
 

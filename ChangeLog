@@ -1,3 +1,20 @@
+2005-05-16 <lts-rudolph@gmx.de>
+    *src/avrdevice.cpp: Bugfix: rawsize -> size
+
+    *src/<nearly all files>: Bugfix: RWMemoryMembers constructor
+    inits now 'core', needed for all traces
+
+    *src/<some files>: Remove trace outputs if tracing
+                       is not enabled
+
+    *src/hwuart.cpp: Bugfix: clear UDRE irq by writing UDR
+                     Bugfix: only init HWUsart once (parent
+                             allready inits the usart
+
+                     Bugfix: irq handling in usart
+
+     Thanks to Jakob Schwendner for the bugreports in u(s)art!                
+
 2005-03-13 <lts-rudolph@gmx.de>
     * src/avrdevice.cpp: Bugfix: _cooked_size -> rawsize
     Bug #12295 fixed

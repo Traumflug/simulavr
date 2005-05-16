@@ -117,6 +117,6 @@ void HWWado::Wdr() {
 }
 
 
-unsigned char RWWdtcr::operator=(unsigned char val) { trioaccess("Wdtcr",val);wado->SetWdtcr(val);  return val; } 
+unsigned char RWWdtcr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Wdtcr",val);wado->SetWdtcr(val);  return val; } 
 
 RWWdtcr::operator unsigned char() const { return wado->GetWdtcr();  } 

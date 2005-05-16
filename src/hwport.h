@@ -80,7 +80,7 @@ class RWPort : public RWMemoryMembers {
     protected:
         HWPort* hwport;
     public:
-        RWPort( HWPort *port) { hwport= port;}
+        RWPort(AvrDevice *c,  HWPort *port): RWMemoryMembers(c), hwport(port) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -89,7 +89,7 @@ class RWPin : public RWMemoryMembers {
     protected:
         HWPort* hwport;
     public:
-        RWPin( HWPort *port) { hwport= port;}
+        RWPin(AvrDevice *c,  HWPort *port) : RWMemoryMembers(c), hwport(port){}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -98,7 +98,7 @@ class RWDdr : public RWMemoryMembers {
     protected:
         HWPort* hwport;
     public:
-        RWDdr( HWPort *port) { hwport= port;}
+        RWDdr(AvrDevice *c,  HWPort *port): RWMemoryMembers(c), hwport(port) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };

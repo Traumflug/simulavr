@@ -100,7 +100,7 @@ int UserInterface::Step(bool &dummy1, SystemClockOffset *nextStepIn_ns) {
                             //cerr << "Start with string >>" << debug << "<<" << endl;
                         }
 
-                        if (trace_on!=0) traceOut << "Net: " << net << "changed to " << par << endl;
+                        //if (trace_on!=0) traceOut << "Net: " << net << "changed to " << par << endl;
 
                     } //__ack
 

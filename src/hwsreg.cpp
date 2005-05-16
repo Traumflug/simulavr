@@ -92,7 +92,7 @@ HWSreg HWSreg::operator =(const int i) {
 unsigned char RWSreg::operator=(unsigned char val) { 
     //trioaccess("Sreg",val); 
     *status=val;
-    if (trace_on) traceOut << (string)(*status);
+    if (core->trace_on) traceOut << (string)(*status);
     return val;
 }
 

@@ -165,9 +165,11 @@ void HWMegaExtIrq::PinStateHasChanged(Pin *p) {
                     if (pinI[actualPin]==0) {
                         eifr|=(1<<actualPin);
                         if (eimsk& (1<<actualPin)) irqSystem->SetIrqFlag(this, actVec);
-                    } else {
-                        eifr=0xff-(1<<actualPin); //clear flag when pin is 0!
-                        irqSystem->ClearIrqFlag(actVec);
+                    } else {                                //only clear irq flag if not set before!
+                        if ((eifr & (1<<actualPin) ) !=0) { //interrupt flag was set
+                            eifr=0xff-(1<<actualPin);       //clear flag when pin is 0!
+                            irqSystem->ClearIrqFlag(actVec);
+                        }
                     }
                     break;
                 case 0x01:
@@ -199,10 +201,10 @@ void HWMegaExtIrq::PinStateHasChanged(Pin *p) {
 }		
 
 
-unsigned char RWEicra::operator=(unsigned char val) { trioaccess("Eicra",val); megaextirq->SetEicra(val); return val; }
-unsigned char RWEicrb::operator=(unsigned char val) { trioaccess("Eicrb",val); megaextirq->SetEicrb(val); return val; }
-unsigned char RWEimsk::operator=(unsigned char val) { trioaccess("Eimsk",val); megaextirq->SetEimsk(val); return val; }
-unsigned char RWEifr::operator=(unsigned char val) { trioaccess("Eifr",val); megaextirq->SetEifr(val); return val; }
+unsigned char RWEicra::operator=(unsigned char val) { if (core->trace_on) trioaccess("Eicra",val); megaextirq->SetEicra(val); return val; }
+unsigned char RWEicrb::operator=(unsigned char val) { if (core->trace_on) trioaccess("Eicrb",val); megaextirq->SetEicrb(val); return val; }
+unsigned char RWEimsk::operator=(unsigned char val) { if (core->trace_on) trioaccess("Eimsk",val); megaextirq->SetEimsk(val); return val; }
+unsigned char RWEifr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Eifr",val); megaextirq->SetEifr(val); return val; }
 RWEicra::operator unsigned char() const { return megaextirq->GetEicra(); }
 RWEicrb::operator unsigned char() const { return megaextirq->GetEicrb(); }
 RWEimsk::operator unsigned char() const { return megaextirq->GetEimsk(); }

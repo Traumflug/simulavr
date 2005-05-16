@@ -76,7 +76,8 @@ class HWUart: public Hardware {
             TX_SEND_STOPBIT,
             TX_SEND_STOPBIT2,
             TX_AFTER_STOPBIT,
-            TX_FIRST_RUN
+            TX_FIRST_RUN,
+            TX_FINISH
         } ;
 
         T_RxState rxState;
@@ -142,7 +143,7 @@ class RWUdr: public RWMemoryMembers {
     protected:
         HWUart* uart;
     public:
-        RWUdr( HWUart* u) { uart=u; }
+        RWUdr(AvrDevice *c,  HWUart* u): RWMemoryMembers(c), uart(u) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -150,7 +151,7 @@ class RWUsr: public RWMemoryMembers {
     protected:
         HWUart* uart;
     public:
-        RWUsr( HWUart* u) { uart=u; }
+        RWUsr(AvrDevice *c,  HWUart* u): RWMemoryMembers(c), uart(u) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -158,7 +159,7 @@ class RWUcr: public RWMemoryMembers {
     protected:
         HWUart* uart;
     public:
-        RWUcr( HWUart* u) { uart=u; }
+        RWUcr(AvrDevice *c,  HWUart* u): RWMemoryMembers(c), uart(u) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -169,7 +170,7 @@ class RWUcsra: public RWMemoryMembers {
     protected:
         HWUsart* uart;
     public:
-        RWUcsra(HWUsart *u) : uart(u) {}
+        RWUcsra(AvrDevice *c, HWUsart *u) : RWMemoryMembers(c), uart(u) { }
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -178,7 +179,7 @@ class RWUcsrb: public RWMemoryMembers {
     protected:
         HWUsart* uart;
     public:
-        RWUcsrb(HWUsart *u) : uart(u) {}
+        RWUcsrb(AvrDevice *c, HWUsart *u) : RWMemoryMembers(c), uart(u) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -187,7 +188,7 @@ class RWUcsrc: public RWMemoryMembers {
     protected:
         HWUsart* uart;
     public:
-        RWUcsrc(HWUsart *u) : uart(u) {}
+        RWUcsrc(AvrDevice *c, HWUsart *u) : RWMemoryMembers(c), uart(u) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -198,7 +199,7 @@ class RWUbrr: public RWMemoryMembers {
     protected:
         HWUart* uart;
     public:
-        RWUbrr( HWUart* u) { uart=u; }
+        RWUbrr(AvrDevice *c,  HWUart* u): RWMemoryMembers(c), uart(u) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -207,7 +208,7 @@ class RWUbrrhi: public RWMemoryMembers {
     protected:
         HWUart* uart;
     public:
-        RWUbrrhi( HWUart* u) { uart=u; }
+        RWUbrrhi(AvrDevice *c,  HWUart* u): RWMemoryMembers(c), uart(u) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };

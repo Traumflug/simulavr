@@ -79,7 +79,7 @@ class RWEicra: public RWMemoryMembers {
         HWMegaExtIrq *megaextirq;
 
     public:
-        RWEicra(HWMegaExtIrq *_irq): megaextirq(_irq) {}
+        RWEicra(AvrDevice *c, HWMegaExtIrq *_irq): RWMemoryMembers(c), megaextirq(_irq) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -91,7 +91,7 @@ class RWEicrb: public RWMemoryMembers {
         HWMegaExtIrq *megaextirq;
 
     public:
-        RWEicrb(HWMegaExtIrq *_irq): megaextirq(_irq) {}
+        RWEicrb(AvrDevice *c, HWMegaExtIrq *_irq): RWMemoryMembers(c), megaextirq(_irq) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -103,7 +103,7 @@ class RWEimsk: public RWMemoryMembers {
         HWMegaExtIrq *megaextirq;
 
     public:
-        RWEimsk(HWMegaExtIrq *_irq): megaextirq(_irq) {}
+        RWEimsk(AvrDevice *c, HWMegaExtIrq *_irq): RWMemoryMembers(c), megaextirq(_irq) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
@@ -115,7 +115,7 @@ class RWEifr: public RWMemoryMembers {
         HWMegaExtIrq *megaextirq;
 
     public:
-        RWEifr(HWMegaExtIrq *_irq): megaextirq(_irq) {}
+        RWEifr(AvrDevice *c, HWMegaExtIrq *_irq): RWMemoryMembers(c), megaextirq(_irq) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };

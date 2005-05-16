@@ -26,7 +26,7 @@
 AvrDevice_at90s8515special::AvrDevice_at90s8515special():
 AvrDevice_at90s8515() { 
     //	status= new HWSreg();	
-    rw[0x20]= new RWWriteToPipe("../../rbout");
+    rw[0x20]= new RWWriteToPipe(this, "../../rbout");
     Reset();
 }
 

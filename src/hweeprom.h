@@ -89,7 +89,7 @@ class RWEearh: public RWMemoryMembers {
 	protected: 
 		HWEeprom *ee;
 	public:
-		RWEearh(HWEeprom *stack); 
+		RWEearh(AvrDevice *c, HWEeprom *e): RWMemoryMembers(c), ee(e){}; 
 		virtual unsigned char operator=(unsigned char) ;
 		virtual operator unsigned char() const;
 };
@@ -98,7 +98,7 @@ class RWEearl: public RWMemoryMembers {
 	protected:
 		HWEeprom *ee;
 	public:
-		RWEearl(HWEeprom *stack);
+		RWEearl(AvrDevice *c, HWEeprom *e): RWMemoryMembers(c), ee(e){}
 		virtual unsigned char operator=(unsigned char) ;
 		virtual operator unsigned char() const;
 };
@@ -107,7 +107,7 @@ class RWEedr: public RWMemoryMembers {
 	protected:
 		HWEeprom *ee;
 	public:
-		RWEedr(HWEeprom *stack);
+		RWEedr(AvrDevice *c, HWEeprom *e): RWMemoryMembers(c), ee(e){}
 		virtual unsigned char operator=(unsigned char) ;
 		virtual operator unsigned char() const;
 };
@@ -115,7 +115,7 @@ class RWEecr: public RWMemoryMembers {
 	protected:
 		HWEeprom *ee;
 	public:
-		RWEecr(HWEeprom *stack);
+		RWEecr(AvrDevice *c, HWEeprom *e): RWMemoryMembers(c), ee(e){}
 		virtual unsigned char operator=(unsigned char) ;
 		virtual operator unsigned char() const;
 };

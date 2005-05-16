@@ -52,8 +52,6 @@ using namespace std;
 
 //test only!
 
-extern int trace_on;
-
 int main(int argc, char *argv[]) {
     int c;
     bool gdbserver_flag=0;
@@ -64,9 +62,10 @@ int main(int argc, char *argv[]) {
     int global_gdb_debug         = 0;
     bool globalWaitForGdbConnection=true; //please wait for gdb connection
     int userinterface_flag=0;
+    unsigned long long fcpu=4000000;
     UserInterface *ui;
 
-    trace_on=0;
+    global_trace_on=0;
 
 
     while (1) {
@@ -79,14 +78,20 @@ int main(int argc, char *argv[]) {
             {"trace", 1, 0, 't'},
             {"version",0,0,'v'},
             {"nogdbwait",0,0,'n'},
+            {"cpufrequence", 1,0,'F'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long (argc, argv, "f:d:gGd:p:t:uxyzhvn", long_options, &option_index);
+        c = getopt_long (argc, argv, "f:d:gGd:p:t:uxyzhvniF:", long_options, &option_index);
         if (c == -1)
             break;
 
         switch (c) {
+            case 'F':
+                fcpu=strtoll(optarg, NULL, 10);
+                cout << "Running with CPU frequence: " << fcpu<<endl;
+                break;
+
             case 'u':
                 cout << "Run with User Interface at Port 7777" << endl;
                 userinterface_flag=1;
@@ -150,6 +155,7 @@ int main(int argc, char *argv[]) {
                 cout << "-p  <port>                   change <port> for gdb server to port" << endl;
                 cout << "-t --trace <file name>       enable trace outputs into <file name>" << endl;
                 cout << "-n --nogdbwait               do not wait for gdb connection" << endl;
+                cout << "-F --cpufrequence            set the cpu frequence to <Hz> " << endl;
                 cout << endl;
                 cout << "Supported devices:" << endl;
                 cout << "at90s8515" << endl;
@@ -187,7 +193,10 @@ int main(int argc, char *argv[]) {
         ui=new UserInterface(7777); //if not gdb, the ui will be master controller :-)
     }
     
-    dev1->SetClockFreq(250); //4 Mhz for dummy
+    //dev1->SetClockFreq(250); //4 Mhz for dummy
+    dev1->SetClockFreq(1000000000/fcpu);
+
+    if (global_trace_on) dev1->trace_on=1;
 
     if (gdbserver_flag==0) {
         SystemClock::Instance().Add(dev1);
