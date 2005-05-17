@@ -12,6 +12,9 @@ DISTCLEANFILES:=${DISTCLEANFILES} simulavr.so keytrans.h simulavr_wrap.cpp
 
 EXTRA_DIST           = simulavr.i 
 
+SUBDIRS = python
+DIST_SUBDIRS = python
+
 lib_LTLIBRARIES		= libavrsim_pp.la
 
 bin_PROGRAMS = simulavr kbdgentables

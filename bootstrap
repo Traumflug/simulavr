@@ -2,6 +2,7 @@
 # Run this to generate all the initial makefiles, etc.
 # For debug, do: ./configure CFLAGS="-O0 -g
 # Takes file/dir as parameter for a directory, and extra params for "configure"
+
 srcdir=`dirname $0`
 
 test -z "$srcdir" && srcdir=.
@@ -38,7 +39,7 @@ test $TEST_TYPE $FILE || {
 
 aclocal -I config
 autoheader
-libtoolize --force
+libtoolize --copy --force
 automake --add-missing --copy
 autoconf
 

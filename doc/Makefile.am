@@ -1,3 +1,3 @@
-info_TEXINFOS = simulavrxx.texinfo
+info_TEXINFOS = simulavrxx.texinfo 
 
-all-am: pdf info 
+all-am: pdf info
