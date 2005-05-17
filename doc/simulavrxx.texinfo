@@ -1,6 +1,6 @@
 \input texinfo @c -*-texinfo-*-
 @c %**start of header
-@setfilename war.info
+@setfilename simulavrxx.info
 @settitle Simulavrxx Documentation 0.8.006
 @c %**end of header
 
