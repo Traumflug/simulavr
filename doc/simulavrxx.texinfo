@@ -264,9 +264,24 @@ What the coloms mean:
 @chapter Examples
 @cindex Examples
 
-@section Tcl Example
+Simulavrxx is designed to interact in a few different ways. These
+examples briefly explain the examples that can be found in the source distribution's @file{example} directory.
+
+The anacomp example is all we have at the moment. Anacomp brings up an Itcl based GUI which shows two analog input simulations, a comparaison output value, and a toggle button on bottom. After changing the inputs, hit the corresponding update to clock the simulation to respond to the changed inputs.
+
+The gdb session for me requires a "load" before hitting "continue", which actually starts the simulation. 
+
+@section Tcl Anacomp Example
+This is Klaus' very nice original example simulation.
+
+After performing the build, go to the @file{examples/anacomp} directory and try @code{make dogdb}.
 
 @section Python Example
+
+This is Bill's hacked port of Klaus' TCL simulation script to Python. The UI is still Itcl based. Eventually it will be updated to also have a Python GUI (likely WxPython at first)
+
+After performing the build, go to the @file{examples/anacomp} directory and try @code{make do_python}.
+
 
 @node Index,  , Examples, Top
 @unnumbered Index
