@@ -30,6 +30,7 @@
  * io-data space, internal and external sram
  */
 
+
 class RWMemoryMembers{
     protected:
         AvrDevice *core;
@@ -126,17 +127,36 @@ class MemoryOffsets {
 using namespace std;
 class RWWriteToPipe: public RWMemoryMembers {
     protected:
-        string pipeName;
         ofstream os;
+        string pipeName;
 
     public:
-        RWWriteToPipe(AvrDevice *c, const string &name): RWMemoryMembers(c), os(name.c_str()) { 
-            pipeName=name;
-        }
+        RWWriteToPipe(AvrDevice *c, const string &name): RWMemoryMembers(c), os(name.c_str()), pipeName(name) {}
         virtual ~RWWriteToPipe() {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
+
+//We need a ifstream pointer because all the "virtual operator unsigned char" functions are defined const.
+//if "is" is member not pointer a read from "is" will modify the object which is not "const".
+//To solve this problem we handle only a pointer to a file.... this is not really a const call, I know!
+
+class RWReadFromPipe: public RWMemoryMembers {
+    protected:
+        ifstream *is;
+        string pipeName;
+
+    public:
+        RWReadFromPipe(AvrDevice *c, const string &name): RWMemoryMembers(c), pipeName(name) {
+            is=new ifstream(name.c_str());
+        }
+        virtual ~RWReadFromPipe() {delete is;}
+        virtual unsigned char operator=(unsigned char) ;
+        virtual operator unsigned char() const;
+};
+
+
+
 
 
 

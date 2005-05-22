@@ -37,7 +37,6 @@ using namespace std;
 #include "global.h"
 #include "avrdevice.h"
 #include "at8515.h"
-#include "at8515special.h"
 #include "atmega128.h"
 #include "at4433.h"
 #include "gdb.h"
@@ -67,10 +66,17 @@ int main(int argc, char *argv[]) {
 
     global_trace_on=0;
 
+    unsigned int writeToPipeOffset=0x20;
+    unsigned int readFromPipeOffset=0x21;
+    string readFromPipeFileName="";
+    string writeToPipeFileName="";
+
+
 
     while (1) {
         //int this_option_optind = optind ? optind : 1;
         int option_index = 0;
+        char *dummy;
         static struct option long_options[] = {
             {"file", 1, 0, 'f'},
             {"device", 1, 0, 'd'},
@@ -79,14 +85,28 @@ int main(int argc, char *argv[]) {
             {"version",0,0,'v'},
             {"nogdbwait",0,0,'n'},
             {"cpufrequence", 1,0,'F'},
+            {"readfrompipe", 1,0,'R'},
+            {"writetopipe", 1,0,'W'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long (argc, argv, "f:d:gGd:p:t:uxyzhvniF:", long_options, &option_index);
+        c = getopt_long (argc, argv, "f:d:gGd:p:t:uxyzhvniF:R:W:", long_options, &option_index);
         if (c == -1)
             break;
 
         switch (c) {
+            case 'R': //read from pipe 
+                readFromPipeOffset=strtoul( optarg, &dummy, 16);
+                dummy++; //position behind the "," or any other delimiter for the offset
+                readFromPipeFileName=dummy;
+                break;
+
+            case 'W': //write to pipe
+                writeToPipeOffset=strtoul( optarg, &dummy, 16);
+                dummy++; //position behind the "," or any other delimiter for the offset
+                writeToPipeFileName=dummy;
+                break;
+
             case 'F':
                 fcpu=strtoll(optarg, NULL, 10);
                 cout << "Running with CPU frequence: " << fcpu<<endl;
@@ -156,6 +176,8 @@ int main(int argc, char *argv[]) {
                 cout << "-t --trace <file name>       enable trace outputs into <file name>" << endl;
                 cout << "-n --nogdbwait               do not wait for gdb connection" << endl;
                 cout << "-F --cpufrequence            set the cpu frequence to <Hz> " << endl;
+                cout << "-W --writetopipe <offset>,<file> add a special pipe register to device at IO-Offset and opens <file> for writing" << endl;            
+                cout << "-R --readfrompipe <offset>,<file> add a special pipe register to device at IO-offset and opens <file> for reading" << endl;            
                 cout << endl;
                 cout << "Supported devices:" << endl;
                 cout << "at90s8515" << endl;
@@ -183,6 +205,17 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
 
+    //if we want to insert some special "pipe" Registers we could do this here:
+    if (readFromPipeFileName!="") {
+        cout << "Add ReadFromPipe-Register at 0x" << hex << readFromPipeOffset << " and read from file: " << readFromPipeFileName << endl;
+        dev1->ReplaceIoRegister(readFromPipeOffset, new RWReadFromPipe(dev1, readFromPipeFileName));
+    }
+
+    if (writeToPipeFileName!="") {
+        cout << "Add WriteToPipe-Register at 0x" << hex << writeToPipeOffset << " and write to file: " << writeToPipeFileName << endl;
+        dev1->ReplaceIoRegister(writeToPipeOffset, new RWWriteToPipe(dev1, writeToPipeFileName));
+    }
+
 
 
     if (filename != "unknown" ) {
@@ -192,7 +225,7 @@ int main(int argc, char *argv[]) {
     if (userinterface_flag==1) {
         ui=new UserInterface(7777); //if not gdb, the ui will be master controller :-)
     }
-    
+
     //dev1->SetClockFreq(250); //4 Mhz for dummy
     dev1->SetClockFreq(1000000000/fcpu);
 

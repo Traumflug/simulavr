@@ -162,12 +162,13 @@ Pin *AvrDevice::GetPin(const char *name) {
         exit(0);
     }
 
-    
+
     return ret;
 }
 
 AvrDevice::~AvrDevice() {}
-AvrDevice::AvrDevice(unsigned int ioSpaceSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int flashSize){
+AvrDevice::AvrDevice(unsigned int _ioSpaceSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int flashSize):
+ioSpaceSize(_ioSpaceSize) {
     unsigned int currentOffset=0;
     const unsigned int RegisterSpaceSize=32;
     const unsigned int totalIoSpace= 0x10000;
@@ -232,119 +233,119 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
     int bpFlag=0;
     int hwWait=0;
 
-//    do {
+    //    do {
 
-        if (trace_on==1) {
-            traceOut << actualFilename << " ";
-            traceOut << HexShort(PC<<1)<<dec<<": ";
+    if (trace_on==1) {
+        traceOut << actualFilename << " ";
+        traceOut << HexShort(PC<<1)<<dec<<": ";
 
-            string sym(Flash->GetSymbolAtAddress(PC));
-            traceOut << sym << " ";
-            for (int len = sym.length(); len<30;len++) { traceOut << " " ; }
-        }
+        string sym(Flash->GetSymbolAtAddress(PC));
+        traceOut << sym << " ";
+        for (int len = sym.length(); len<30;len++) { traceOut << " " ; }
+    }
 
-        hwWait=0;
-        vector<Hardware *>::iterator ii;
-        vector<Hardware *>::iterator end;
-        end= hwCycleList.end();
+    hwWait=0;
+    vector<Hardware *>::iterator ii;
+    vector<Hardware *>::iterator end;
+    end= hwCycleList.end();
 
-        for (ii=hwCycleList.begin(); ii!=end; ii++) {
-            if (((*ii)->CpuCycle())>0) hwWait=1;
-        }
+    for (ii=hwCycleList.begin(); ii!=end; ii++) {
+        if (((*ii)->CpuCycle())>0) hwWait=1;
+    }
 
-        if (cpuCycles<=0) {
+    if (cpuCycles<=0) {
 
-            if (hwWait!=0) { 
-                if(trace_on)traceOut << "CPU-Hold by IO-Hardware ";
-            } else {
-                //check for enabled breakpoints here
-                
-                if (BP.end()!=find(BP.begin(), BP.end(), PC)) {
-                    if(trace_on)traceOut << "Breakpoint found at 0x" << hex << PC << dec << endl;
-                    bpFlag=BREAK_POINT;
-                    if(nextStepIn_ns!=0) {
-                        *nextStepIn_ns=clockFreq;
-                    }
-                    untilCoreStepFinished= !((cpuCycles>0) || (hwWait>0));
-                    return bpFlag;
+        if (hwWait!=0) { 
+            if(trace_on)traceOut << "CPU-Hold by IO-Hardware ";
+        } else {
+            //check for enabled breakpoints here
+
+            if (BP.end()!=find(BP.begin(), BP.end(), PC)) {
+                if(trace_on)traceOut << "Breakpoint found at 0x" << hex << PC << dec << endl;
+                bpFlag=BREAK_POINT;
+                if(nextStepIn_ns!=0) {
+                    *nextStepIn_ns=clockFreq;
                 }
-                
-
-                if (newIrqPc!= 0xffffffff) {
-                    if (noDirectIrqJump==0) {
-                        if (trace_on){
-                            traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;
-                        }
-
-                        irqSystem->IrqHandlerStarted(actualIrqVector);    //what vector we raise?
-                        //Funktor* fkt=new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
-                        stack->SetBreakPoint(stack->GetStackPointer(),IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector).clone());
-
-                        //pushing the stack
-                        unsigned long val=PC;
-                        for (int tt=0; tt<PC_size; tt++) {
-                            stack->Push(val&0xff);
-                            val>>=8;
-                        }
-                        cpuCycles=4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
-                        status->I=0; //irq started so remove I-Flag from SREG
-
-                        PC=newIrqPc-1;	//we add a few lines later 1 so we sub here 1 :-)
-                        newIrqPc=0xffffffff;
-                    } else {
-                        noDirectIrqJump=0;
-                    }
-                }
-
-                if (cpuCycles<=0) {
-                    if ((unsigned int)(PC<<1) >= (unsigned int)Flash->GetSize() ) {
-                        if (trace_on) {
-                            traceOut << actualFilename << " Simulation runs out of Flash Space at" << hex << (PC << 1) << endl;
-                            traceOut.flush();
-                        } else {
-                            cerr << actualFilename << " Simulation runs out of Flash Space at " << hex << (PC << 1) << endl;
-                        }
-                        exit(0);
-                    }
-
-                    DecodedInstruction *de= (Flash->DecodedMem[PC]);
-                    if (trace_on) {
-                        cpuCycles= de->Trace();
-                    } else {
-                        cpuCycles=(*de)(); 
-                    }
-
-                    // cpuCycles=(*(Flash->DecodedMem[PC]))();
-                }
-
-                if (cpuCycles<0) bpFlag=cpuCycles;
-                if( bpFlag!=BREAK_POINT) PC++;
-
-
-                if (((status->I)==1) && (newIrqPc==0xffffffff)) {
-                    newIrqPc= irqSystem->GetNewPc(actualIrqVector); //If any interrupt is pending get new PC 
-                    noDirectIrqJump=1;
-                }
-
+                untilCoreStepFinished= !((cpuCycles>0) || (hwWait>0));
+                return bpFlag;
             }
-        } else { //cpuCycles>0
-            if (trace_on==1) traceOut << "CPU-waitstate";
-        }
 
-        if(nextStepIn_ns!=0) {
-            *nextStepIn_ns=clockFreq;
-        }
 
-        cpuCycles--;
-        if (trace_on==1) {
-            traceOut << endl;
-            TraceNextLine();
-        }
+            if (newIrqPc!= 0xffffffff) {
+                if (noDirectIrqJump==0) {
+                    if (trace_on){
+                        traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;
+                    }
 
-        //if (untilCoreStepFinished == false) { //we wait not until end so reply the finish state
-            untilCoreStepFinished= !((cpuCycles>0) || (hwWait>0));
-            return bpFlag;
-        //}
+                    irqSystem->IrqHandlerStarted(actualIrqVector);    //what vector we raise?
+                    //Funktor* fkt=new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
+                    stack->SetBreakPoint(stack->GetStackPointer(),IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector).clone());
+
+                    //pushing the stack
+                    unsigned long val=PC;
+                    for (int tt=0; tt<PC_size; tt++) {
+                        stack->Push(val&0xff);
+                        val>>=8;
+                    }
+                    cpuCycles=4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
+                    status->I=0; //irq started so remove I-Flag from SREG
+
+                    PC=newIrqPc-1;	//we add a few lines later 1 so we sub here 1 :-)
+                    newIrqPc=0xffffffff;
+                } else {
+                    noDirectIrqJump=0;
+                }
+            }
+
+            if (cpuCycles<=0) {
+                if ((unsigned int)(PC<<1) >= (unsigned int)Flash->GetSize() ) {
+                    if (trace_on) {
+                        traceOut << actualFilename << " Simulation runs out of Flash Space at" << hex << (PC << 1) << endl;
+                        traceOut.flush();
+                    } else {
+                        cerr << actualFilename << " Simulation runs out of Flash Space at " << hex << (PC << 1) << endl;
+                    }
+                    exit(0);
+                }
+
+                DecodedInstruction *de= (Flash->DecodedMem[PC]);
+                if (trace_on) {
+                    cpuCycles= de->Trace();
+                } else {
+                    cpuCycles=(*de)(); 
+                }
+
+                // cpuCycles=(*(Flash->DecodedMem[PC]))();
+            }
+
+            if (cpuCycles<0) bpFlag=cpuCycles;
+            if( bpFlag!=BREAK_POINT) PC++;
+
+
+            if (((status->I)==1) && (newIrqPc==0xffffffff)) {
+                newIrqPc= irqSystem->GetNewPc(actualIrqVector); //If any interrupt is pending get new PC 
+                noDirectIrqJump=1;
+            }
+
+        }
+    } else { //cpuCycles>0
+        if (trace_on==1) traceOut << "CPU-waitstate";
+    }
+
+    if(nextStepIn_ns!=0) {
+        *nextStepIn_ns=clockFreq;
+    }
+
+    cpuCycles--;
+    if (trace_on==1) {
+        traceOut << endl;
+        TraceNextLine();
+    }
+
+    //if (untilCoreStepFinished == false) { //we wait not until end so reply the finish state
+    untilCoreStepFinished= !((cpuCycles>0) || (hwWait>0));
+    return bpFlag;
+    //}
     //} while ( untilCoreStepFinished && ((cpuCycles>0) || (hwWait>0)));
 
     //return bpFlag;
@@ -379,4 +380,14 @@ void AvrDevice::SetRampz(unsigned char val) {
 
 void AvrDevice::DeleteAllBreakpoints() {
     BP.erase(BP.begin(), BP.end());
+}
+
+void AvrDevice::ReplaceIoRegister(unsigned int offset, RWMemoryMembers *newMember){
+    if (offset>ioSpaceSize) {
+        cerr << "Could not replace register in non existing IoRegisterSpace" << endl;
+        exit(0);
+    }
+
+    rw[offset]=newMember;
+
 }

@@ -49,6 +49,7 @@ class AvrDevice: public SimulationMember {
     protected:
         SystemClockOffset clockFreq;
         map < string, Pin *> allPins; 
+        unsigned int ioSpaceSize;
 
         //old static vars for Step()
         int cpuCycles;
@@ -84,13 +85,14 @@ class AvrDevice: public SimulationMember {
         void AddToCycleList(Hardware *hw){ hwCycleList.push_back(hw) ; }
         void RemoveFromCycleList(Hardware *hw);
         void Load(const char* n);
+        void ReplaceIoRegister(unsigned int offset, RWMemoryMembers *);
 
         Pin *GetPin(const char *name);
 #ifndef SWIG
         MemoryOffsets &operator->*(MemoryOffsets *m) { return *m;}
 #endif
 
-        AvrDevice(unsigned int flashSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int IoSpaceSize);
+        AvrDevice(unsigned int ioSpaceSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int flashSize);
         int Step(bool &, SystemClockOffset *nextStepIn_ns =0);
         void Reset();
         void SetClockFreq(SystemClockOffset f);

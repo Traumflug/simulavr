@@ -23,7 +23,6 @@ libavrsim_pp_la_SOURCES	= 	\
 	application.cpp 	\
 	at4433.cpp		\
 	at8515.cpp		\
-	at8515special.cpp	\
 	atmega128.cpp		\
 	avrdevice.cpp		\
 	avrerror.cpp		\
@@ -71,7 +70,6 @@ pkginclude_HEADERS = 	\
 	application.h \
 	at4433.h		\
 	at8515.h		\
-	at8515special.h		\
 	atmega128.h		\
 	avrdevice.h		\
 	avrdevice_impl.h	\
