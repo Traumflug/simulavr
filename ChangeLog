@@ -1,3 +1,18 @@
+2005-05-22 <lts-rudolph@mx.de>
+    * src/avrdevice.cpp 
+    * src/avrdevice.h 
+    * src/main.cpp 
+    * src/rwmem.cpp 
+    * src/rwmem.h
+    * src/simulavr.i 
+    * src/at8515special.cpp (deleted)
+    * src/at8515special.h (deleted)
+
+    the old at8515special devices which have a hard coded file name to write 
+    into a file are replaced by a more generic solution. Any core could
+    be expanded by an RWReadFromPipe or RWWriteToPipe special register.
+    For details look inside rwmem.h or main.h for an example.
+    
 2005-05-16 <lts-rudolph@gmx.de>
     *src/avrdevice.cpp: Bugfix: rawsize -> size
 
