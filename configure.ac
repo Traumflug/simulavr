@@ -173,6 +173,7 @@ AC_SUBST([bfd_a_location])
 echo set libbfd_root_location to ${libbfd_root_location}
 
 AVR_LIBIBERTY([${libbfd_root_location}])
+AVR_LIBIBERTY([${libbfd_root_location}/libiberty])
 avr_readelf=$(dirname $(dirname [$(which avr-readelf])))
 AVR_LIBIBERTY([${avr_readelf}/lib])
 
@@ -180,6 +181,24 @@ AVR_LIBIBERTY([${avr_readelf}/lib])
 AC_SUBST([ac_aux_dir])
 my_top_builddir=`pwd`/
 AC_SUBST([my_top_builddir])
+
+# Attempt to provide preliminary support for OSX (darwin?) 
+# I don't know enough about this, so I've simply hacked a darwin check here to 
+# cue modifications to the Makefiles later....
+# If you know a better way, please contact this package's maintainers.
+case $host_os in
+   darwin*)
+      NonPortableDarwin_LIBADD_Hack='$(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a'
+      NonPortableDarwin_GXX_Flags='-flat_namespace -single_module -dynamiclib -undefined suppress'
+      ;;
+        *)
+      NonPortableDarwin_LIBADD_Hack=
+      NonPortableDarwin_GXX_Flags=
+      ;;
+esac
+AC_SUBST([NonPortableDarwin_GXX_Flags])
+AC_SUBST([NonPortableDarwin_LIBADD_Hack])
+
 
 AC_CONFIG_FILES([Makefile
         doc/Makefile
@@ -189,7 +208,7 @@ AC_CONFIG_FILES([Makefile
         regress/regress.py
         regress/modules/Makefile
         regress/test_opcodes/Makefile
-        examples/Makefile examples/anacomp/Makefile
+        examples/Makefile examples/anacomp/Makefile examples/at90s8515special/Makefile
         examples/gui.tcl examples/anacomp/check.tcl
         examples/anacomp/checkdebug.tcl
         examples/anacomp/checkdebug.gdb
@@ -202,6 +221,7 @@ AC_MSG_WARN([
 swig not found, so it is not possible to build simulavr.so and tcl examples will not run. Though simulavrxx itself may be built without it.
 ])
 fi
+
 
 echo "swig_path         = " ${swig_path}
 echo "libbfd.a location = " ${bfd_a_location}
