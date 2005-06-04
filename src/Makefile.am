@@ -2,6 +2,8 @@ bfd_a_location = @bfd_a_location@
 bfd_h_location  = @bfd_h_location@
 libiberty_location = @libiberty_location@
 swig_path = @swig_path@
+NonPortableDarwin_LIBADD_Hack = @NonPortableDarwin_LIBADD_Hack@
+NonPortableDarwin_GXX_Flagss = @NonPortableDarwin_GXX_Flags@
 CCACHE = @CCACHE@
 MYTCL_LIB_SPEC=@MYTCL_LIB_SPEC@
 TCL_INCLUDE_SPEC=@TCL_INCLUDE_SPEC@
@@ -9,6 +11,8 @@ TCL_INCLUDE_SPEC=@TCL_INCLUDE_SPEC@
 MAINTAINERCLEANFILES 	= Makefile.in
 
 DISTCLEANFILES:=${DISTCLEANFILES} simulavr.so keytrans.h simulavr_wrap.cpp
+
+CLEANFILES:=${CLEANFILES} simulavr.so keytrans.h simulavr_wrap.cpp
 
 EXTRA_DIST           = simulavr.i 
 
@@ -146,13 +150,13 @@ simulavr_SOURCES = main.cpp
 # at least on Linux
 
 simulavr_DEPENDENCIES = libavrsim_pp.la
-
 simulavr_LDADD = $(top_builddir)/src/libavrsim_pp.la $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a
+libavrsim_pp_la_LIBADD = $(NonPortableDarwin_LIBADD_Hack)
 
 AM_CPPFLAGS=$(TCL_INCLUDE_SPEC)
 AM_CXXFLAGS=-O2
 
-INCLUDES		= -I$(bfd_h_location) -I$(top_srcdir)/src -I $(top_builddir)/src
+INCLUDES		= -I$(includedir) -I$(bfd_h_location) -I$(top_srcdir)/src -I $(top_builddir)/src
 
 # WAR:: should not build if no swig is detected...
 
@@ -164,7 +168,7 @@ simulavr_wrap.cpp: $(srcdir)/simulavr.i
 	$(swig_path) -c++ -o $@ $<
 
 simulavr.so: simulavr_wrap.o simulavr
-	g++ -I$(srcdir) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) $(MYTCL_LIB_SPEC) $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o simulavr.so
+	g++ -I$(srcdir) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) $(MYTCL_LIB_SPEC) $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o simulavr.so $(NonPortableDarwin_GXX_Flags)
 
 clean_simulavr.so:
 	$(RM) simulavr.so 
@@ -175,10 +179,10 @@ python/simulavr_wrap.cpp: $(srcdir)/simulavr.i
 	$(swig_path) -c++ -python -outdir python/ -o $@ $?
 
 python/_simulavr.so: python/simulavr_wrap.cpp simulavr
-	g++ -I$(srcdir) -I/usr/include/python2.3 $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o $@
+	g++ -I$(srcdir) -I/usr/include/python2.3 $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o $@ $(NonPortableDarwin_GXX_Flags)
 
 clean_python_simulavr:
 	$(RM) python/_simulavr.so python/simulavr.py python/simulavr_wrap.cpp
 
 
-clean : clean_simulavr.so clean_python_simulavr
+#clean : clean_simulavr.so clean_python_simulavr
