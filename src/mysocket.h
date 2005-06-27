@@ -58,7 +58,6 @@ class sockbuf
     protected:
         virtual int overflow(int c){
             char dummy =c&0xff;
-//                        cout << "Ausgabe >" << (unsigned char ) dummy << "< --" << endl;
             ::write( *conn, &dummy, 1);
             return 0;
         }

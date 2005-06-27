@@ -270,6 +270,11 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                 return bpFlag;
             }
 
+            if (EP.end()!=find(EP.begin(), EP.end(), PC)) {
+                if (global_verbose_on) cout << "Simulation finished!" << endl;
+                exit(0);
+            }
+
 
             if (newIrqPc!= 0xffffffff) {
                 if (noDirectIrqJump==0) {

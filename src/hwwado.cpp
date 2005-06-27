@@ -35,11 +35,9 @@ void HWWado::SetWdtcr(unsigned char val) {
 
 	if ( newWDE != 0) { 			//enable the wado allways allowed
 		wdtcr=val;
-		//cout << "WADO enabled" ;
 	} else {  						//unset the wado
 		if (oldWDTOE !=0) { 		//WDTOE was set, 
 			wdtcr=val;
-			//cout << "WADO disabled";
 		}
 	} 
 
@@ -58,7 +56,6 @@ unsigned int HWWado::CpuCycle() {
 	if (cntWde==0) wdtcr&=(0xff-WDTOE); //clear WDTOE after 4 cpu cycles
 
 	if ((( wdtcr& WDE )!= 0 ) && (timeOutAt < SystemClock::Instance().GetCurrentTime() )) {
-		//cout << "Wado overflow!";
 		core->Reset();
 	}
 

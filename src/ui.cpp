@@ -86,7 +86,6 @@ int UserInterface::Step(bool &dummy1, SystemClockOffset *nextStepIn_ns) {
 
                     par= rest.substr(0, pos2);
                     dummy=rest.substr(pos2+1);
-                    //cout << "debugstring: " << debug ;
 
                     if (net == "__ack" ) {
                         waitOnAckFromTclDone++;
@@ -108,8 +107,6 @@ int UserInterface::Step(bool &dummy1, SystemClockOffset *nextStepIn_ns) {
 
                 } // len > 0
             } //poll
-            //cout.setf( ios_base::dec);
-            //cout << "UserInterface::Step Req: " <<  waitOnAckFromTclRequest << " Done:" << waitOnAckFromTclDone << endl; 
         }while (waitOnAckFromTclRequest > waitOnAckFromTclDone+500); 
 
 
@@ -141,10 +138,8 @@ void UserInterface::SendUiNewState(const string &s, const char &c)  {
 
 void UserInterface::SetNewValueFromUi(const string &value){
     if (value=="0") {
-        cout << "Set update to 0" << endl;
         updateOn=false;
     } else {
-        cout << "Set update to 1" << endl;
         updateOn=true;
     }
 

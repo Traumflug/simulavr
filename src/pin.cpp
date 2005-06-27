@@ -34,7 +34,6 @@ void Pin::SetOutState( T_Pinstate s) {
 }
 
 int Pin::GetAnalog() const {
-    //cout << "Analog value " << hex << analogValue << " and state:" << (unsigned char) *this << endl;
     switch (outState) {
         case ANALOG: 
             return analogValue; //reflext that we are self outputting an analog value

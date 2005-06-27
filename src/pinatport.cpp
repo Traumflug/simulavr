@@ -27,7 +27,7 @@
 #include <iostream>
 using namespace std;
 PinAtPort::PinAtPort() { 
-    cout << "Dummy Pin At Port" << endl;
+    cerr << "Dummy Pin At Port" << endl;
 }
 
 PinAtPort::PinAtPort( HWPort *p, unsigned char pn)

@@ -38,6 +38,7 @@ class Memory {
 		unsigned char *myMemory;
 		multimap<unsigned int, string> sym;
 		string GetSymbolAtAddress(unsigned int add);
+		unsigned int GetAddressAtSymbol(const string &s);
         void AddSymbol( pair<unsigned int, string> p);
 		Memory(int size);
 		unsigned int GetSize();

@@ -55,12 +55,9 @@ int main() {
         int number;
         xToNumber >> xcode >> number;
         if (xToNumber.fail()) break;
-        //cout << xcode << "-" << number << endl;
         target << "xToNumber[" << xcode << "]="<< number<< ";" << endl;
     }
     while (!xToNumber.eof());
-
-    //cout << endl << endl;
 
     do {
         int number;
@@ -79,11 +76,7 @@ int main() {
         outNumberToScancode(target, 2, number, mode2);
         outNumberToScancode(target, 3, number, mode3);
 
-        //cout << number << "." << mode1 << "." << mode2 << "." << mode3 << endl;
     } while (!keynumberToScancode.eof());
-
-
-
 
     return 0;
 }

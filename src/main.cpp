@@ -35,6 +35,7 @@ using namespace std;
 #include "config.h"
 
 #include "global.h"
+#include "flash.h"
 #include "avrdevice.h"
 #include "at8515.h"
 #include "atmega128.h"
@@ -71,7 +72,7 @@ int main(int argc, char *argv[]) {
     string readFromPipeFileName="";
     string writeToPipeFileName="";
 
-
+    vector<string> terminationArgs;
 
     while (1) {
         //int this_option_optind = optind ? optind : 1;
@@ -87,14 +88,27 @@ int main(int argc, char *argv[]) {
             {"cpufrequence", 1,0,'F'},
             {"readfrompipe", 1,0,'R'},
             {"writetopipe", 1,0,'W'},
+            {"verbose", 0,0,'V'},
+            {"terminate",1,0,'T'},
             {0, 0, 0, 0}
         };
 
-        c = getopt_long (argc, argv, "f:d:gGd:p:t:uxyzhvniF:R:W:", long_options, &option_index);
+        c = getopt_long (argc, argv, "f:d:gGd:p:t:uxyzhvniF:R:W:VT:", long_options, &option_index);
         if (c == -1)
             break;
 
         switch (c) {
+            case 'T':
+                {
+                    terminationArgs.push_back(optarg);
+                }
+                break;
+
+
+            case 'V':
+                global_verbose_on=1;
+                break;
+
             case 'R': //read from pipe 
                 readFromPipeOffset=strtoul( optarg, &dummy, 16);
                 dummy++; //position behind the "," or any other delimiter for the offset
@@ -109,42 +123,42 @@ int main(int argc, char *argv[]) {
 
             case 'F':
                 fcpu=strtoll(optarg, NULL, 10);
-                cout << "Running with CPU frequence: " << fcpu<<endl;
+                if (global_verbose_on) cout << "Running with CPU frequence: " << fcpu<<endl;
                 break;
 
             case 'u':
-                cout << "Run with User Interface at Port 7777" << endl;
+                if (global_verbose_on) cout << "Run with User Interface at Port 7777" << endl;
                 userinterface_flag=1;
                 break;
 
             case 'f':
-                cout << "File to load " << optarg << endl;
+                if (global_verbose_on) cout << "File to load " << optarg << endl;
                 filename=optarg;
                 break;
 
             case 'd':
-                cout << "Device to simulate " << optarg << endl;
+                if (global_verbose_on) cout << "Device to simulate " << optarg << endl;
                 devicename=optarg;
                 break;
 
             case 'g':
-                cout << "Running as gdb-server" << endl;
+                if (global_verbose_on) cout << "Running as gdb-server" << endl;
                 gdbserver_flag=1;
                 break;
 
             case 'G':
-                cout << "Running with debug informations from gdbserver" << endl;
+                if (global_verbose_on) cout << "Running with debug informations from gdbserver" << endl;
                 global_gdb_debug = 1;
                 gdbserver_flag=1;
                 break;
 
             case 'p':
-                cout << "Running NOT on default port, use instead: " << global_gdbserver_port << endl;
+                if (global_verbose_on) cout << "Running NOT on default port, use instead: " << global_gdbserver_port << endl;
                 global_gdbserver_port    = atoi(optarg);
                 break;
 
             case 't':
-                cout << "Running in Trace Mode" << endl;
+                if (global_verbose_on) cout << "Running in Trace Mode" << endl;
                 StartTrace(optarg);
                 break;
 
@@ -178,6 +192,8 @@ int main(int argc, char *argv[]) {
                 cout << "-F --cpufrequence            set the cpu frequence to <Hz> " << endl;
                 cout << "-W --writetopipe <offset>,<file> add a special pipe register to device at IO-Offset and opens <file> for writing" << endl;            
                 cout << "-R --readfrompipe <offset>,<file> add a special pipe register to device at IO-offset and opens <file> for reading" << endl;            
+                cout << "-V --verbose                 output some hints to console" << endl;
+                cout << "-T --terminate <label> or <address> stops simulation if PC runs on <label> or <address>" << endl;
                 cout << endl;
                 cout << "Supported devices:" << endl;
                 cout << "at90s8515" << endl;
@@ -207,12 +223,12 @@ int main(int argc, char *argv[]) {
 
     //if we want to insert some special "pipe" Registers we could do this here:
     if (readFromPipeFileName!="") {
-        cout << "Add ReadFromPipe-Register at 0x" << hex << readFromPipeOffset << " and read from file: " << readFromPipeFileName << endl;
+        if (global_verbose_on) cout << "Add ReadFromPipe-Register at 0x" << hex << readFromPipeOffset << " and read from file: " << readFromPipeFileName << endl;
         dev1->ReplaceIoRegister(readFromPipeOffset, new RWReadFromPipe(dev1, readFromPipeFileName));
     }
 
     if (writeToPipeFileName!="") {
-        cout << "Add WriteToPipe-Register at 0x" << hex << writeToPipeOffset << " and write to file: " << writeToPipeFileName << endl;
+        if (global_verbose_on) cout << "Add WriteToPipe-Register at 0x" << hex << writeToPipeOffset << " and write to file: " << writeToPipeFileName << endl;
         dev1->ReplaceIoRegister(writeToPipeOffset, new RWWriteToPipe(dev1, writeToPipeFileName));
     }
 
@@ -221,12 +237,19 @@ int main(int argc, char *argv[]) {
     if (filename != "unknown" ) {
         dev1->Load(filename.c_str());
     }
+    //if we have a file we can check out for termination lines.
+    vector<string>::iterator ii;
+    for (ii=terminationArgs.begin(); ii!=terminationArgs.end(); ii++) {
+        if (global_verbose_on) cout <<*ii<<endl;
+        unsigned int epa=dev1->Flash->GetAddressAtSymbol(*ii);
+        dev1->EP.push_back(epa);
+    }
+
 
     if (userinterface_flag==1) {
         ui=new UserInterface(7777); //if not gdb, the ui will be master controller :-)
     }
 
-    //dev1->SetClockFreq(250); //4 Mhz for dummy
     dev1->SetClockFreq(1000000000/fcpu);
 
     if (global_trace_on) dev1->trace_on=1;

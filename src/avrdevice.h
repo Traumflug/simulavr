@@ -61,6 +61,7 @@ class AvrDevice: public SimulationMember {
     public:
         string actualFilename;
         Breakpoints BP;
+        Exitpoints  EP;
         word PC;
         int PC_size;
         AvrFlash *Flash;

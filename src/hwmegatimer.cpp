@@ -121,7 +121,7 @@ bool HWMegaTimer0::OcrWork(unsigned char &ocr, bool &lastOcr, PinAtPort &pinOc, 
 						//pin has gpio functionality, nothing to handle here
 						break;
 					case 1:
-						cout << "Timer1: Error Mode is reserved!" ;
+						cerr << "Timer1: Error Mode is reserved!" ;
 						break;
 
 					case 2:
@@ -149,7 +149,7 @@ bool HWMegaTimer0::OcrWork(unsigned char &ocr, bool &lastOcr, PinAtPort &pinOc, 
 						break;
 
 					case 1:
-						cout << "Timer1: Error Mode is reserved";
+						cerr << "Timer1: Error Mode is reserved";
 						break;
 
 					case 2:
@@ -171,9 +171,6 @@ bool HWMegaTimer0::OcrWork(unsigned char &ocr, bool &lastOcr, PinAtPort &pinOc, 
 }
 
 void HWMegaTimer0::TimerCompareAfterCount() {
-	//cout << "Timer0: " << hex << (unsigned int)  tcnt << " ";
-	//cout << "Timer0 tov: " << hex << (unsigned int) *pointerToTop << " ";
-
 	//handling the tovr irq flag 
 	if (tcnt==*tovCompare) {
 		timer01irq->AddFlagToTifr(0x01);
@@ -413,7 +410,7 @@ bool HWMegaTimer2::OcrWork(unsigned char &ocr, bool &lastOcr, PinAtPort &pinOc, 
 						//pin has gpio functionality, nothing to handle here
 						break;
 					case 1:
-						cout << "Timer1: Error Mode is reserved!" ;
+						cerr << "Timer1: Error Mode is reserved!" ;
 						break;
 
 					case 2:
@@ -441,7 +438,7 @@ bool HWMegaTimer2::OcrWork(unsigned char &ocr, bool &lastOcr, PinAtPort &pinOc, 
 						break;
 
 					case 1:
-						cout << "Timer1: Error Mode is reserved";
+						cerr << "Timer1: Error Mode is reserved";
 						break;
 
 					case 2:
@@ -878,7 +875,7 @@ void HWMegaTimer1::TimerCompareAfterCount() {
 			}
 			break;
 		case 13:
-			cout << "Timer Mode 13 not allowed!";
+			cerr << "Timer Mode 13 not allowed!";
 			break;
 
 	} //end of switch timerMode
@@ -1003,7 +1000,6 @@ void HWMegaTimer1::CheckForMode() {
 
 	timerMode= (WGMn3<<3) + (WGMn2 <<2) + (WGMn1 << 1) + WGMn0;
 
-    //cout << "TimerMode selected:" << dec << (unsigned int)timerMode << endl;
 	switch (timerMode) {
 
 		case 0:
@@ -1059,7 +1055,7 @@ void HWMegaTimer1::CheckForMode() {
 			tovCompare=&topFFFF;
 			break;
 		case 13:
-			cout << "Illegal Timer Mode seleted!";
+			cerr << "Illegal Timer Mode seleted!";
 			break;
 		case 14:
 			pointerToTop=&icr1;

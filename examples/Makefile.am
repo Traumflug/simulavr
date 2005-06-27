@@ -11,4 +11,4 @@ pkginclude_HEADERS =
 
 EXTRA_DIST           = 
 
-SUBDIRS = anacomp
+SUBDIRS = anacomp simple_ex1

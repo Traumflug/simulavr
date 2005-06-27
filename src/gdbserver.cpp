@@ -1365,7 +1365,6 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
     //cout << "Stepping the real core" << endl;
     int res=core->Step(untilCoreStepFinished, timeToNextStepIn_ns);
     lastCoreStepFinished=untilCoreStepFinished;
-    //cout << "Core Step done, was finished:" << untilCoreStepFinished<< endl;
 
     if (res == BREAK_POINT) {
         //cout << "Run on Breakpoint" << endl;

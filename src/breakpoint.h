@@ -34,5 +34,7 @@ using namespace std;
 class Breakpoints: public vector<dword> {
 };
 
+class Exitpoints: public vector<dword> {
+   };
 
 #endif

@@ -116,9 +116,6 @@ unsigned int HWExtIrq::CpuCycle(){
     return 0;    
 }
 void HWExtIrq::PinStateHasChanged(Pin *p) {
-    //cout << "GEt M C U C R Copy for Int1 :" << hex << (unsigned int)(mcucrCopy&0x03)<<" " << endl;
-    //cout << "Get Pin for this event: " << hex << (unsigned int) pinI0 << " " << endl; 
-    //cout << "New: " << pinI0 << " Old: " << int0_old <<" ";
     switch (mcucrCopy&0x03) {
         case 0x00:
             if (pinI0==0) {
@@ -134,7 +131,6 @@ void HWExtIrq::PinStateHasChanged(Pin *p) {
                 int0_old=0;
                 gifr|=(1<<INT0);
                 if (gimsk & (1<<INT0) ) irqSystem->SetIrqFlag(this, vectorInt0);
-                // cout << "IRQ Flag is set! for falling edge!";
             }
             break;
         case 0x03:
@@ -142,7 +138,6 @@ void HWExtIrq::PinStateHasChanged(Pin *p) {
                 int0_old=1;
                 gifr|=(1<<INT0);
                 if (gimsk & (1<<INT0) ) irqSystem->SetIrqFlag(this, vectorInt0);
-                //  cout << "IRQ Flag is set! for rising edge!";
             }
             break;
     }
@@ -156,7 +151,7 @@ void HWExtIrq::PinStateHasChanged(Pin *p) {
             }
             break;
         case 0x04:
-            cout << "Illegal State in mcucrCopy! for int1 sence control" << endl;
+            cerr << "Illegal State in mcucrCopy! for int1 sence control" << endl;
             break;
         case 0x08:
             if ((pinI1==0) && ( int1_old==1)) {

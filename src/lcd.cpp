@@ -138,7 +138,6 @@ ui(_ui), name(_name),
 commandData( &myPortValue, 64)
     //debugOut("./curses")
 {
-    cout << "----------" << endl;
     lastPortValue=0;
     readLow=0;
     command=0;

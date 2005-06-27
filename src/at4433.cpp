@@ -161,10 +161,10 @@ AvrDevice(64, 128, 0, 4*1024) {
 
 AvrDevice_at90s4433::~AvrDevice_at90s4433() {}
 unsigned char AvrDevice_at90s4433::GetRampz() {
-	cout << "Rampz is not a valid Register in at8515!" ;
+	cerr << "Rampz is not a valid Register in at8515!" ;
 	return 0;
 }
 
 void AvrDevice_at90s4433::SetRampz(unsigned char val) {
-	cout << "Illegal Rampz operation in at8515 core";
+	cerr << "Illegal Rampz operation in at8515 core";
 }

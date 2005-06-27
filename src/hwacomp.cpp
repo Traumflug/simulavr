@@ -71,10 +71,8 @@ unsigned int HWAcomp::CpuCycle() {
 }
 
 void HWAcomp::PinStateHasChanged(Pin *p) {
-    //cout << "HWAComp: acsr: start" << hex << (unsigned int ) acsr << endl;
     bool oldComp=(acsr & ACO);
 
-    //cout << "Compare Pin0: " << pinAin0.GetAnalog() << " with Pin1: " << pinAin1.GetAnalog() << endl;
 
     if (pinAin0.GetAnalog()>pinAin1.GetAnalog()) { //set comperator 1
         if (oldComp==false) { //not set before
@@ -98,39 +96,13 @@ void HWAcomp::PinStateHasChanged(Pin *p) {
         }
     }
 
-    //cout << "HWAComp: acsr: end" << hex << (unsigned int ) acsr << endl;
-
-    //return 0;
 }
-
-#if 0
-
-bool HWAcomp::IsIrqFlagSet(unsigned int vec) {
-    /* XXX remove that function next time
-    if (vec== irqVec) {
-    if ( (acsr & ( ACI | ACIE) ) == ( ACI | ACIE) ) { //irq flag and irq enabled?
-    return true;
-    } else {
-    return false;
-    }
-    } else {
-    return false;
-    }
-    */
-
-    return 1;
-}
-#endif
-
 
 void HWAcomp::ClearIrqFlag(unsigned int vector){
-    //cout << "Clear Irq Flag in HWAComp" << endl;
-    //cout << "acsr= " << hex << (unsigned int ) acsr << endl;
     if (vector==irqVec) {
         acsr&=~ACI;
         irqSystem->ClearIrqFlag(irqVec);
     }
-    //cout << "acsr after clear = " << hex << ( unsigned int) acsr << endl;
 }
 
 

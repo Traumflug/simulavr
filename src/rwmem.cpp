@@ -134,7 +134,7 @@ RWWriteToPipe::operator unsigned char() const { return 0; }
 unsigned char RWReadFromPipe::operator=(unsigned char val) { return 0; } 
 RWReadFromPipe::operator unsigned char() const{ 
     char val;
-    is->get(val);
+    is.get(val);
     return val; 
 } 
 

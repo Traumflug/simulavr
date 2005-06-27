@@ -25,6 +25,34 @@
 #include <sstream>
 #include <iostream>
 
+#include "trace.h"
+
+unsigned int Memory::GetAddressAtSymbol(const string &s) {
+    char *dummy;
+
+    char *copy=(char*) malloc(s.length());
+    strcpy(copy, s.c_str());
+
+    multimap<unsigned int, string>::iterator ii;
+    unsigned int retval=0;
+    retval=strtoul(copy, &dummy, 16);
+
+    if (retval !=0 && ((unsigned int)s.length() == (unsigned int)(dummy-copy))) {
+        return retval;
+    }
+
+    for (ii=sym.begin(); ii!=sym.end(); ii++) {
+        if (ii->second == s) {
+            return ii->first;
+        }
+    }
+
+    cerr << "Symbol " << s << " not found!" << endl;
+    exit(0);
+
+    return 0;
+    
+}
 
 string Memory::GetSymbolAtAddress(unsigned int add){
     string lastName;

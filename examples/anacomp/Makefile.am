@@ -1,6 +1,3 @@
-bfd_la_location = @bfd_la_location@
-bfd_h_location  = @bfd_h_location@
-libiberty_location = @libiberty_location@
 PYTHON = python
 
 MAINTAINERCLEANFILES 	= Makefile.in

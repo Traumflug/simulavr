@@ -397,29 +397,12 @@ unsigned char HWSpi::GetSpsr() {
 
 unsigned char HWSpi::GetSpcr() { return spcr; }
 
-#if 0
-bool HWSpi::IsIrqFlagSet(unsigned int vector) {
-    return 1;
-
-    /* this function mjust be removed later
-    if (vector== vectorForSpif) {
-
-        return (( spcr & SPIE ) && ( spsr & SPIF) );
-    } else {
-        cout << "WWWWAAAARRRNNNNIIIINNNNGGG  Warning there is HWSPI called to get a irq vector which is not assigned for!?!?!?!?";
-    }
-    return 0;
-    */
-
-}
-#endif
-
 void HWSpi::ClearIrqFlag(unsigned int vector) {
     if (vector== vectorForSpif) {
         spsr&=0xff-SPIF;
         irqSystem->ClearIrqFlag( vectorForSpif);
     } else {
-        cout << "WWWWAAAARRRNNNNIIIINNNNGGG  Warning there is HWSPI called to get a irq vector which is not assigned for!?!?!?!?";
+        cerr << "WWWWAAAARRRNNNNIIIINNNNGGG  Warning there is HWSPI called to get a irq vector which is not assigned for!?!?!?!?";
     }
 }
 

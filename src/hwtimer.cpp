@@ -33,7 +33,6 @@ HWPrescaler::HWPrescaler(AvrDevice *core): Hardware(core) {
 void HWTimer0::TimerCompareAfterCount() {
 	if ((tcnt==1) ) { //overflow occured! when leaving 0
 		timer01irq->AddFlagToTifr(0x02);	//set TOV0 in TIFR
-		//cout << "Timer0 TIFR set " ;
 	}
 }
 
@@ -136,7 +135,6 @@ void HWTimer1::TimerCompareAfterCount() {
 
 	if (tcnt1==1 & cntDir==1) { //overflow occured! while leaving 0 upward
 		timer01irq->AddFlagToTifr(0x80);	//set TOV1 in TIFR
-		//cout << "Timer1 TOV1 set " ;
 	}
 
 	if (tcnt1==ocr1a) {
@@ -201,7 +199,6 @@ void HWTimer1::TimerCompareAfterCount() {
 		}
 
 		timer01irq->AddFlagToTifr(0x40);	//set OCF1A in TIFR
-		//cout << "Timer1 OCF1A set " ;
 
 	} //end of compare
 
@@ -260,7 +257,6 @@ void HWTimer1::TimerCompareAfterCount() {
 		}
 
 		timer01irq->AddFlagToTifr(0x20);	//set OCF1B in TIFR
-		//cout << "Timer1 OCF1B set " ;
 	} // end of compare
 }
 
@@ -344,7 +340,6 @@ unsigned int HWTimer1::CpuCycle(){
 			if (( icp ^ (tccr1b&0x40)>>6)==1) {
 				//edge OK
 				timer01irq->AddFlagToTifr(0x08);	//set ICF1 in TIFR
-				//cout << "Timer1 ICF1 set " ;
 				icr1=tcnt1;	//Capture
 
 
@@ -459,8 +454,8 @@ unsigned char RWOcral::operator=(unsigned char val) { if (core->trace_on) trioac
 unsigned char RWOcrbh::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Ocrbh",val);timer1->SetOcr1bh(val); return val; }
 unsigned char RWOcrbl::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Ocrbl",val);timer1->SetOcr1bl(val); return val; }
 
-unsigned char RWIcrh::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Icrh",val);cout << "Write To Read Only Register ICR1H";  return val; }
-unsigned char RWIcrl::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Icrl",val);cout << "Write To Read Only Register ICR1L";  return val; }
+unsigned char RWIcrh::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Icrh",val);cerr << "Write To Read Only Register ICR1H";  return val; }
+unsigned char RWIcrl::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Icrl",val);cerr << "Write To Read Only Register ICR1L";  return val; }
 
 RWTccra::operator unsigned char() const { return timer1->GetTccr1a();}
 RWTccrb::operator unsigned char() const { return timer1->GetTccr1b();}

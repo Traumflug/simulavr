@@ -110,26 +110,6 @@ void HWAd::SetAdcsr(unsigned char val) {
 }
 
 
-#if 0
-bool HWAd::IsIrqFlagSet(unsigned int vec) {
-    return 1;
-
-    /*XXX remove this function later
-
-    if (adcsr&ADIF) {
-        //cout << "ad is finished checked in irq: adcsr:" << hex << (unsigned int)adcsr << endl;
-    }
-    if (vec== irqVec) {
-        if ((adcsr&(ADIE|ADIF))==(ADIE|ADIF)) {
-            //cout << "IrqFlag is 1" << endl;
-            return true;
-        }
-    }
-    return false;
-    */
-}
-#endif
-
 void HWAd::ClearIrqFlag(unsigned int vector){
     if (vector==irqVec) {
         adcsr&=~ADIF;
@@ -188,10 +168,8 @@ unsigned int HWAd::CpuCycle() {
                     clk=0;
                     if (adcsr&ADSC) { //start a conversion
                         if (usedBefore) {
-                            //cout << "running adc" << endl;
                             state=RUNNING;
                         } else {
-                            //cout << "Init adc" << endl;
                             state=INIT;
                         }
                     }
@@ -214,15 +192,12 @@ unsigned int HWAd::CpuCycle() {
                     if (clk==1.5*2) { //sampling
                         adSample= admux->GetMuxOutput();
                         int adref= aref.GetAnalog();
-                        //cout << "Sampling adc,  Aref:" << hex << adref << " Ain " << hex << adSample << endl;
                         if (adSample>adref) adSample=aref;
                         if (adref==0) {
                             adSample=INT_MAX;
                         } else {
                             adSample= (int)((float)adSample/(float)adref*INT_MAX);
                         }
-
-                        //cout << "Calculated adSample is: " << adSample << " in % " << dec << (float)adSample/(float)INT_MAX*100 << endl;
 
                     } else if ( clk== 13*2) {
                         //calc sample to go to 10 bit value
@@ -237,13 +212,10 @@ unsigned int HWAd::CpuCycle() {
                             adch=adSample>>8;
                         }
                         adcl=adSample&0xff;
-                        //cout << "AD Value is " << hex << adSample << endl;
-                        
                         adcsr|=ADIF;        //set irq flag (conversion complete)
                         if ((adcsr&(ADIE|ADIF))==(ADIE|ADIF)) {
                             irqSystem->SetIrqFlag(this, irqVec);
                         }
-                        //cout << "ad finished " << endl;
                         if (adcsr& ADFR) { //start again and state is running again
                             clk=0;
                         } else {

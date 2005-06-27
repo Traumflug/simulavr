@@ -208,7 +208,7 @@ AC_CONFIG_FILES([Makefile
         regress/regress.py
         regress/modules/Makefile
         regress/test_opcodes/Makefile
-        examples/Makefile examples/anacomp/Makefile examples/at90s8515special/Makefile
+        examples/Makefile examples/anacomp/Makefile examples/simple_ex1/Makefile
         examples/gui.tcl examples/anacomp/check.tcl
         examples/anacomp/checkdebug.tcl
         examples/anacomp/checkdebug.gdb

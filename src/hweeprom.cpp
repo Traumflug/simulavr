@@ -180,7 +180,6 @@ unsigned char HWEeprom::ReadFromAddress( unsigned int addr) {
 }
 
 void HWEeprom::WriteMem( unsigned char *src, unsigned int offset, unsigned int secSize) {
-    cout << "Write EEprom Mem at offset : " << hex << offset << " size: " << secSize << endl;
     for (unsigned int tt=0; tt<secSize; tt++) { 
         if (tt+offset<size) {
             *(myMemory+tt+offset)=src[tt];

@@ -24,6 +24,10 @@
 #define RWMEM
 
 #include "avrdevice.h"
+#include <iostream>
+#include <fstream>
+#include <iostream>
+
 /*
  * All here defined types are used to simulate the 
  * read write address space. This means also registers
@@ -127,11 +131,16 @@ class MemoryOffsets {
 using namespace std;
 class RWWriteToPipe: public RWMemoryMembers {
     protected:
-        ofstream os;
+        ofstream ofs;
+        ostream &os;
         string pipeName;
 
     public:
-        RWWriteToPipe(AvrDevice *c, const string &name): RWMemoryMembers(c), os(name.c_str()), pipeName(name) {}
+        RWWriteToPipe(AvrDevice *c, const string &name)
+           : RWMemoryMembers(c), os((name=="-")?std::cout:ofs), pipeName(name) 
+         {
+         if( name != "-" )ofs.open(name.c_str());
+         }
         virtual ~RWWriteToPipe() {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
@@ -143,14 +152,17 @@ class RWWriteToPipe: public RWMemoryMembers {
 
 class RWReadFromPipe: public RWMemoryMembers {
     protected:
-        ifstream *is;
+        mutable istream &is;
+        mutable ifstream ifs;
         string pipeName;
 
     public:
-        RWReadFromPipe(AvrDevice *c, const string &name): RWMemoryMembers(c), pipeName(name) {
-            is=new ifstream(name.c_str());
-        }
-        virtual ~RWReadFromPipe() {delete is;}
+        RWReadFromPipe(AvrDevice *c, const string &name)
+           : RWMemoryMembers(c), is((name=="-")?std::cin:ifs), pipeName(name) 
+         {
+         if( name != "-" )ifs.open(name.c_str());
+         }
+        virtual ~RWReadFromPipe() {}
         virtual unsigned char operator=(unsigned char) ;
         virtual operator unsigned char() const;
 };

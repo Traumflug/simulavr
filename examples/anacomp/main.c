@@ -14,8 +14,12 @@ unsigned char results[0x20];
 
 
 int main () {
+   int i;
     DDRB=0xff;
     volatile int x;
+
+    for( i=0; i<10000; ++i )
+       *( (volatile char*) 0x20)='*';
 
     do {
         if (ACSR & (1<<ACO) ) {

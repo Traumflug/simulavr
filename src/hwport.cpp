@@ -61,7 +61,6 @@ Pin& HWPort::GetPin(unsigned char pinNo) {
 }
 
 void HWPort::CalcPin() {
-    //    cout << "Calc Pin for Port " << myName << endl;
     //calculating the value for register "pin" from the Pin p[] array
     pin=0;
     for (int tt=0; tt<8; tt++) {
@@ -97,8 +96,6 @@ void HWPort::CalcOutputs() { //Calculate the new output value to be transmitted 
                 workingPort|=port&actualBit;
             }
         }
-
-        //cout << " \n \nworking ddr 0x" << hex << (unsigned int) workingDdr << " working port 0x" << hex << (unsigned int) workingPort << dec << endl;
 
         if (workingDdr&actualBit) {	//Ddr is output
             if (workingPort&actualBit) { //Port is High

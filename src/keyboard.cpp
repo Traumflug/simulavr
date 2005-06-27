@@ -57,8 +57,6 @@ int Keyboard::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
                     myState=WRITE_CHANGE_DATA;
                     actualChar= buffer[bufferReadIndex];
                     bufferReadIndex=(bufferReadIndex+1)&(KBD_BUFFER_SIZE-1);
-
-                    //cout << "Start writing scanCode :" << hex << (unsigned int) actualChar << " to virtual Kbd-Lines" << dec << endl;
                 }
             }
             break;
@@ -105,14 +103,12 @@ int Keyboard::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
 
 
         case WRITE_CHANGE_CLOCK_LOW:
-            //cout << "Set clk line to low" << endl;
             clk='L';
             *timeToNextStepIn_ns=30000;
             myState=WRITE_CHANGE_CLOCK_HIGH;
             break;
 
         case WRITE_CHANGE_CLOCK_HIGH:
-            //cout << "set clk line to high" << endl;
             clk='H';
             *timeToNextStepIn_ns=40000;
             myState=WRITE_CHANGE_DATA;
@@ -212,8 +208,6 @@ void Keyboard::SetClockFreq(SystemClockOffset f){
 }
 
 int Keyboard::InsertScanCodeToBuffer( unsigned char scan) {
-    //cout << "Write Scan Code << " << hex << (unsigned int) scan << dec << " to buffer " << endl;
-
     if (((bufferWriteIndex+1)&(KBD_BUFFER_SIZE-1)) == bufferReadIndex) return -1; //buffer is full
     buffer[bufferWriteIndex]= scan; 
     bufferWriteIndex=(bufferWriteIndex+1)&(KBD_BUFFER_SIZE-1);
@@ -222,7 +216,6 @@ int Keyboard::InsertScanCodeToBuffer( unsigned char scan) {
 }
 
 void Keyboard::InsertMakeCodeToBuffer( int key) {
-    //cout << "Insert Make Code " << endl;
     int keynum= xToNumber[key];
     if (keynum==0) return;
 
@@ -238,7 +231,6 @@ void Keyboard::InsertMakeCodeToBuffer( int key) {
 }
 
 void Keyboard::InsertBreakCodeToBuffer( int key) {
-    //cout << "Insert Break Code" << endl;
     int sendF0Pos=0;
 
     int keynum= xToNumber[key];
@@ -264,7 +256,6 @@ void Keyboard::InsertBreakCodeToBuffer( int key) {
 }
 
 void Keyboard::SetNewValueFromUi(const string& s) {
-    //cout << "New String from GUI received!!! JuHu!!!! " << s << endl;    
     switch (s[0]) {
         case 'B':
             InsertBreakCodeToBuffer(atoi(s.substr(1).c_str()));

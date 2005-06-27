@@ -52,8 +52,13 @@ unsigned int AvrFlash::GetSize() { return size; }
 void AvrFlash::WriteMem( unsigned char *src, unsigned int offset, unsigned int secSize) {
     for (unsigned tt=0; tt<secSize; tt+=2) { 
         if (tt+offset<size) {
+#ifndef WORDS_BIGENDIAN
             *(myMemory+tt+offset)=src[tt+1];
             *(myMemory+tt+1+offset)=src[tt];
+#else
+            *(myMemory+tt+offset)=src[tt];
+            *(myMemory+tt+1+offset)=src[tt+1];
+#endif
         } 
     }
 
