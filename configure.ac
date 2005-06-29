@@ -139,6 +139,12 @@ if test x"$bfd_h_location" == "x"; then
   AVR_BFD_SEARCH_STEP([${libbfd_root_location}])
 fi
 
+AC_ARG_WITH([libiberty-path],
+	    [--with-libiberty-path=path location of AVR-binutils version of libiberty],
+	    [AC_MSG_NOTICE([--with-libiberty-path=${withval} specified...])
+             AVR_LIBIBERTY([${withval}])
+])
+
 if test x"${bfd_h_location}" == x; then
 AC_MSG_ERROR([
 
@@ -226,6 +232,7 @@ fi
 echo "swig_path         = " ${swig_path}
 echo "libbfd.a location = " ${bfd_a_location}
 echo "bfd.h location     = " ${bfd_h_location}
+echo "libiberty location = " ${libiberty_location}
 echo "tcl include        = " ${TCL_INCLUDE_SPEC}
 echo "tcl version        = " ${TCL_VERSION}
 echo "tcl lib spec       = " ${TCL_LIB_SPEC}
