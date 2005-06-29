@@ -59,6 +59,7 @@ by the Free Software Foundation.
 * Invoking::                    
 * Using with GDB::              
 * Tracing::                     
+* Building and Installing simulavrxx::  
 * Examples::                    
 * Index::                       Complete index.
 
@@ -73,7 +74,7 @@ by the Free Software Foundation.
 @node Introduction, Invoking, Top, Top
 @chapter Introduction
 
-@cindex chapter, Introduction_x
+@cindex Introduction
 
 The simulavrxx program is a simulator for the Atmel AVR family of
 microcontrollers.  Simulavrxx can be used either standalone or as a
@@ -121,11 +122,10 @@ during execution.
 @item simulavrxx.so provides a "loadable" tcl/tk library to write simulation sessions without compiling simulator sources
 @end itemize
 
-
 @node Invoking, Using with GDB, Introduction, Top
 @chapter Invoking
 
-@cindex chapter, Invoking_x
+@cindex Invoking
 
 Options for simulavrxx:
 @table @samp
@@ -190,7 +190,7 @@ Connecting multiple devices via multiple sockets is discussed in the scripting s
 
 @comment  node-name,  next,  previous,  up
 @comment @node Invoking, Using with GDB, Introduction, Top
-@node Tracing, Examples, Using with GDB, Top
+@node Tracing, Building and Installing simulavrxx, Using with GDB, Top
 @chapter Tracing 
 @cindex Tracing
 
@@ -259,8 +259,64 @@ What the coloms mean:
   which means that the label information in the trace output is wrong. That is not a bug, this is related to the 
   possibilities of the gdb interface.
 
+@node Building and Installing simulavrxx, Examples, Tracing, Top
+@chapter Building and Installing simulavrxx
+@cindex Installing, Building simulavrxx
 
-@node Examples, Index, Tracing, Top
+Simulavrxx uses GNU autotools. This means that, given a tarball, for
+verion 0.8.006, for example, you should be able to use the following
+steps to build and install simulavrxx:
+
+@quotation
+@format
+@command{tar zxvf simulavrxx-0.8.006.tar.gz}
+@command{cd simulavrxx-0.8.006}
+@command{./configure}
+@command{make}
+@command{make install}@end format
+@end quotation
+
+
+Simulavrxx does rely on a few other GNU tools. In particular, it relies on libbfd from binutils, and by libbfd's dependency, it also relies on libiberty. I have found it useful to install my hand-configured-installed files in one area. That way I can put the avr-tools in my path only when I'm working on avr related work.
+
+For reference, here is how I install avr tools to /home/rivetwa/install:
+
+@quotation
+@format
+@command{mkdir b-binutils}
+@command{tar jxvf binutils-2.16.tar.bz2}
+@command{cd b-binutils}
+@command{../binutils-2.16/configure  --enable-install-libbfd --prefix=/home/rivetwa/install --target=avr}
+@command{make && make install}
+@end format
+@end quotation
+
+Then I configure/install simulavrxx as follows:
+
+@quotation
+@format
+@command{tar zxvf simulavrxx-0.8.006.tar.gz}
+@command{cd simulavrxx-0.8.006}
+@command{./configure --prefix=/home/rivetwa/install}
+@command{make}
+@command{make install}
+@end format
+@end quotation
+
+
+Actually, I use some other flags, but I'm a maintainer. Ideally this is all you should need to build/install simulavrxx. If this doesn't work, read on. I will walk through a few of the configure options that some users have had to use. 
+
+@table @samp
+@item --prefix
+Use this option to specify the root directory to install simulavrxx to. /usr/local is the default.
+@item --with-bfd-path
+If configure tells you it can't find libbfd, try --with-bfd-path=/your/path/. Notice that you are expected to point to the libbfd from binutils configured for AVR.
+@item --with-libiberty-path
+In the unlikely event that your properly installed AVR binutils results in simulavrxx finding libbfd but not libiberty, use this option. Use of this option usually means the libiberty you are looking at did not come from the same binutils install that gave you the libbfd you have.
+@end table
+
+
+@node Examples, Index, Building and Installing simulavrxx, Top
 @chapter Examples
 @cindex Examples
 
@@ -272,15 +328,25 @@ The anacomp example is all we have at the moment. Anacomp brings up an Itcl base
 The gdb session for me requires a "load" before hitting "continue", which actually starts the simulation. 
 
 @section Tcl Anacomp Example
+@cindex Example TCL
+
 This is Klaus' very nice original example simulation.
 
 After performing the build, go to the @file{examples/anacomp} directory and try @code{make dogdb}.
 
 @section Python Example
+@cindex Example, Python
 
 This is Bill's hacked port of Klaus' TCL simulation script to Python. The UI is still Itcl based. Eventually it will be updated to also have a Python GUI (likely WxPython at first)
 
 After performing the build, go to the @file{examples/anacomp} directory and try @code{make do_python}.
+
+@section Simple Example
+@cindex Example, Simple
+
+This sample uses only simulavrxx to execute a hackede AVR program. I say "hacked" becuase is shows using 3 simulator features that provide input, output and simulation termination based on "magic" port access and reaching a particular symbol. It is only really useful for getting your feet wet with simulavr, it is not a great example of how to use simulavrxx. It is thought to be useful enough to the absolute newbie to get you started though.
+
+After performing the build, go to the @file{examples/simple_ex1} directory and try @code{make run_sim}. Notice the use of -W, -R and -T flags. 
 
 
 @node Index,  , Examples, Top
