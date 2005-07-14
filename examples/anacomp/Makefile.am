@@ -5,7 +5,6 @@ MAINTAINERCLEANFILES 	= Makefile.in
 pkginclude_HEADERS = 
 
 EXTRA_DIST           = main.c
-if HAVE_WISH
 do: anacomp
 	$(TCL_WISH) check.tcl
 
@@ -15,7 +14,6 @@ dogdb: anacomp
 do_python: anacomp
 	$(PYTHON) $(srcdir)/checkdebug.py
 
-endif
 
 # WAR: should detect avr-toolset first!
 

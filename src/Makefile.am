@@ -8,6 +8,20 @@ CCACHE = @CCACHE@
 MYTCL_LIB_SPEC=@MYTCL_LIB_SPEC@
 TCL_INCLUDE_SPEC=@TCL_INCLUDE_SPEC@
 
+if USE_SWIG
+if HAVE_TCL_DEV
+if WAR_SHARED
+  BUILD_SO=simulavr.so
+endif
+endif
+
+if USE_PYTHON
+if WAR_SHARED
+  BUILD_SO_PY=python/_simulavr.so
+endif
+endif
+endif
+
 MAINTAINERCLEANFILES 	= Makefile.in
 
 DISTCLEANFILES:=${DISTCLEANFILES} simulavr.so keytrans.h simulavr_wrap.cpp
@@ -161,7 +175,7 @@ INCLUDES		= -I$(includedir) -I$(bfd_h_location) -I$(top_srcdir)/src -I $(top_bui
 # WAR:: should not build if no swig is detected...
 
 # This is a cheat! Hopefully it works ok...
-all-am: simulavr.so python/_simulavr.so
+all-am:  $(BUILD_SO) $(BUILD_SO_PY)
 
 # TCL bindings
 simulavr_wrap.cpp: $(srcdir)/simulavr.i
@@ -169,6 +183,7 @@ simulavr_wrap.cpp: $(srcdir)/simulavr.i
 
 simulavr.so: simulavr_wrap.o simulavr
 	g++ -I$(srcdir) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) $(MYTCL_LIB_SPEC) $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o simulavr.so $(NonPortableDarwin_GXX_Flags)
+
 
 clean_simulavr.so:
 	$(RM) simulavr.so 

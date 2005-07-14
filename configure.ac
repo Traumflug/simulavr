@@ -18,19 +18,18 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 AC_SWIG
+AC_WAR_TCL
 
 AC_CHECK_PROG(AVR_AS, avr-as, avr-as)
 AC_CHECK_PROG(AVR_LD, avr-ld, avr-ld)
 AC_CHECK_PROG(AVR_GCC, avr-gcc, avr-gcc)
 AC_CHECK_PROG(AVR_GXX, avr-g++, avr-g++)
-AC_PATH_PROG(TCL_WISH, wish wish8.4 wish8.3 wish8.2)
 AC_CHECK_PROG(CCACHE, ccache, ccache, "")
 
 AC_SUBST([AVR_AS])
 AC_SUBST([AVR_LD])
 AC_SUBST([AVR_GCC])
 AC_SUBST([AVR_GXX])
-AC_SUBST([TCL_WISH])
 AC_SUBST([CCACHE])
 
 
@@ -50,10 +49,11 @@ AC_C_VOLATILE
 AC_C_BIGENDIAN
 
 if test -e ${swig_path}; then
- AC_MSG_NOTICE([got swig])
+ AC_MSG_NOTICE([got swig user parameter])
 else
  swig_path=""
 fi
+AM_CONDITIONAL([USE_SWIG],[test x${swig_path} != "x"])
 
 if (echo $CXX | grep ccache); then
   echo
@@ -64,27 +64,6 @@ fi
 
 AC_SUBST([CXX])
 
-AM_CONDITIONAL(HAVE_WISH, test x$TCL_WISH != x)
-
-AC_PATH_PROGS(TCL_CONFIG, [tclConfig.sh], [""], [/usr/lib/tcl /usr/lib/tcl8.4 /usr/lib/tcl8.3 /usr/lib/tcl8.2 /usr/lib])
-
-# find any old tcl, if present. (AC_SEARCH_LIBS more useful here? I
-# think we don't want to always include it in LIBS which AC_SERCH_LIBS
-# seems to do)
-if test x"${TCL_CONFIG}" != "x"; then
-    source ${TCL_CONFIG}
-    # WAR: I don't know what I'm doing...TCL_LIB_SPEC contains
-    # an unepanded variable ${TCL_DBGX} when I looked..
-    MYTCL_LIB_SPEC=`eval echo "${TCL_LIB_SPEC}"`
-    echo "MYTCL_LIB_SPEC=$MYTCL_LIB_SPEC"
-else
-    AC_MSG_WARN([Failed to find tclConfig.sh... tcl dependent code may fail to build...ask package maintainer to update configure process])
-fi
-
-
-AC_SUBST([TCL_INCLUDE_SPEC])
-AC_SUBST([TCL_LIB_SPEC])
-AC_SUBST([MYTCL_LIB_SPEC])
 
 # Checks for library functions.
 AC_FUNC_MALLOC
@@ -93,31 +72,9 @@ AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([inet_ntoa memset socket strdup strerror])
 
-dnl This macro searches for python version 2.1.1 or newer
-AC_CACHE_CHECK([for python >= 2.1.1], [_cv_python_211], [
+AC_WAR_PYTHON
 
-changequote(<@, @>)
-
-_cv_python_211='no' ;
-if python -V 2>&1 | grep -q Python ; then
-  cat <<EOF > py_ver.py
-import sys
-v = sys.version_info
-ver = (int(v[0]) << 16) + (int(v[1]) << 8) + int(v[2])
-if ver < 0x020101:
-        print 'no'
-else:
-        print 'yes'
-EOF
-  _cv_python_211=`python py_ver.py`
-  rm -f py_ver.py
-fi
-
-changequote([, ])
-])
-AC_PYTHON
-
-if test "x$_cv_python_211" = "xyes" ; then
+if test "x$_cv_python_211" == "xyes" ; then
   ac_regression_subdir="regress"
 else
   AC_MSG_WARN([ ])
@@ -182,7 +139,18 @@ AVR_LIBIBERTY([${libbfd_root_location}])
 AVR_LIBIBERTY([${libbfd_root_location}/libiberty])
 avr_readelf=$(dirname $(dirname [$(which avr-readelf])))
 AVR_LIBIBERTY([${avr_readelf}/lib])
+if test x${with_bfd_path} != x; then
+AVR_LIBIBERTY([${with_bfd_path}/lib])
+fi
 
+if test x"${libiberty_location}" == x; then
+AC_MSG_ERROR([
+ 
+*** ERROR ***
+
+libiberty.a from binutils is not found
+])
+fi
 
 AC_SUBST([ac_aux_dir])
 my_top_builddir=`pwd`/
@@ -205,6 +173,27 @@ esac
 AC_SUBST([NonPortableDarwin_GXX_Flags])
 AC_SUBST([NonPortableDarwin_LIBADD_Hack])
 
+if test "x${swig_path}" == "x"; then
+AC_MSG_WARN([
+*** WARNING ***
+swig not found, so it is not possible to build simulavr.so and tcl examples will not run. Though simulavrxx itself may be built without it.
+])
+fi
+
+AM_CONDITIONAL([WAR_SHARED],[test x$enable_shared == "xyes"])
+
+if test x"$enable_shared" == "xyes"; then
+ if test x"$swig_path" != "x"; then
+  if test x"$TCL_WISH" != "x"; then
+     use_wish=yes
+  fi
+  if test x"$have_python" != "x"; then
+     use_python=yes
+  fi
+ fi
+fi
+AM_CONDITIONAL([USE_PYTHON],[test "x$have_python" != "x"])
+AM_CONDITIONAL([USE_WISH],[test "x$TCL_WISH" != "x"])
 
 AC_CONFIG_FILES([Makefile
         doc/Makefile
@@ -221,13 +210,6 @@ AC_CONFIG_FILES([Makefile
          ])
 AC_OUTPUT
 
-if test "x${swig_path}" == "x"; then
-AC_MSG_WARN([
-*** WARNING ***
-swig not found, so it is not possible to build simulavr.so and tcl examples will not run. Though simulavrxx itself may be built without it.
-])
-fi
-
 
 echo "swig_path         = " ${swig_path}
 echo "libbfd.a location = " ${bfd_a_location}
@@ -237,6 +219,4 @@ echo "tcl include        = " ${TCL_INCLUDE_SPEC}
 echo "tcl version        = " ${TCL_VERSION}
 echo "tcl lib spec       = " ${TCL_LIB_SPEC}
 echo "my tcl lib spec    = " ${MYTCL_LIB_SPEC}
-
-
-
+echo "swig_path          = " ${swig_path}
