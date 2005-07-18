@@ -44,6 +44,8 @@ class DecodedInstruction {
         virtual int operator()()=0; 
         virtual int Trace()=0;
         bool IsInstruction2Words() { return size2Word; } 
+
+        virtual ~DecodedInstruction() {}
 };
 
 DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core );

@@ -229,7 +229,11 @@ class HWMegaTimer1 : public Hardware {
 		unsigned char GetTccr1c() { return tccr1c;}
 
 		unsigned char GetTcnt1h() { return allTemp; /*tcnt1htemp;*/}
-		unsigned char GetTcnt1l() { return tcnt1&0xff; /*tcnt1htemp*/ allTemp=tcnt1>>8;}
+		unsigned char GetTcnt1l() { 
+            allTemp=tcnt1>>8; 
+            return tcnt1&0xff; 
+        }
+            /*tcnt1htemp*/ /*allTemp=tcnt1>>8;*//*}*/
 		unsigned char GetOcr1ah() { return ocr1a>>8;}
 		unsigned char GetOcr1al() { return ocr1a&0xff;}
 		unsigned char GetOcr1bh() { return ocr1b>>8;}
@@ -237,7 +241,10 @@ class HWMegaTimer1 : public Hardware {
 		unsigned char GetOcr1ch() { return ocr1c>>8;}
 		unsigned char GetOcr1cl() { return ocr1c&0xff;}
 		unsigned char GetIcr1h() { return allTemp; /*icr1htemp;*/}
-		unsigned char GetIcr1l() { return icr1&0xff; /*icr1htemp*/allTemp=icr1>>8;}
+		unsigned char GetIcr1l() { 
+            allTemp=icr1>>8; 
+            return icr1&0xff; 
+            /*icr1htemp*//*allTemp=icr1>>8;*/}
 
 		static const unsigned short top0=0x0000;
 		static const unsigned short topFFFF=0xffff;

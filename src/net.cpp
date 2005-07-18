@@ -64,8 +64,9 @@ bool MirrorNet::CalcNet() {
     return (bool)*p;
 }
 
+//Attention, after the call the Net is not longer available nor valid!
 void MirrorNet::Delete(Pin *p) { 
-    //should delete myself (delete this!) 
+    delete(this);
 }
     
 

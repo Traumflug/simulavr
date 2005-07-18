@@ -182,6 +182,9 @@ unsigned int HWUart::CpuCycleRx() {
     //
     //this part MUST! ONLY BE CALLED IF THE PRESCALER OUTPUT COUNTS
     if ( ucr & RXEN) {
+        // will be used to cause interrupts (in the end of this if)
+        unsigned char usr_old=usr;
+
         switch (rxState) {
             case RX_WAIT_FOR_HIGH: //wait for startbit
                 if (pinRx==1) rxState=RX_WAIT_FOR_LOWEDGE;
@@ -293,7 +296,10 @@ unsigned int HWUart::CpuCycleRx() {
                     }
                 }
 
-                if (cntRxSamples>15) {
+                if (
+                        (ucsrc&USBS) && (cntRxSamples>16) | //if 2 stopbits used we have to wait full bit frame
+                        (!(ucsrc&USBS)) && (cntRxSamples>10) //in case of only 1 stopbit we can shorten the stopbit
+                   ) {
 
                     if ( rxLowCnt<rxHighCnt) { //the bit was high this is ok
                         udrRead=rxDataTmp&0xff;
@@ -315,11 +321,14 @@ unsigned int HWUart::CpuCycleRx() {
                         rxHighCnt=0;
                         rxState= RX_READ_STOPBIT2;  
                     } else {
-                        if (usr|RXC) { //RXC is allready set->Overrun Error
+                        if (usr&RXC) { //RXC is allready set->Overrun Error
                             usr|=OR;
                         }
                         usr|=RXC; //receiving is complete, regardless of framing error!
-                        rxState= RX_WAIT_FOR_HIGH;
+                        if (rxLowCnt<rxHighCnt)
+                            rxState = RX_WAIT_FOR_LOWEDGE;
+                        else 
+                            rxState = RX_WAIT_FOR_HIGH;
                     }
                 }	
                 break;
@@ -335,7 +344,7 @@ unsigned int HWUart::CpuCycleRx() {
                         }
                     }
 
-                    if (cntRxSamples>15) {
+                    if (cntRxSamples>10) { //the last stopbit could allways be shorter than normal data-bit
                         if ( rxLowCnt<rxHighCnt) { //the bit was high this is ok
                             usr&=0xff-FE;
                         }
@@ -344,7 +353,10 @@ unsigned int HWUart::CpuCycleRx() {
                     }
 
                     usr|=RXC; //receiving is complete, regardless of framing error!
-                    rxState= RX_WAIT_FOR_HIGH;
+                    if (rxLowCnt<rxHighCnt)
+                        rxState = RX_WAIT_FOR_LOWEDGE;
+                    else 
+                        rxState = RX_WAIT_FOR_HIGH;
                 }	
 
 
@@ -353,6 +365,19 @@ unsigned int HWUart::CpuCycleRx() {
             case RX_DISABLED:
                 break;
         } //end of switch
+
+        // check if as a result of this operation any interrupt flags sholud be changed.
+        unsigned char irqold= ucr&usr_old;
+        unsigned char irqnew= ucr&usr;
+  	 
+  	 
+        unsigned char changed=irqold^irqnew;
+        unsigned char setnew= changed&irqnew;
+        unsigned char clearnew= changed& (~irqnew);
+  	 
+        CheckForNewSetIrq(setnew);
+        CheckForNewClearIrq(clearnew);
+  	
     } // end of rx enabled
     return 0;
 }
@@ -360,13 +385,17 @@ unsigned int HWUart::CpuCycleRx() {
 
 unsigned int HWUart::CpuCycleTx() {
     /*************************************** TRANCEIVER PART **********************************/
-    unsigned char usr_old=usr;
+    //unsigned char usr_old=usr;
 
     baudCnt16++;
     if (baudCnt16==16) { //1 time baud rate - baud rate / 16 here
         baudCnt16=0;
 
         if (ucr & TXEN ) {	//transmitter enabled
+
+            // will be used to cause interrupts int the end of this if
+            unsigned char usr_old=usr;
+
             if (!(usr & UDRE) ) { // there is new data in udr
                 if ((usr & TXC)| (txState==TX_FIRST_RUN)|txState==TX_FINISH) { //transmitter is empty
                     //shift data from udr->transmit shift register
@@ -434,9 +463,9 @@ unsigned int HWUart::CpuCycleTx() {
                             txState=TX_SEND_STARTBIT;
                         } // end of new data in udr
                         else 
-                        { 
-                            txState=TX_AFTER_STOPBIT;
-                        }
+                            { 
+                                txState=TX_AFTER_STOPBIT;
+                            }
                     }
                     break;
 
@@ -454,9 +483,9 @@ unsigned int HWUart::CpuCycleTx() {
                         txState=TX_SEND_STARTBIT;
                     } // end of new data in udr
                     else 
-                    { 
-                        txState=TX_AFTER_STOPBIT;
-                    }
+                        { 
+                            txState=TX_AFTER_STOPBIT;
+                        }
                     break;
 
                 case TX_AFTER_STOPBIT: //transmit complete and no new data
@@ -472,29 +501,32 @@ unsigned int HWUart::CpuCycleTx() {
                     break;
 
             } //end of switch tx state
+
+            // check if some interrupts should be caused as a result
+            // of this sending tact
+            unsigned char irqold= ucr&usr_old;
+            unsigned char irqnew= ucr&usr;
+
+
+            unsigned char changed=irqold^irqnew;
+            unsigned char setnew= changed&irqnew;
+            unsigned char clearnew= changed& (~irqnew);
+
+            CheckForNewSetIrq(setnew);
+            CheckForNewClearIrq(clearnew);
+
         } // end of tx enabled 
     }	//end of 1 time baudrate
-
-    unsigned char irqold= ucr&usr_old;
-    unsigned char irqnew= ucr&usr;
-
-
-    unsigned char changed=irqold^irqnew;
-    unsigned char setnew= changed&irqnew;
-    unsigned char clearnew= changed& (~irqnew);
-
-    CheckForNewSetIrq(setnew);
-    CheckForNewClearIrq(clearnew);
 
 
     return 0;
 }
 
 HWUart::HWUart( AvrDevice *core, HWIrqSystem *s, PinAtPort tx, PinAtPort rx, unsigned int vrx, unsigned int vudre, unsigned int vtx):
-Hardware(core), irqSystem(s), pinTx(tx), pinRx(rx), vectorRx(vrx), vectorUdre(vudre), vectorTx(vtx) {
-    core->AddToCycleList(this);
-    Reset();
-}
+    Hardware(core), irqSystem(s), pinTx(tx), pinRx(rx), vectorRx(vrx), vectorUdre(vudre), vectorTx(vtx) {
+        core->AddToCycleList(this);
+        Reset();
+    }
 
 HWUsart::HWUsart( AvrDevice *core, HWIrqSystem *s, PinAtPort tx, PinAtPort rx, PinAtPort xck, unsigned int vrx, unsigned int vudre, unsigned int vtx): HWUart( core, s, tx, rx, vrx, vudre, vtx), pinXck(xck) {
     Reset();
@@ -514,10 +546,16 @@ void HWUart::Reset() {
     SetFrameLengthFromRegister(); 
 }
 
-unsigned char HWUart::GetUdr() { 
-    usr&=0xff-RXC; // unset RXC register
+unsigned char HWUart::GetUdr() {
+    if (usr&RXC) {
+        usr&=0xff-RXC; // unset RXC register
+        if (ucr & RXC) {
+            irqSystem->ClearIrqFlag(vectorRx); // and clear interrupt flag
+        }	 
+    }
     return udrRead;
 }
+
 unsigned char HWUart::GetUsr() { return usr; }
 unsigned char HWUart::GetUcr() { return ucr; }
 unsigned char HWUart::GetUbrr() { return ubrr&0xff; }

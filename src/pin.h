@@ -44,8 +44,8 @@ class Pin {
         unsigned char mask;
         int analogValue;
 
+        NetInterface *connectedTo;  
     public:
-        NetInterface *connectedTo;       //only as we calc the net externaly, this must be moved inside pin!!! BUG
 
         Pin(const OpenDrain &od); 
         typedef enum {

@@ -24,60 +24,25 @@
 #include "systemclock.h"
 
 
-#define UDRE 0x20
-#define TXEN 0x08
-#define RXEN 0x10
-#define RXB8 0x02
-#define FE 0x10
-#define CHR9 0x04
-#define RXC 0x80
-#define TXC 0x40
-#define TXB8 0x01
+SerialTxBuffered::SerialTxBuffered(){
+	Reset();
+};
 
-#define RXCIE 0x80
-#define TXCIE 0x40
-#define UDRIE 0x20
-
-unsigned int SerialTx::CpuCycle() {
-    CpuCycleTx();
-
-    return 0;
-}
-
-unsigned int SerialTx::CpuCycleTx() {
-    return 0;
-}
-
-SerialTx::SerialTx(UserInterface *_ui, const char *_name, const char *baseWindow):
-ui(_ui), name(_name)  {
-    allPins["tx"]= &tx;
-
-    ostringstream os;
-    os << "create SerialTx " << name  << " " << baseWindow << endl;
-    ui->Write(os.str());
-    ui->AddExternalType(name, this);
-    Reset();
-}
-
-void SerialTx::Reset() {
-    txState=TX_DISABLED;
+void SerialTxBuffered::Reset(){
+	txState=TX_DISABLED;
     baudrate=115200;
     maxBitCnt=8;
     tx='H'; 
-}
+};
 
-Pin* SerialTx::GetPin(const char *name) {
-    return allPins[name];
-}
-
-int SerialTx::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
+int SerialTxBuffered::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
     switch (txState) {
         case TX_SEND_STARTBIT:
             data=*(inputBuffer.begin());
             inputBuffer.erase(inputBuffer.begin());
             tx='L';
             bitCnt=0;
-            *timeToNextStepIn_ns=(SystemClockOffset)1e9/baudrate; //all we measures are in us!;
+            *timeToNextStepIn_ns=(SystemClockOffset)1e9/baudrate; //all we measures are in ns !;
             txState=TX_SEND_DATABIT;
             break;
 
@@ -87,16 +52,21 @@ int SerialTx::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
             } else {
                 tx='L';
             }
-            *timeToNextStepIn_ns=(SystemClockOffset)1e9/baudrate; //all we measures are in us!;
+            *timeToNextStepIn_ns=(SystemClockOffset)1e9/baudrate; //all we measures are in ns !;
             bitCnt++;
             if(bitCnt>=maxBitCnt) txState=TX_SEND_STOPBIT;
             break;
 
         case TX_SEND_STOPBIT:
             tx='H';
-            if (inputBuffer.size()>0) { //another char to send!
+            txState=TX_STOPPING;
+            *timeToNextStepIn_ns=(SystemClockOffset)1e9/baudrate; //last step, do not continue
+            break;
+            
+        case TX_STOPPING:
+        	if (inputBuffer.size()>0) { //another char to send!
                 txState=TX_SEND_STARTBIT;
-                *timeToNextStepIn_ns=(SystemClockOffset)1e9/baudrate;
+                *timeToNextStepIn_ns=0;//(SystemClockOffset)1e9/baudrate;
             } else {
                 txState=TX_DISABLED;
                 *timeToNextStepIn_ns=-1; //last step, do not continue
@@ -114,13 +84,49 @@ int SerialTx::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
 
 }
 
-void SerialTx::SetNewValueFromUi(const string &s) {
-    inputBuffer.push_back(s[0]); //write new char to input buffer
+void SerialTxBuffered::Send(unsigned char data){
+	inputBuffer.push_back(data); //write new char to input buffer
 
     //if we not active, activate tx machine now
     if (txState==TX_DISABLED) {
         txState=TX_SEND_STARTBIT;
         SystemClock::Instance().Add(this);
     }
+};
 
+void SerialTxBuffered::SetBaudRate(SystemClockOffset baud){
+	baudrate = baud;
+};
+
+
+
+
+
+
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+// don't know why is this needed, but don't want to change it.. just in case..
+unsigned int SerialTx::CpuCycle() {
+    CpuCycleTx();
+
+    return 0;
+}
+
+unsigned int SerialTx::CpuCycleTx() {
+    return 0;
+}
+
+SerialTx::SerialTx(UserInterface *_ui, const char *_name, const char *baseWindow):
+ui(_ui), name(_name)  {
+    ostringstream os;
+    os << "create SerialTx " << name  << " " << baseWindow << endl;
+    ui->Write(os.str());
+    ui->AddExternalType(name, this);
+    Reset();
+}
+
+void SerialTx::SetNewValueFromUi(const string &s) {
+    Send(s[0]);
 }

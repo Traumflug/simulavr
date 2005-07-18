@@ -26,24 +26,19 @@
 #include "systemclocktypes.h"
 #include "ui.h"
 
-
-class SerialTx: public SimulationMember, public ExternalType {
+class SerialTxBuffered: public SimulationMember {
     protected:
-        UserInterface *ui;
-        string name;
-
         Pin tx;
 
         map < string, Pin *> allPins;
         unsigned long long baudrate;
-
-        unsigned int CpuCycleTx();
 
         enum T_TxState{
             TX_DISABLED,
             TX_SEND_STARTBIT,
             TX_SEND_DATABIT,
             TX_SEND_STOPBIT,
+            TX_STOPPING
         } ;
 
         T_TxState txState;
@@ -52,14 +47,30 @@ class SerialTx: public SimulationMember, public ExternalType {
         unsigned int data;
         unsigned int bitCnt;
         unsigned int maxBitCnt;
+       
+
+    public:
+        SerialTxBuffered();
+        void Reset();
+        virtual ~SerialTxBuffered(){};
+        virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
+        virtual void Send(unsigned char data);
+        virtual void SetBaudRate(SystemClockOffset baud);
+        Pin* GetPin(const char *name); 
+};
+
+
+class SerialTx: public SerialTxBuffered, public ExternalType {
+    protected:
+        UserInterface *ui;
+        string name;
+
+        unsigned int CpuCycleTx();
 
     public:
         SerialTx(UserInterface *_ui, const char *_name, const char *baseWindow);
         unsigned int CpuCycle();
-        void Reset();
-        Pin* GetPin(const char *name);
         virtual ~SerialTx(){};
-        virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
         virtual void SetNewValueFromUi(const string &);
  };
 

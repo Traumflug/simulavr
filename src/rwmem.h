@@ -45,6 +45,7 @@ class RWMemoryMembers{
         virtual unsigned char operator=(unsigned char val) =0;
         virtual operator unsigned char() const =0 ;
         void operator=(const RWMemoryMembers &mm);
+        virtual ~RWMemoryMembers(){};
 };
 
 /* the following class have one byte own memory and can be used for

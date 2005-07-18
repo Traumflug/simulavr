@@ -26,5 +26,7 @@ class Funktor {
     public:
         virtual void operator()() =0;
         virtual Funktor* clone()=0;
+
+        virtual ~Funktor() {}
 };
 #endif

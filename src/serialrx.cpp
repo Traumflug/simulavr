@@ -25,69 +25,32 @@
 #include "systemclocktypes.h"
 
 
-#define UDRE 0x20
-#define TXEN 0x08
-#define RXEN 0x10
-#define RXB8 0x02
-#define FE 0x10
-#define CHR9 0x04
-#define RXC 0x80
-#define TXC 0x40
-#define TXB8 0x01
+SerialRxBasic::SerialRxBasic(){
+	rx.RegisterCallback(this);
+    allPins["rx"]= &rx;
+    Reset();
+};
 
-#define RXCIE 0x80
-#define TXCIE 0x40
-#define UDRIE 0x20
-
-unsigned int SerialRx::CpuCycle() {
-    CpuCycleRx();
-
-    return 0;
-}
-unsigned int SerialRx::CpuCycleRx() {
-    return 0;
-}
-
-void SerialRx::PinStateHasChanged(Pin *p){
-    if (0==(bool)(*p)) { //Low
+void SerialRxBasic::PinStateHasChanged(Pin* p){
+	if (0==(bool)(*p)) { //Low
         if (rxState== RX_WAIT_LOWEDGE) {
             rxState=RX_READ_STARTBIT;
             SystemClock::Instance().Add(this); //as next Step() is called
         }
     }
-}
+};
 
-
-SerialRx::SerialRx(UserInterface *_ui, const char *_name, const char *baseWindow):
-ui(_ui), name(_name)  {
-    rx.RegisterCallback(this);
-    allPins["rx"]= &rx;
-
-    ostringstream os;
-    os << "create SerialRx " << name  << " " << baseWindow << endl;
-    ui->Write(os.str());
-    ui->AddExternalType(name, this);
-    Reset();
-
-    /*
-    ui->SendUiNewState(name, 't');
-    ui->SendUiNewState(name, 'e');
-    ui->SendUiNewState(name, 's');
-    ui->SendUiNewState(name, 't');
-    */
-}
-
-void SerialRx::Reset() {
-    baudrate=115200;
+void SerialRxBasic::Reset(){
+	baudrate=115200;
     maxBitCnt=10; //Start+8Data+Stop
     rxState=RX_WAIT_LOWEDGE;
+};
+
+Pin* SerialRxBasic::GetPin(const char* name){
+	return allPins[name];
 }
 
-Pin* SerialRx::GetPin(const char *name) {
-    return allPins[name];
-}
-
-int SerialRx::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
+int SerialRxBasic::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
     switch (rxState) {
         case RX_READ_STARTBIT: //wait until first edge of databit
             *timeToNextStepIn_ns= (SystemClockOffset)1e9/baudrate/16*7;
@@ -128,34 +91,18 @@ int SerialRx::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
             dataByte=dataByte>>1;
             bitCnt++;
             if (bitCnt>=maxBitCnt) {
-                *timeToNextStepIn_ns= (SystemClockOffset)1e9/baudrate/16*7; //only to the end of THIS bit
-                rxState=RX_READ_STOPBIT;
+            	// this bit IS STOP BIT... 
+                *timeToNextStepIn_ns= -1; //nothing more please
+                rxState= RX_WAIT_LOWEDGE;
+                
+                /// @todo This is bug if frame format is different (eg 7 oor 9 bits)
+                unsigned char c=(unsigned char)((dataByte>>(16-maxBitCnt))&0xff); 
+                CharReceived(c);
             } else {
-                *timeToNextStepIn_ns= (SystemClockOffset)1e9/baudrate/16*(7+7); //read first edge of next bit
+                *timeToNextStepIn_ns= (SystemClockOffset)1e9/baudrate/16*(7+7); //read middle of next bit
                 rxState=RX_READ_DATABIT_FIRST;
             }
 
-
-            break;
-
-        case RX_READ_STOPBIT:
-            {
-                *timeToNextStepIn_ns= -1; //nothing more please
-                rxState= RX_WAIT_LOWEDGE;
-                ostringstream os;
-                unsigned char c=(unsigned char)((dataByte>>6)&0xff);
-                if (isprint(c)) {
-                    if (isspace(c)) {
-                        os << "set" << " " << name << " " << '_' << endl; 
-                    } else {
-                        os << "set" << " " << name << " " << c << endl; 
-                    }
-                } else {
-                    os << "set" << " " << name << " " << "0x" << hex << (unsigned int)c << endl;
-                }
-
-                ui->Write(os.str());
-            }
             break;
 
         default:
@@ -163,8 +110,80 @@ int SerialRx::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
     }
 
     return 0;
+};
 
+void SerialRxBasic::setBaudRate(SystemClockOffset baud){
+	baudrate = baud;
+};
+
+
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+void SerialRxBuffered::CharReceived(unsigned char c){
+	buffer.push_back(c);
+};
+
+unsigned char SerialRxBuffered::Get(){
+	unsigned char c = buffer[0];
+	buffer.erase(buffer.begin());
+	return c;
+};
+
+long SerialRxBuffered::Size(){
+	return buffer.size();
+};
+
+
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+
+unsigned int SerialRx::CpuCycle() {
+    CpuCycleRx();
+
+    return 0;
 }
+unsigned int SerialRx::CpuCycleRx() {
+    return 0;
+}
+
+SerialRx::SerialRx(UserInterface *_ui, const char *_name, const char *baseWindow):
+ui(_ui), name(_name)  {
+    rx.RegisterCallback(this);
+    allPins["rx"]= &rx;
+
+    ostringstream os;
+    os << "create SerialRx " << name  << " " << baseWindow << endl;
+    ui->Write(os.str());
+    ui->AddExternalType(name, this);
+    Reset();
+
+    /*
+    ui->SendUiNewState(name, 't');
+    ui->SendUiNewState(name, 'e');
+    ui->SendUiNewState(name, 's');
+    ui->SendUiNewState(name, 't');
+    */
+}
+
+void SerialRx::CharReceived(unsigned char c){
+    ostringstream os;
+    if (isprint(c)) {
+        if (isspace(c)) {
+            os << "set" << " " << name << " " << '_' << endl; 
+        } else {
+            os << "set" << " " << name << " " << c << endl; 
+        }
+    } else {
+        os << "set" << " " << name << " " << "0x" << hex << (unsigned int)c << endl;
+    }
+
+    ui->Write(os.str());
+};
+
 
 //not used
 void SerialRx::SetNewValueFromUi(const string &){

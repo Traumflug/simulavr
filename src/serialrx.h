@@ -28,28 +28,20 @@
 #include "pinnotify.h"
 
 
-class SerialRx: public SimulationMember, public ExternalType, public HasPinNotifyFunction {
+class SerialRxBasic: public SimulationMember, public HasPinNotifyFunction {
     protected:
-        UserInterface *ui;
-        string name;
-
         Pin rx;
-
         map < string, Pin *> allPins;
         unsigned long long baudrate;
 
-        unsigned int CpuCycleRx();
         void PinStateHasChanged(Pin*);
+        virtual void CharReceived(unsigned char c)=0;
 
         int highCnt;
 
         int bitCnt;
         int maxBitCnt;
         int dataByte;
-
-
-
-
 
         enum T_RxState {
             RX_WAIT_LOWEDGE,
@@ -58,19 +50,52 @@ class SerialRx: public SimulationMember, public ExternalType, public HasPinNotif
             RX_READ_DATABIT_FIRST,
             RX_READ_DATABIT_SECOND,
             RX_READ_DATABIT_THIRD,
-            RX_READ_STOPBIT
         } ;
 
         T_RxState rxState;
 
 
     public:
-        SerialRx(UserInterface *_ui, const char *_name, const char *baseWindow);
-        unsigned int CpuCycle();
+    	void setBaudRate(SystemClockOffset baud);
+        SerialRxBasic();
         void Reset();
         Pin* GetPin(const char *name);
-        virtual ~SerialRx(){};
+        virtual ~SerialRxBasic(){};
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
+ };
+ 
+ 
+ // ===========================================================================
+ 
+ 
+ class SerialRxBuffered: public SerialRxBasic{
+ 	protected:
+ 		vector<unsigned char> buffer;
+ 		virtual void CharReceived(unsigned char c);
+ 	public:
+ 		unsigned char Get();
+ 		long Size();
+ };
+
+
+// ===========================================================================
+
+
+class SerialRx: public SerialRxBasic, public ExternalType{
+    protected:
+        UserInterface *ui;
+        string name;
+
+        map < string, Pin *> allPins;
+
+        unsigned int CpuCycleRx();
+        virtual void CharReceived(unsigned char c);
+
+    public:
+        SerialRx(UserInterface *_ui, const char *_name, const char *baseWindow);
+        unsigned int CpuCycle();
+        Pin* GetPin(const char *name);
+        virtual ~SerialRx(){};
         virtual void SetNewValueFromUi(const string &);
  };
 

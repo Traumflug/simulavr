@@ -26,6 +26,8 @@ class Pin;
 class HasPinNotifyFunction {
     public:
         virtual void PinStateHasChanged(Pin*)=0;
+
+        virtual ~HasPinNotifyFunction() {}
 };
 
 #endif

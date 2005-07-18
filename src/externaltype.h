@@ -7,5 +7,7 @@ using namespace std;
 class ExternalType {
     public:
         virtual void SetNewValueFromUi(const string &)=0;
+
+        virtual ~ExternalType() {}
 };
 #endif

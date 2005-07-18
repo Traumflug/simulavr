@@ -121,6 +121,12 @@ Pin::Pin( unsigned char *parentPin, unsigned char _mask) {
 void Pin::RegisterNet(Net *n) {
     if (connectedTo!=0) { // we are allready connected!
         connectedTo->Delete(this); //remove it from old Net
+        //Attention: Delete can also destroy the Net itself if
+        //the Net is from type MirrorNet. So it is not allowed
+        //to use connectedTo anymore after the Delete call.
+        //in this function it is absolutly the correct semantic,
+        //because we set directly the new net and the
+        //old value is not longer accessable.
     }
 
     connectedTo=n;
@@ -142,8 +148,9 @@ Pin::operator unsigned char() const {
 }
 
 Pin::operator bool() const {
-    if ((outState==HIGH)||(outState==PULLUP)) return 1;
-    if ((outState==ANALOG) || (outState==TRISTATE)) { //maybe for TRISTATE not handled complete in simulavr... TODO
+    if (outState==HIGH) return 1;
+    if ((outState==ANALOG) || (outState==TRISTATE) || (outState==PULLUP) || (outState==PULLDOWN)) 
+    { //maybe for TRISTATE not handled complete in simulavr... TODO
         if (analogValue > (INT_MAX/2)) {
             return 1;
         } else {
