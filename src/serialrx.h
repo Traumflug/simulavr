@@ -56,10 +56,10 @@ class SerialRxBasic: public SimulationMember, public HasPinNotifyFunction {
 
 
     public:
-    	void setBaudRate(SystemClockOffset baud);
+    	void SetBaudRate(SystemClockOffset baud);
         SerialRxBasic();
         void Reset();
-        Pin* GetPin(const char *name);
+        virtual Pin* GetPin(const char *name) ;
         virtual ~SerialRxBasic(){};
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
  };
@@ -94,7 +94,6 @@ class SerialRx: public SerialRxBasic, public ExternalType{
     public:
         SerialRx(UserInterface *_ui, const char *_name, const char *baseWindow);
         unsigned int CpuCycle();
-        Pin* GetPin(const char *name);
         virtual ~SerialRx(){};
         virtual void SetNewValueFromUi(const string &);
  };

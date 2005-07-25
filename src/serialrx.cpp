@@ -112,7 +112,7 @@ int SerialRxBasic::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns
     return 0;
 };
 
-void SerialRxBasic::setBaudRate(SystemClockOffset baud){
+void SerialRxBasic::SetBaudRate(SystemClockOffset baud){
 	baudrate = baud;
 };
 

@@ -56,7 +56,7 @@ class SerialTxBuffered: public SimulationMember {
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
         virtual void Send(unsigned char data);
         virtual void SetBaudRate(SystemClockOffset baud);
-        Pin* GetPin(const char *name); 
+        virtual Pin* GetPin(const char *name); 
 };
 
 

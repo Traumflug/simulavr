@@ -1,3 +1,13 @@
+2005-07-25 <lts-rudolph@gmx.de>
+    *src/hwuart.cpp
+    *src/serialrx.cpp
+    *src/serialrx.h
+    *src/serialtx.cpp
+    *src/serialtx.h
+
+    bugfix for my changes in #4147-4152
+    thanks to Artur Abels for very fast review
+
 2005-07-18 <lts-rudolph@gmx.de>
     *src/decoder.h
     *src/externaltype.h

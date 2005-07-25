@@ -25,6 +25,7 @@
 
 
 SerialTxBuffered::SerialTxBuffered(){
+	allPins["tx"] = &tx;
 	Reset();
 };
 
@@ -34,6 +35,10 @@ void SerialTxBuffered::Reset(){
     maxBitCnt=8;
     tx='H'; 
 };
+
+Pin* SerialTxBuffered::GetPin(const char* name){
+	return allPins[name];
+}
 
 int SerialTxBuffered::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
     switch (txState) {

@@ -188,6 +188,7 @@ unsigned int HWUart::CpuCycleRx() {
         switch (rxState) {
             case RX_WAIT_FOR_HIGH: //wait for startbit
                 if (pinRx==1) rxState=RX_WAIT_FOR_LOWEDGE;
+                
                 break;
 
             case RX_WAIT_FOR_LOWEDGE:
@@ -297,7 +298,7 @@ unsigned int HWUart::CpuCycleRx() {
                 }
 
                 if (
-                        (ucsrc&USBS) && (cntRxSamples>16) | //if 2 stopbits used we have to wait full bit frame
+                        (ucsrc&USBS) && (cntRxSamples>16) || //if 2 stopbits used we have to wait full bit frame
                         (!(ucsrc&USBS)) && (cntRxSamples>10) //in case of only 1 stopbit we can shorten the stopbit
                    ) {
 
