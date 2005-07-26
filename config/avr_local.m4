@@ -35,6 +35,7 @@ AC_DEFUN([AVR_BFD_SEARCH_STEP],
    AVR_CHECK_FOR_BFD([bfd search-],[$1],[],[])
    AVR_CHECK_FOR_BFD([bfd search-],[$1],[bfd],[bfd])
    AVR_CHECK_FOR_BFD([bfd search-],[$1],[include],[lib])
+   AVR_CHECK_FOR_BFD([bfd search-],[$1],[include],[])
 ])
 
 AC_DEFUN([AVR_LIBIBERTY],
