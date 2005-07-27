@@ -92,6 +92,12 @@ AC_ARG_WITH([bfd-path],
 ])
 if test x"$bfd_h_location" == "x"; then
   libbfd_root_location=$(which avr-readelf | sed -e ['s/\/[^\/]*\/[^\/]*$//']) 2> /dev/null
+
+   # Gentoo puts the AVR version of tools somewhere like this after 
+   # a "crossdev -t avr" install of the compiler toolchain
+   my_binutils_ver=$(avr-readelf  --version | head -n 1 | sed -e 's/GNU readelf //' )
+  AVR_BFD_SEARCH_STEP([/usr/binutils/avr/${my_binutils_ver}])  
+  AVR_BFD_SEARCH_STEP([${libbfd_root_location}  /${my_binutils_ver}])  
   AVR_BFD_SEARCH_STEP([${libbfd_root_location}/${host}/avr])
   AVR_BFD_SEARCH_STEP([${libbfd_root_location}])
 fi
