@@ -61,6 +61,8 @@ by the Free Software Foundation.
 * Tracing::                     
 * Building and Installing simulavrxx::  
 * Examples::                    
+* Platform Related Notes::      
+* Help Wanted::                 
 * Index::                       Complete index.
 
 
@@ -119,7 +121,7 @@ during execution.
 @item elf file loading is supported, no objcopy needed anymore
 @item execution speed is tuned a lot, most hardware simulations are now only done if needed
 @item external io pins which are not ports are also available
-@item simulavrxx.so provides a "loadable" tcl/tk library to write simulation sessions without compiling simulator sources
+@item simulavrxx.so provides a "loadable" tcl/tk library to write simulation sessions without compling simulator sources
 @end itemize
 
 @node Invoking, Using with GDB, Introduction, Top
@@ -279,7 +281,7 @@ steps to build and install simulavrxx:
 
 Simulavrxx does rely on a few other GNU tools. In particular, it relies on libbfd from binutils, and by libbfd's dependency, it also relies on libiberty. I have found it useful to install my hand-configured-installed files in one area. That way I can put the avr-tools in my path only when I'm working on avr related work.
 
-For reference, here is how I install avr tools to /home/rivetwa/install:
+For reference, here is how I could install avr tools to /home/rivetwa/install:
 
 @quotation
 @format
@@ -316,7 +318,7 @@ In the unlikely event that your properly installed AVR binutils results in simul
 @end table
 
 
-@node Examples, Index, Building and Installing simulavrxx, Top
+@node Examples, Platform Related Notes, Building and Installing simulavrxx, Top
 @chapter Examples
 @cindex Examples
 
@@ -349,7 +351,33 @@ This sample uses only simulavrxx to execute a hackede AVR program. I say "hacked
 After performing the build, go to the @file{examples/simple_ex1} directory and try @code{make run_sim}. Notice the use of -W, -R and -T flags. 
 
 
-@node Index,  , Examples, Top
+@node Platform Related Notes, Help Wanted, Examples, Top
+@chapter Platform Related Notes
+@unnumbered Platform Related notes
+
+@section Gentoo GNU/Linux distribution
+@cindex Gentoo Platform Notes
+
+To install the avr cross compiler toolchain, try:
+
+@code{crossdev -t avr}
+
+Of course you may need to "@code{emerge crossdev}" first ;-)
+
+No ebuild for simulavrxx exists yet, but for me, the standard ./configure && make works. Let me know if this is not the case for you. 
+
+
+@node Help Wanted, Index, Platform Related Notes, Top
+@chapter Help Wanted
+@cindex Help Wanted
+
+There are many things we could use help with on this project. Here are some things that you may be able to help us out with:
+
+@itemize @bullet
+@item First paragraph of each chapter in this document (authored in texinfo) is not indented the way the content paragraphs are...this leads to strange formatting, IMHO. Hints on how to better structure this document are welcome!
+@end itemize
+
+@node Index,  , Help Wanted, Top
 @unnumbered Index
 
 @printindex cp
