@@ -184,7 +184,6 @@ unsigned int HWAd::CpuCycle() {
                         //normaly that can also be done after 12 cycles and start a
                         //14 cycle long normal run... but this is here spec conform :-)
                         usedBefore=true;
-                        //cout << "switch adc from init to running" << endl;
                     }
                     break;
 
@@ -216,6 +215,7 @@ unsigned int HWAd::CpuCycle() {
                         if ((adcsr&(ADIE|ADIF))==(ADIE|ADIF)) {
                             irqSystem->SetIrqFlag(this, irqVec);
                         }
+
                         if (adcsr& ADFR) { //start again and state is running again
                             clk=0;
                         } else {

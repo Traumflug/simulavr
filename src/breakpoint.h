@@ -1,4 +1,4 @@
- /*
+/*
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -35,6 +35,6 @@ class Breakpoints: public vector<dword> {
 };
 
 class Exitpoints: public vector<dword> {
-   };
+};
 
 #endif

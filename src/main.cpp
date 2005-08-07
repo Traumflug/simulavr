@@ -74,6 +74,8 @@ int main(int argc, char *argv[]) {
 
     vector<string> terminationArgs;
 
+
+
     while (1) {
         //int this_option_optind = optind ? optind : 1;
         int option_index = 0;
@@ -237,6 +239,7 @@ int main(int argc, char *argv[]) {
     if (filename != "unknown" ) {
         dev1->Load(filename.c_str());
     }
+
     //if we have a file we can check out for termination lines.
     vector<string>::iterator ii;
     for (ii=terminationArgs.begin(); ii!=terminationArgs.end(); ii++) {
@@ -244,7 +247,6 @@ int main(int argc, char *argv[]) {
         unsigned int epa=dev1->Flash->GetAddressAtSymbol(*ii);
         dev1->EP.push_back(epa);
     }
-
 
     if (userinterface_flag==1) {
         ui=new UserInterface(7777); //if not gdb, the ui will be master controller :-)

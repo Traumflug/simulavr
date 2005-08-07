@@ -146,7 +146,7 @@ Pin::operator unsigned char() const {
     }
     return 'S'; //only default, should never be reached
 }
-
+/* patch removed -> test again , not working as expected
 Pin::operator bool() const {
     if (outState==HIGH) return 1;
     if ((outState==ANALOG) || (outState==TRISTATE) || (outState==PULLUP) || (outState==PULLDOWN)) 
@@ -160,6 +160,21 @@ Pin::operator bool() const {
 
     return 0;
 }
+*/
+
+Pin::operator bool() const {
+    if ((outState==HIGH)||(outState==PULLUP)) return 1;
+    if ((outState==ANALOG) || (outState==TRISTATE)) { //maybe for TRISTATE not handled complete in simulavr... TODO
+        if (analogValue > (INT_MAX/2)) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    return 0;
+}
+
 
 Pin& Pin::operator= (unsigned char c) {
     switch (c) {

@@ -142,7 +142,6 @@ void SystemClock::Endless() {
         if (breakMessage!=0) break;
     }
 #else
-    cerr << "normal loop" << endl;
     while( breakMessage==0) {
         steps++;
         bool untilCoreStepFinished=false;

@@ -73,7 +73,7 @@ unsigned int HWAcomp::CpuCycle() {
 void HWAcomp::PinStateHasChanged(Pin *p) {
     bool oldComp=(acsr & ACO);
 
-
+    
     if (pinAin0.GetAnalog()>pinAin1.GetAnalog()) { //set comperator 1
         if (oldComp==false) { //not set before
             acsr|=ACO;

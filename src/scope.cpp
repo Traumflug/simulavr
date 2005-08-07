@@ -65,9 +65,9 @@ void Scope::SetInStateForChannel(unsigned int channel, const Pin& p) {
         os << name << " ChangeValue " << SystemClock::Instance().GetCurrentTime() << " " << channel << " " << p.GetAnalog()<<endl;
 
         ui->Write(os.str());
-        cerr << "Set last val for channel " << channel << " value " << p.GetAnalog() << endl;
+        //cout << "Set last val for channel " << channel << " value " << p.GetAnalog() << endl;
         lastVal[channel]=p.GetAnalog();
-        cerr << "OK" << endl << endl;
+        //cout << "OK" << endl << endl;
     }
 }
 

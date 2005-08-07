@@ -23,7 +23,7 @@
 #ifndef AT4433
 #define AT4433
 #include "avrdevice.h"
-
+class HWPort;
 class HWSpi;
 class HWUart;
 class HWAcomp;

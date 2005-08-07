@@ -1362,12 +1362,10 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
 
     } //last core step finished
 
-    //cout << "Stepping the real core" << endl;
     int res=core->Step(untilCoreStepFinished, timeToNextStepIn_ns);
     lastCoreStepFinished=untilCoreStepFinished;
 
     if (res == BREAK_POINT) {
-        //cout << "Run on Breakpoint" << endl;
         runMode=GDB_RET_OK; //we will stop next call from GdbServer::Step
         SendPosition(SIGTRAP);
     }
