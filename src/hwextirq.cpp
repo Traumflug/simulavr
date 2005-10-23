@@ -157,14 +157,14 @@ void HWExtIrq::PinStateHasChanged(Pin *p) {
             if ((pinI1==0) && ( int1_old==1)) {
                 int1_old=0;
                 gifr|=(1<<INT1);
-                if (gimsk & (1<<INT0) ) irqSystem->SetIrqFlag(this, vectorInt1);
+                if (gimsk & (1<<INT1) ) irqSystem->SetIrqFlag(this, vectorInt1);
             }
             break;
         case 0x0c:
             if ((pinI1==1) && ( int1_old==0)) {
                 int1_old=1;
                 gifr|=(1<<INT1);
-                if (gimsk & (1<<INT0) ) irqSystem->SetIrqFlag(this, vectorInt1);
+                if (gimsk & (1<<INT1) ) irqSystem->SetIrqFlag(this, vectorInt1);
             }
             break;
     }

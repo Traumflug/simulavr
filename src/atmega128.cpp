@@ -31,6 +31,7 @@
 #include "hwtimer.h"    //prescaler
 #include "hweeprom.h"
 #include "hwmegatimer0123irq.h"
+#include "hwwado.h"
 
 
 //#include "avrdevice_impl.h"
@@ -60,6 +61,8 @@ AvrDevice(224, 4096, 0xef00, 128*1024) {
     
 	prescaler123=new HWPrescaler(this);
 	prescaler0=new HWPrescaler(this);
+
+    wado = new HWWado(this);
 
     usart0=new HWUsart(this, irqSystem, PinAtPort(porte,1), PinAtPort(porte,0), PinAtPort(porte, 2), 18, 19, 20);
     usart1=new HWUsart(this, irqSystem, PinAtPort(portd,3), PinAtPort(portd,2), PinAtPort(portd, 5), 30, 31, 32);
