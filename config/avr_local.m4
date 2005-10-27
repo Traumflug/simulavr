@@ -11,7 +11,7 @@ dnl - defines AVR_LIBBFD_LIBDIR to detected library directory
 dnl
 AC_DEFUN([AVR_CHECK_FOR_BFD],
 [ 
-if test x"$bfd_h_location" == "x"; then
+if test x"$bfd_h_location" = "x"; then
   AC_MSG_CHECKING($1 $2 in "$3" and "$4")
       bfd_h_location=$2/$3
       bfd_a_location=$2/$4
@@ -40,7 +40,7 @@ AC_DEFUN([AVR_BFD_SEARCH_STEP],
 
 AC_DEFUN([AVR_LIBIBERTY],
 [
- if test x"$libiberty_location" == "x"; then
+ if test x"$libiberty_location" = "x"; then
   if test x"$1" != x; then
    libiberty_location=$1
    AC_MSG_CHECKING(Any likely libiberty available via $1...) 

@@ -1,3 +1,11 @@
+2005-10-27    <rivetwa@member.fsf.org>
+	* configure.ac
+	* config/avr_local.m4
+	* config/avr_swig.m4
+
+	bugfix: should use "=" for test, not "==". Thanks Joerg Wunsch for
+	the bug #14791. 
+
 2005-10-23 <lts-rudolph@gmx.de>
     *src/hwextirq.cpp
     *src/atmega128.cpp

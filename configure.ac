@@ -74,7 +74,7 @@ AC_CHECK_FUNCS([inet_ntoa memset socket strdup strerror])
 
 AC_WAR_PYTHON
 
-if test "x$_cv_python_211" == "xyes" ; then
+if test "x$_cv_python_211" = "xyes" ; then
   ac_regression_subdir="regress"
 else
   AC_MSG_WARN([ ])
@@ -90,7 +90,7 @@ AC_ARG_WITH([bfd-path],
 	    [--with-bfd-path=path location of AVR-binutils version of libbfd],
 	    [AVR_BFD_SEARCH_STEP([${withval}])
 ])
-if test x"$bfd_h_location" == "x"; then
+if test x"$bfd_h_location" = "x"; then
   libbfd_root_location=$(which avr-readelf | sed -e ['s/\/[^\/]*\/[^\/]*$//']) 2> /dev/null
 
    # Gentoo puts the AVR version of tools somewhere like this after 
@@ -108,7 +108,7 @@ AC_ARG_WITH([libiberty-path],
              AVR_LIBIBERTY([${withval}])
 ])
 
-if test x"${bfd_h_location}" == x; then
+if test x"${bfd_h_location}" = x; then
 AC_MSG_ERROR([
 
 *** ERROR ***
@@ -149,7 +149,7 @@ if test x${with_bfd_path} != x; then
 AVR_LIBIBERTY([${with_bfd_path}/lib])
 fi
 
-if test x"${libiberty_location}" == x; then
+if test x"${libiberty_location}" = x; then
 AC_MSG_ERROR([
  
 *** ERROR ***
@@ -179,16 +179,16 @@ esac
 AC_SUBST([NonPortableDarwin_GXX_Flags])
 AC_SUBST([NonPortableDarwin_LIBADD_Hack])
 
-if test "x${swig_path}" == "x"; then
+if test "x${swig_path}" = "x"; then
 AC_MSG_WARN([
 *** WARNING ***
 swig not found, so it is not possible to build simulavr.so and tcl examples will not run. Though simulavrxx itself may be built without it.
 ])
 fi
 
-AM_CONDITIONAL([WAR_SHARED],[test x$enable_shared == "xyes"])
+AM_CONDITIONAL([WAR_SHARED],[test x$enable_shared = "xyes"])
 
-if test x"$enable_shared" == "xyes"; then
+if test x"$enable_shared" = "xyes"; then
  if test x"$swig_path" != "x"; then
   if test x"$TCL_WISH" != "x"; then
      use_wish=yes

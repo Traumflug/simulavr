@@ -5,7 +5,7 @@ AC_DEFUN([AC_SWIG],
       [swig_path=""])
    
 
-   if test x"${swig_path}" == x; then
+   if test x"${swig_path}" = x; then
       AC_PATH_PROGS(swig_path, swig, swig,$PATH)
    fi
 
