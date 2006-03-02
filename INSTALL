@@ -201,8 +201,14 @@ Now you have an autoconfigured project. Follow the usual step:
         configuring binutils for AVR to get the libraries.
 
 documentation:
-   From the root of the build directory, try "make info" and "make
-   pdf" to make those versions of the documentation.
+   It seems auto-tools behavior changed... Now the project is
+   configured so that "make doc" should make all the documentation.
+
+   Old directions were: From the root of the build directory, try
+   "make info" and "make pdf" to make those versions of the
+   documentation. This probably won't work work anymor since I removed
+   the doc subdir. Any hints on how this should be handled would be
+   appreciated.
 
 
 If you are pulling files from CVS, these notes may be important to you:
