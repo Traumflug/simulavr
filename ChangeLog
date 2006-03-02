@@ -1,3 +1,11 @@
+2006-03-02    <rivetwa@member.fsf.org>
+
+	* Makefile.am (CONFIG_SUBDIR_NAME): removed doc subdirectory. This
+	way simulavrxx can be build without any fuss on systems without
+	the tools used to produce documentation.
+
+	Now you must do something like "make doc" to get documentation.
+
 2005-10-27    <rivetwa@member.fsf.org>
 	* configure.ac
 	* config/avr_local.m4
