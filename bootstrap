@@ -37,7 +37,7 @@ test $TEST_TYPE $FILE || {
     exit 1
 }
 
-aclocal -I config
+aclocal -I m4
 autoheader
 libtoolize --copy --force
 automake --add-missing --copy
