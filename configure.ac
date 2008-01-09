@@ -20,7 +20,7 @@ AX_AVR_ENVIRONMENT
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES([Makefile src/Makefile \
         examples/Makefile examples/anacomp/Makefile
-        examples/gui.tcl
+        examples/gui.tcl examples/anacomp/check.tcl examples/anacomp/checkdebug.gdb examples/anacomp/checkdebug.tcl
 ])
 AC_OUTPUT
 
