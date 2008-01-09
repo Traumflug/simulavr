@@ -58,7 +58,7 @@ void AvrDevice::Load(const char* fname) {
     //reading out the symbols
     {
         long storage_needed;
-        asymbol **symbol_table;
+        static asymbol **symbol_table;
         long number_of_symbols;
         long i;
 
@@ -82,8 +82,12 @@ void AvrDevice::Load(const char* fname) {
         }
 
         for (i=0; i<number_of_symbols; i++) {
+           // WAR: if no section data, skip
+           if( !symbol_table[i]->section )
+              continue;
             unsigned int lma=symbol_table[i]->section->lma;
             unsigned int vma=symbol_table[i]->section->vma;
+
             if (vma<0x7fffff) { //range of flash space
                 pair<unsigned int, string> p((symbol_table[i]->value+lma)>>1, symbol_table[i]->name);
                 //symbols.insert(p);

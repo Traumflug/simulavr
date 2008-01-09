@@ -2,20 +2,13 @@
 # to the mailing list
 
 import sys, os
-sys.path.append("../../src/python/")
+sys.path.append("../../src")
 
 traceFile = "trace"
 
-#we use some itcl :-)
-# import Itcl???
+from pysimulavr import *
 
-#load the avr-simulator packag
-#
-# for now you need to have _simulavr.so and simulavr.py from the src/python subdir in this
-# directory
-from simulavr import *
-
-print "simulavr loaded"
+print "pysimulavr loaded"
 
 #now start external generic gui server 
 os.system('wish ../gui.tcl &')

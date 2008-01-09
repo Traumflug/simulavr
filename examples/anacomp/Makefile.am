@@ -1,3 +1,4 @@
+AVR_GCC=@AVR_GCC@
 PYTHON = python
 
 MAINTAINERCLEANFILES 	= Makefile.in

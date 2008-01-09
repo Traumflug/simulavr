@@ -1,41 +1,20 @@
-bfd_a_location = @bfd_a_location@
-bfd_h_location  = @bfd_h_location@
-libiberty_location = @libiberty_location@
-swig_path = @swig_path@
-NonPortableDarwin_LIBADD_Hack = @NonPortableDarwin_LIBADD_Hack@
-NonPortableDarwin_GXX_Flagss = @NonPortableDarwin_GXX_Flags@
-CCACHE = @CCACHE@
-MYTCL_LIB_SPEC=@MYTCL_LIB_SPEC@
-TCL_INCLUDE_SPEC=@TCL_INCLUDE_SPEC@
+AVR_LIBBFD_LIB=@AVR_LIBBFD_LIB@
+AVR_LIBBFD_INC=@AVR_LIBBFD_INC@
+PYTHON_CPPFLAGS=@PYTHON_CPPFLAGS@
+
+AM_CXXFLAGS=-I$(AVR_LIBBFD_INC)
+
+AVR_LIBIBERTY_LIB=@AVR_LIBIBERTY_LIB@
 
 if USE_SWIG
-if HAVE_TCL_DEV
-if WAR_SHARED
-  BUILD_SO=simulavr.so
-endif
-endif
-
 if USE_PYTHON
-if WAR_SHARED
-  BUILD_SO_PY=python/_simulavr.so
+LIBPYSIMULAVR=_pysimulavr.so
 endif
 endif
-endif
 
-MAINTAINERCLEANFILES 	= Makefile.in
+bin_PROGRAMS    = simulavr kbdgentables
 
-DISTCLEANFILES:=${DISTCLEANFILES} simulavr.so keytrans.h simulavr_wrap.cpp
-
-CLEANFILES:=${CLEANFILES} simulavr.so keytrans.h simulavr_wrap.cpp
-
-EXTRA_DIST           = simulavr.i 
-
-SUBDIRS = python
-DIST_SUBDIRS = python
-
-lib_LTLIBRARIES		= libavrsim_pp.la
-
-bin_PROGRAMS = simulavr kbdgentables
+lib_LTLIBRARIES	= libavrsim_pp.la
 
 libavrsim_pp_la_SOURCES	= 	\
 	application.cpp 	\
@@ -83,6 +62,7 @@ libavrsim_pp_la_SOURCES	= 	\
 	systemclock.cpp		\
 	trace.cpp		\
 	ui.cpp 			
+libavrsim_pp_la_LDFLAGS = -version-info 0:0:0
 
 pkginclude_HEADERS = 	\
 	application.h \
@@ -96,9 +76,9 @@ pkginclude_HEADERS = 	\
 	breakpoint.h		\
 	config_deprecated.h 	\
 	decoder.h		\
-	externaltype.h \
+	externaltype.h 		\
 	flash.h			\
-	funktor.h \
+	funktor.h 		\
 	gdb.h			\
 	global.h		\
 	hardware.h		\
@@ -142,62 +122,30 @@ pkginclude_HEADERS = 	\
 	ui.h			\
 	xcode_to_keynumber.dat
 
-LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
-CXXLINK = $(LIBTOOL) --mode=link --tag=CXX $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+simulavr_SOURCES = main.cpp
 
-# WAR: Hmm...how do we auto-depend on this generated file? Seems we
-# should be able to auto-generate at least first-generation include
-# dependencies whether or not those files exist...;-( 
+simulavr_LDADD = libavrsim_pp.la $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB)
+
 $(srcdir)/keyboard.cpp : keytrans.h 
+
+kbdgentables_SOURCES = kbdgentables.cpp
 
 keytrans.h: kbdgentables keynumber_to_scancode.dat xcode_to_keynumber.dat
 	./kbdgentables
 
-kbdgentables_SOURCES = kbdgentables.cpp
-
-simulavr_SOURCES = main.cpp 
-
-
-# WAR: simulavr.so/.dll needs tp be properly integrated via the
-# autotools, but I don't "get" it yet...so this hack gets us running
-# at least on Linux
-
-simulavr_DEPENDENCIES = libavrsim_pp.la
-simulavr_LDADD = $(top_builddir)/src/libavrsim_pp.la $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a
-libavrsim_pp_la_LIBADD = $(NonPortableDarwin_LIBADD_Hack)
-
-AM_CPPFLAGS=$(TCL_INCLUDE_SPEC)
-AM_CXXFLAGS=-O2
-
-INCLUDES		= -I$(includedir) -I$(bfd_h_location) -I$(top_srcdir)/src -I $(top_builddir)/src
-
-# WAR:: should not build if no swig is detected...
-
-# This is a cheat! Hopefully it works ok...
-all-am:  $(BUILD_SO) $(BUILD_SO_PY)
-
-# TCL bindings
-simulavr_wrap.cpp: $(srcdir)/simulavr.i
-	$(swig_path) -c++ -o $@ $<
-
-simulavr.so: simulavr_wrap.o simulavr
-	g++ -I$(srcdir) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) $(MYTCL_LIB_SPEC) $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o simulavr.so $(NonPortableDarwin_GXX_Flags)
-
-
-clean_simulavr.so:
-	$(RM) simulavr.so 
-
-
 # Python bindings
-python/simulavr_wrap.cpp: $(srcdir)/simulavr.i
-	$(swig_path) -c++ -python -outdir python/ -o $@ $?
+_pysimulavr.so: pysimulavr_wrap.cpp simulavr
+	$(CXX) -I$(srcdir) $(PYTHON_CPPFLAGS) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB)  -lc -lm -lncurses -shared -o $@ $(NonPortableDarwin_GXX_Flags)
 
-python/_simulavr.so: python/simulavr_wrap.cpp simulavr
-	g++ -I$(srcdir) -I/usr/include/python2.3 $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) $(bfd_a_location)/libbfd.a $(libiberty_location)/libiberty.a -lc -lm -lncurses -shared -o $@ $(NonPortableDarwin_GXX_Flags)
-
-clean_python_simulavr:
-	$(RM) python/_simulavr.so python/simulavr.py python/simulavr_wrap.cpp
+pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
+	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_CPPFLAGS) -o $@ $?
 
 
-#clean : clean_simulavr.so clean_python_simulavr
+
+
+DISTCLEANFILES:=${DISTCLEANFILES} simulavr.so keytrans.h  _pysimulavr.so pysimulavr.py pysimulavr_wrap.cpp
+Cleanfiles:=${CLEANFILES} simulavr.so keytrans.h simulavr_wrap.cpp
+
+
+
+all-am: $(LIBPYSIMULAVR)

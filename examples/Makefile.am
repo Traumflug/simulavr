@@ -13,5 +13,6 @@ pkginclude_HEADERS =
 
 EXTRA_DIST           = 
 
-SUBDIRS = simple_ex1 $(ANACOMP)
+#SUBDIRS = simple_ex1 $(ANACOMP)
+SUBDIRS =  $(ANACOMP)
 DIST_SUBDIR = anacomp
