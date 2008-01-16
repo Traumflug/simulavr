@@ -33,7 +33,7 @@ dnl for libbfd. If none found, error out.
 
 if test x"${with_bfd_path}" = "xcheck";
 then
-   AX_TEST_LIBBFD([$(dirname $(which ${AVR_AS}))/../i686-pc-linux-gnu/avr/])
+   AX_TEST_LIBBFD([$(dirname $(which ${AVR_AS}))/../$host/avr/])
 fi
 
 
