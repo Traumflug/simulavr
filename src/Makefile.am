@@ -142,6 +142,8 @@ pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
 
 
 
+EXTRA_DIST           = pysimulavr.i 
+
 
 DISTCLEANFILES:=${DISTCLEANFILES} simulavr.so keytrans.h  _pysimulavr.so pysimulavr.py pysimulavr_wrap.cpp
 Cleanfiles:=${CLEANFILES} simulavr.so keytrans.h simulavr_wrap.cpp
