@@ -3,6 +3,7 @@
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
  * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2007 Onno Kortmann
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +21,43 @@
  *
  ****************************************************************************
  */
-#include <stdlib.h> //use exit()
-#include <iostream>
+
+#include <ctype.h> //toupper
+#include "config.h"
+#include "at4433.h"
+#include "at8515.h"
+#include "atmega128.h"
+#include "avrfactory.h"
+
 using namespace std;
 
-#include "printable.h"
+/* FIXME: Replace this factory with an automatically and pluggable
+factory pattern. (-> AVR devices register themselves.) */
 
-void Printable::operator()() {
-    out << "dummy function for operator()() called from Pintable::Printable" << endl;
-    exit(0);
+AvrDevice* AvrFactory::makeDevice(const std::string in) {
+    string c(in); //use copy to transform to lower case
+    transform(c.begin(), c.end(), c.begin(), ::toupper);
+
+    if (c=="AT90S4433") 
+        return new AvrDevice_at90s4433();
+    else if (c=="AT90S8515")
+        return new AvrDevice_at90s8515();
+    else if (c=="ATMEGA128")
+        return new AvrDevice_atmega128();
+    else {
+        cerr << "Invalid device specification:" << c << endl;
+        exit(1);
+    }
 }
 
+AvrFactory& AvrFactory::instance() {
+    static AvrFactory *f=0;
+    if (!f) {
+        f=new AvrFactory();
+    }
+
+    return *f;
+}
+
+AvrFactory::AvrFactory() {}
 

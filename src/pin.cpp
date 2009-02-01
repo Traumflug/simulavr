@@ -21,6 +21,8 @@
  ****************************************************************************
  */
 
+#include <stdlib.h> // use atoi
+
 #include "pin.h"
 #include "net.h"
 #include "ui.h"
@@ -293,7 +295,7 @@ OpenDrain::operator bool() const
 }
 
 
-ExtPin::ExtPin ( T_Pinstate ps, UserInterface *_ui, char *_extName, char *baseWindow) : Pin(ps), ui(_ui), extName(_extName) {
+ExtPin::ExtPin ( T_Pinstate ps, UserInterface *_ui, const char *_extName, const char *baseWindow) : Pin(ps), ui(_ui), extName(_extName) {
     ostringstream os;
     outState=ps;
     os << "create Net "<< _extName << " "<<baseWindow << " " << endl;
@@ -323,7 +325,7 @@ void ExtAnalogPin::SetNewValueFromUi(const string& s) {
 }
 
 
-ExtAnalogPin::ExtAnalogPin ( unsigned int value, UserInterface *_ui, char *_extName, char* baseWindow) : Pin(Pin::TRISTATE), ui(_ui), extName(_extName) {
+ExtAnalogPin::ExtAnalogPin ( unsigned int value, UserInterface *_ui, const char *_extName, const char* baseWindow) : Pin(Pin::TRISTATE), ui(_ui), extName(_extName) {
     ostringstream os;
     os << "create AnalogNet "<< _extName << " "<<baseWindow <<" " << endl;
     ui->Write(os.str());

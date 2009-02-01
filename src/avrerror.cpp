@@ -35,20 +35,7 @@
 
 #include "avrerror.h"
 
-#if MACRO_DOCUMENTATION
-
-/** \brief Print an ordinary message to stdout. */
-#define avr_message(fmt, args...) private_avr_message(__FILE__, __LINE__, fmt, ## args)
-
-/** \brief Print a warning message to stderr. */
-#define avr_warning(fmt, args...) private_avr_warning(__FILE__, __LINE__, fmt, ## args)
-
-/** \brief Print an error message to stderr and terminate program. */
-#define avr_error(fmt, args...)   private_avr_error(__FILE__, __LINE__, fmt, ## args)
-
-#else /* Not Documentation */
-
-void private_avr_message( char *file, int line, char *fmt, ... )
+void private_avr_message( const char *file, int line, const char *fmt, ... )
 {
     va_list ap;
     char    ffmt[128];
@@ -62,7 +49,7 @@ void private_avr_message( char *file, int line, char *fmt, ... )
     va_end(ap);
 }
 
-void private_avr_warning( char *file, int line, char *fmt, ... )
+void private_avr_warning( const char *file, int line, const char *fmt, ... )
 {
     va_list ap;
     char    ffmt[128];
@@ -76,7 +63,7 @@ void private_avr_warning( char *file, int line, char *fmt, ... )
     va_end(ap);
 }
 
-void private_avr_error( char *file, int line, char *fmt, ... )
+void private_avr_error( const char *file, int line, const char *fmt, ... )
 {
     va_list ap;
     char    ffmt[128];
@@ -92,4 +79,3 @@ void private_avr_error( char *file, int line, char *fmt, ... )
     exit(1);                    /* exit instead of abort */
 }
 
-#endif /* Not documenation */

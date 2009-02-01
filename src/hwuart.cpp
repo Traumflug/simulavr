@@ -298,8 +298,8 @@ unsigned int HWUart::CpuCycleRx() {
                 }
 
                 if (
-                        (ucsrc&USBS) && (cntRxSamples>16) || //if 2 stopbits used we have to wait full bit frame
-                        (!(ucsrc&USBS)) && (cntRxSamples>10) //in case of only 1 stopbit we can shorten the stopbit
+                        ((ucsrc&USBS) && (cntRxSamples>16)) || //if 2 stopbits used we have to wait full bit frame
+                        ((!(ucsrc&USBS)) && (cntRxSamples>10)) //in case of only 1 stopbit we can shorten the stopbit
                    ) {
 
                     if ( rxLowCnt<rxHighCnt) { //the bit was high this is ok
@@ -398,7 +398,7 @@ unsigned int HWUart::CpuCycleTx() {
             unsigned char usr_old=usr;
 
             if (!(usr & UDRE) ) { // there is new data in udr
-                if ((usr & TXC)| (txState==TX_FIRST_RUN)|txState==TX_FINISH) { //transmitter is empty
+                if ((usr & TXC)| (txState==TX_FIRST_RUN)|(txState==TX_FINISH)) { //transmitter is empty
                     //shift data from udr->transmit shift register
                     txDataTmp=udrWrite;
                     if (ucr & TXB8) { // there is a 1 in txb8

@@ -34,8 +34,8 @@
 #define avr_warning(fmt, args...) private_avr_warning(__FILE__, __LINE__, fmt, ## args)
 #define avr_error(fmt, args...)   private_avr_error(__FILE__, __LINE__, fmt, ## args)
 
-extern void private_avr_message   ( char *file, int line, char *fmt, ... );
-extern void private_avr_warning   ( char *file, int line, char *fmt, ... );
-extern void private_avr_error     ( char *file, int line, char *fmt, ... );
+extern void private_avr_message   ( const char *file, int line, const char *fmt, ... );
+extern void private_avr_warning   ( const char *file, int line, const char *fmt, ... );
+extern void private_avr_error     ( const char *file, int line, const char *fmt, ... );
 
 #endif /* SIM_AVRERROR_H */

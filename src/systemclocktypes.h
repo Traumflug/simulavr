@@ -23,7 +23,7 @@
 
 /*
 This file should be removed or integrated somewhere in the near future
-Actually it is only putted to make the compile possible because of 
+Actually it is only put to make the compile possible because of 
 infinite recursion in header dependencies which I have not fixed until now
 */
 

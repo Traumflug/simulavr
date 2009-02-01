@@ -281,7 +281,7 @@ void HWMegaTimer0::CheckForMode() {
 }
 
 unsigned int HWMegaTimer0::CpuCycle(){
-	switch (tccr) {
+	switch (tccr & 0x07) { // CS00..CS02
 		case STOP:
 			break;
 
@@ -572,7 +572,7 @@ void HWMegaTimer2::CheckForMode() {
 }
 
 unsigned int HWMegaTimer2::CpuCycle(){
-	switch (tccr) {
+	switch (tccr & 0x07) { //CS20..CS22
 		case STOP:
 			break;
 
@@ -972,7 +972,7 @@ unsigned int HWMegaTimer1::CpuCycle(){
 	//
 	if ( icp!=icp_old) { //pin change for capture detected
 		inputCaptureNoiseCnt++;
-		if ( tccr1b&0x80==0 | (inputCaptureNoiseCnt>=4)) {
+		if ( ((tccr1b&0x80) == 0) || (inputCaptureNoiseCnt>=4)) {
 			inputCaptureNoiseCnt=0;
 			icp_old=icp;
 

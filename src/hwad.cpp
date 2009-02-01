@@ -20,6 +20,8 @@
  *
  ****************************************************************************
  */
+
+#include <limits.h> //use MAX_INT
 #include "hwad.h"
 
 #include "irqsystem.h"

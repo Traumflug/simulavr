@@ -94,7 +94,10 @@ class AvrDevice: public SimulationMember {
 #endif
 
         AvrDevice(unsigned int ioSpaceSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int flashSize);
-        int Step(bool &, SystemClockOffset *nextStepIn_ns =0);
+	/*! Steps the AVR core.
+	  \param untilCoreStepFinished if true, steps a core step and not a
+	  single clock cycle. */
+        int Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_ns =0);
         void Reset();
         void SetClockFreq(SystemClockOffset f);
         SystemClockOffset GetClockFreq();

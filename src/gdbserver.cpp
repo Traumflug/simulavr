@@ -248,7 +248,7 @@ void GdbServer::gdb_write( const void *buf, size_t count )
 If reply is NULL, return pointer to the last reply saved.
 Otherwise, make a copy of the buffer pointed to by reply. */
 
-char* GdbServer::gdb_last_reply( char *reply )
+const char* GdbServer::gdb_last_reply( const char *reply )
 {
 
     if (reply == NULL)
@@ -277,7 +277,7 @@ void GdbServer::gdb_send_ack( )
 
 /* Send a reply to GDB. */
 
-void GdbServer::gdb_send_reply( char *reply )
+void GdbServer::gdb_send_reply( const char *reply )
 {
     int cksum = 0;
     int bytes;

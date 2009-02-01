@@ -172,28 +172,32 @@ void HWMegaExtIrq::PinStateHasChanged(Pin *p) {
                         }
                     }
                     break;
+
                 case 0x01:
                     if (pinI[actualPin]!= int_old[actualPin]) {
-                        int_old[actualPin]=pinI[actualPin];
                         eifr|=(1<<actualPin);
                         if (eimsk& (1<<actualPin)) irqSystem->SetIrqFlag(this, actVec);
                     }
                     break;
+
                 case 0x02:
                     if ((pinI[actualPin]==0) && ( int_old[actualPin]==1)) {
-                        int_old[actualPin]=0;
                         eifr|=(1<<actualPin);
                         if (eimsk& (1<<actualPin)) irqSystem->SetIrqFlag(this, actVec);
                     }
                     break;
+
                 case 0x03:
                     if ((pinI[actualPin]==1) && ( int_old[actualPin]==0)) {
-                        int_old[actualPin]=1;
                         eifr|=(1<<actualPin);
                         if (eimsk& (1<<actualPin)) irqSystem->SetIrqFlag(this, actVec);
                     }
                     break;
             }
+
+            //update the "old state" for next edge detection (patch 5182, thanks to Mike Felser!)
+            int_old[actualPin]=pinI[actualPin];
+
         } //2*4 pins
     } //xx eicra/b
 

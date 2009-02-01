@@ -37,9 +37,7 @@ using namespace std;
 #include "global.h"
 #include "flash.h"
 #include "avrdevice.h"
-#include "at8515.h"
-#include "atmega128.h"
-#include "at4433.h"
+#include "avrfactory.h"
 #include "gdb.h"
 #include "ui.h"
 #include "systemclock.h"
@@ -198,9 +196,9 @@ int main(int argc, char *argv[]) {
                 cout << "-T --terminate <label> or <address> stops simulation if PC runs on <label> or <address>" << endl;
                 cout << endl;
                 cout << "Supported devices:" << endl;
-                cout << "at90s8515" << endl;
-                cout << "at90s4433" << endl;
-                cout << "atmega128" << endl;
+                cout << "AT90S4433" << endl;
+                cout << "AT90S8515" << endl;
+                cout << "ATMEGA128" << endl;
                 cout << endl;
 
                 exit(0);
@@ -209,19 +207,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* now we create the device */
-    AvrDevice *dev1;
-    if (devicename=="unknown") {
-        dev1= new AvrDevice_at90s8515;
-    } else if (devicename=="at90s8515") {
-        dev1= new AvrDevice_at90s8515;
-    } else if (devicename=="atmega128") {
-        dev1= new AvrDevice_atmega128;
-    } else if (devicename=="at90s4433") {
-        dev1= new AvrDevice_at90s4433;
-    } else {
-        cerr << "Not a valid device" << endl;
-        exit(0);
-    }
+    AvrDevice *dev1=AvrFactory::instance().makeDevice(devicename);
 
     //if we want to insert some special "pipe" Registers we could do this here:
     if (readFromPipeFileName!="") {

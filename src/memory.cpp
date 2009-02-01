@@ -20,6 +20,7 @@
  *
  ****************************************************************************
  */
+#include <string.h> //strcpy()
 #include "memory.h"
 
 #include <sstream>

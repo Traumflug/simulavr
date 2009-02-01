@@ -38,7 +38,7 @@ class ScopePin : public Pin {
 };
 
 //attention! vector<> must be initialized with any size, else it crashes! This is a bug in the lib!
-Scope::Scope( UserInterface *u, const string & n, unsigned int cnt, char *baseWindow): ui(u), name(n), vecPin(100), lastVal(100), noOfChannels(cnt) {
+Scope::Scope( UserInterface *u, const string & n, unsigned int cnt, const char *baseWindow): ui(u), name(n), vecPin(100), lastVal(100), noOfChannels(cnt) {
 
     for (unsigned int tt=0; tt< cnt; tt++) {
         vecPin[tt]=new ScopePin(this, tt);

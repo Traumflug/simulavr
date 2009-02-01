@@ -100,8 +100,8 @@ static int get_A_6( word opcode );
 int funyFunc(int x) { return 0; }
 
 avr_op_ADC::avr_op_ADC(word opcode, AvrDevice *c) : 
-DecodedInstruction(c, get_rd_5(opcode),get_rr_5(opcode)), R1(((*(c->R))[get_rd_5(opcode)])), R2(((*(c->R))[get_rr_5(opcode)])), 
-status(core->status)
+    DecodedInstruction(c, get_rd_5(opcode),get_rr_5(opcode)), R1(((*(c->R))[get_rd_5(opcode)])), R2(((*(c->R))[get_rr_5(opcode)])), 
+    status(core->status)
 { }
 
 int avr_op_ADC::operator()() { 
@@ -122,10 +122,10 @@ int avr_op_ADC::operator()() {
 }
 
 avr_op_ADD::avr_op_ADD(word opcode, AvrDevice *c) : 
-DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
     R1(((*(c->R))[get_rd_5(opcode)])),
     R2(((*(c->R))[get_rr_5(opcode)])), 
-status(core->status)
+    status(core->status)
 { }
 
 int avr_op_ADD::operator()() { 
@@ -146,7 +146,7 @@ int avr_op_ADD::operator()() {
 }
 
 avr_op_ADIW::avr_op_ADIW(word opcode, AvrDevice *c): 
-DecodedInstruction(c, get_K_6(opcode),  get_rd_2(opcode)),
+    DecodedInstruction(c, get_K_6(opcode),  get_rd_2(opcode)),
     Rl( (*(core->R))[get_rd_2(opcode)]),
     Rh( (*(core->R))[get_rd_2(opcode)+1]),
     K(get_K_6(opcode)),
@@ -173,7 +173,7 @@ int avr_op_ADIW::operator()() {
 }
 
 avr_op_AND::avr_op_AND(word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
     R2((*(core->R))[get_rr_5(opcode)]),
     status(core->status) {}
@@ -198,10 +198,10 @@ DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
 
 avr_op_ANDI::avr_op_ANDI
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
+    DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
     R1((*(core->R))[get_rd_4(opcode)]),
     status(core->status) ,
-K(get_K_8(opcode))
+    K(get_K_8(opcode))
 {}
 
 int avr_op_ANDI::operator()() 
@@ -220,9 +220,9 @@ int avr_op_ANDI::operator()()
 
 avr_op_ASR::avr_op_ASR
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     R1((*(core->R))[get_rd_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_ASR::operator()() 
@@ -245,9 +245,9 @@ int avr_op_ASR::operator()()
 
 avr_op_BCLR::avr_op_BCLR
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_sreg_bit(opcode),0),
+    DecodedInstruction(c, get_sreg_bit(opcode),0),
     status(core->status) ,
-K(~(1<<get_sreg_bit(opcode)))
+    K(~(1<<get_sreg_bit(opcode)))
 {}
 
 int avr_op_BCLR::operator()() 
@@ -259,11 +259,11 @@ int avr_op_BCLR::operator()()
 
 avr_op_BLD::avr_op_BLD
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_reg_bit(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_reg_bit(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
     Kadd(1<<get_reg_bit(opcode)),
     Kremove(~(1<<get_reg_bit(opcode))),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_BLD::operator()() 
@@ -286,10 +286,10 @@ int avr_op_BLD::operator()()
 
 avr_op_BRBC::avr_op_BRBC
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_reg_bit(opcode), n_bit_unsigned_to_signed( get_k_7(opcode), 7 )),
+    DecodedInstruction(c, get_reg_bit(opcode), n_bit_unsigned_to_signed( get_k_7(opcode), 7 )),
     status(core->status) ,
     bitmask(1<<get_reg_bit(opcode)),
-offset(n_bit_unsigned_to_signed( get_k_7(opcode), 7))
+    offset(n_bit_unsigned_to_signed( get_k_7(opcode), 7))
 {}
 
 int avr_op_BRBC::operator()() 
@@ -313,10 +313,10 @@ int avr_op_BRBC::operator()()
 
 avr_op_BRBS::avr_op_BRBS
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_reg_bit(opcode), n_bit_unsigned_to_signed( get_k_7(opcode), 7 )),
+    DecodedInstruction(c, get_reg_bit(opcode), n_bit_unsigned_to_signed( get_k_7(opcode), 7 )),
     status(core->status) ,
     bitmask(1<<get_reg_bit(opcode)),
-offset(n_bit_unsigned_to_signed( get_k_7(opcode), 7))
+    offset(n_bit_unsigned_to_signed( get_k_7(opcode), 7))
 {}
 
 int avr_op_BRBS::operator()()
@@ -339,9 +339,9 @@ int avr_op_BRBS::operator()()
 
 avr_op_BSET::avr_op_BSET
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_reg_bit(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_reg_bit(opcode)),
     status(core->status) ,
-K(1<<get_sreg_bit(opcode))
+    K(1<<get_sreg_bit(opcode))
 {}
 
 int avr_op_BSET::operator()() 
@@ -353,10 +353,10 @@ int avr_op_BSET::operator()()
 
 avr_op_BST::avr_op_BST
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_reg_bit(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_reg_bit(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
     status(core->status) ,
-K(1<<get_reg_bit(opcode))
+    K(1<<get_reg_bit(opcode))
 {}
 
 int avr_op_BST::operator()() 
@@ -371,8 +371,8 @@ int avr_op_BST::operator()()
 
 avr_op_CALL::avr_op_CALL
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, 0, 0, true),
-KH(get_k_22(opcode))
+    DecodedInstruction(c, 0, 0, true),
+    KH(get_k_22(opcode))
 {}
 
 int avr_op_CALL::operator()() 
@@ -394,9 +394,9 @@ int avr_op_CALL::operator()()
 
 avr_op_CBI::avr_op_CBI
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_A_5(opcode), get_reg_bit(opcode)),
+    DecodedInstruction(c, get_A_5(opcode), get_reg_bit(opcode)),
     ioreg((*(core->ioreg))[get_A_5(opcode)]),
-K(~(1<<get_reg_bit(opcode)))
+    K(~(1<<get_reg_bit(opcode)))
 {}
 
 int avr_op_CBI::operator()() 
@@ -408,9 +408,9 @@ int avr_op_CBI::operator()()
 
 avr_op_COM::avr_op_COM
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     R1((*(core->R))[get_rd_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_COM::operator()() 
@@ -433,10 +433,10 @@ int avr_op_COM::operator()()
 
 avr_op_CP::avr_op_CP
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),get_rr_5(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode),get_rr_5(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
     R2((*(core->R))[get_rr_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_CP::operator()() 
@@ -459,10 +459,10 @@ int avr_op_CP::operator()()
 
 avr_op_CPC::avr_op_CPC
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
     R2((*(core->R))[get_rr_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_CPC::operator()() 
@@ -490,10 +490,10 @@ int avr_op_CPC::operator()()
 
 avr_op_CPI::avr_op_CPI
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
+    DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
     R1((*(core->R))[get_rd_4(opcode)]),
     status(core->status) ,
-K(get_K_8(opcode))
+    K(get_K_8(opcode))
 {}
 
 int avr_op_CPI::operator()() 
@@ -514,10 +514,10 @@ int avr_op_CPI::operator()()
 
 avr_op_CPSE::avr_op_CPSE
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
     R2((*(core->R))[get_rr_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_CPSE::operator()() 
@@ -551,9 +551,9 @@ int avr_op_CPSE::operator()()
 
 avr_op_DEC::avr_op_DEC
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), 0),
+    DecodedInstruction(c, get_rd_5(opcode), 0),
     R1((*(core->R))[get_rd_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_DEC::operator()() 
@@ -573,10 +573,10 @@ int avr_op_DEC::operator()()
 
 avr_op_EICALL:: avr_op_EICALL
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, 0, 0),
+    DecodedInstruction(c, 0, 0),
     RL((*(core->R))[30]),
     RH((*(core->R))[31]),
-eind((*(core->ioreg))[EIND])
+    eind((*(core->ioreg))[EIND])
 {}
 
 int  avr_op_EICALL::operator()() 
@@ -584,7 +584,7 @@ int  avr_op_EICALL::operator()()
 
     int pc_bytes = 3;
 
-    int new_PC=RL+(RH<<8)+(*(core->ioreg))[EIND]<<16;
+    int new_PC=RL+(RH<<8)+((*(core->ioreg))[EIND]<<16);
     //avr_warning( "needs serious code review\n" );
 
     avr_core_stack_push( core, pc_bytes, (core->PC)+1 );
@@ -596,10 +596,10 @@ int  avr_op_EICALL::operator()()
 
 avr_op_EIJMP::avr_op_EIJMP
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, 0,0),
+    DecodedInstruction(c, 0,0),
     RL((*(core->R))[30]),
     RH((*(core->R))[31]),
-eind((*(core->ioreg))[EIND])
+    eind((*(core->ioreg))[EIND])
 {}
 
 int avr_op_EIJMP::operator()() 
@@ -612,10 +612,10 @@ int avr_op_EIJMP::operator()()
 
 avr_op_ELPM_Z::avr_op_ELPM_Z
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     R1((*(core->R))[get_rd_5(opcode)]),
     ZL((*(core->R))[30]),
-ZH((*(core->R))[31])
+    ZH((*(core->R))[31])
 {}
 
 int avr_op_ELPM_Z::operator()() 
@@ -638,10 +638,10 @@ int avr_op_ELPM_Z::operator()()
 
 avr_op_ELPM_Z_incr::avr_op_ELPM_Z_incr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     R1((*(core->R))[get_rd_5(opcode)]),
     ZL((*(core->R))[30]),
-ZH((*(core->R))[31])
+    ZH((*(core->R))[31])
 {}
 
 int avr_op_ELPM_Z_incr::operator()() 
@@ -672,10 +672,10 @@ int avr_op_ELPM_Z_incr::operator()()
 
 avr_op_ELPM::avr_op_ELPM
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, 0,0),
+    DecodedInstruction(c, 0,0),
     R0((*(core->R))[0]),
     ZL((*(core->R))[30]),
-ZH((*(core->R))[31])
+    ZH((*(core->R))[31])
 {}
 
 int avr_op_ELPM::operator()() 
@@ -698,10 +698,10 @@ int avr_op_ELPM::operator()()
 
 avr_op_EOR::avr_op_EOR
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
     R2((*(core->R))[get_rr_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_EOR::operator()() 
@@ -725,11 +725,11 @@ int avr_op_EOR::operator()()
 
 avr_op_ESPM::avr_op_ESPM
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, 0,0),
+    DecodedInstruction(c, 0,0),
     R1((*(core->R))[get_rd_5(opcode)]),
     R2((*(core->R))[get_rr_5(opcode)]),
     status(core->status) ,
-K(get_K_6(opcode))
+    K(get_K_6(opcode))
 {}
 
 int avr_op_ESPM::operator()()  //TODO currently not supported
@@ -741,13 +741,13 @@ int avr_op_ESPM::operator()()  //TODO currently not supported
 
 avr_op_FMUL::avr_op_FMUL
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_3(opcode), get_rr_3(opcode)),
+    DecodedInstruction(c, get_rd_3(opcode), get_rr_3(opcode)),
     R0((*(core->R))[0]),
     R1((*(core->R))[1]),
     Rd((*(core->R))[get_rd_3(opcode)]),
     Rr((*(core->R))[get_rr_3(opcode)]),
     status(core->status) ,
-K(get_K_6(opcode))
+    K(get_K_6(opcode))
 {}
 
 int avr_op_FMUL::operator()() 
@@ -774,12 +774,12 @@ int avr_op_FMUL::operator()()
 
 avr_op_FMULS::avr_op_FMULS
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_3(opcode), get_rr_3(opcode)),
+    DecodedInstruction(c, get_rd_3(opcode), get_rr_3(opcode)),
     R0((*(core->R))[0]),
     R1((*(core->R))[1]),
     Rd((*(core->R))[get_rd_3(opcode)]),
     Rr((*(core->R))[get_rr_3(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_FMULS::operator()() 
@@ -805,13 +805,13 @@ int avr_op_FMULS::operator()()
 
 avr_op_FMULSU::avr_op_FMULSU
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_3(opcode), get_rr_3(opcode)),
+    DecodedInstruction(c, get_rd_3(opcode), get_rr_3(opcode)),
 
     R0((*(core->R))[0]),
     R1((*(core->R))[1]),
     Rd((*(core->R))[get_rd_3(opcode)]),
     Rr((*(core->R))[get_rr_3(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_FMULSU::operator()() 
@@ -834,10 +834,10 @@ int avr_op_FMULSU::operator()()
 
 avr_op_ICALL::avr_op_ICALL
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, 0,0),
+    DecodedInstruction(c, 0,0),
     Rl((*(core->R))[30]),
     Rh((*(core->R))[31]),
-pc_bytes((c->PC_size) )
+    pc_bytes((c->PC_size) )
 {}
 
 int avr_op_ICALL::operator()() 
@@ -858,9 +858,9 @@ int avr_op_ICALL::operator()()
 
 avr_op_IJMP::avr_op_IJMP
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, 0,0),
+    DecodedInstruction(c, 0,0),
     Rl((*(core->R))[30]),
-Rh((*(core->R))[31])
+    Rh((*(core->R))[31])
 {}
 
 int avr_op_IJMP::operator()() 
@@ -875,9 +875,9 @@ int avr_op_IJMP::operator()()
 
 avr_op_IN::avr_op_IN
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_A_6(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_A_6(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
-ioreg((*(core->ioreg))[get_A_6(opcode)])
+    ioreg((*(core->ioreg))[get_A_6(opcode)])
 {}
 
 int avr_op_IN::operator()() 
@@ -890,9 +890,9 @@ int avr_op_IN::operator()()
 
 avr_op_INC::avr_op_INC
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     R1((*(core->R))[get_rd_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_INC::operator()() 
@@ -914,8 +914,8 @@ int avr_op_INC::operator()()
 
 avr_op_JMP::avr_op_JMP
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_k_22(opcode), 0, true),
-K(get_k_22(opcode))
+    DecodedInstruction(c, get_k_22(opcode), 0, true),
+    K(get_k_22(opcode))
 {}
 
 int avr_op_JMP::operator()() 
@@ -932,11 +932,11 @@ int avr_op_JMP::operator()()
 
 avr_op_LDD_Y::avr_op_LDD_Y
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_q(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_q(opcode)),
     Rl((*(core->R))[28]),
     Rh((*(core->R))[29]),
     Rd((*(core->R))[get_rd_5(opcode)]),
-K(get_q(opcode))
+    K(get_q(opcode))
 {}
 
 int avr_op_LDD_Y::operator()() 
@@ -953,11 +953,11 @@ int avr_op_LDD_Y::operator()()
 
 avr_op_LDD_Z::avr_op_LDD_Z
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_q(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_q(opcode)),
     Rd((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[30]),
     Rh((*(core->R))[31]),
-K(get_q(opcode))
+    K(get_q(opcode))
 {}
 
 int avr_op_LDD_Z::operator()() 
@@ -977,7 +977,7 @@ int avr_op_LDD_Z::operator()()
 
 avr_op_LDI::avr_op_LDI
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_4(opcode),  get_K_8(opcode)),
+    DecodedInstruction(c, get_rd_4(opcode),  get_K_8(opcode)),
     R1((*(core->R))[get_rd_4(opcode)]),
     K(get_K_8(opcode)) {
     }
@@ -992,8 +992,8 @@ int avr_op_LDI::operator()() {
 
 avr_op_LDS::avr_op_LDS
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), 0, true),
-R1((*(core->R))[get_rd_5(opcode)])
+    DecodedInstruction(c, get_rd_5(opcode), 0, true),
+    R1((*(core->R))[get_rd_5(opcode)])
 {}
 
 int avr_op_LDS::operator()()  //TODO, read sram as reference also! read second word!!!
@@ -1011,10 +1011,10 @@ int avr_op_LDS::operator()()  //TODO, read sram as reference also! read second w
 
 avr_op_LD_X::avr_op_LD_X
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     Rl((*(core->R))[26]),
     Rh((*(core->R))[27]),
-Rd((*(core->R))[get_rd_5(opcode)])
+    Rd((*(core->R))[get_rd_5(opcode)])
 {}
 
 int avr_op_LD_X::operator()() 
@@ -1032,12 +1032,12 @@ int avr_op_LD_X::operator()()
 
 avr_op_LD_X_decr::avr_op_LD_X_decr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     Rd((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[26]),
     Rh((*(core->R))[27]),
     status(core->status) ,
-K(get_K_6(opcode))
+    K(get_K_6(opcode))
 {}
 
 int avr_op_LD_X_decr::operator()() 
@@ -1065,10 +1065,10 @@ int avr_op_LD_X_decr::operator()()
 
 avr_op_LD_X_incr::avr_op_LD_X_incr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     Rd((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[26]),
-Rh((*(core->R))[27])
+    Rh((*(core->R))[27])
 {}
 
 int avr_op_LD_X_incr::operator()() 
@@ -1097,10 +1097,10 @@ int avr_op_LD_X_incr::operator()()
 
 avr_op_LD_Y_decr::avr_op_LD_Y_decr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c,  get_rd_5(opcode), 0),
+    DecodedInstruction(c,  get_rd_5(opcode), 0),
     Rd((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[28]),
-Rh((*(core->R))[29])
+    Rh((*(core->R))[29])
 {}
 
 int avr_op_LD_Y_decr::operator()() 
@@ -1128,10 +1128,10 @@ int avr_op_LD_Y_decr::operator()()
 
 avr_op_LD_Y_incr::avr_op_LD_Y_incr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0 ),
+    DecodedInstruction(c, get_rd_5(opcode),0 ),
     Rd((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[28]),
-Rh((*(core->R))[29])
+    Rh((*(core->R))[29])
 {}
 
 int avr_op_LD_Y_incr::operator()() 
@@ -1156,10 +1156,10 @@ int avr_op_LD_Y_incr::operator()()
 
 avr_op_LD_Z_incr::avr_op_LD_Z_incr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     Rd((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[30]),
-Rh((*(core->R))[31])
+    Rh((*(core->R))[31])
 {}
 
 int avr_op_LD_Z_incr::operator()() 
@@ -1186,10 +1186,10 @@ int avr_op_LD_Z_incr::operator()()
 
 avr_op_LD_Z_decr::avr_op_LD_Z_decr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0 ),
+    DecodedInstruction(c, get_rd_5(opcode),0 ),
     Rd((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[30]),
-Rh((*(core->R))[31])
+    Rh((*(core->R))[31])
 {}
 
 int avr_op_LD_Z_decr::operator()() 
@@ -1216,10 +1216,10 @@ int avr_op_LD_Z_decr::operator()()
 
 avr_op_LPM_Z::avr_op_LPM_Z
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     Rd((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[30]),
-Rh((*(core->R))[31])
+    Rh((*(core->R))[31])
 {}
 
 int  avr_op_LPM_Z::operator()() 
@@ -1242,10 +1242,10 @@ int  avr_op_LPM_Z::operator()()
 
 avr_op_LPM::avr_op_LPM
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, 0,0),
+    DecodedInstruction(c, 0,0),
     R0((*(core->R))[0]),
     Rl((*(core->R))[30]),
-Rh((*(core->R))[31])
+    Rh((*(core->R))[31])
 {}
 
 int avr_op_LPM::operator()() 
@@ -1265,10 +1265,10 @@ int avr_op_LPM::operator()()
 
 avr_op_LPM_Z_incr::avr_op_LPM_Z_incr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), 0),
+    DecodedInstruction(c, get_rd_5(opcode), 0),
     Rd((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[30]),
-Rh((*(core->R))[31])
+    Rh((*(core->R))[31])
 {}
 
 int avr_op_LPM_Z_incr::operator()() 
@@ -1292,9 +1292,9 @@ int avr_op_LPM_Z_incr::operator()()
 
 avr_op_LSR::avr_op_LSR
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     Rd((*(core->R))[get_rd_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_LSR::operator()() 
@@ -1320,9 +1320,9 @@ int avr_op_LSR::operator()()
 
 avr_op_MOV::avr_op_MOV
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
-R2((*(core->R))[get_rr_5(opcode)])
+    R2((*(core->R))[get_rr_5(opcode)])
 {}
 
 int avr_op_MOV::operator()() 
@@ -1335,13 +1335,13 @@ int avr_op_MOV::operator()()
 
 avr_op_MOVW::avr_op_MOVW
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_4(opcode), get_rr_4(opcode)),
+    DecodedInstruction(c, get_rd_4(opcode), get_rr_4(opcode)),
     Rdl((*(core->R))[(get_rd_4(opcode)-16)<<1]),
     Rdh((*(core->R))[((get_rd_4(opcode)-16)<<1)+1]),
     Rsl((*(core->R))[(get_rr_4(opcode)-16)<<1]),
     Rsh((*(core->R))[((get_rr_4(opcode)-16)<<1) +1]),
     status(core->status) ,
-K(get_K_6(opcode))
+    K(get_K_6(opcode))
 {}
 
 int avr_op_MOVW::operator()() 
@@ -1355,12 +1355,12 @@ int avr_op_MOVW::operator()()
 
 avr_op_MUL::avr_op_MUL
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
     R0((*(core->R))[0]),
     R1((*(core->R))[1]),
     Rd((*(core->R))[get_rd_5(opcode)]),
     Rr((*(core->R))[get_rr_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_MUL::operator()() 
@@ -1385,12 +1385,12 @@ int avr_op_MUL::operator()()
 
 avr_op_MULS::avr_op_MULS
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_4(opcode), get_rr_4(opcode)),
+    DecodedInstruction(c, get_rd_4(opcode), get_rr_4(opcode)),
     Rd((*(core->R))[get_rd_4(opcode)]),
     Rr((*(core->R))[get_rr_4(opcode)]),
     R0((*(core->R))[0]),
     R1((*(core->R))[1]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_MULS::operator()() 
@@ -1413,12 +1413,12 @@ int avr_op_MULS::operator()()
 
 avr_op_MULSU::avr_op_MULSU
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_3(opcode), get_rr_3(opcode)),
+    DecodedInstruction(c, get_rd_3(opcode), get_rr_3(opcode)),
     Rd((*(core->R))[get_rd_3(opcode)]),
     Rr((*(core->R))[get_rr_3(opcode)]),
     R0((*(core->R))[0]),
     R1((*(core->R))[1]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_MULSU::operator()() 
@@ -1444,9 +1444,9 @@ int avr_op_MULSU::operator()()
 
 avr_op_NEG::avr_op_NEG
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     Rd((*(core->R))[get_rd_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_NEG::operator()() 
@@ -1469,8 +1469,8 @@ int avr_op_NEG::operator()()
 
 
 avr_op_NOP::avr_op_NOP
-    (word opcode, AvrDevice *c):
-DecodedInstruction(c,0,0)
+(word opcode, AvrDevice *c):
+    DecodedInstruction(c,0,0)
 {}
 
 int avr_op_NOP::operator()() 
@@ -1481,10 +1481,10 @@ int avr_op_NOP::operator()()
 
 avr_op_OR::avr_op_OR
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
     Rd((*(core->R))[get_rd_5(opcode)]),
     Rr((*(core->R))[get_rr_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_OR::operator()() 
@@ -1505,10 +1505,10 @@ int avr_op_OR::operator()()
 
 avr_op_ORI::avr_op_ORI
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
+    DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
     R1((*(core->R))[get_rd_4(opcode)]),
     status(core->status) ,
-K(get_K_8(opcode))
+    K(get_K_8(opcode))
 {}
 
 int avr_op_ORI::operator()() 
@@ -1531,9 +1531,9 @@ int avr_op_ORI::operator()()
 
 avr_op_OUT::avr_op_OUT
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_A_6(opcode), get_rd_5(opcode)),
+    DecodedInstruction(c, get_A_6(opcode), get_rd_5(opcode)),
     ioreg((*(core->ioreg))[get_A_6(opcode)]),
-R1((*(core->R))[get_rd_5(opcode)])
+    R1((*(core->R))[get_rd_5(opcode)])
 {}
 
 int avr_op_OUT::operator()() 
@@ -1547,8 +1547,8 @@ int avr_op_OUT::operator()()
 
 avr_op_POP::avr_op_POP
 (word opcode, AvrDevice *c):
-DecodedInstruction(c,  get_rd_5(opcode),0 ),
-R1((*(core->R))[get_rd_5(opcode)])
+    DecodedInstruction(c,  get_rd_5(opcode),0 ),
+    R1((*(core->R))[get_rd_5(opcode)])
 {}
 
 int avr_op_POP::operator()() 
@@ -1561,8 +1561,8 @@ int avr_op_POP::operator()()
 
 avr_op_PUSH::avr_op_PUSH
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), 0),
-R1((*(core->R))[get_rd_5(opcode)])
+    DecodedInstruction(c, get_rd_5(opcode), 0),
+    R1((*(core->R))[get_rd_5(opcode)])
 {}
 
 int avr_op_PUSH::operator()() 
@@ -1575,8 +1575,8 @@ int avr_op_PUSH::operator()()
 
 avr_op_RCALL::avr_op_RCALL
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, n_bit_unsigned_to_signed( get_k_12(opcode), 12 ),0),
-K(n_bit_unsigned_to_signed( get_k_12(opcode), 12 ))
+    DecodedInstruction(c, n_bit_unsigned_to_signed( get_k_12(opcode), 12 ),0),
+    K(n_bit_unsigned_to_signed( get_k_12(opcode), 12 ))
 {}
 
 int avr_op_RCALL::operator()() 
@@ -1592,8 +1592,8 @@ int avr_op_RCALL::operator()()
 }
 
 avr_op_RET::avr_op_RET
-    (word opcode, AvrDevice *c):
-DecodedInstruction(c, 0,0)
+(word opcode, AvrDevice *c):
+    DecodedInstruction(c, 0,0)
 {}
 
 int avr_op_RET::operator()() 
@@ -1608,8 +1608,8 @@ int avr_op_RET::operator()()
 
 avr_op_RETI::avr_op_RETI
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, 0,0),
-status(core->status) 
+    DecodedInstruction(c, 0,0),
+    status(core->status) 
 {}
 
 int avr_op_RETI::operator()() 
@@ -1627,8 +1627,8 @@ int avr_op_RETI::operator()()
 
 avr_op_RJMP::avr_op_RJMP
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, n_bit_unsigned_to_signed( get_k_12(opcode), 12 ),0),
-K(n_bit_unsigned_to_signed( get_k_12(opcode), 12 ))
+    DecodedInstruction(c, n_bit_unsigned_to_signed( get_k_12(opcode), 12 ),0),
+    K(n_bit_unsigned_to_signed( get_k_12(opcode), 12 ))
 {}
 
 int avr_op_RJMP::operator()() 
@@ -1644,9 +1644,9 @@ int avr_op_RJMP::operator()()
 
 avr_op_ROR::avr_op_ROR
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     R1((*(core->R))[get_rd_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_ROR::operator()() 
@@ -1672,10 +1672,10 @@ int avr_op_ROR::operator()()
 
 avr_op_SBC::avr_op_SBC
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
     R2((*(core->R))[get_rr_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_SBC::operator()() 
@@ -1703,10 +1703,10 @@ int avr_op_SBC::operator()()
 
 avr_op_SBCI::avr_op_SBCI
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
+    DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
     R1((*(core->R))[get_rd_4(opcode)]),
     status(core->status) ,
-K(get_K_8(opcode))
+    K(get_K_8(opcode))
 {}
 
 int avr_op_SBCI::operator()() 
@@ -1734,9 +1734,9 @@ int avr_op_SBCI::operator()()
 
 avr_op_SBI::avr_op_SBI
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_A_5(opcode), get_reg_bit(opcode)),
+    DecodedInstruction(c, get_A_5(opcode), get_reg_bit(opcode)),
     ioreg((*(core->ioreg))[get_A_5(opcode)]),
-K(1<<get_reg_bit(opcode))
+    K(1<<get_reg_bit(opcode))
 {}
 
 int avr_op_SBI::operator()() 
@@ -1750,9 +1750,9 @@ int avr_op_SBI::operator()()
 
 avr_op_SBIC::avr_op_SBIC
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_A_5(opcode), get_reg_bit(opcode)),
+    DecodedInstruction(c, get_A_5(opcode), get_reg_bit(opcode)),
     ioreg((*(core->ioreg))[get_A_5(opcode)]),
-K(1<<get_reg_bit(opcode))
+    K(1<<get_reg_bit(opcode))
 {}
 
 int avr_op_SBIC::operator()() 
@@ -1781,9 +1781,9 @@ int avr_op_SBIC::operator()()
 
 avr_op_SBIS::avr_op_SBIS
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_A_5(opcode), get_reg_bit(opcode)),
+    DecodedInstruction(c, get_A_5(opcode), get_reg_bit(opcode)),
     ioreg((*(core->ioreg))[get_A_5(opcode)]),
-K(1<<get_reg_bit(opcode))
+    K(1<<get_reg_bit(opcode))
 {}
 
 int avr_op_SBIS::operator()() 
@@ -1814,11 +1814,11 @@ int avr_op_SBIS::operator()()
 
 avr_op_SBIW::avr_op_SBIW
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_2(opcode), get_K_6(opcode)),
+    DecodedInstruction(c, get_rd_2(opcode), get_K_6(opcode)),
     Rl((*(core->R))[get_rd_2(opcode)]),
     Rh((*(core->R))[get_rd_2(opcode)+1]),
     status(core->status) ,
-K(get_K_6(opcode))
+    K(get_K_6(opcode))
 {}
 
 int avr_op_SBIW::operator()() 
@@ -1847,9 +1847,9 @@ int avr_op_SBIW::operator()()
 
 avr_op_SBRC::avr_op_SBRC
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_reg_bit(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_reg_bit(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
-K(1<<get_reg_bit(opcode))
+    K(1<<get_reg_bit(opcode))
 {}
 
 int avr_op_SBRC::operator()() 
@@ -1877,9 +1877,9 @@ int avr_op_SBRC::operator()()
 
 avr_op_SBRS::avr_op_SBRS
 (word opcode, AvrDevice *c):
-DecodedInstruction(c,  get_rd_5(opcode), get_reg_bit(opcode)),
+    DecodedInstruction(c,  get_rd_5(opcode), get_reg_bit(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
-K(1<<get_reg_bit(opcode))
+    K(1<<get_reg_bit(opcode))
 {}
 
 int avr_op_SBRS::operator()() 
@@ -1908,8 +1908,8 @@ int avr_op_SBRS::operator()()
 }
 
 avr_op_SLEEP::avr_op_SLEEP
-    (word opcode, AvrDevice *c):
-DecodedInstruction(c, 0,0)
+(word opcode, AvrDevice *c):
+    DecodedInstruction(c, 0,0)
 {}
 
 int avr_op_SLEEP::operator()() 
@@ -1944,9 +1944,9 @@ int avr_op_SLEEP::operator()()
 
 avr_op_SPM::avr_op_SPM
 (word opcode, AvrDevice *c):
-DecodedInstruction(c,0,0),
+    DecodedInstruction(c,0,0),
     R0((*(core->R))[0]),
-R1((*(core->R))[1])
+    R1((*(core->R))[1])
 {}
 
 int avr_op_SPM::operator()() 
@@ -1958,11 +1958,11 @@ int avr_op_SPM::operator()()
 
 avr_op_STD_Y::avr_op_STD_Y
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_q(opcode), get_rd_5(opcode)),
+    DecodedInstruction(c, get_q(opcode), get_rd_5(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[28]),
     Rh((*(core->R))[29]),
-K(get_q(opcode))
+    K(get_q(opcode))
 {}
 
 int avr_op_STD_Y::operator()() 
@@ -1986,11 +1986,11 @@ int avr_op_STD_Y::operator()()
 
 avr_op_STD_Z::avr_op_STD_Z
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_q(opcode), get_rd_5(opcode)),
+    DecodedInstruction(c, get_q(opcode), get_rd_5(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[30]),
     Rh((*(core->R))[31]),
-K(get_q(opcode))
+    K(get_q(opcode))
 {}
 
 int avr_op_STD_Z::operator()() 
@@ -2015,8 +2015,8 @@ int avr_op_STD_Z::operator()()
 
 avr_op_STS::avr_op_STS
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0, true),
-R1((*(core->R))[get_rd_5(opcode)])
+    DecodedInstruction(c, get_rd_5(opcode),0, true),
+    R1((*(core->R))[get_rd_5(opcode)])
 {}
 
 int avr_op_STS::operator()() 
@@ -2045,10 +2045,10 @@ int avr_op_STS::operator()()
 
 avr_op_ST_X::avr_op_ST_X
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     R1((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[26]),
-Rh((*(core->R))[27])
+    Rh((*(core->R))[27])
 {}
 
 int avr_op_ST_X::operator()() 
@@ -2075,10 +2075,10 @@ int avr_op_ST_X::operator()()
 
 avr_op_ST_X_decr::avr_op_ST_X_decr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     R1((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[26]),
-Rh((*(core->R))[27])
+    Rh((*(core->R))[27])
 {}
 
 int avr_op_ST_X_decr::operator()() 
@@ -2106,10 +2106,10 @@ int avr_op_ST_X_decr::operator()()
 
 avr_op_ST_X_incr::avr_op_ST_X_incr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     R1((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[26]),
-Rh((*(core->R))[27])
+    Rh((*(core->R))[27])
 {}
 
 int avr_op_ST_X_incr::operator()() 
@@ -2132,10 +2132,10 @@ int avr_op_ST_X_incr::operator()()
 
 avr_op_ST_Y_decr::avr_op_ST_Y_decr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     R1((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[28]),
-Rh((*(core->R))[29])
+    Rh((*(core->R))[29])
 {}
 
 int avr_op_ST_Y_decr::operator()() 
@@ -2161,10 +2161,10 @@ int avr_op_ST_Y_decr::operator()()
 
 avr_op_ST_Y_incr::avr_op_ST_Y_incr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     R1((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[28]),
-Rh((*(core->R))[29])
+    Rh((*(core->R))[29])
 {}
 
 int avr_op_ST_Y_incr::operator()() 
@@ -2191,10 +2191,10 @@ int avr_op_ST_Y_incr::operator()()
 
 avr_op_ST_Z_decr::avr_op_ST_Z_decr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0 ),
+    DecodedInstruction(c, get_rd_5(opcode),0 ),
     R1((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[30]),
-Rh((*(core->R))[31])
+    Rh((*(core->R))[31])
 {}
 
 int avr_op_ST_Z_decr::operator()() 
@@ -2223,10 +2223,10 @@ int avr_op_ST_Z_decr::operator()()
 
 avr_op_ST_Z_incr::avr_op_ST_Z_incr
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
+    DecodedInstruction(c, get_rd_5(opcode),0),
     R1((*(core->R))[get_rd_5(opcode)]),
     Rl((*(core->R))[30]),
-Rh((*(core->R))[31])
+    Rh((*(core->R))[31])
 {}
 
 int avr_op_ST_Z_incr::operator()() 
@@ -2254,10 +2254,10 @@ int avr_op_ST_Z_incr::operator()()
 
 avr_op_SUB::avr_op_SUB
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
+    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
     R1((*(core->R))[get_rd_5(opcode)]),
     R2((*(core->R))[get_rr_5(opcode)]),
-status(core->status) 
+    status(core->status) 
 {}
 
 int avr_op_SUB::operator()() 
@@ -2283,10 +2283,10 @@ int avr_op_SUB::operator()()
 
 avr_op_SUBI::avr_op_SUBI
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
+    DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
     R1((*(core->R))[get_rd_4(opcode)]),
     status(core->status) ,
-K(get_K_8(opcode))
+    K(get_K_8(opcode))
 {}
 
 int avr_op_SUBI::operator()() 
@@ -2311,8 +2311,8 @@ int avr_op_SUBI::operator()()
 
 avr_op_SWAP::avr_op_SWAP
 (word opcode, AvrDevice *c):
-DecodedInstruction(c, get_rd_5(opcode),0),
-R1((*(core->R))[get_rd_5(opcode)])
+    DecodedInstruction(c, get_rd_5(opcode),0),
+    R1((*(core->R))[get_rd_5(opcode)])
 {}
 
 int avr_op_SWAP::operator()() 
@@ -2328,8 +2328,8 @@ int avr_op_SWAP::operator()()
 }
 
 avr_op_WDR::avr_op_WDR
-    (word opcode, AvrDevice *c):
-DecodedInstruction(c, 0,0)
+(word opcode, AvrDevice *c):
+    DecodedInstruction(c, 0,0)
 {}
 
 int avr_op_WDR::operator()() 
@@ -2341,8 +2341,8 @@ int avr_op_WDR::operator()()
 }
 
 avr_op_ILLEGAL::avr_op_ILLEGAL
-    (word opcode, AvrDevice *c):
-DecodedInstruction(c, 0,0)
+(word opcode, AvrDevice *c):
+    DecodedInstruction(c, 0,0)
 {}
 
 int avr_op_ILLEGAL::operator()() 

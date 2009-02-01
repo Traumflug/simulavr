@@ -93,7 +93,7 @@ class Socket: public sockstream {
         void Write(const string &s); 
         ssize_t Poll();
 
-        void Write(char *in) {
+        void Write(const char *in) {
             string a(in);
             Write(a);
         }

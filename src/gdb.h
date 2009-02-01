@@ -80,9 +80,9 @@ class GdbServer: public SimulationMember {
         int gdb_read_byte( );
         int hex2nib( char hex );
         void gdb_write( const void *buf, size_t count );
-        char* gdb_last_reply( char *reply );
+        const char* gdb_last_reply( const char *reply );
         void gdb_send_ack( );
-        void gdb_send_reply(  char *reply );
+        void gdb_send_reply( const char *reply );
         void gdb_read_registers( );
         void gdb_write_registers(  char *pkt );
         int gdb_extract_hex_num( char **pkt, char stop );

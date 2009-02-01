@@ -133,7 +133,7 @@ void HWTimer1::TimerCompareAfterCount() {
 	}
 
 
-	if (tcnt1==1 & cntDir==1) { //overflow occured! while leaving 0 upward
+	if ((tcnt1==1) && (cntDir==1)) { //overflow occured! while leaving 0 upward
 		timer01irq->AddFlagToTifr(0x80);	//set TOV1 in TIFR
 	}
 
@@ -332,7 +332,7 @@ unsigned int HWTimer1::CpuCycle(){
 	//
 	if ( icp!=icp_old) { //pin change for capture detected
 		inputCaptureNoiseCnt++;
-		if ( tccr1b&0x80==0 | (inputCaptureNoiseCnt>=4)) {
+		if ( ((tccr1b&0x80)==0) || (inputCaptureNoiseCnt>=4)) {
 			inputCaptureNoiseCnt=0;
 			icp_old=icp;
 

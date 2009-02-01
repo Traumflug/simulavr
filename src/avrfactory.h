@@ -3,6 +3,7 @@
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
  * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2007 Onno Kortmann
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +21,26 @@
  *
  ****************************************************************************
  */
-#include <stdlib.h> //use exit()
-#include <iostream>
-using namespace std;
+#ifndef AVRFACTORY
+#define AVRFACTORY
 
-#include "printable.h"
+#include <string>
 
-void Printable::operator()() {
-    out << "dummy function for operator()() called from Pintable::Printable" << endl;
-    exit(0);
-}
+class AvrDevice;
+
+class AvrFactory {
+ public:
+    /*! Produces an AVR device according to the configuration string.
+      Right now, the configuration string is simply the full name of the AVR
+      device, like AT90S4433 or ATMEGA128.
+      */
+    AvrDevice* makeDevice(const std::string configuration);
+
+    //! Singleton class access. 
+    static AvrFactory& instance();
+ private:
+    AvrFactory();
+};
 
 
+#endif

@@ -47,14 +47,19 @@ class Pin {
         NetInterface *connectedTo;  
     public:
 
-        Pin(const OpenDrain &od); 
+        Pin(const OpenDrain &od);
+
+	/*! Possible PIN states.
+	  \warning Please do not change the order of these values without
+	  thinking twice, as for example the simulavrxx VPI interface depends
+	  on this/exports this to verilog. */
         typedef enum {
-            SHORTED,
+            LOW,
             HIGH,
+            SHORTED,
             PULLUP,
             TRISTATE,
             PULLDOWN,
-            LOW,
             ANALOG,
             ANALOG_SHORTED
         }T_Pinstate;
@@ -96,7 +101,7 @@ class ExtPin : public Pin, public ExternalType {
 
     public:
         void SetNewValueFromUi(const string &);
-        ExtPin(T_Pinstate, UserInterface *, char *_extName, char *baseWindow); 
+        ExtPin(T_Pinstate, UserInterface *, const char *_extName, const char *baseWindow); 
         //Pin &operator= (unsigned char);
 
         void SetInState(const Pin& p);
@@ -109,7 +114,7 @@ class ExtAnalogPin : public Pin, public ExternalType {
 
     public:
         void SetNewValueFromUi(const string &);
-        ExtAnalogPin(unsigned int startval, UserInterface *, char *_extName, char* baseWindow); 
+        ExtAnalogPin(unsigned int startval, UserInterface *, const char *_extName, const char* baseWindow); 
         //Pin &operator= (unsigned char);
 
         void SetInState(const Pin& p);

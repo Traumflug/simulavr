@@ -49,7 +49,7 @@ class Scope : public SimulationMember {
 
 
     public:
-        Scope(UserInterface *ui, const string &name, unsigned int noOfChannels, char *baseWindow);
+        Scope(UserInterface *ui, const string &name, unsigned int noOfChannels, const char *baseWindow);
         virtual ~Scope();
         Pin *GetPin(unsigned int no); 
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){return 0;} //what we should step here?
