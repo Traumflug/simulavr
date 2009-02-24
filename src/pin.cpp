@@ -22,6 +22,7 @@
  */
 
 #include <stdlib.h> // use atoi
+#include <limits.h> // for INT_MAX
 
 #include "pin.h"
 #include "net.h"
