@@ -74,7 +74,7 @@ int avr_op_ASR::Trace( ) {
     return ret;
 }
 
-char *opcodes_bclr[8]= {
+const char *opcodes_bclr[8]= {
     "CLC",
     "CLZ",
     "CLN",
@@ -98,7 +98,7 @@ int avr_op_BLD::Trace( ) {
     return ret;
 }
 
-char *branch_opcodes_clear[8] = {
+const char *branch_opcodes_clear[8] = {
     "BRCC",
     "BRNE",
     "BRPL",
@@ -120,7 +120,7 @@ int avr_op_BRBC::Trace( ) {
     return ret;
 }
 
-char *branch_opcodes_set[8] = {
+const char *branch_opcodes_set[8] = {
     "BRCS",
     "BREQ",
     "BRMO",
@@ -142,7 +142,7 @@ int avr_op_BRBS::Trace( ) {
     return ret;
 }
 
-char *opcodes_bset[8]= {
+const char *opcodes_bset[8]= {
     "SEC",
     "SEZ",
     "SEN",
