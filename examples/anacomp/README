@@ -7,20 +7,27 @@ and
 make dogdb
 
 do:
-make check start a simple gui and enable the user to enter new analog
-values to the entry fields. You must press the update button!
-And "->B0" give the output state of the Port B 0 pin. The 
-simple application main.c will only use the analog comparator
-and set the pib B0 the the value which is the result from analog
-comparison!
+Executing "make do" starts a simple gui and enables the user to enter
+analog values (0 .. MAX_INT) in the input fields. After entering a new
+analog value in ain0 or ain1, you must press the update button!  
+
+At this point, the output of the analog comparator will be used to
+determine the output state of the "->B0" field.   "->B0" displays
+the start of the Port B 0 pin.  Its value is determined by the
+following logic
+
+if ain0 >  ain1  B0 = H(igh)
+if ain0 == ain1  B0 = L(ow)
+if ain0 <  ain1  B0 = L(ow)
 
 dogdb:
 starts also the ddd graphical interface to avr-gdb which will then
 connected to simulavr. After the gui from ddd is available and all
-files loaded the avr programm can be started with the cont button.
+files loaded the avr program can be started with the "cont" button.
 The breakpoint inside main stops the program flow and you can step/next
 to the programm. The gui.tcl enables you to give new analog values to
-the ain0 and ain1 pins so you can observe the comparator action.
+the ain0 and ain1 pins so you can observe the comparator action as
+described above.
 
 
 
