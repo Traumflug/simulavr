@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
             {"trace", 1, 0, 't'},
             {"version",0,0,'v'},
             {"nogdbwait",0,0,'n'},
-            {"cpufrequence", 1,0,'F'},
+            {"cpufrequency", 1,0,'F'},
             {"readfrompipe", 1,0,'R'},
             {"writetopipe", 1,0,'W'},
             {"verbose", 0,0,'V'},
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
 
             case 'F':
                 fcpu=strtoll(optarg, NULL, 10);
-                if (global_verbose_on) cout << "Running with CPU frequence: " << fcpu<<endl;
+                if (global_verbose_on) cout << "Running with CPU frequency: " << fcpu<<endl;
                 break;
 
             case 'u':
@@ -184,12 +184,12 @@ int main(int argc, char *argv[]) {
                 cout << "-u                           run with user interface for external pin handling at port 7777" << endl;
                 cout << "-f --file <name>             load elf-file <name> for simulation in simulated target" << endl; 
                 cout << "-d --device <device name>    simulate <device name> " << endl;
-                cout << "-g --gdbserver               running as gdb-server" << endl;
-                cout << "-G                           running as gdb-server and write debug info for gdb-connection" << endl;                             
-                cout << "-p  <port>                   change <port> for gdb server to port" << endl;
-                cout << "-t --trace <file name>       enable trace outputs into <file name>" << endl;
+                cout << "-g --gdbserver               run as gdb-server" << endl;
+                cout << "-G                           run as gdb-server and write debug info for gdb-connection" << endl;                             
+                cout << "-p  <port>                   us <port> for gdb server" << endl;
+                cout << "-t --trace <file name>       enable trace outputs to <file name>" << endl;
                 cout << "-n --nogdbwait               do not wait for gdb connection" << endl;
-                cout << "-F --cpufrequence            set the cpu frequence to <Hz> " << endl;
+                cout << "-F --cpufrequency            set the cpu frequency to <Hz> " << endl;
                 cout << "-W --writetopipe <offset>,<file> add a special pipe register to device at IO-Offset and opens <file> for writing" << endl;            
                 cout << "-R --readfrompipe <offset>,<file> add a special pipe register to device at IO-offset and opens <file> for reading" << endl;            
                 cout << "-V --verbose                 output some hints to console" << endl;

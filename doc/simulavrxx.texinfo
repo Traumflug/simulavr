@@ -142,13 +142,25 @@ at90s8515
 at90s4433
 atmega128
 @item -g --gdbserver
-running as gdb-server
+run as gdb-server
 @item -G
-running as gdb-server and write debug info for gdb-connection
+run as gdb-server and write debug info for gdb-connection
 @item -p  <port>
 change <port> for gdb server to port
 @item -t --trace <file name>
 enable trace outputs into <file name>
+@item -n --nogdbwait
+do not wait for gdb connection
+@item -F --cpufrequency
+set the cpu frequence to <Hz> 
+@item -R --readfrompipe <offset>,<file>
+add a special pipe register to device at IO-offset and opens <file> for reading
+@item -W --writetopipe <offset>,<file>
+add a special pipe register to device at IO-Offset and opens <file> for writing
+@item -V --verbose
+output some hints to console
+@item -T --terminate <label> or <address>
+stops simulation if PC runs on <label> or <address>
 @end table
 
 @node Using with GDB, Tracing, Invoking, Top
