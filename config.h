@@ -1,17 +1,11 @@
-#define ZUHAUSE
-
 #define PRG_WISH "/usr/bin/wish"
-#ifndef ZUHAUSE
-#define BFD_H "/home/rudolphk/work/binutils-2.17_avr/bfd/bfd.h"
-#else
-#define BFD_H "/home/zfrdh/work/binutils-2.17_avr/bfd/bfd.h"
-#endif
+#define BFD_H "/home/zfrdh/work/binutils-2.19/build_avr/bfd/bfd.h"
 #define VERSION "0.0000001 local version "
 
 #ifdef __DO_NOT_USE_FROM_C_CODE
 
 #if swig is available 
-all: simulavr simulavr.so avr.vpi
+all: simulavr simulavr.so  #avr.vpi
 #else  swig is not availabe
 #all: simulavr 
 #endif
@@ -27,9 +21,10 @@ CXX=ccache g++
 TCL_VERSION=8.4 
 #TCL_VERSION=
 
-#ifndef ZUHAUSE
-#BFD= /home/rudolphk/work/binutils-2.17_avr
-#else
-BFD= /home/zfrdh/work/binutils-2.17_avr
-#endif
+BFD= /home/zfrdh/work/binutils-2.19/build_avr
+
+#HAVE_GEDA=yes
+HAVE_GEDA=no
+GEDA=/home/zfrdh/geda-install/
+ADD_LIBS=/usr/lib/libz.a
 #endif
