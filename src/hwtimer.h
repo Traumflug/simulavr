@@ -98,6 +98,11 @@ class HWTimer1 : public Hardware {
 		unsigned char tccr1a;
 		unsigned char tccr1b;
 
+		/* FIXME: According to the datasheets,
+		   there is only ONE temporary 16bit
+		   register in the AVR architecture. Combine all
+		   the various 16bit registers into one! */
+		
 		unsigned short tcnt1;
 		unsigned char tcnt1htemp;
 
@@ -164,13 +169,13 @@ class HWTimer1 : public Hardware {
 		unsigned char GetTccr1b() { return tccr1b;}
 
 		unsigned char GetTcnt1h() { return tcnt1htemp;}
-		unsigned char GetTcnt1l() { return tcnt1&0xff; tcnt1htemp=tcnt1>>8;}
+		unsigned char GetTcnt1l() { tcnt1htemp=tcnt1>>8; return tcnt1&0xff;}
 		unsigned char GetOcr1ah() { return ocr1a>>8;}
 		unsigned char GetOcr1al() { return ocr1a&0xff;}
 		unsigned char GetOcr1bh() { return ocr1b>>8;}
 		unsigned char GetOcr1bl() { return ocr1b&0xff;}
 		unsigned char GetIcr1h() { return icr1htemp;}
-		unsigned char GetIcr1l() { return icr1&0xff; icr1htemp=icr1>>8;}
+		unsigned char GetIcr1l() { icr1htemp=icr1>>8; return icr1&0xff;}
 
 		void SetTccr1a(unsigned char val);
 		void SetTccr1b(unsigned char val); // { tccr1b=val;}
