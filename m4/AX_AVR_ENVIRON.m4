@@ -50,6 +50,8 @@ fi
 if test "x${with_libiberty_path}" = "xcheck";
 then
    AX_TEST_LIBIBERTY([$(dirname $(which ${AVR_AS}))/../lib/libiberty.a])
+else
+   AX_TEST_LIBIBERTY($with_libiberty_path)
 fi
 
 AC_SUBST([AVR_AS])
