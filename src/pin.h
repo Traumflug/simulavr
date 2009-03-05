@@ -39,101 +39,106 @@ class UserInterface;
 class Hardware;
 
 class Pin {
-    protected:
-        unsigned char *pinOfPort; //points to HWPort::pin or 0L
-        unsigned char mask;
-        int analogValue;
+   protected:
+      unsigned char *pinOfPort; //points to HWPort::pin or 0L
+      unsigned char mask;
+      int analogValue;
 
-        NetInterface *connectedTo;  
-    public:
+      NetInterface *connectedTo;
 
-        Pin(const OpenDrain &od);
+      /*! iff mynet is true, the NetInterface connectedTo belongs to this
+      PIN and must be memory-managed by this PIN! */
+      bool myNet;
+   public:
 
-	/*! Possible PIN states.
-	  \warning Please do not change the order of these values without
-	  thinking twice, as for example the simulavrxx VPI interface depends
-	  on this/exports this to verilog. */
-        typedef enum {
-            LOW,
-            HIGH,
-            SHORTED,
-            PULLUP,
-            TRISTATE,
-            PULLDOWN,
-            ANALOG,
-            ANALOG_SHORTED
-        }T_Pinstate;
+      Pin(const OpenDrain &od);
 
-        T_Pinstate outState;
-        vector<HasPinNotifyFunction*> notifyList;
+      /*! Possible PIN states.
+      \warning Please do not change the order of these values without
+      thinking twice, as for example the simulavrxx VPI interface depends
+      on this/exports this to verilog. */
+      typedef enum {
+         LOW,
+         HIGH,
+         SHORTED,
+         PULLUP,
+         TRISTATE,
+         PULLDOWN,
+         ANALOG,
+         ANALOG_SHORTED
+      }T_Pinstate;
 
-    public:
-        void SetOutState( T_Pinstate s);
-        virtual void SetInState ( const Pin &p);
+      T_Pinstate outState;
+      vector<HasPinNotifyFunction*> notifyList;
 
-        Pin(T_Pinstate ps);
-        Pin();
-        Pin( unsigned char *parentPin, unsigned char mask); 
+   public:
+      void SetOutState( T_Pinstate s);
+      virtual void SetInState ( const Pin &p);
+
+      Pin(T_Pinstate ps);
+      Pin();
+      Pin( unsigned char *parentPin, unsigned char mask); 
 #ifndef SWIG
-        operator unsigned char() const;
-        virtual Pin &operator= (unsigned char);
-        virtual operator bool() const;
-        virtual Pin operator+ (const Pin& p);
-        virtual Pin operator+= (const Pin& p);
+      operator unsigned char() const;
+      virtual Pin &operator= (unsigned char);
+      virtual operator bool() const;
+      virtual Pin operator+ (const Pin& p);
+      virtual Pin operator+= (const Pin& p);
 #endif
-        virtual void RegisterNet(Net *n);
-        virtual Pin GetPin() { return *this;}
-        virtual ~Pin(){}
-        //T_Pinstate GetOutState();
-        int GetAnalog() const;
-        void RegisterCallback( HasPinNotifyFunction *);
+      virtual void RegisterNet(Net *n);
+      virtual Pin GetPin() { return *this;}
+      virtual ~Pin();
+      //T_Pinstate GetOutState();
+      int GetAnalog() const;
+      void RegisterCallback( HasPinNotifyFunction *);
 
 
-        friend class HWPort;
-        friend class Net;
+      friend class HWPort;
+      friend class Net;
 
 };
 
+
 class ExtPin : public Pin, public ExternalType {
-    protected:
-        UserInterface *ui;
-        string extName;
+   protected:
+      UserInterface *ui;
+      string extName;
 
-    public:
-        void SetNewValueFromUi(const string &);
-        ExtPin(T_Pinstate, UserInterface *, const char *_extName, const char *baseWindow); 
-        //Pin &operator= (unsigned char);
+   public:
+      void SetNewValueFromUi(const string &);
+      ExtPin(T_Pinstate, UserInterface *, const char *_extName, const char *baseWindow); 
+      //Pin &operator= (unsigned char);
 
-        void SetInState(const Pin& p);
+      void SetInState(const Pin& p);
 };
 
 class ExtAnalogPin : public Pin, public ExternalType {
-    protected:
-        UserInterface *ui;
-        string extName;
+   protected:
+      UserInterface *ui;
+      string extName;
 
-    public:
-        void SetNewValueFromUi(const string &);
-        ExtAnalogPin(unsigned int startval, UserInterface *, const char *_extName, const char* baseWindow); 
-        //Pin &operator= (unsigned char);
+   public:
+      void SetNewValueFromUi(const string &);
+      ExtAnalogPin(unsigned int startval, UserInterface *, const char *_extName, const char* baseWindow); 
+      //Pin &operator= (unsigned char);
 
-        void SetInState(const Pin& p);
+      void SetInState(const Pin& p);
 };
 
 class OpenDrain: public Pin {
-    protected:
-        Pin *pin;
+   protected:
+      Pin *pin;
 
-    public:
-        OpenDrain(Pin *p) { pin=p;}
+   public:
+      OpenDrain(Pin *p) { pin=p;}
 #ifndef SWIG
-        virtual operator bool() const;
-        virtual Pin operator+ (const Pin& p);
-        virtual Pin operator+= (const Pin& p);
+      virtual operator bool() const;
+      virtual Pin operator+ (const Pin& p);
+      virtual Pin operator+= (const Pin& p);
 #endif
-        virtual Pin GetPin();
-        void RegisterNet(Net *n) { pin->RegisterNet(n);}
-        virtual ~OpenDrain() {}
+      virtual Pin GetPin();
+      void RegisterNet(Net *n) { pin->RegisterNet(n);}
+      virtual ~OpenDrain() {}
 };
 
 #endif
