@@ -15,13 +15,13 @@ AC_CHECK_PROG(NATIVE_NM, nm, nm)
 
 dnl Let's handle user-provided flags first.
 AC_ARG_WITH([bfd-path],
-        [AS_HELP_STRING([--with-bfd=path  location of AVR-binutils version of libbfd install where include/bfd.h and lib/libbfd.a are found (from binutils)])],
+        [AS_HELP_STRING([--with-bfd-path=path  location of AVR-binutils version of libbfd install where include/bfd.h and lib/libbfd.a are found (from binutils)])],
         [],
         [with_bfd_path=check])
 AC_MSG_RESULT([with_bfd_path = $with_bfd_path])
 
 AC_ARG_WITH([libiberty-path],
-        [AS_HELP_STRING([--with-libiberty=path  location of libiberty(from binutils)])],
+        [AS_HELP_STRING([--with-libiberty-path=path  location of libiberty(from binutils)])],
         [],
         [with_libiberty_path=check])
 AC_MSG_RESULT([with_libiberty_path = $with_libiberty_path])
