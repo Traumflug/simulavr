@@ -82,8 +82,8 @@ class AvrDevice: public SimulationMember {
         vector<Hardware *> hwResetList; 
         vector<Hardware *> hwCycleList; 
 
-        void AddToResetList(Hardware *hw){ hwResetList.push_back(hw) ; }
-        void AddToCycleList(Hardware *hw){ hwCycleList.push_back(hw) ; }
+        void AddToResetList(Hardware *hw);
+        void AddToCycleList(Hardware *hw);
         void RemoveFromCycleList(Hardware *hw);
         void Load(const char* n);
         void ReplaceIoRegister(unsigned int offset, RWMemoryMembers *);
