@@ -1,8 +1,13 @@
+#
+#  $Id$
+#
+
 AVR_LIBBFD_LIB=@AVR_LIBBFD_LIB@
 AVR_LIBBFD_INC=@AVR_LIBBFD_INC@
+SWIG=@SWIG@
 PYTHON_CPPFLAGS=@PYTHON_CPPFLAGS@
 
-AM_CXXFLAGS=-I$(AVR_LIBBFD_INC)
+AM_CXXFLAGS=-I$(AVR_LIBBFD_INC) ## -static
 
 AVR_LIBIBERTY_LIB=@AVR_LIBIBERTY_LIB@
 
@@ -13,16 +18,22 @@ endif
 endif
 
 bin_PROGRAMS    = simulavr kbdgentables
+lib_LTLIBRARIES	= libsimulavr.la
 
-lib_LTLIBRARIES	= libavrsim_pp.la
+if USE_TCL
+TCL_WRAP_SRC = simulavr_wrap.cxx
+TCL_LIB      = -ltcl
+endif
 
-libavrsim_pp_la_SOURCES	= 	\
+libsimulavr_la_SOURCES	= 	\
+	$(TCL_WRAP_SRC)         \
 	application.cpp 	\
 	at4433.cpp		\
 	at8515.cpp		\
 	atmega128.cpp		\
 	avrdevice.cpp		\
 	avrerror.cpp		\
+	avrfactory.cpp		\
 	avrmalloc.cpp		\
 	decoder.cpp		\
 	decoder_trace.cpp 	\
@@ -62,10 +73,11 @@ libavrsim_pp_la_SOURCES	= 	\
 	systemclock.cpp		\
 	trace.cpp		\
 	ui.cpp 			
-libavrsim_pp_la_LDFLAGS = -version-info 0:0:0
+libsimulavr_la_LDFLAGS = -version-info 0:0:0 
+libsimulavr_la_LDFLAGS += --start-group -lz $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB) --end-group
 
 pkginclude_HEADERS = 	\
-	application.h \
+	application.h 		\
 	at4433.h		\
 	at8515.h		\
 	atmega128.h		\
@@ -124,7 +136,16 @@ pkginclude_HEADERS = 	\
 
 simulavr_SOURCES = main.cpp
 
-simulavr_LDADD = libavrsim_pp.la $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB)
+simulavr_LDADD = libsimulavr.la $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB) \
+   -lz $(TCL_LIB)
+
+TCLHEADER= serialtx.h serialrx.h avrdevice.h at8515.h atmega128.h \
+    at4433.h systemclock.h ui.h hardware.h pin.h net.h trace.h gdb.h lcd.h 
+
+simulavr_wrap.cxx: simulavr.i $(TCLHEADER)
+	@SWIG@ -c++ simulavr.i
+
+simulavr_wrap.o: simulavr_wrap.cxx
 
 $(srcdir)/keyboard.cpp : keytrans.h 
 
@@ -135,7 +156,7 @@ keytrans.h: kbdgentables keynumber_to_scancode.dat xcode_to_keynumber.dat
 
 # Python bindings
 _pysimulavr.so: pysimulavr_wrap.cpp simulavr
-	$(CXX) -I$(srcdir) $(PYTHON_CPPFLAGS) $< $(patsubst %.lo,%.o,$(libavrsim_pp_la_OBJECTS)) $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB)  -lc -lm -lncurses -shared -o $@ $(NonPortableDarwin_GXX_Flags)
+	$(CXX) -I$(srcdir) $(PYTHON_CPPFLAGS) $< $(patsubst %.lo,%.o,$(libsimulavr_la_OBJECTS)) $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB)  -lc -lm -lncurses -shared -o $@ $(NonPortableDarwin_GXX_Flags)
 
 pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
 	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_CPPFLAGS) -o $@ $?

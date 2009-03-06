@@ -2,8 +2,8 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
- * 
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -33,6 +33,15 @@
 #include "ui.h"
 #include "pin.h"
 
+typedef enum {
+        IDLE,
+        POWER_ON,     // First State after Reset
+        PWR_AFTER_FS1,// After first Function Set Cmd no Busy Flag
+        PWR_AFTER_FS2,// After second Function Set Cmd no Busy Flag
+        PWR_ON_FINISH,// After third Function Set Cmd no Busy Flag. After the next CMD BF is valid
+        CMDEXEC       // Executing any command after init
+    } t_myState;
+
 
 class Lcd : public SimulationMember {
     protected:
@@ -49,15 +58,18 @@ class Lcd : public SimulationMember {
         Pin readWrite;
         Pin commandData;
 
+        unsigned int CmdExecTime_ns; // Command Execution Time
+        t_myState myState;           // LCD State-Event machine
+        char      myd3;              // internal D3
 
 
         int merke_x;
         int merke_y;
 
         void LcdWriteData(unsigned char data);
-        void LcdWriteCommand(unsigned char command);
+        unsigned int  LcdWriteCommand(unsigned char command);
 
-        //ofstream debugOut;
+        ofstream debugOut;
         void SendCursorPosition();
 
         unsigned char lastPortValue;
@@ -70,7 +82,7 @@ class Lcd : public SimulationMember {
         //Lcd(UserInterface *ui, const string &name, const string &baseWindow);
         Lcd(UserInterface *ui, const char *name, const char *baseWindow);
         virtual ~Lcd();
-        Pin *GetPin(const char *name); 
+        Pin *GetPin(const char *name);
 
 };
 

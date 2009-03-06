@@ -1,11 +1,14 @@
+#
+#  $Id$
+#
+
 AVR_GCC=@AVR_GCC@
-PYTHON = python
+PYTHON=@PYTHON@
 
-MAINTAINERCLEANFILES 	= Makefile.in
+noinst_DATA = anacomp
 
-pkginclude_HEADERS = 
+CLEANFILES = anacomp anacomp.o
 
-EXTRA_DIST           = main.c
 do: anacomp
 	$(TCL_WISH) check.tcl
 

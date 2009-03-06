@@ -1,4 +1,7 @@
-#!/usr/bin/wish
+#! @TCL_WISH@
+#
+#  $Id$
+#
 
 package require Itcl
 namespace import itcl::*

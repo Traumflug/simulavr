@@ -1,3 +1,92 @@
+2009-03-06	Klaus Rudolph <lts-rudolph@gmx.de>
+
+	* src/lcd.cpp: bugfix: char output conversion
+
+2009-03-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* VERSION: Updated to simulavrxx-20090305a.
+
+2009-03-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* release_support: New file.
+
+2009-03-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* VERSION: Updated to simulavrxx-20090305.
+
+2009-03-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* SUPPORT, VERSION: New files.
+
+2009-03-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* bootstrap, configure.ac, src/Makefile.am: Add configure argument
+	--disable-tcl and attempt to detect if tcl.h is not available. If it
+	is not available, then
+	* m4/enable-tcl.m4: New file.
+
+2009-03-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* bootstrap: Enhance to include bootstrap cleanand help from command
+	line. Fragments from RTEMS bootstrap.
+
+2009-03-04 Onno Kortmann <onno@gmx.net>
+
+	* src/hwtimer.h, bugfix: 16 bit register handling	(P0005)
+
+
+2009-03-04 Onno Kortmann <onno@gmx.net>
+
+	* m4/AX_AVR_ENVIRON.m4: fix for libiberty detection	(P0002)
+
+2009-03-04 Onno Kortmann <onno@gmx.net>
+
+	* m4/AX_AVR_ENVIRON.m4, src/at4433.cpp: correct some typos (P0001)
+
+2009-03-03	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/Makefile, src/lcd.cpp, src/lcd.h: Fix spelling error.
+
+2009-03-03	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac, src/Makefile: Add DDD_WITH_ARGS so we are not invoking
+	ddd when it does not exist.
+
+2009-03-03	Knut Schwichtenberg <kschwi@web.de>
+
+	* doc/simulavrxx.texinfo: Improve documentation.
+
+2009-03-03	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* README: Improve.
+
+2009-03-03	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* Makefile.am, configure.ac, regress/Makefile.am, src/Makefile: make
+	check now runs the regression suite. Merved contents of config into
+	m4 so autoconf macros were in one place. Add more .cvsignores now
+	that we have more output.
+	* m4/README, m4/avr_local.m4, m4/avr_python.m4, m4/avr_swig.m4,
+	m4/avr_tcl.m4, regress/.cvsignore, regress/modules/.cvsignore,
+	regress/test_opcodes/.cvsignore: New files.
+	* config/README, config/avr_local.m4, config/avr_python.m4,
+	config/avr_swig.m4, config/avr_tcl.m4: Removed.
+
+2009-03-03	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* ChangeLog, Makefile.am, README.gdb, configure.ac, doc/Makefile.am,
+	doc/version.texi, examples/Makefile.am, examples/gui.tcl.in,
+	examples/anacomp/Makefile.am, examples/anacomp/check.tcl.in,
+	examples/anacomp/checkdebug.tcl.in, examples/simple_ex1/Makefile.am,
+	m4/AX_AVR_ENVIRON.m4, regress/Makefile.am,
+	regress/modules/Makefile.am, regress/test_opcodes/Makefile.am,
+	src/Makefile, src/Makefile.am: Make the autoconf/make build structure
+	work. Add .cvsignore files.
+	* .cvsignore, ChangeLog-CVS, doc/.cvsignore, examples/.cvsignore,
+	examples/anacomp/.cvsignore, examples/simple_ex1/.cvsignore,
+	src/.cvsignore: New files.
+
+
 2006-03-02    <rivetwa@member.fsf.org>
 
 	* Makefile.am (CONFIG_SUBDIR_NAME): removed doc subdirectory. This
@@ -15,79 +104,79 @@
 	the bug #14791. 
 
 2005-10-23 <lts-rudolph@gmx.de>
-    *src/hwextirq.cpp
-    *src/atmega128.cpp
+	* src/hwextirq.cpp
+	* src/atmega128.cpp
 
-    bugfix watchdog in mega128, thanks Mike! #4509 patch added
-    bugfix for extirq (INT1), bug found from Lars Noschinski, Thanks!
+	bugfix watchdog in mega128, thanks Mike! #4509 patch added
+	bugfix for extirq (INT1), bug found from Lars Noschinski, Thanks!
 
 
 2005-07-25 <lts-rudolph@gmx.de>
-    *src/hwuart.cpp
-    *src/serialrx.cpp
-    *src/serialrx.h
-    *src/serialtx.cpp
-    *src/serialtx.h
+	* src/hwuart.cpp
+	* src/serialrx.cpp
+	* src/serialrx.h
+	* src/serialtx.cpp
+	* src/serialtx.h
 
-    bugfix for my changes in #4147-4152
-    thanks to Artur Abels for very fast review
+	bugfix for my changes in #4147-4152
+	thanks to Artur Abels for very fast review
 
 2005-07-18 <lts-rudolph@gmx.de>
-    *src/decoder.h
-    *src/externaltype.h
-    *src/funktor.h
-    *src/hwmegatimer.h
-    *src/hwuart.cpp
-    *src/net.cpp
-    *src/net.h
-    *src/pin.cpp
-    *src/pin.h
-    *src/pinnotify.h
-    *src/rwmem.h
-    *src/serialrx.cpp
-    *src/serialrx.h
-    *src/serialtx.cpp
-    *src/serialtx.h
-    *src/simulationmember.h
+	* src/decoder.h
+	* src/externaltype.h
+	* src/funktor.h
+	* src/hwmegatimer.h
+	* src/hwuart.cpp
+	* src/net.cpp
+	* src/net.h
+	* src/pin.cpp
+	* src/pin.h
+	* src/pinnotify.h
+	* src/rwmem.h
+	* src/serialrx.cpp
+	* src/serialrx.h
+	* src/serialtx.cpp
+	* src/serialtx.h
+	* src/simulationmember.h
 
-    adding all patches from #4147-4152 with minor changes
-    thanks to Artur Abels!
+	adding all patches from #4147-4152 with minor changes
+	thanks to Artur Abels!
 
 2005-05-22 <lts-rudolph@mx.de>
-    * src/avrdevice.cpp 
-    * src/avrdevice.h 
-    * src/main.cpp 
-    * src/rwmem.cpp 
-    * src/rwmem.h
-    * src/simulavr.i 
-    * src/at8515special.cpp (deleted)
-    * src/at8515special.h (deleted)
+	* src/avrdevice.cpp 
+	* src/avrdevice.h 
+	* src/main.cpp 
+	* src/rwmem.cpp 
+	* src/rwmem.h
+	* src/simulavr.i 
+	* src/at8515special.cpp (deleted)
+	* src/at8515special.h (deleted)
 
-    the old at8515special devices which have a hard coded file name to write 
-    into a file are replaced by a more generic solution. Any core could
-    be expanded by an RWReadFromPipe or RWWriteToPipe special register.
-    For details look inside rwmem.h or main.h for an example.
-    
+	the old at8515special devices which have a hard coded file name to write 
+	into a file are replaced by a more generic solution. Any core could
+	be expanded by an RWReadFromPipe or RWWriteToPipe special register.
+	For details look inside rwmem.h or main.h for an example.
+
 2005-05-16 <lts-rudolph@gmx.de>
-    *src/avrdevice.cpp: Bugfix: rawsize -> size
+	* src/avrdevice.cpp: Bugfix: rawsize -> size
 
-    *src/<nearly all files>: Bugfix: RWMemoryMembers constructor
-    inits now 'core', needed for all traces
+	* src/<nearly all files>: Bugfix: RWMemoryMembers constructor
+	inits now 'core', needed for all traces
 
-    *src/<some files>: Remove trace outputs if tracing
-                       is not enabled
+	* src/<some files>: Remove trace outputs if tracing
+	is not enabled
 
-    *src/hwuart.cpp: Bugfix: clear UDRE irq by writing UDR
-                     Bugfix: only init HWUsart once (parent
-                             allready inits the usart
+	* src/hwuart.cpp: Bugfix: clear UDRE irq by writing UDR
+	Bugfix: only init HWUsart once (parent
+	allready inits the usart
 
-                     Bugfix: irq handling in usart
+	Bugfix: irq handling in usart
 
-     Thanks to Jakob Schwendner for the bugreports in u(s)art!                
+	Thanks to Jakob Schwendner for the bugreports in u(s)art!                
 
 2005-03-13 <lts-rudolph@gmx.de>
-    * src/avrdevice.cpp: Bugfix: _cooked_size -> rawsize
-    Bug #12295 fixed
+	* src/avrdevice.cpp: Bugfix: _cooked_size -> rawsize
+	Bug #12295 fixed
 
 2005-03-03    <no.mail@please.com>
 
@@ -150,28 +239,28 @@
 	* Cleaned up macro quoting.
 
 2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
-    Add additional debug output in case of termination 
-    * src/avrdevice.cpp 
+	Add additional debug output in case of termination 
+	* src/avrdevice.cpp 
 
 2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
-    Bugfix: PC now has only as many bits as needed for flash size
-    * src/decoder.cpp 
+	Bugfix: PC now has only as many bits as needed for flash size
+	* src/decoder.cpp 
 
 2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
-    remove old unused source lines
-    * src/flash.cpp 
+	remove old unused source lines
+	* src/flash.cpp 
 
 2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
-    Bugfix: systemclocktypes was unknown to simulavr.so
-    * src/simulavr.i
+	Bugfix: systemclocktypes was unknown to simulavr.so
+	* src/simulavr.i
 
 2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
-    adding usart to atmega128, not complete: synchronos mode missing
-    double/tripple rx buffer missing
-    * src/atmega128.cpp 
-    * src/atmega128.h 
-    * src/hwuart.cpp 
-    * src/hwuart.h
+	adding usart to atmega128, not complete: synchronos mode missing
+	double/tripple rx buffer missing
+	* src/atmega128.cpp 
+	* src/atmega128.h 
+	* src/hwuart.cpp 
+	* src/hwuart.h
 
 2004-12-24    <rivetwa@member.fsf.org>
 
@@ -180,43 +269,43 @@
 	cleaned up???)
 
 2004-12-24  Klaus Rudolph  <lts-rudolph@gmx.de>
-    Cleanup for swig warnings
-    * src/avrdevice.h 
-    * src/main.cpp
-    * src/mysocket.h
-    * src/net.h
-    * src/pin.h
-    * src/serialtx.h
-    * src/simulavr.i
-    * src/systemclock.h
+	Cleanup for swig warnings
+	* src/avrdevice.h 
+	* src/main.cpp
+	* src/mysocket.h
+	* src/net.h
+	* src/pin.h
+	* src/serialtx.h
+	* src/simulavr.i
+	* src/systemclock.h
 
 2004-12-23(2)  Klaus Rudolph  <lts-rudolph@gmx.de> 
 
-    Remove private testcode
-    * main.cpp
-    * main3.cpp removed!
-    * Makefile.am
+	Remove private testcode
+	* main.cpp
+	* main3.cpp removed!
+	* Makefile.am
 
 2004-12-23  Klaus Rudolph  <lts-rudolph@gmx.de>
 
 	First version of Change log, not of simulavrxx :-)
-    * ChangeLog 
-    * INSTALL
-    * AUTHORS
+	* ChangeLog 
+	* INSTALL
+	* AUTHORS
 
-    Bugfix: Simulation terminates or runs in trouble after internal
-    time exceeds "long" variable. Fixed: use long long
-    * src/avrdevice.cpp 
-    * src/avrdevice.h 
-    * src/hwwado.cpp 
-    * src/hwwado.h 
-    * src/irqsystem.h 
-    * src/keyboard.cpp 
-    * src/keyboard.h 
-    * src/main3.cpp 
-    * src/main.cpp 
-    * src/systemclock.cpp 
-    * src/systemclock.h 
-    * src/trace.cpp 
-    * src/trace.h 
+	Bugfix: Simulation terminates or runs in trouble after internal
+	time exceeds "long" variable. Fixed: use long long
+	* src/avrdevice.cpp 
+	* src/avrdevice.h 
+	* src/hwwado.cpp 
+	* src/hwwado.h 
+	* src/irqsystem.h 
+	* src/keyboard.cpp 
+	* src/keyboard.h 
+	* src/main3.cpp 
+	* src/main.cpp 
+	* src/systemclock.cpp 
+	* src/systemclock.h 
+	* src/trace.cpp 
+	* src/trace.h 
 

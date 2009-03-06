@@ -1,0 +1,33 @@
+2009-03-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* Makefile.am: Add configure argument --disable-tcl and attempt to
+	detect if tcl.h is not available. If it is not available, then
+
+2009-03-04	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* stdiodemo/README: Move non-autoconf Makefiles to Makefile.notauto so
+	it is VERY clear.
+	* atmel_key/README, stdiodemo/.cvsignore: New files.
+
+2009-03-03	Knut Schwichtenberg <kschwi@web.de>
+
+	* atmel_key/AppNotePCATKeyboardInterface.pdf, atmel_key/Makefile.am,
+	atmel_key/Notes.txt, atmel_key/StdDefs.c, atmel_key/StdDefs.h,
+	atmel_key/checkdebug.gdb, atmel_key/debug.gdb, atmel_key/kb.c,
+	atmel_key/kb.h, atmel_key/kbd.xbm, atmel_key/main.c,
+	atmel_key/pindefs.h, atmel_key/scancodes.h, atmel_key/serial.c,
+	atmel_key/serial.h: New files.
+
+2009-03-03	Knut Schwichtenberg <kschwi@web.de>
+
+	* anacomp/.cvsignore, anacomp/checkdebug.tcl.in: Merge stdiodemo
+	example. Use DDD_WITH_ARGS to avoid invoking ddd when it
+	* ChangeLog, anacomp/checkdebug.gdb, stdiodemo/Makefile.am,
+	stdiodemo/README, stdiodemo/checkdebug.gdb,
+	stdiodemo/checkdebug.tcl.in, stdiodemo/defines.h,
+	stdiodemo/hd44780.c, stdiodemo/hd44780.h, stdiodemo/lcd.c,
+	stdiodemo/lcd.h, stdiodemo/stdiodemo-setup.jpg,
+	stdiodemo/stdiodemo.c, stdiodemo/stdiodemo.dox, stdiodemo/uart.c,
+	stdiodemo/uart.h: New files.
+	* anacomp/checkdebug.gdb.in: Removed.
+

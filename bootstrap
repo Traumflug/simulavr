@@ -1,18 +1,25 @@
 #!/bin/sh
-# Run this to generate all the initial makefiles, etc.
-# For debug, do: ./configure CFLAGS="-O0 -g
-# Takes file/dir as parameter for a directory, and extra params for "configure"
+#
+#  Run this to have autotools generate all of its output.
+#
+#  NOTE: This is based upon the original script and that found in
+#        RTEMS (http://www.rtems.org).
+#
+#  $Id$
+#
 
 srcdir=`dirname $0`
 
 test -z "$srcdir" && srcdir=.
-
-ORIGDIR=`pwd`
-cd $srcdir
+progname=`basename $0`
+top_srcdir=`dirname $0`
 
 PROJECT=simulavrxx
-TEST_TYPE=-d
-FILE=src
+
+test -d src || {
+    echo "You must run this script in the top-level $PROJECT directory"
+    exit 1
+}
 
 (autoconf --version) < /dev/null > /dev/null 2>&1 || {
     echo
@@ -32,21 +39,95 @@ FILE=src
     exit 1
 }
 
-test $TEST_TYPE $FILE || {
-    echo "You must run this script in the top-level $PROJECT directory"
-    exit 1
+usage()
+{
+  echo
+  echo "usage: ${progname} [-c|-p|-h] [-q][-v]"
+  echo
+  echo "options:"
+  echo "	-c .. clean, remove all aclocal/autoconf/automake generated files"
+  echo "	-h .. display this message and exit"
+  echo "	-q .. quiet, don't display directories"
+  echo "	-v .. verbose, pass -v to autotools"
+  echo
+  exit 1;
 }
 
-aclocal -I m4
-autoheader
-libtoolize --copy --force
-automake --add-missing --copy
-autoconf
+verbose=""
+quiet="false"
+mode="generate"
 
-cd $ORIGDIR
+while test $# -gt 0; do
+case $1 in
+-h|--he|--hel|--help)
+  usage ;;
+-q|--qu|--qui|--quie|--quiet)
+  quiet="true";
+  shift;;
+-v|--ve|--ver|--verb|--verbo|--verbos|--verbose)
+  verbose="-v";
+  shift;;
+-c|--cl|--cle|--clea|--clean)
+  mode="clean";
+  shift;;
+-*) echo "unknown option $1" ;
+  usage ;;
+*) echo "invalid parameter $1" ;
+  usage ;;
+esac
+done
 
-		  
-echo
-echo "Now type './configure' to configure $PROJECT."
+case ${mode} in 
+  generate)
+    aclocal ${verbose} -I m4
+    autoheader ${verbose}
+    libtoolize ${verbose} --copy --force
+    automake ${verbose} --add-missing --copy
+    autoconf ${verbose}
+    echo
+    echo "Now type './configure' to configure $PROJECT."
+    ;;
+  clean)
+    test "$quiet" = "true" || echo "removing automake generated Makefile.in files"
+    files=`find . -name 'Makefile.am' -print | sed -e 's%\.am%\.in%g'` ;
+    for i in $files; do if test -f $i; then
+      rm -f $i
+      test "$verbose" = "-v" && echo "$i"    
+    fi; done
 
+    test "$quiet" = "true" || echo "removing configure files"
+    files=`find . -name 'configure' -print` ;
+    test "$verbose" = "-v" && test -n "$files" && echo "$files" ;
+    for i in $files; do if test -f $i; then
+      rm -f $i config.sub config.guess depcomp install-sh mdate-sh missing \
+	  mkinstalldirs texinfo.tex compile
+      test "$verbose" = "-v" && echo "$i"    
+    fi; done
+    
+    test "$quiet" = "true" || echo "removing aclocal.m4 files"
+    files=`find . -name 'aclocal.m4' -print` ;
+    test "$verbose" = "-v" && test -n "$files" && echo "$files" ;
+    for i in $files; do if test -f $i; then
+      rm -f $i
+      test "$verbose" = "-v" && echo "$i"    
+    fi; done
 
+    find . -name '*~' -print | xargs rm -f
+    find . -name 'bspopts.h.in' -print | xargs rm -f
+    find . -name '*.orig' -print | xargs rm -f
+    find . -name '*.rej' -print | xargs rm -f
+    find . -name 'config.status' -print | xargs rm -f
+    find . -name 'config.log' -print | xargs rm -f
+    find . -name 'config.cache' -print | xargs rm -f
+    find . -name 'Makefile' -print | xargs rm -f
+    find . -name '.deps' -print | xargs rm -rf
+    find . -name '.libs' -print | xargs rm -rf
+    find . -name 'stamp-h.in' | xargs rm -rf
+    find . -name 'autom4te*.cache' | xargs rm -rf
+    ;;
+
+  *)
+    ;;
+esac
+
+exit 0

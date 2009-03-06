@@ -1,17 +1,23 @@
-MAINTAINERCLEANFILES 	= Makefile.in
+#
+#  $Id$
+#
 
-EXTRA_DIST           = fred.c
+AVR_GCC=@AVR_GCC@
 
-# WAR: should detect avr-toolset first!
+noinst_DATA = fred
+
+CLEANFILES = fred fred.o
+
+## If you want a listing and map, uncomment these
+## LIST_ARG=-Wa,-adhl=$@.lst
+## MAP_ARG=-Wl,-M,-Map=$@.map
 
 fred.o : $(srcdir)/fred.c
-	$(AVR_GCC) -Wa,-adhl=$@.lst -g -O2 -mmcu=at90s8515 -c -o $@ $< 
+	$(AVR_GCC) $(LIST_ARG) -g -O2 -mmcu=at90s8515 -c -o $@ $< 
 
 fred : fred.o
-	$(AVR_GCC) -Wl,-M,-Map=$@.map -mmcu=at90s8515 -o $@ $<
+	$(AVR_GCC) $(MAP_ARG) -mmcu=at90s8515 -o $@ $<
 
 run_sim: fred
-	../../src/simulavr --device at90s8515 -f fred -W 0x20,- -R 0x22,- -T exit
-
-
-SUBDIRS =
+	../../src/simulavr --device at90s8515 -f fred \
+	    -W 0x20,- -R 0x22,- -T exit

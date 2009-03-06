@@ -1,0 +1,67 @@
+#! /bin/sh -x
+#
+#  This script supports the cut_release by performing module specific
+#  answers and answering module specific questions.
+#
+#  Module: simulavrxx
+#
+#  $Id$
+#
+
+usage()
+{
+  echo $*
+  exit 1
+}
+
+if test $# -lt 1 ; then
+  usage "not enough arguments."
+fi
+
+user_name=`grep ^$LOGNAME /etc/passwd | cut -d':' -f5 | cut -d',' -f1`
+# If you don't have user information, then we won't commit anything.
+if test "X${user_name}" = "X" ; then
+  echo "User information not set"
+  usage
+fi
+case $1 in
+  name)
+    echo "simulavrxx"
+    ;;
+  pretag)
+    release_name=$2
+    current=$3
+    currentdir=`pwd`
+    ;;
+  postexport)
+    # In order to prevent end users from having to have "developer" tools
+    # like automake and autoconf, we need to ensure that the following
+    # timestamp relationships hold:
+    #
+    #  + configure is newer than configure.in
+    #  + aclocal.m4 is newer than the aclocal macros it uses
+    #  + Makefile.in is newer than Makefile.am
+    #
+    # This regenerates all automatically generated files and ensures that
+    # timestamp relationships are correct.
+    #
+    # NOTE: The standard way of doing this is to have a script named
+    #       bootstrap at the top level.
+    #
+    ./bootstrap
+
+    # now remove left overs from auto* -- they take 2MB even with bzip
+    find . -name autom4te.cache -print | xargs -e rm -rf 
+    find . -name .cvsignore -print | xargs -e rm -rf 
+    ;;
+  after_tar)
+    current=$2
+    reldir_curr=$3
+    module_name=TBD
+    ;;
+  *)
+    usage "$1 is not a valid subcommand."
+    ;;
+esac
+
+exit 0

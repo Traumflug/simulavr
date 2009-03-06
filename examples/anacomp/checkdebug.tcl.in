@@ -1,3 +1,7 @@
+#! @TCL_WISH@
+#
+#  $Id$
+#
 
 set traceFile trace
 
@@ -5,7 +9,7 @@ set traceFile trace
 package require Itcl
 
 #load the avr-simulator package
-load @my_top_builddir@src/simulavr.so
+load @top_builddir@/src/.libs/libsimulavr.so
 puts "simulavr loaded"
 
 #now start external generic gui server 
@@ -60,7 +64,7 @@ puts "Simulation runs endless, please press CTRL-C to abort"
 GdbServer gdb1 $dev1 1212 0
 $sc Add gdb1
 
-exec ddd --debugger avr-gdb --command checkdebug.gdb &
+exec @DDD_WITH_ARGS@ avr-gdb --command checkdebug.gdb &
 
 #now run simulation
 $sc Endless
