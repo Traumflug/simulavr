@@ -1,0 +1,82 @@
+PS1 Keyboard Interface      Don Carveth  July 2002
+
+PS-2 (PC-AT) style keyboard interface.
+Mirrors all characters typed on PC-AT keyboard on terminal connected to UART.
+
+Based on Atmel App Note AVR-313
+Converted supplied c code to GCC 3.2
+Based on ATMEGA163 at 8 MHz
+
+*********** REVISION HISTORY **************************
+Rev 0   Creation        8/30/02
+		Converted from IAR to GCC
+		Operational.
+
+*********** OPERATION *********************************
+Connect PS-2 keyboard as shown below - see App note for connection info
+Connect UART to terminal program at 19200 baud, 8N1
+    
+All standard keys pressed will mirror on terminal.  Shift works, <ctrl> and
+<alt> have no effect.
+Hit <F1> to alternate between character mode and hex code representation.
+
+
+Connect an LED to PD5 to ensure the program is running.
+Use the test pin at PB1 to monitor progress.  Insert test_pin() commands in
+    the program to toggle the pin - watch on your scope. Only need
+    for debugging.
+    
+To change processor or crystal make changes in StdDefs.h.
+Select between polled and interrupt driven UART transmit (putchar) in StdDefs.h
+	
+*********** RESOURCES *********************************
+
+Processor: ATMega163
+Crystal: 4 MHz
+Flash size: 0x7e6  (2022)
+RAM Used: 0x9c  (156)
+EEPROM Used: 0
+
+Pins used:
+
+PA0
+PA1
+PA2
+PA3
+PA4
+PA5
+PA6
+PA7 
+
+PB0 
+PB1 
+PB2 
+PB3 
+PB4  
+PB5  MOSI   -  ISP, 
+PB6  MISO   -  ISP,
+PB7  SCK    -  ISP
+
+PC0 
+PC1 
+PC2 
+PC3 
+PC4 
+PC5 
+PC6 
+PC7 
+
+PD0  UART Rcv
+PD1  UART Txd
+PD2  INT0  - Clock
+PD3  INT1  - Data
+PD4  
+PD5  Run LED
+PD6  
+PD7  
+
+Interrupts:
+INT0 - PS-1 Keyboard clock
+
+Timers:
+

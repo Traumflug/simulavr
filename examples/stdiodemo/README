@@ -1,0 +1,18 @@
+#
+#  $Id$
+#
+
+Author: Knut Schwichtenberg <kschwi@web.de>
+
+
+Joel Sherrill Notes
+===================
+
+3 March 2009
+Temporarily, the Makefile.am is a real Makefile. The rest of the
+contents of this directory appear to work with the autotools
+tree but the Makefile Knut provided has not yet been converted to
+a Makefile.am properly. Until this is complete
+
+make -f Makefile.notauto 
+make -f Makefile.notauto clean
