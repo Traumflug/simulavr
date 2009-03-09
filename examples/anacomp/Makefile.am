@@ -7,7 +7,7 @@ PYTHON=@PYTHON@
 
 noinst_DATA = anacomp
 
-CLEANFILES = anacomp anacomp.o
+CLEANFILES = anacomp anacomp.o trace
 
 do: anacomp
 	$(TCL_WISH) check.tcl

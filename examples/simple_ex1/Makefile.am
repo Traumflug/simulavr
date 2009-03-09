@@ -6,7 +6,7 @@ AVR_GCC=@AVR_GCC@
 
 noinst_DATA = fred
 
-CLEANFILES = fred fred.o
+CLEANFILES = fred fred.o trace
 
 ## If you want a listing and map, uncomment these
 ## LIST_ARG=-Wa,-adhl=$@.lst
