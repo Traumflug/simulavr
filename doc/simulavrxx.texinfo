@@ -754,7 +754,7 @@ and SerialTx! Not optimal but that's it at the moment...
 
 This example is based on Klaus' Anacomp Example and uses the Atmel
 application note AVR313 to convert the incomming data from the
-keyboard into a serial ASCII stream and sent this stream via the serial
+keyboard into a serial ASCII stream and sends this stream via the serial
 interface. Atmel's C-Code is ported to a current avr-gcc (4.x) and a
 Mega128. For this example only the serial transmitter is used. Atmel
 implemented the serial transmitter as interrupt controlled application,
@@ -762,7 +762,7 @@ opposite to the serial transmitter / receiver of the LCD example. Here
 a polled solution is implemented.
 
 After performing the build, go to the @file{examples/atmel-key} directory
-and try @code{./checkdebug.tcl}.  This example by it self is good to
+and try @code{./checkdebug.tcl}.  This example by itself is good to
 show how the GUI needs to be setup to make the Keyboard component work.
 The output of the keyboard is displayed into SerialRx component.
 Let's look into the simulation script to point out some details:

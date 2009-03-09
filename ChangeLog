@@ -1,5 +1,10 @@
 2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* doc/simulavrxx.texinfo: Minor corrections.
+	* src/Makefile.am: Remove useless comment.
+
+2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* Makefile.am: Only build examples if AVR cross tools are installed.
 	* configure.ac: Detect libiberty, Tcl, and AVR cross tools in the
 	native environment and react accordingly.  Warn when missing something
