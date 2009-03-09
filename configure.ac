@@ -30,7 +30,7 @@ AX_AVR_ENVIRONMENT
 
 ## Examples compile to avr code.  Do not build them if avr tools not installed
 ## NOTE: Cheap check -- only seeing if avr-gcc was found
-if test X"${AVR_GCC}" = X"no" ; then
+if test X"${AVR_GCC}" = X"" ; then
   AC_MSG_WARN([])
   AC_MSG_WARN([AVR Cross tools not installed])
   AC_MSG_WARN([Not building examples])
@@ -104,6 +104,7 @@ AC_CONFIG_FILES([\
 AC_OUTPUT
 
 echo
+echo AVR_GCC=${AVR_GCC}
 echo AVR_LIBBFD_INC=${AVR_LIBBFD_INC}
 echo AVR_LIBBFD_LIB=${AVR_LIBBFD_LIB}
 echo AVR_LIBIBERTY_LIB=${AVR_LIBIBERTY_LIB}

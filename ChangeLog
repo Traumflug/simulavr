@@ -1,5 +1,10 @@
 2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* configure.ac: Fix issue where NOT have avr-gcc in PATH was not
+	detected.
+
+2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* .cvsignore, doc/.cvsignore, regress/.cvsignore,
 	regress/modules/.cvsignore, regress/test_opcodes/.cvsignore,
 	src/.cvsignore: New files.
