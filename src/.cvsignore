@@ -1,0 +1,12 @@
+Makefile
+Makefile.in
+simulavr_wrap.cxx
+.deps
+.libs
+config.h
+kbdgentables
+keytrans.h
+libsimulavr.la
+simulavr
+stamp-h1
+*.lo

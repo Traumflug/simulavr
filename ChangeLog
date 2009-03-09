@@ -1,5 +1,11 @@
 2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* .cvsignore, doc/.cvsignore, regress/.cvsignore,
+	regress/modules/.cvsignore, regress/test_opcodes/.cvsignore,
+	src/.cvsignore: New files.
+
+2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* config.h, src/Makefile: Removed.  Discussed with Eric Weddington.
 	Autotools version works well enough to clobber these.
 
