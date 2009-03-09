@@ -1,5 +1,10 @@
 2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* .cvsignore, anacomp/.cvsignore, atmel_key/.cvsignore,
+	simple_ex1/.cvsignore, stdiodemo/.cvsignore: New files.
+
+2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* simple_ex1/fred.c: Clean up. Make this echo the entire string.
 
 2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
