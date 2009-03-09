@@ -1,5 +1,10 @@
 2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* config.h, src/Makefile: Removed.  Discussed with Eric Weddington.
+	Autotools version works well enough to clobber these.
+
+2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* doc/simulavrxx.texinfo: Minor corrections.
 	* src/Makefile.am: Remove useless comment.
 
