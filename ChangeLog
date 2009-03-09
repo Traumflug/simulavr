@@ -1,3 +1,25 @@
+2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* Makefile.am: Only build examples if AVR cross tools are installed.
+	* configure.ac: Detect libiberty, Tcl, and AVR cross tools in the
+	native environment and react accordingly.  Warn when missing something
+	that disables a feature from being built.
+	* doc/Makefile.am: Add to CLEANFILES.
+	* doc/simulavrxx.texinfo: Reformat. Clean up texinfo.  Fix some
+	spelling and grammar errors.
+	* doc/version.texi: Updated.
+	* m4/AX_AVR_ENVIRON.m4, m4/avr_local.m4: Multiple changes to
+	handle detection of libbfd and libiberty.  Now links on Cygwin.
+	* m4/swig_multi_module_support.m4: Remove obsolete -noruntime flag.
+	* src/Makefile.am: Clean up flags for libiberty and libbfd.
+	* TODO: New file.
+	* Makefile.in, aclocal.m4, config.guess, config.sub, configure,
+	depcomp, install-sh, missing, config/README, config/avr_local.m4,
+	config/avr_python.m4, config/avr_swig.m4, config/avr_tcl.m4,
+	doc/Makefile.in, regress/Makefile.in, regress/modules/Makefile.in,
+	regress/test_opcodes/Makefile.in, src/Makefile.in: Removed.
+	These files are automatically generated and should not be in CVS.
+
 2009-03-06	Klaus Rudolph <lts-rudolph@gmx.de>
 
 	* src/lcd.cpp: bugfix: char output conversion

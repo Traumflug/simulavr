@@ -1,0 +1,22 @@
+#
+#  $Id$
+#
+
++ Host specific issues
+  - Cygwin: Core dumps on a cout printing the device option string
+  - Mingw: Uses BSD sockets.  Need to have WinSock as alternative
+
++ Feature parity with avrtest.  Known issues:
+  - abort magic address
+  - exit magic address
+  - instructions executed limit
+
++ Feature parity with simulavr.  Known issues:
+  - ?
+
++ Configure issues
+  - Joel's Cygwin has texi2pdf but not a valid TeX install.  It configures
+    OK but fails when building documentation.
+  - libiconv.a and libintl.a are not needed on Fedora 10 but required on
+    Cygwin.  They are forced in on Cygwin now.  Can we know dynamically
+    if these are needed?

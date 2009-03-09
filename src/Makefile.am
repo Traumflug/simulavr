@@ -9,8 +9,6 @@ PYTHON_CPPFLAGS=@PYTHON_CPPFLAGS@
 
 AM_CXXFLAGS=-I$(AVR_LIBBFD_INC) ## -static
 
-AVR_LIBIBERTY_LIB=@AVR_LIBIBERTY_LIB@
-
 if USE_SWIG
 if USE_PYTHON
 LIBPYSIMULAVR=_pysimulavr.so
@@ -18,11 +16,11 @@ endif
 endif
 
 bin_PROGRAMS    = simulavr kbdgentables
-lib_LTLIBRARIES	= libsimulavr.la
 
 if USE_TCL
 TCL_WRAP_SRC = simulavr_wrap.cxx
 TCL_LIB      = -ltcl
+lib_LTLIBRARIES	= libsimulavr.la
 endif
 
 libsimulavr_la_SOURCES	= 	\
@@ -74,7 +72,7 @@ libsimulavr_la_SOURCES	= 	\
 	trace.cpp		\
 	ui.cpp 			
 libsimulavr_la_LDFLAGS = -version-info 0:0:0 
-libsimulavr_la_LDFLAGS += --start-group -lz $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB) --end-group
+libsimulavr_la_LIBADD = -lz $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB) 
 
 pkginclude_HEADERS = 	\
 	application.h 		\
@@ -136,14 +134,14 @@ pkginclude_HEADERS = 	\
 
 simulavr_SOURCES = main.cpp
 
-simulavr_LDADD = libsimulavr.la $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB) \
-   -lz $(TCL_LIB)
+simulavr_LDADD = libsimulavr.la $(AVR_LIBBFD_LIB) \
+   -lz $(TCL_LIB) $(AVR_LIBIBERTY_LIB)
 
 TCLHEADER= serialtx.h serialrx.h avrdevice.h at8515.h atmega128.h \
     at4433.h systemclock.h ui.h hardware.h pin.h net.h trace.h gdb.h lcd.h 
 
 simulavr_wrap.cxx: simulavr.i $(TCLHEADER)
-	@SWIG@ -c++ simulavr.i
+	@SWIG@ $(srcdir)/simulavr.i
 
 simulavr_wrap.o: simulavr_wrap.cxx
 
@@ -156,19 +154,15 @@ keytrans.h: kbdgentables keynumber_to_scancode.dat xcode_to_keynumber.dat
 
 # Python bindings
 _pysimulavr.so: pysimulavr_wrap.cpp simulavr
-	$(CXX) -I$(srcdir) $(PYTHON_CPPFLAGS) $< $(patsubst %.lo,%.o,$(libsimulavr_la_OBJECTS)) $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB)  -lc -lm -lncurses -shared -o $@ $(NonPortableDarwin_GXX_Flags)
+	$(CXX) -I$(srcdir) $(PYTHON_CPPFLAGS) $< $(patsubst %.lo,%.o,$(libsimulavr_la_OBJECTS)) $(AVR_LIBBFD_LIB) $(LIBIBERTY) -lc -lm -lncurses -shared -o $@ $(NonPortableDarwin_GXX_Flags)
 
 pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
 	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_CPPFLAGS) -o $@ $?
 
-
-
 EXTRA_DIST           = pysimulavr.i 
 
-
-DISTCLEANFILES:=${DISTCLEANFILES} simulavr.so keytrans.h  _pysimulavr.so pysimulavr.py pysimulavr_wrap.cpp
-Cleanfiles:=${CLEANFILES} simulavr.so keytrans.h simulavr_wrap.cpp
-
-
+DISTCLEANFILES:=${DISTCLEANFILES} simulavr.so keytrans.h \
+    _pysimulavr.so pysimulavr.py pysimulavr_wrap.cpp
+CLEANFILES := ${CLEANFILES} simulavr.so keytrans.h simulavr_wrap.cxx
 
 all-am: $(LIBPYSIMULAVR)

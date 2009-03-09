@@ -15,10 +15,38 @@ AM_CONDITIONAL([USE_SWIG],[test "x$SWIG" != 'x'])
 AM_CONDITIONAL([USE_PYTHON],[test "x$PYTHON" != 'x'])
 AC_WAR_PYTHON
 
+## Check about the AVR cross compilation environment
+AX_AVR_ENVIRONMENT
+
+## AC_CHECK_LIB(
+##   [libiberty],
+##   [have_libiberty=yes
+##   ],
+##   [have_libiberty=no
+##    AC_MSG_ERROR([libiberty.a is required])
+##   ]
+## )
+## AM_CONDITIONAL([HAVE_LIBIBERTY], [test x"${have_libiberty}" = x"yes"]) 
+
+## Examples compile to avr code.  Do not build them if avr tools not installed
+## NOTE: Cheap check -- only seeing if avr-gcc was found
+if test X"${AVR_GCC}" = X"no" ; then
+  AC_MSG_WARN([])
+  AC_MSG_WARN([AVR Cross tools not installed])
+  AC_MSG_WARN([Not building examples])
+  AC_MSG_WARN([])
+  ac_have_avr_cross_tools=no
+else
+  ac_have_avr_cross_tools=yes
+fi
+
+AM_CONDITIONAL([USE_AVR_CROSS], [test x"${ac_have_avr_cross_tools}" = x"yes"]) 
+
+## Some of the examples include GUIs written in Wish
 AC_PATH_PROG(TCL_WISH, [wish], [/usr/bin/wish], [no])
 test "${TCL_WISH}" = no && AC_MSG_ERROR([wish is required])
 
-## If they don't have ddd installed, then just invoked command line gdb
+## If ddd is not installed, then just invoked command line gdb
 AC_PATH_PROG(DDD, [ddd], [/usr/bin/ddd], [no])
 if test "${ddd}" = yes ; then
   DDD_WITH_ARGS=ddd --debugger
@@ -27,10 +55,6 @@ else
 fi
 AC_SUBST([DDD_WITH_ARGS],${DDD_WITH_ARGS})
 
-dnl AC_CHECK_PROG(CCACHE, ccache, ccache)
-
-AX_AVR_ENVIRONMENT
-
 ## Check if Tcl is desired
 AC_MSG_CHECKING([Tcl desired])
 SIMULAVRXX_ENABLE_TCL
@@ -38,9 +62,19 @@ AC_MSG_RESULT([${SIMULAVRXX_USE_TCL}])
 
 # Check if Tcl development kit installed
 if test x"${SIMULAVRXX_USE_TCL}" = x"yes" ; then
-  AC_CHECK_HEADER([tcl.h],[TCL_h_found=yes],[TCL_h_found=no])
+  AC_CHECK_HEADER(
+    [tcl.h],
+    [Tcl_h_found=yes],
+    [Tcl_h_found=no;
+     AC_MSG_WARN([])
+     AC_MSG_WARN([Tcl Development Kit Not Installed])
+     AC_MSG_WARN([Not building Tcl interface or examples])
+     AC_MSG_WARN([])
+    ]
+   )
 fi
 
+# If they did not want Tcl or it is not installed, do not use it
 AM_CONDITIONAL(
   [USE_TCL],
   [test x"${SIMULAVRXX_USE_TCL}" = x"yes" -a x"${Tcl_h_found}" = x"yes"]) 
