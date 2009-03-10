@@ -47,17 +47,28 @@ AC_MSG_CHECKING([Tcl desired])
 SIMULAVRXX_ENABLE_TCL
 AC_MSG_RESULT([${SIMULAVRXX_USE_TCL}])
 
+AC_ARG_WITH([tclconfig-path],
+  [AS_HELP_STRING([--with-tclconfig=path  directory with tclConfig.sh])],
+  [if test ! -d ${with_tclconfig_path} ; then
+     AC_MSG_ERROR([(${with_tclconfig_path}) is not a directory])
+   fi
+  ],
+  [with_tclconfig_path=/usr/lib]
+)
+
+AC_MSG_RESULT([tclConfig.sh directory = $with_tclconfig_path])
 # Check if Tcl development kit installed
 if test x"${SIMULAVRXX_USE_TCL}" = x"yes" ; then
   # If we can find tclConfig.sh, forget hacking at it
   AC_CHECK_FILE(
-    [/usr/lib/tclConfig.sh],
-    [source /usr/lib/tclConfig.sh
+    [${with_tclconfig_path}/tclConfig.sh],
+    [source ${with_tclconfig_path}/tclConfig.sh
      Tcl_h_found=yes
      AC_SUBST([AVR_TCL_LIB],[${TCL_LIB_SPEC}])
      AC_SUBST([AVR_TCL_INCLUDE],[${TCL_INCLUDE_SPEC}])
     ],
-    [AC_CHECK_HEADER([tcl.h], [Tcl_h_found=yes], [Tcl_h_found=no])
+    [AC_MSG_WARN([tclConfig.sh not found .. guessing])
+     AC_CHECK_HEADER([tcl.h], [Tcl_h_found=yes], [Tcl_h_found=no])
      AC_CHECK_HEADER([tcl.h], [Tcl_h_found=yes], [Tcl_h_found=no])
      AC_SUBST([AVR_TCL_LIB],[-ltcl8.5])
      AC_SUBST([AVR_TCL_INCLUDE],[])

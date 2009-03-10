@@ -1,5 +1,9 @@
 2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* configure.ac: Add --with-tclconfig-path..
+
+2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* configure.ac: Drop autoconf requirement to 2.61.
 
 2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
