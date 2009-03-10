@@ -1,3 +1,9 @@
+2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* bootstrap, configure.ac: Add AC_PREREQ to require 2.63. Also require
+	automake 1.10 or newer. It may be possible to use slightly older
+	versions but we know automake 1.8 is too old.
+
 2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* configure.ac: Fix issue where NOT have avr-gcc in PATH was not

@@ -3,7 +3,8 @@
 ##
 
 AC_INIT([Simulavrxx], [0.8.007-WR_b], [simulavr-devel@nongnu.org])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_INIT_AUTOMAKE([1.10 -Wall -Werror foreign])
+AC_PREREQ([2.63])
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_LIBTOOL
 AC_PROG_CXX

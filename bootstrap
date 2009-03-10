@@ -23,7 +23,7 @@ test -d src || {
 
 (autoconf --version) < /dev/null > /dev/null 2>&1 || {
     echo
-    echo "You must have autoconf installed to compile $PROJECT."
+    echo "You must have autoconf 2.63 installed to compile $PROJECT."
     exit 1
 }
 
@@ -35,7 +35,7 @@ test -d src || {
 		  
 (automake --version) < /dev/null > /dev/null 2>&1 || {
     echo
-    echo "You should use automake 1.8 or later to compile $PROJECT."
+    echo "You should use automake 1.10 or later to compile $PROJECT."
     exit 1
 }
 
