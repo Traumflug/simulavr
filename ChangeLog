@@ -1,5 +1,9 @@
 2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* configure.ac: Drop autoconf requirement to 2.61.
+
+2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* configure.ac, src/Makefile.am: Use /usr/lib/tclConfig.sh if
 	available. Build a static libsim.a which contains the non-Tcl
 	dependent source for the shared library and the simulavr executable.
