@@ -1,5 +1,12 @@
 2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* configure.ac, src/Makefile.am: Use /usr/lib/tclConfig.sh if
+	available. Build a static libsim.a which contains the non-Tcl
+	dependent source for the shared library and the simulavr executable.
+	This avoids the simulavr executable being dependent on Tcl at all.
+
+2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* bootstrap, configure.ac: Add AC_PREREQ to require 2.63. Also require
 	automake 1.10 or newer. It may be possible to use slightly older
 	versions but we know automake 1.8 is too old.

@@ -19,16 +19,6 @@ AC_WAR_PYTHON
 ## Check about the AVR cross compilation environment
 AX_AVR_ENVIRONMENT
 
-## AC_CHECK_LIB(
-##   [libiberty],
-##   [have_libiberty=yes
-##   ],
-##   [have_libiberty=no
-##    AC_MSG_ERROR([libiberty.a is required])
-##   ]
-## )
-## AM_CONDITIONAL([HAVE_LIBIBERTY], [test x"${have_libiberty}" = x"yes"]) 
-
 ## Examples compile to avr code.  Do not build them if avr tools not installed
 ## NOTE: Cheap check -- only seeing if avr-gcc was found
 if test X"${AVR_GCC}" = X"" ; then
@@ -42,10 +32,6 @@ else
 fi
 
 AM_CONDITIONAL([USE_AVR_CROSS], [test x"${ac_have_avr_cross_tools}" = x"yes"]) 
-
-## Some of the examples include GUIs written in Wish
-AC_PATH_PROG(TCL_WISH, [wish], [/usr/bin/wish], [no])
-test "${TCL_WISH}" = no && AC_MSG_ERROR([wish is required])
 
 ## If ddd is not installed, then just invoked command line gdb
 AC_PATH_PROG(DDD, [ddd], [/usr/bin/ddd], [no])
@@ -63,44 +49,63 @@ AC_MSG_RESULT([${SIMULAVRXX_USE_TCL}])
 
 # Check if Tcl development kit installed
 if test x"${SIMULAVRXX_USE_TCL}" = x"yes" ; then
-  AC_CHECK_HEADER(
-    [tcl.h],
-    [Tcl_h_found=yes],
-    [Tcl_h_found=no;
-     AC_MSG_WARN([])
-     AC_MSG_WARN([Tcl Development Kit Not Installed])
-     AC_MSG_WARN([Not building Tcl interface or examples])
-     AC_MSG_WARN([])
+  # If we can find tclConfig.sh, forget hacking at it
+  AC_CHECK_FILE(
+    [/usr/lib/tclConfig.sh],
+    [source /usr/lib/tclConfig.sh
+     Tcl_h_found=yes
+     AC_SUBST([AVR_TCL_LIB],[${TCL_LIB_SPEC}])
+     AC_SUBST([AVR_TCL_INCLUDE],[${TCL_INCLUDE_SPEC}])
+    ],
+    [AC_CHECK_HEADER([tcl.h], [Tcl_h_found=yes], [Tcl_h_found=no])
+     AC_CHECK_HEADER([tcl.h], [Tcl_h_found=yes], [Tcl_h_found=no])
+     AC_SUBST([AVR_TCL_LIB],[-ltcl8.5])
+     AC_SUBST([AVR_TCL_INCLUDE],[])
     ]
-   )
+  )
 fi
 
+## Some of the examples include GUIs written in Wish
+AC_PATH_PROG(TCL_WISH, [wish], [/usr/bin/wish], [no])
+test "${TCL_WISH}" = no && AC_MSG_WARN([wish not found])
+
 # If they did not want Tcl or it is not installed, do not use it
-AM_CONDITIONAL(
-  [USE_TCL],
-  [test x"${SIMULAVRXX_USE_TCL}" = x"yes" -a x"${Tcl_h_found}" = x"yes"]) 
+if test x"${SIMULAVRXX_USE_TCL}" = x"yes" -a x"${Tcl_h_found}" = x"yes"; then
+  build_tcl_libs=yes
+else
+  build_tcl_libs=no
+fi
+
+AM_CONDITIONAL([USE_TCL], [test x"${build_tcl_libs}" = x"yes"])
+
+if test x"${build_tcl_libs}" = x"yes" -a x"${TCL_WISH}" != x"no" ; then
+  AC_CONFIG_FILES(
+    [examples/gui.tcl],
+    [chmod +x examples/gui.tcl])
+  AC_CONFIG_FILES(
+    [examples/anacomp/check.tcl],
+    [chmod +x examples/anacomp/check.tcl])
+  AC_CONFIG_FILES(
+    [examples/anacomp/checkdebug.tcl],
+    [chmod +x examples/anacomp/checkdebug.tcl])
+  AC_CONFIG_FILES(
+    [examples/stdiodemo/checkdebug.tcl],
+    [chmod +x examples/stdiodemo/checkdebug.tcl])
+else
+  AC_MSG_WARN([])
+  AC_MSG_WARN([Tcl Development Kit Not Installed])
+  AC_MSG_WARN([Not building Tcl interface or examples])
+  AC_MSG_WARN([])
+fi
 
 AC_CONFIG_HEADERS([src/config.h])
-AC_CONFIG_FILES(
-  [examples/gui.tcl],
-  [chmod +x examples/gui.tcl])
-AC_CONFIG_FILES(
-  [examples/anacomp/check.tcl],
-  [chmod +x examples/anacomp/check.tcl])
-AC_CONFIG_FILES(
-  [examples/anacomp/checkdebug.tcl],
-  [chmod +x examples/anacomp/checkdebug.tcl])
-AC_CONFIG_FILES(
-  [examples/stdiodemo/checkdebug.tcl],
-  [chmod +x examples/stdiodemo/checkdebug.tcl])
 AC_CONFIG_FILES(
   [regress/regress.py],
   [chmod +x regress/regress.py])
 AC_CONFIG_FILES([\
   Makefile src/Makefile doc/Makefile \
   regress/Makefile regress/modules/Makefile regress/test_opcodes/Makefile \
-  examples/Makefile examples/anacomp/Makefile \
-  examples/simple_ex1/Makefile \
+  examples/Makefile examples/anacomp/Makefile examples/simple_ex1/Makefile \
 ])
 AC_OUTPUT
 
