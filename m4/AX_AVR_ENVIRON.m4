@@ -59,16 +59,19 @@ fi
 
 AVR_LIBIBERTY_LIB=${libiberty_a_location}/libiberty.a
 
+## BEGIN CYGWIN HACKS
 ## It appears that this is not needed on Fedora 10 but is needed on Cygwin
 ## TBD: Better way to figure out when this is really needed
+if test -r /usr/lib/libcygwin.a ; then 
+  AVR_LIBBFD_LIB="/usr/lib/libcygwin.a ${AVR_LIBBFD_LIB}"
+fi
 if test -r ${libiberty_a_location}/libintl.a ; then 
   AVR_LIBIBERTY_LIB="${AVR_LIBIBERTY_LIB} ${libiberty_a_location}/libintl.a"
 fi
-## It appears that iconv is not needed on Fedora 10 but is needed on Cygwin
-## TBD: Better way to figure out when this is really needed
 if test -r ${libiberty_a_location}/libiconv.a ; then 
   AVR_LIBIBERTY_LIB="${AVR_LIBIBERTY_LIB} ${libiberty_a_location}/libiconv.a"
 fi
+## END OF CYGWIN HACKS
 
 
 if test -z "${libiberty_a_location}";

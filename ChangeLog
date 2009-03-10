@@ -1,3 +1,10 @@
+2009-03-10  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* m4/AX_AVR_ENVIRON.m4: simple_ex1 runs on Cygwin.  The problem
+	is related to getopt() being in the Cygwin DLL and in libiberty.a.
+	Linking against libcygwin.a early enough ensures we get the 
+	correct implementation of getopt() and supporting variables.
+
 2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* configure.ac: Add --with-tclconfig-path..
