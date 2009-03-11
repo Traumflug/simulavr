@@ -1,5 +1,11 @@
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* Makefile.am, atmel_key/.cvsignore: Add autotools Makefile.am. Builds
+	but I have no way to test.
+	* atmel_key/Makefile.am: New file.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* anacomp/Makefile.am, simple_ex1/Makefile.am: make dist now produces a
 	tarball which compiles completely.
 
