@@ -42,6 +42,10 @@ else
 fi
 AC_SUBST([DDD_WITH_ARGS],${DDD_WITH_ARGS})
 
+## Check for Tex to know if we build PDF
+AC_CHECK_PROGS(TEX, [tex], [no])
+AM_CONDITIONAL([HAVE_TEX], [test x"${TEX}" != x"no"])
+
 ## Check if Tcl is desired
 AC_MSG_CHECKING([Tcl desired])
 SIMULAVRXX_ENABLE_TCL

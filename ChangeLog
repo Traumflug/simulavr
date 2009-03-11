@@ -1,5 +1,12 @@
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* doc/Makefile.am, configure.ac: Detect when tex is not installed
+	so we can avoid attempting to build the PDF format of the
+	documentation.  With this commit, the CVS tree builds cleanly on
+	Cygwin and can run a "fred" which was built on GNU/Linux.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* doc/simulavr.texinfo: Document -m <nanoseconds> option.
 
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
