@@ -1,5 +1,9 @@
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* doc/simulavrxx.texinfo: Add --with-tclconfig-path.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* src/Makefile.am: Generate simulavr_wrap.cxx in build not source
 	tree.
 

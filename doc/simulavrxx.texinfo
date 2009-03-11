@@ -660,6 +660,11 @@ is specified, neither the simulator shared library not the examples
 requiring the Tcl GUI will be built.  By default, Tcl is enabled
 but if Tcl is not installed on your computer, Tcl will be automatically
 disabled.
+
+@item --with-tclconfig-path
+If configure tells you it can't find tclConfig.sh, try
+--with-tclconfig-path=/your/path/.
+
 @end table
 
 
