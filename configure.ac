@@ -135,7 +135,7 @@ AC_CONFIG_FILES([\
   Makefile src/Makefile doc/Makefile \
   regress/Makefile regress/modules/Makefile regress/test_opcodes/Makefile \
   examples/Makefile examples/anacomp/Makefile examples/atmel_key/Makefile \
-  examples/simple_ex1/Makefile \
+  examples/simple_ex1/Makefile examples/stdiodemo/Makefile \
 ])
 AC_OUTPUT
 
