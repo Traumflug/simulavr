@@ -1,5 +1,9 @@
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* configure.ac: Fix typo in tclconfig-path name.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* doc/version.texi, src/Makefile.am: make dist now produces a tarball
 	which compiles completely.
 

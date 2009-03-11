@@ -52,7 +52,7 @@ SIMULAVRXX_ENABLE_TCL
 AC_MSG_RESULT([${SIMULAVRXX_USE_TCL}])
 
 AC_ARG_WITH([tclconfig-path],
-  [AS_HELP_STRING([--with-tclconfig=path  directory with tclConfig.sh])],
+  [AS_HELP_STRING([--with-tclconfig-path=path  directory with tclConfig.sh])],
   [if test ! -d ${with_tclconfig_path} ; then
      AC_MSG_ERROR([(${with_tclconfig_path}) is not a directory])
    fi
