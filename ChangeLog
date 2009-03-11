@@ -1,5 +1,10 @@
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* configure.ac: Add autotools Makefile.am. Builds but I have no way to
+	test.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* configure.ac: Fix typo in tclconfig-path name.
 
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
