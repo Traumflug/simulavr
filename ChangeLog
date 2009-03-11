@@ -1,3 +1,8 @@
+2009-03-11   	Joerg Wunsch <joerg_wunsch>
+
+	* mr/avr_local.m4: Look in lib64 for libbfd.a and libiberty.a so
+	we find things on 64-bit hosts.
+
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* doc/simulavrxx.texinfo: Add --with-tclconfig-path.
