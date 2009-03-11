@@ -18,9 +18,7 @@
       + AT90S2313 -
       + AT90S4414 - essentially AT90S8515 w/less memory so easy
       + AT90S8515 -
-      + ATmega8 -
-      + ATmega48 -
-      + ATmega88 -
+      + ATmega8 - could be built based on the existing AT90S4433 code
       + ATmega16 -
       + ATmega32 -
       + AT90S1200 - different, can be ignored as obsolete
