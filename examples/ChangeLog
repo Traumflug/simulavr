@@ -1,5 +1,10 @@
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* anacomp/Makefile.am: make dist appears to put the correct set of
+	files in the tarball.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* Makefile.am, atmel_key/.cvsignore, stdiodemo/.cvsignore: Add
 	autotools Makefile.am. Builds but I have no way to ensure either
 	example works. I have left the non-autotools

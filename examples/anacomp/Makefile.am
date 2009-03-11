@@ -9,7 +9,7 @@ noinst_DATA = anacomp
 
 CLEANFILES = anacomp anacomp.o trace
 
-EXTRA_DIST = main.c
+EXTRA_DIST = main.c checkdebug.py checkdebug.gdb
 
 do: anacomp
 	$(TCL_WISH) check.tcl
