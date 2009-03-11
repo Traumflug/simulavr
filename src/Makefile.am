@@ -64,7 +64,7 @@ TCLHEADER= serialtx.h serialrx.h avrdevice.h at8515.h atmega128.h \
     at4433.h systemclock.h ui.h hardware.h pin.h net.h trace.h gdb.h lcd.h 
 
 simulavr_wrap.cxx: simulavr.i $(TCLHEADER)
-	@SWIG@ $(srcdir)/simulavr.i
+	@SWIG@ -o $@ $(srcdir)/simulavr.i
 
 simulavr_wrap.o: simulavr_wrap.cxx
 	$(CXX) -I$(SRCDIR) -I$(TCL_INCLUDE) -c $<
@@ -78,7 +78,10 @@ keytrans.h: kbdgentables keynumber_to_scancode.dat xcode_to_keynumber.dat
 
 # Python bindings
 _pysimulavr.so: pysimulavr_wrap.cpp simulavr
-	$(CXX) -I$(srcdir) $(PYTHON_CPPFLAGS) $< $(patsubst %.lo,%.o,$(libsimulavr_la_OBJECTS)) $(AVR_LIBBFD_LIB) $(LIBIBERTY) -lc -lm -lncurses -shared -o $@ $(NonPortableDarwin_GXX_Flags)
+	$(CXX) -I$(srcdir) $(PYTHON_CPPFLAGS) $< \
+	    $(patsubst %.lo,%.o,$(libsimulavr_la_OBJECTS)) \
+	    $(AVR_LIBBFD_LIB) $(LIBIBERTY) -lc -lm -lncurses -shared \
+	    -o $@ $(NonPortableDarwin_GXX_Flags)
 
 pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
 	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_CPPFLAGS) -o $@ $?

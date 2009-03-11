@@ -1,6 +1,7 @@
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
-	* TODO: Update per discussion on mailing list.
+	* src/Makefile.am: Generate simulavr_wrap.cxx in build not source
+	tree.
 
 2009-03-10  Joel Sherrill <joel.sherrill@oarcorp.com>
 
