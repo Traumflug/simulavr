@@ -8,6 +8,8 @@ noinst_DATA = fred
 
 CLEANFILES = fred fred.o trace
 
+EXTRA_DIST = fred.c
+
 ## If you want a listing and map, uncomment these
 ## LIST_ARG=-Wa,-adhl=$@.lst
 ## MAP_ARG=-Wl,-M,-Map=$@.map

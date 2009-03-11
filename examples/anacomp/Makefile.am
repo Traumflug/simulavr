@@ -9,6 +9,8 @@ noinst_DATA = anacomp
 
 CLEANFILES = anacomp anacomp.o trace
 
+EXTRA_DIST = main.c
+
 do: anacomp
 	$(TCL_WISH) check.tcl
 

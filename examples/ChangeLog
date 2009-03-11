@@ -1,3 +1,8 @@
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* anacomp/Makefile.am, simple_ex1/Makefile.am: make dist now produces a
+	tarball which compiles completely.
+
 2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* anacomp/.cvsignore, simple_ex1/.cvsignore: Use /usr/lib/tclConfig.sh
