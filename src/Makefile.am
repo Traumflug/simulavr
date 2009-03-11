@@ -86,7 +86,7 @@ _pysimulavr.so: pysimulavr_wrap.cpp simulavr
 pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
 	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_CPPFLAGS) -o $@ $?
 
-EXTRA_DIST = simulavr.i pysimulavr.i 
+EXTRA_DIST = simulavr.i pysimulavr.i vpi.cpp
 
 CLEANFILES = keytrans.h simulavr_wrap.cxx \
    keytrans.h _pysimulavr.so pysimulavr.py pysimulavr_wrap.cpp

@@ -1,5 +1,11 @@
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* Makefile.am, SUPPORT, make_tarball, src/Makefile.am: make dist
+	appears to put the correct set of files in the tarball.
+	* release_support: Removed.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* m4/AX_AVR_ENVIRON.m4: Move libiberty check in libbfd directory.
 
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>

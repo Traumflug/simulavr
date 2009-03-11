@@ -1,6 +1,11 @@
 #!/bin/bash
-# I can't figure this out...autotools seems very difficult to use well.
-./bootstrap
+#
+#  Need to enhance this.. bump the version number, etc.
+#
+#  $Id$
+#
+
+
 ./bootstrap
 ./configure --prefix=/asdfasdf
 make -j 8 distcheck
