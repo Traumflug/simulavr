@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,20 +45,20 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
 AvrDevice(64, 128, 0, 4*1024) { 
 
 	irqSystem = new HWIrqSystem(this, 2);
-    eeprom= new HWMegaEeprom(this, irqSystem, 256, 12); //we use a eeprom with irq here
+	eeprom= new HWMegaEeprom(this, irqSystem, 256, 12); //we use a eeprom with irq here
 	stack = new HWStack(this, Sram, 0x00ff);
 
 	portb= new HWPort(this, "B");
 	portc= new HWPort(this, "C");
 	portd= new HWPort(this, "D");
 
-    portx= new HWPort(this, "X"); //TODO we have no portx for oc1b from timer1 here but 
-                                    //we have no time to rewrite the timer logic now :-) TODO XXX
-    porty= new HWPort(this, "Y"); //AREF on pin 0 ("Y0") 
+	portx= new HWPort(this, "X");	//TODO we have no portx for oc1b from timer1 here but 
+					//we have no time to rewrite the timer logic now :-) TODO XXX
+	porty= new HWPort(this, "Y");	//AREF on pin 0 ("Y0") 
 
-	//	irqSystem = new HWIrqSystem;
-    admux= new HWAdmux(this, PinAtPort( portc, 0), PinAtPort( portc, 1), PinAtPort( portc, 2), PinAtPort( portc, 3), PinAtPort( portc, 4), PinAtPort (portc,5));
-    ad= new HWAd( this, admux, irqSystem, PinAtPort( porty, 0), 11); //vec 11 ADConversion Complete
+	// irqSystem = new HWIrqSystem;
+	admux= new HWAdmux(this, PinAtPort( portc, 0), PinAtPort( portc, 1), PinAtPort( portc, 2), PinAtPort( portc, 3), PinAtPort( portc, 4), PinAtPort (portc,5));
+	ad= new HWAd( this, admux, irqSystem, PinAtPort( porty, 0), 11); //vec 11 ADConversion Complete
 	spi= new HWSpi(this, irqSystem, PinAtPort( portb, 3), PinAtPort( portb, 4), PinAtPort( portb, 5), PinAtPort(portb, 2),/*irqvec*/ 7) ;
 	uart= new HWUart( this, irqSystem, PinAtPort(portd,1), PinAtPort(portd, 0),8,9,10) ;
 	acomp= new HWAcomp(this, irqSystem, PinAtPort(portd, 6), PinAtPort(portd, 7), 13);
@@ -97,7 +97,7 @@ AvrDevice(64, 128, 0, 4*1024) {
 	rw[0x4c]= new RWTcntl(this, timer1);
 	rw[0x4b]= new RWOcrah(this, timer1);
 	rw[0x4a]= new RWOcral(this, timer1);
-    //Attention, we copied the complete timer from 8515 device, but there are some differces between them! TODO
+	//Attention, we copied the complete timer from 8515 device, but there are some differces between them! TODO
 	rw[0x49]= new RWReserved(this); //now comp B here RWOcrbh(this, timer1);
 	rw[0x48]= new RWReserved(this); //now comp B here Ocrbl(timer1);
 
@@ -161,10 +161,10 @@ AvrDevice(64, 128, 0, 4*1024) {
 
 AvrDevice_at90s4433::~AvrDevice_at90s4433() {}
 unsigned char AvrDevice_at90s4433::GetRampz() {
-	cerr << "Rampz is not a valid Register in at4433!" ;
+	cerr << "RAMPZ is not a valid register in at90s4433!" ;
 	return 0;
 }
 
 void AvrDevice_at90s4433::SetRampz(unsigned char val) {
-	cerr << "Illegal Rampz operation in at4433 core";
+	cerr << "Illegal RAMPZ operation in at90s4433 core";
 }

@@ -1,13 +1,13 @@
 \input texinfo @c -*-texinfo-*-
 @c %**start of header
-@setfilename simulavrxx.info
-@settitle Simulavrxx Documentation 0.8.006
+@setfilename simulavr.info
+@settitle SimulAVR Documentation 0.9cvs
 @c %**end of header
 
 @include version.texi
 
 @copying
-This file documents the simulavrxx program.
+This file documents the simulavr program.
 
 Copyright @copyright{} 2001, 2002, 2003 Theodore A. Roth
 
@@ -36,36 +36,36 @@ by the Free Software Foundation.
 @end copying
 
 @titlepage
-@title Simulavrxx - an AVR simulation framework
+@title SimulAVR - an AVR simulation framework
 @subtitle A simulator for the Atmel AVR family of microcontrollers.
-@subtitle For simulavrxx version @value{VERSION}, @value{UPDATED}.
+@subtitle For simulAVR version @value{VERSION}, @value{UPDATED}.
 @author by Theodore A. Roth, Klaus Rudolph, William Rivet
 
 @c The following two commands start the copyright page.
 @page
-@hfill Send bugs and comments on Simulavrxx to@*
+@hfill Send bugs and comments on SimulAVR to@*
 @hfill @w{@email{simulavr-devel@@nongnu.org}}
 @vskip 0pt plus 1filll
 @insertcopying
 @end titlepage
 
-@c Output the table of contents at the beginning.
+@c Output the table of contents at the begining.
 @contents
 
 @ifnottex
 @node Top, Introduction, (dir), (dir)
-@top Simulavr
+@top SimulAVR
 
 @insertcopying
 @end ifnottex
 
 @menu
-* Introduction::                What is simulavrxx?
+* Introduction::                What is SimulAVR?
 * Invoking::
 * Using with avr-gdb::
 * Tracing::
 * Graphic User Interface::
-* Building and Installing simulavrxx::
+* Building and Installing SimulAVR::
 * Examples::
 * Platform Related Notes::
 * Limitations::
@@ -78,45 +78,33 @@ by the Free Software Foundation.
 
 @cindex Introduction
 
-The simulavrxx program is a simulator for the Atmel AVR family of
-microcontrollers.  Simulavrxx can be used either standalone or as a
+The SimulAVR program is a simulator for the Atmel AVR family of
+microcontrollers.  SimulAVR can be used either standalone or as a
 remote target for avr-gdb.  When used in gdbserver mode, the simulator is
 used as a back-end so that avr-gdb can be used as a source level debugger for
 AVR programs.
 
-Simulavrxx is derived from Theodore Roth's simulavr. The hardware
-simulation part is completely written new in C++, only the instruction
-decoder and the avr-gdb interface are mostly copied from the original
-simulavr sources.
-
-Why I have written it again: I need some more hardware models like
-timers, SPI, UART and others which where not available at the point I
-have started. And my biggest problem was the missing IO port
-functionality.  For my personal needs I must have the ability to connect
-the AVR IO ports to other devices like other AVR devices or LCD, LEDs
-and other components. After looking into the original code I was really
-unable to understand it and add the functionality I need. So I started
-nearly from scratch but used the instruction decoder and the avr-gdb server
-interface which helps me a lot.
-
-Currently (version 0.8.006) the executable of simulavrxx is named simulavr.
-To avoid confusion with Theodore Roth's simulavr the executable and the library are always named
-simulavrxx in this document.
+SimulAVR started out as a C based project written by Theodore Roth. The hardware
+simulation part has since been completely re-written in C++. Only the
+instruction decoder and the avr-gdb interface are mostly copied from the 
+original simulavr sources. This C++ based version was known as simulavrxx until
+it became feature compatibile with the old simulavr code, then it renamed back
+to simulavr.
 
 What features are new:
 @itemize @bullet
 @item run multiple AVR devices in one simulation
-@item connect multiple AVR core pins to other devices like LCD, led and
+@item connect multiple AVR core pins to other devices like LCD, LED and
 others (environment)
-@item connect multiple AVR cores to multiple avr-gdb instances (each on
-own socket/port no)
-@item write simulation scripts in TCL/TK, other languages could be added
+@item connect multiple AVR cores to multiple avr-gdb instances (each on its
+own socket/port number)
+@item write simulation scripts in Tcl/Tk, other languages could be added
 by simply adding swig scripts!
 @item tracing the execution of the program
-@item these traces supports all debugging information directly from
+@item these traces support all debugging information directly from
 the ELF-file
 @item the traces run step by step for each device so you see all actions
-in the multiple devices in time correct order
+in the multiple devices in time-correct order
 @item every interrupt call is visible
 @item interrupt statistics with latency, longest and shortest execution
 time and some more
@@ -124,23 +112,22 @@ time and some more
 @item you have a simple text based UI interface to add LCD, switches,
 LEDs or other components and can modify it during simulation, so there
 is no longer a need to enter a pin value during execution.
-@item execution timing should be nearly accurate :-), different access
-times for internal RAM / external RAM / EEProm and other hardware
-components are simulated.
+@item execution timing should be nearly accurate, different access
+times for internal RAM / external RAM / EEPROM and other hardware
+components are simulated
 @item a pseudo core hardware component is introduced to do "printf"
 debugging. This "device" is connected to a normal named UNIX socket so
-you have not to waste a UART or other hardware in your test environment.
+you do not have to waste a UART or other hardware in your test environment
 @item ELF-file loading is supported, no objcopy needed anymore
 @item execution speed is tuned a lot, most hardware simulations are now
 only done if needed
 @item external IO pins which are not ports are also available
-@item simulavrxx.so provides a "loadable" TCL/TK library to write
-simulation sessions without compiling simulator sources
+@item simulavr.so provides a "loadable" Tcl/Tk library to write
+simulation sessions without compiling simulator sources.
 @end itemize
 
-To understand simulavrxx the reader should realize simulavrxx
-is functionally a library. This library is linked together with
-a command-line interface to create a command-line program. It is also
+The core of SimulAVR is functionally a library. This library is linked together
+with a command-line interface to create a command-line program. It is also
 linked together with a interpreter interface to create a library that can
 be use by a graphical interpreter language (currently python / TCL). In
 the examples directory there are examples of simulations with a graphical
@@ -153,7 +140,7 @@ IO-pins of the simulated CPU.
 
 @cindex Invoking
 
-The following options are only valid for the command-line version of simulavrxx:
+The following options are only valid for the command-line version of simulavr:
 @table @samp
 @item -d --device <device name>
 simulate <device name>
@@ -182,15 +169,15 @@ for reading
 enable trace outputs into <file name>
 @item -T --terminate <label> or <address>
 stops simulation if PC runs on <label> or <address>. If this parameter
-is omitted, simulavrxx has to be terminated manually.
+is omitted, simulavr has to be terminated manually.
 For <label> you can use any label listed in the map-file of the linker -
-no matter if it is ever reached or not :-).
+no matter if it is ever reached or not.
 @item -u
 run with user interface for external pin handling at port 7777. This
 does not open any graphics but activates the interface to communicate
 with the environment simulation.
 @item -v --version
-show the software version of simulavrxx
+show the software version of simulavr
 @item -V --verbose
 output some hints to console
 @item -W --writetopipe <offset>,<file>
@@ -208,16 +195,16 @@ For more details see the example in the directory simple_ex1.
 @chapter Using with avr-gdb
 @cindex avr-gdb, using with
 
-Using the simulator with avr-gdb is very simple. Start simulavrxx with:
+Using the simulator with avr-gdb is very simple. Start simulavr with:
 
-@command{simulavrxx -g}
+@command{simulavr -g}
 
-Now simulavrxx opens a socket on port 1212. If you need another port
+Now simulavr opens a socket on port 1212. If you need another port
 give the port number with:
 
-@command{simulavrxx -p5566}
+@command{simulavr -p5566}
 
-which will start simulavrxx with avr-gdb socket at port 5566.
+which will start simulavr with avr-gdb socket at port 5566.
 
 After that you can start avr-gdb or ddd with avr-gdb.
 
@@ -239,13 +226,13 @@ In the comandline of ddd or avr-gdb you can now enter your debug commands:
 @b{Attention}: In the actual implementation there is a known bug: If you
 start in avr-gdb mode and give no file to execute @command{-f filename}
 you will run into an @command{"Illegal Instruction"}.  The reason
-is that simulavrxx runs immediately with an empty flash. But avr-gdb
+is that simulavr runs immediately with an empty flash. But avr-gdb
 is not connected and could stop the core. Solution: Please start with
-@command{simulavrxx -g -f <filename>}. The problem will be fixed later.
-It doesn't matter whether the filename of the simulavrxx command line
+@command{simulavr -g -f <filename>}. The problem will be fixed later.
+It doesn't matter whether the filename of the simulavr command line
 is identical to the filename of avr-gdb file command.  The avr-gdb
 downloads the file itself to the simulator.  And after downloading the
-core of simulavrxx will be reset complete, so there is not a real problem.
+core of simulavr will be reset complete, so there is not a real problem.
 
 Connecting multiple devices via multiple sockets is discussed in the
 scripting section.
@@ -299,10 +286,7 @@ possible to give some flags for the labels which would be printed. This
 is dependent on the ELF-file and BFD-library.
 @item after the label a potential offset to that label is printed. For
 example @command{main+0x6} which means 6 instructions after the
-@command{main} label is defined. @i{TBD: At the moment I am wondering why I
-write instructions not bytes offset? This will be changed next time
-:-). Seems to be not very sensible to write address in bytes and offset
-in instruction (words). Ok, will be fixed...}
+@command{main} label is defined.
 @item The decoded AVR instruction. Keep in mind pseudo-opcodes. If
 you wonder why you write an assembler instruction one way and get
 another assembler instruction here you have to think about the Atmel
@@ -321,7 +305,6 @@ R16,R16} which means exclusive or with itself which results also in zero.
 the output if the core needs more then one cycle for the instruction.
 Sometimes a lot of wait states will be generated e.g. for eeprom access.
 @end itemize
-@i{TBD: If a hardware register like the UDR in the UART is affected the name of the register is also printed (in the future :-)}
 @item if the status register is affected also the @command{SREG=[------Z-]} is shown.
 
 @end itemize
@@ -331,17 +314,17 @@ avr-gdb interface and run the trace in parallel you have to keep in mind
 that you MUST load the file in avr-gdb and also in the simulator from
 command-line or script. It is not possible to transfer the symbols from
 the ELF-file through the avr-gdb interface. For that reason you always
-must give the same ELF-file for avr-gdb and for simulavrxx. If you load
+must give the same ELF-file for avr-gdb and for simulavr. If you load
 another ELF-file via the avr-gdb interface to the simulator the symbols
 for tracing could not be updated which means that the label information
 in the trace output is wrong. That is not a bug, this is related to the
 possibilities of the avr-gdb interface.
 
 @comment  node-name,  next,  previous,  up
-@node Graphic User Interface, Building and Installing simulavrxx, Tracing, Top
+@node Graphic User Interface, Building and Installing SimulAVR, Tracing, Top
 @chapter Graphic User Interface
 @cindex Graphic User Interface
-To adjust reader's expectations about simulavrxx let's start with some
+To adjust reader's expectations about simulavr let's start with some
 design goals. The main design goals are:
 
 @itemize @bullet
@@ -359,7 +342,7 @@ extend. That's what can be found over here.
 Next let's define what a GUI is necessary for. Showing the source
 code, variables and so on is done by avr-gdb and that comes with a GUI
 e.g. ddd. There is no need to provide an alternative. Within the examples
-provided together with simulavrxx the following graphical components
+provided together with simulavr the following graphical components
 are provided by the script gui.tcl:
 
 @itemize @bullet
@@ -533,7 +516,7 @@ not marked by the function @command{isprint} as printable are displayed
 in hex-format (e.g. 0x0d for "\n").
 
 The additional three hashed lines in the GUI shall be used for "status",
-"pin", "baudrate" in a future release of simulavrxx. The necessary data
+"pin", "baudrate" in a future release of simulavr. The necessary data
 is currently not forwarded by the simulation to the GUI.
 
 The SerialRx component provides a Pin named "rx" that has to be wired as
@@ -551,12 +534,12 @@ was halted.
 @section Command Line Parameter -u vs. Interpreter
 @cindex Command Line Parameter -u vs. Interpreter
 
-Coming into touch with simulavrxx it might be confusing why there is
-a simulavrxx program providing a command-line switch -u and all the
+Coming into touch with simulavr it might be confusing why there is
+a simulavr program providing a command-line switch -u and all the
 swig story and a interpreter program.  Lets start with a closer look
 to the example anacomp/checkdebug.*.  It's a personal preference of
 the reader if you look at the python or the TCL source.  There is no
-difference in function between them.  Simulavrxx is able to simulate
+difference in function between them.  Simulavr is able to simulate
 the AVR silicon device as well as some external components which will
 be called Environment further on.  Each Environment component needs a
 graphical representation, a registration in the simulator and a connection
@@ -566,7 +549,7 @@ is done by the script examples/gui.tcl.  This script is able only to
 display components and forward inputs to the simulator via socket 7777
 (and currently only on the local host).
 
-Now we should compare main.cpp of simualavrxx and anacomp/checkdebug.*.
+Now we should compare main.cpp of simulavr and anacomp/checkdebug.*.
 Both files are the "main" routines (spoken in C-language).  They share
 major parts while other's are different.  The simulator core can be
 understood as a library that is linked to the main to have a simulator
@@ -584,7 +567,7 @@ simulator registers this component.  Only registered components are
 updated by the simulator.  The current implementation provides no network
 interface to register graphical components.  Instead the swig-I/F is
 able to access any function of the simulator core.  Here the framework
-character of simulavrxx becomes visible.  Each specific simulation needs
+character of simulavr becomes visible.  Each specific simulation needs
 a specific main-program to display the necessary graphical components.
 Within a script file it is much simpler to create a case specific
 simulation GUI.
@@ -592,58 +575,57 @@ simulation GUI.
 If there is anyone looking for a task to create an all-purpose GUI feel
 free to start.
 
-@node Building and Installing simulavrxx, Examples, Graphic User Interface, Top
-@chapter Building and Installing simulavrxx
-@cindex Installing, Building simulavrxx
+@node Building and Installing SimulAVR, Examples, Graphic User Interface, Top
+@chapter Building and Installing SimulAVR
+@cindex Installing, Building SimulAVR
 
-Simulavrxx uses GNU auto tools. This means that, given a tarball, for
-version 0.8.006, for example, you should be able to use the following
-steps to build and install simulavrxx:
+SimulAVR uses GNU auto tools. This means that, given a tarball, for
+version 0.9, for example, you should be able to use the following
+steps to build and install simulavr:
 
 @example
-tar zxvf simulavrxx-0.8.006.tar.gz
-cd simulavrxx-0.8.006
+tar zxvf simulavr-0.9.tar.gz
+cd simulavr-0.9
 configure
 make
 make install
 @end example
 
 
-Simulavrxx does rely on a few other GNU tools. In particular, it relies
+Simulavr does rely on a few other GNU tools. In particular, it relies
 on libbfd from binutils, and by libbfd's dependency, it also relies on
 libiberty. I have found it useful to install my hand-configured-installed
 files in one area. That way I can put the AVR-tools in my path only when
 I'm working on AVR related work.  For reference, here is how I could
-install AVR tools to /home/rivetwa/install:
+install AVR tools to /home/user/install:
 
 @example
 mkdir b-binutils
-tar jxvf binutils-2.16.tar.bz2
+tar jxvf binutils-2.19.tar.bz2
 cd b-binutils
-../binutils-2.16/configure --enable-install-libbfd \
-   --prefix=/home/rivetwa/install --target=avr
+../binutils-2.19/configure --enable-install-libbfd \
+   --prefix=/home/user/install --target=avr
 make && make install
 @end example
 
-Then I configure/install simulavrxx as follows:
+Then I configure/install simulavr as follows:
 
 @example
-tar zxvf simulavrxx-0.8.006.tar.gz
-cd simulavrxx-0.8.006
-./configure --prefix=/home/rivetwa/install
+tar zxvf simulavr-0.9.tar.gz
+cd simulavr-0.9
+./configure --prefix=/home/user/install
 make
 make install
 @end example
 
-Actually, I use some other flags, but I'm a maintainer. Ideally this is
-all you should need to build/install simulavrxx. If this doesn't work,
-read on. I will walk through a few of the configure options that some
-users have had to use.
+Ideally this is all you should need to build/install simulavr. Below are some
+of the configure options.
 
 @table @samp
 @item --prefix
-Use this option to specify the root directory to install simulavrxx
+Use this option to specify the root directory to install simulavr
 to. /usr/local is the default.
+
 @item --with-bfd-path
 If configure tells you it can't find libbfd, try
 --with-bfd-path=/your/path/. Notice that you are expected to point to
@@ -651,13 +633,13 @@ the libbfd from binutils configured for AVR.
 
 @item --with-libiberty-path
 In the unlikely event that your properly installed AVR binutils results
-in simulavrxx finding libbfd but not libiberty, use this option. Use of
+in simulavr finding libbfd but not libiberty, use this option. Use of
 this option usually means the libiberty you are looking at did not come
 from the same binutils install that gave you the libbfd you have.
 
 @item --disable-tcl
 By default, the Tcl interface is enabled.  However, it is possible to
-build a standalone simulavrxx executable without Tcl.  When @c{--disable-tcl}
+build a standalone simulavr executable without Tcl.  When @c{--disable-tcl}
 is specified, neither the simulator shared library not the examples
 requiring the Tcl GUI will be built.  By default, Tcl is enabled
 but if Tcl is not installed on your computer, Tcl will be automatically
@@ -670,11 +652,11 @@ If configure tells you it can't find tclConfig.sh, try
 @end table
 
 
-@node Examples, Platform Related Notes, Building and Installing simulavrxx, Top
+@node Examples, Platform Related Notes, Building and Installing SimulAVR, Top
 @chapter Examples
 @cindex Examples
 
-Simulavrxx is designed to interact in a few different ways. These
+Simulavr is designed to interact in a few different ways. These
 examples briefly explain the examples that can be found in the source
 distribution's @file{examples} directory.
 
@@ -689,7 +671,7 @@ which actually starts the simulation.
 
 It is strongly recommended to implement own simulation scripts very
 closely to the examples. Usage of a different name than @code{.x} for
-the grahic frame need changes of gui.tcl as well as some simulavrxx
+the grahic frame need changes of gui.tcl as well as some simulavr
 sources. So stay better close to the example.
 
 @section TCL Anacomp Example
@@ -713,12 +695,12 @@ and try @code{make do_python}.
 @section Simple Example
 @cindex Example, Simple
 
-This sample uses only simulavrxx to execute a hacked AVR program. I say
+This sample uses only simulavr to execute a hacked AVR program. I say
 "hacked" because is shows using 3 simulator features that provide input,
 output and simulation termination based on "magic" port access and
 reaching a particular symbol.  It is only really useful for getting
-your feet wet with simulavrxx, it is not a great example of how to use
-simulavrxx. It is thought to be useful enough to the absolute newbie to
+your feet wet with simulavr, it is not a great example of how to use
+simulavr. It is thought to be useful enough to the absolute newbie to
 get you started though.
 
 After performing the build, go to the @file{examples/simple_ex1} directory
@@ -740,9 +722,9 @@ sc AddAsyncMember  mylcd
 @end example
 
 The first command creates a LCD instance @code{mylcd} with the name
-@code{lcd0} The second command adds the LCD instance to the simulavrxx
+@code{lcd0} The second command adds the LCD instance to the simulavr
 timer subsystem as an asynchronous member.  Asynchronous Timer objects
-are updated every 1ns - which means every iteration in the simulavrxx
+are updated every 1ns - which means every iteration in the simulavr
 main-loop.  All timing is done internally in the @file{lcd.cpp}. The
 rest of this simulation script is the normal business create Nets for
 each LCD pin, wire the Nets to the CPU pins.  The stdiodemo application
@@ -783,9 +765,9 @@ sc Add kbd
 
 These three commands create a Keyboard instance @code{kbd} with
 the name @code{"kbd1"}. For this instance the clock timing is
-set to 40000ns. simulavrxx internal timing for any asynchronous
+set to 40000ns. simulavr internal timing for any asynchronous
 activity are multiples of 1ns. The third command addes the keyboard
-instance to the simulavrxx timer. The rest of the commands in
+instance to the simulavr timer. The rest of the commands in
 @file{examples/atmel-key/checkdebug.tcl} is the normal for this
 simmulation. Create a CPU AtMega128 with 4MHz clock. Create indicators
 for the digital pins (not necessary but good looking). Create a Net for
@@ -793,7 +775,7 @@ each signal - here Clock(key_clk), Data(key_data), Run-LED(key_runLED),
 Test-Pin(key_TestPin), and Serial Output(key_txD0). Wire the pins
 Net specific. Run-LED and Test-Pin are specific to the Atmel AP-Note
 AVR313. The output of the keyboard converter is send to the serial
-interface. Based on an "implementation speciality" of simulavrxx a serial
+interface. Based on an "implementation speciality" of simulavr a serial
 output must be either set by the AVR program to output or a Pin with a
 Pull-Up activated has to be wired.
 
@@ -816,7 +798,7 @@ The last command ExtPin shows an alternative default value for
 txD0-Pin. Here it is pulled high - what is identical of adding any pull-up
 resistor to the device pin - no matter which resistor value is used.
 
-While creating this example, simulavrxx helped to find the bugs left in
+While creating this example, simulavr helped to find the bugs left in
 the AP-Note.
 
 @node Platform Related Notes, Limitations, Examples, Top
@@ -834,7 +816,7 @@ There have been some problems reported with crossdev. Have a look to
 build scripts for Linux provided by the AVR-Freaks.  This script has
 problems with the bfd-libs but the rest builds easily.
 
-No ebuild for simulavrxx exists yet, but for me, the standard ./configure
+No ebuild for simulavr exists yet, but for me, the standard ./configure
 && make works. Let me know if this is not the case for you.
 
 @node Limitations, Help Wanted, Platform Related Notes, Top
@@ -848,7 +830,7 @@ document version and software version to ensure both fit together.
 @cindex Overall Limitations
 
 This chapters describes an overview of system wide limitations for
-simulavrxx. Specific limitations see below.
+simulavr. Specific limitations see below.
 
 @itemize @bullet
 @item The documentation of the simulator provides a wide field of
@@ -860,29 +842,24 @@ Mega128 CPU for simulation. This works only if your destination CPU and
 the Mega128 share @strong{identical} components. Comparing of the names
 e.g. "Timer0" is not sufficient - you need to compare each component
 for identical function!
-@item simulavrxx simulates an AVR-CPU and a small amount of environment,
+@item simulavr simulates an AVR-CPU and a small amount of environment,
 like IO-network, some analogue components as well as SPI, ...
 There is neither a fully description for the environment available nor
 comprehensive examples around.
-@item simulavrxx makes no validation if the current assembler statement
+@item simulavr makes no validation if the current assembler statement
 is available for the selected CPU (e.g. MUL for Tiny,...)
-@item The current version of simulavrxx does @strong{not yet} support Cygwin!
-As of 6 March 2009, you can configure on Cygwin and successfully build but
-the simulavrxx program core dumps printing very early in @code{main()}.
-Help is appreciated in getting this platform to work.
-@item The current version of simulavrxx is not validated against the
+@item The current version of simulavr is not validated against the
 avr-gcc regression tests.
-@item AVR XMEGA are completely @strong{not yet} simulated by simulavrxx.
+@item AVR XMEGA are completely @strong{not yet} simulated by simulavr.
 @end itemize
 
 @section CPU Limitations
 @cindex CPU Limitations
 
-This chapters describes an overview of limitations for
-simulavrxx. Specific limitations see below.  This chapter focuses only
-on the Mega128 CPU.
+This chapters describes an overview of limitations for simulavr. Specific 
+limitations see below.  This chapter focuses only on the Mega128 CPU.
 
-The following hardware is @strong{not} simulated by simulavrxx:
+The following hardware is @strong{not} simulated by simulavr:
 @itemize @bullet
 @item TWI Serial Interface
 @item Analog to Digital Converter Subsystem
@@ -903,7 +880,7 @@ Mega128.
 
 While Atmel changed some function details of the EEPROM, Watchdog Timer,
 Timer Subsystem, ADC, and USART / USI these subsystems have identical
-names but different functions.  Therefore adding a new CPU to simulavrxx
+names but different functions.  Therefore adding a new CPU to simulavr
 might end in reprogramming a subsystem!
 
 
@@ -919,7 +896,7 @@ Here are some things that you may be able to help us out with:
 texinfo) is not indented the way the content paragraphs are...this
 leads to strange formatting, IMHO. Hints on how to better structure this
 document are welcome!
-@item Running simulavrxx as part of the WinAVR tool chain.
+@item Running simulavr as part of the WinAVR tool chain.
 @item Grouping of identical AVR hardware, such as: What kind of timers
 are around 8bit vs. 16bit, functions, PWM...
 @end itemize

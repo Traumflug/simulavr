@@ -2,9 +2,9 @@
 # $Id$
 #
 
-CLEANFILES = simulavrxx.info stamp-vti
+CLEANFILES = simulavr.info stamp-vti
 
-info_TEXINFOS = simulavrxx.texinfo 
+info_TEXINFOS = simulavr.texinfo 
 
 if HAVE_TEX
 TEX_FORMATS = pdf

@@ -1,4 +1,4 @@
 @set UPDATED 11 March 2009
 @set UPDATED-MONTH March 2009
-@set EDITION 0.8.007-WR_b
-@set VERSION 0.8.007-WR_b
+@set EDITION 0.9cvs
+@set VERSION 0.9cvs

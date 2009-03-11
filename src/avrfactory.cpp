@@ -22,7 +22,6 @@
  ****************************************************************************
  */
 
-#include <ctype.h> //toupper
 #include "config.h"
 #include "at4433.h"
 #include "at8515.h"
@@ -35,17 +34,16 @@ using namespace std;
 factory pattern. (-> AVR devices register themselves.) */
 
 AvrDevice* AvrFactory::makeDevice(const std::string in) {
-    string c(in); //use copy to transform to lower case
-    transform(c.begin(), c.end(), c.begin(), ::toupper);
+    string c(in); // use copy to transform to lower case
 
-    if (c=="AT90S4433") 
+    if (c == "at90s4433") 
         return new AvrDevice_at90s4433();
-    else if (c=="AT90S8515")
+    else if (c == "at90s8515")
         return new AvrDevice_at90s8515();
-    else if (c=="ATMEGA128")
+    else if (c == "atmega128")
         return new AvrDevice_atmega128();
     else {
-        cerr << "Invalid device specification:" << c << endl;
+        cerr << "Invalid device specification: " << c << endl;
         exit(1);
     }
 }

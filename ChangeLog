@@ -1,3 +1,25 @@
+2009-03-11  Eric B. Weddington  <eric.weddington@atmel.com>
+
+        * configure.ac (AC_INIT): Change name to 'SimulAVR'. Change version name
+        to '0.9cvs'.
+        * doc/Makefile.am (CLEANFILES): Change simulavrxx to simulavr.
+        (info_TEXINFOS): Same.
+        * doc/doc/version.texi (EDITION): Update version name.
+        (VERSION) Same.
+        * src/at4433.cpp: Whitespace changes. Fix spelling and case in error
+        messages.
+        * src/at8515.cpp: Fix spelling and case in error messages.
+        * src/atmega128.cpp: Whitespace changes.
+	* src/avrfactory.cpp (makeDevice): Change device names to lower case
+        to match convention used in other tools.
+	* src/main.cpp (main): Fix spelling in usage. Change device names to
+        lower case to match convention in other tools. Remove duplicated option
+        in call to getopt_long. Whitespace changes. Fixes to verbose messages.
+        Change name of program.
+        * doc/simulavrxx.info: Change name (remove) to...
+        * doc/simulavr.info: ... this new file. Various clean ups.
+        * m4/README: Fix spelling.
+
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* Makefile.am, SUPPORT, make_tarball, src/Makefile.am: make dist

@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
          {0, 0, 0, 0}
       };
 
-      c = getopt_long (argc, argv, "f:d:gGd:m:p:t:uxyzhvniF:R:W:VT:B:", long_options, &option_index);
+      c = getopt_long (argc, argv, "f:d:gGm:p:t:uxyzhvniF:R:W:VT:B:", long_options, &option_index);
       if (c == -1)
          break;
 
@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
 
          case 'F':
             fcpu=strtoll(optarg, NULL, 10);
-            if (global_verbose_on) cout << "Running with CPU frequency: " << fcpu<<endl;
+            if (global_verbose_on) cout << "Running with CPU frequency: " << fcpu << endl;
             break;
 
          case 'm':
@@ -142,12 +142,12 @@ int main(int argc, char *argv[]) {
             break;
 
          case 'f':
-            if (global_verbose_on) cout << "File to load " << optarg << endl;
+            if (global_verbose_on) cout << "File to load: " << optarg << endl;
             filename=optarg;
             break;
 
          case 'd':
-            if (global_verbose_on) cout << "Device to simulate " << optarg << endl;
+            if (global_verbose_on) cout << "Device to simulate: " << optarg << endl;
             devicename=optarg;
             break;
 
@@ -157,14 +157,14 @@ int main(int argc, char *argv[]) {
             break;
 
          case 'G':
-            if (global_verbose_on) cout << "Running with debug informations from gdbserver" << endl;
+            if (global_verbose_on) cout << "Running with debug information from gdbserver" << endl;
             global_gdb_debug = 1;
             gdbserver_flag=1;
             break;
 
          case 'p':
-            if (global_verbose_on) cout << "Running NOT on default port, use instead: " << global_gdbserver_port << endl;
-            global_gdbserver_port    = atoi(optarg);
+            if (global_verbose_on) cout << "Running on port: " << optarg << endl;
+            global_gdbserver_port = atoi(optarg);
             break;
 
          case 't':
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
 
          case 'v':
             {
-               cout << "Simulavr++ " << VERSION << endl;
+               cout << "SimulAVR " << VERSION << endl;
                cout << "See documentation for copyright and distribution terms" << endl;
                cout << endl;
                exit(0);
@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
             cout << "-g --gdbserver               run as gdb-server" << endl;
             cout << "-G                           run as gdb-server and write debug info for gdb-connection" << endl;                             
             cout << "-m  <nanoseconds>            maximum run time of <nanoseconds>" << endl;
-            cout << "-p  <port>                   us <port> for gdb server" << endl;
+            cout << "-p  <port>                   use <port> for gdb server" << endl;
             cout << "-t --trace <file name>       enable trace outputs to <file name>" << endl;
             cout << "-n --nogdbwait               do not wait for gdb connection" << endl;
             cout << "-F --cpufrequency            set the cpu frequency to <Hz> " << endl;
@@ -208,9 +208,9 @@ int main(int argc, char *argv[]) {
             cout << "-B --breakpoint <label> or <address> , same as -T for backward compatibility" << endl;
             cout << endl;
             cout << "Supported devices:" << endl;
-            cout << "AT90S4433" << endl;
-            cout << "AT90S8515" << endl;
-            cout << "ATMEGA128" << endl;
+            cout << "at90s4433" << endl;
+            cout << "at90s8515" << endl;
+            cout << "atmega128" << endl;
             cout << endl;
 
             exit(0);
