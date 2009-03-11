@@ -1,5 +1,6 @@
 Makefile.in
 Makefile
+atmel_key
 serial.lst
 main.sym
 main.map
