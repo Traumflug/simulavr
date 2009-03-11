@@ -3,16 +3,31 @@
 #
 
 + Host specific issues
-  - Cygwin: Core dumps on a cout printing the device option string
+  - Cygwin: Cannot use library objects built for DLL as static
   - Mingw: Uses BSD sockets.  Need to have WinSock as alternative
 
 + Feature parity with avrtest.  Known issues:
-  - abort magic address
-  - exit magic address
-  - instructions executed limit
+  - Support avrtest magic addresses 
+      STDIO_PORT 0x52
+      EXIT_PORT  0x4F
+      ABORT_PORT 0x49
 
 + Feature parity with simulavr.  Known issues:
-  - ?
+  - avr-libc mostly tests with AT90S8515 and ATmega128 so most is OK
+  - Models not yet supported:
+      + AT90S2313 -
+      + AT90S4414 - essentially AT90S8515 w/less memory so easy
+      + AT90S8515 -
+      + ATmega8 -
+      + ATmega48 -
+      + ATmega88 -
+      + ATmega16 -
+      + ATmega32 -
+      + AT90S1200 - different, can be ignored as obsolete
+      + ATmega103 - can be ignored as obsolete
+      + range of AT43USBxxx controllers - can be ignored as replaced (sorta)
+        by the AT90USB* / ATmega???U? devices.
+   - simulavr has a core dump feature
 
 + Configure issues
   - Joel's Cygwin has texi2pdf but not a valid TeX install.  It configures

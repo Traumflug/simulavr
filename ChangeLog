@@ -1,3 +1,7 @@
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* TODO: Update per discussion on mailing list.
+
 2009-03-10  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* m4/AX_AVR_ENVIRON.m4: simple_ex1 runs on Cygwin.  The problem
