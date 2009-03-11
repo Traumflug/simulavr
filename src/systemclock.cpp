@@ -42,7 +42,7 @@ SystemClock::SystemClock() {
 void SystemClock::SetTraceModeForAllMembers(int trace_on) {
     iterator mi;
     for (mi=begin(); mi!=end(); mi++) {
-       mi->second->trace_on=trace_on;
+        mi->second->trace_on=trace_on;
     }
 } 
 
@@ -120,7 +120,7 @@ void SystemClock::Rescedule( SimulationMember *sm, SystemClockOffset newTime) {
 
 
 
-int breakMessage=0;
+volatile int breakMessage=0;
 
 void OnBreak(int s) 
 {
@@ -136,20 +136,31 @@ void SystemClock::Endless() {
     signal(SIGINT, OnBreak);
     signal(SIGTERM, OnBreak);
 
-#ifdef PROF
-    for (unsigned long long tt=0; tt<1000000LL; tt++) {
-        Step(0);
-        if (breakMessage!=0) break;
-    }
-#else
     while( breakMessage==0) {
         steps++;
         bool untilCoreStepFinished=false;
         Step(untilCoreStepFinished);
     }
-#endif
+
     cout << "SystemClock::Endless stopped" << endl;
     cout << "number of cpu cycles simulated: " << dec << steps << endl;
+    Application::GetInstance()->PrintResults();
+}
+
+
+void SystemClock::Run(SystemClockOffset maxRunTime) {
+    int steps=0;
+    signal(SIGINT, OnBreak);
+    signal(SIGTERM, OnBreak);
+
+    while( breakMessage==0 && (SystemClock::Instance().GetCurrentTime() < maxRunTime)) {
+        steps++;
+        bool untilCoreStepFinished=false;
+        Step(untilCoreStepFinished);
+    }
+
+    cout << endl << "Ran too long.  Terminated after " << maxRunTime << " simulated nanoseconds." << endl;
+
     Application::GetInstance()->PrintResults();
 }
 

@@ -50,6 +50,7 @@ class SystemClock
         void IncrTime(SystemClockOffset of) { currentTime+= of; }
         SystemClockOffset GetCurrentTime();
         void Endless();
+        void Run(SystemClockOffset maxRunTime);
         static SystemClock& Instance();
         void Rescedule( SimulationMember *sm, SystemClockOffset newTime);
         void SetTraceModeForAllMembers(int trace_on);

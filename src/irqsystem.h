@@ -46,7 +46,11 @@ class IrqStatisticEntry {
         SystemClockOffset startedFinished;
 
 
-        IrqStatisticEntry(): flagSet(0), flagCleared(0), handlerStarted(0), handlerFinished(0){}
+        IrqStatisticEntry():
+          flagSet(0), flagCleared(0),
+          handlerStarted(0), handlerFinished(0),
+          setClear(0), setStarted(0),   setFinished(0),  startedFinished(0)
+        {}
         void CalcDiffs();
 };
 
