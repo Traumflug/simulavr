@@ -12,7 +12,7 @@ noinst_DATA = atmel_key
 
 CLEANFILES = atmel_key kb.o main.o serial.o StdDefs.o
 
-EXTRA_DIST = kb.c kb.h main.c pindefs.h scancodes.h serial.c serial.h
+EXTRA_DIST = kb.c kb.h main.c pindefs.h scancodes.h serial.c serial.h \
   StdDefs.c StdDefs.h README Notes.txt Makefile.notauto kbd.xbm \
   checkdebug.gdb debug.gdb
 
