@@ -92,14 +92,16 @@ int main(int argc, char *argv[]) {
          {"writetopipe", 1,0,'W'},
          {"verbose", 0,0,'V'},
          {"terminate",1,0,'T'},
+         {"breakpoint",1,0,'B'},
          {0, 0, 0, 0}
       };
 
-      c = getopt_long (argc, argv, "f:d:gGd:m:p:t:uxyzhvniF:R:W:VT:", long_options, &option_index);
+      c = getopt_long (argc, argv, "f:d:gGd:m:p:t:uxyzhvniF:R:W:VT:B:", long_options, &option_index);
       if (c == -1)
          break;
 
       switch (c) {
+         case 'B':
          case 'T':
             {
                terminationArgs.push_back(optarg);
@@ -203,6 +205,7 @@ int main(int argc, char *argv[]) {
             cout << "-R --readfrompipe <offset>,<file> add a special pipe register to device at IO-offset and opens <file> for reading" << endl;            
             cout << "-V --verbose                 output some hints to console" << endl;
             cout << "-T --terminate <label> or <address> stops simulation if PC runs on <label> or <address>" << endl;
+            cout << "-B --breakpoint <label> or <address> , same as -T for backward compatibility" << endl;
             cout << endl;
             cout << "Supported devices:" << endl;
             cout << "AT90S4433" << endl;
