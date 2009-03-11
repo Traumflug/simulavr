@@ -37,14 +37,14 @@ libsim_la_SOURCES = \
   printable.cpp rwmem.cpp scope.cpp serialrx.cpp serialtx.cpp systemclock.cpp \
   trace.cpp ui.cpp
 
-libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
+nodist_libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
 libsimulavr_la_LDFLAGS = -version-info 0:0:0 
 libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz \
   $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB) 
 
 pkginclude_HEADERS = \
   application.h at4433.h at8515.h atmega128.h avrdevice.h \
-  avrdevice_impl.h avrerror.h avrmalloc.h breakpoint.h \
+  avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h breakpoint.h \
   config_deprecated.h decoder.h externaltype.h flash.h \
   funktor.h gdb.h global.h hardware.h helper.h hwacomp.h \
   hwad.h hweeprom.h hwextirq.h hwmegaextirq.h hwmegatimer.h \
@@ -86,9 +86,9 @@ _pysimulavr.so: pysimulavr_wrap.cpp simulavr
 pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
 	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_CPPFLAGS) -o $@ $?
 
-EXTRA_DIST           = pysimulavr.i 
+EXTRA_DIST = simulavr.i pysimulavr.i 
 
-CLEANFILES = simulavr.so keytrans.h simulavr_wrap.cxx \
-   simulavr.so keytrans.h _pysimulavr.so pysimulavr.py pysimulavr_wrap.cpp
+CLEANFILES = keytrans.h simulavr_wrap.cxx \
+   keytrans.h _pysimulavr.so pysimulavr.py pysimulavr_wrap.cpp
 
 all-am: $(LIBPYSIMULAVR)

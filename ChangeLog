@@ -1,5 +1,10 @@
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* doc/version.texi, src/Makefile.am: make dist now produces a tarball
+	which compiles completely.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* configure.ac: First attempt adding DISTCHECK_CONFIGURE_FLAGS.
 
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
