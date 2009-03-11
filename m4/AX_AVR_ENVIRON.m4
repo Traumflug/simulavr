@@ -31,15 +31,13 @@ dnl libbfd. If given library is not suitable, error out.
 dnl if no libbfd is given, and with_bfd_path is not "no", then search
 dnl for libbfd. If none found, error out.
 
-if test x"${with_bfd_path}" != "xcheck";
-then
+if test x"${with_bfd_path}" != "xcheck"; then
   AVR_BFD_SEARCH_STEP($with_bfd_path)
 else
   AVR_BFD_SEARCH_STEP(/usr)
 fi
 
-if test -z "${bfd_a_location}";
-then
+if test -z "${bfd_a_location}"; then
   AC_MSG_ERROR([
     Could not locate libbfd.a or bfd.h.
     Please use the --with-bfd-path=<path to your libbfd library>
@@ -50,8 +48,12 @@ AVR_LIBBFD_LIB=${bfd_a_location}/libbfd.a
 AVR_LIBBFD_INC=${bfd_h_location}
 
 ######### LIBIBERTY
-if test "x${with_libiberty_path}" != "xcheck";
-then
+if test "x${with_libiberty_path}" != "xcheck"; then
+  if test x"${with_bfd_path}" != "xcheck"; then
+    AVR_LIBIBERTY_SEARCH_STEP($with_bfd_path)
+  fi
+  AVR_BFD_SEARCH_STEP(/usr)
+
   AVR_LIBIBERTY_SEARCH_STEP($with_libiberty_path)
 else
   AVR_LIBIBERTY_SEARCH_STEP(/usr)
