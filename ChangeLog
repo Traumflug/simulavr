@@ -1,5 +1,9 @@
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* configure.ac: First attempt adding DISTCHECK_CONFIGURE_FLAGS.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* m4/AX_AVR_ENVIRON.m4: Look in user specified bfd path for libiberty.
 
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>

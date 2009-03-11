@@ -68,6 +68,7 @@ if test x"${SIMULAVRXX_USE_TCL}" = x"yes" ; then
     [${with_tclconfig_path}/tclConfig.sh],
     [source ${with_tclconfig_path}/tclConfig.sh
      Tcl_h_found=yes
+     tclconfig_root_patch=${with_tclconfig_path}
      AC_SUBST([AVR_TCL_LIB],[${TCL_LIB_SPEC}])
      AC_SUBST([AVR_TCL_INCLUDE],[${TCL_INCLUDE_SPEC}])
     ],
@@ -93,6 +94,18 @@ fi
 
 AM_CONDITIONAL([USE_TCL], [test x"${build_tcl_libs}" = x"yes"])
 
+## We have to propagate all the configure flags we want to use when
+## configuring for make distcheck
+DISTCHECK_CONFIGURE_FLAGS="${DISTCHECK_CONFIGURE_FLAGS} \
+  --with-bfd-path=${libbfd_root_location} \
+  --with-libiberty-path=${libiberty_root_location}"
+if test X"${tclconfig_root_path}" != X ; then
+  DISTCHECK_CONFIGURE_FLAGS="${DISTCHECK_CONFIGURE_FLAGS} \
+    --with-tclconfig-path=${tclconfig_root_path}"
+fi
+AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
+
+## Certain files should only be generated if Tcl is available and enabled
 if test x"${build_tcl_libs}" = x"yes" -a x"${TCL_WISH}" != x"no" ; then
   AC_CONFIG_FILES(
     [examples/gui.tcl],
@@ -113,6 +126,7 @@ else
   AC_MSG_WARN([])
 fi
 
+## Output all the configure generated files that are required all the time
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES(
   [regress/regress.py],
