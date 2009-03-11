@@ -49,13 +49,11 @@ AVR_LIBBFD_INC=${bfd_h_location}
 
 ######### LIBIBERTY
 if test "x${with_libiberty_path}" != "xcheck"; then
+  AVR_LIBIBERTY_SEARCH_STEP($with_libiberty_path)
+else
   if test x"${with_bfd_path}" != "xcheck"; then
     AVR_LIBIBERTY_SEARCH_STEP($with_bfd_path)
   fi
-  AVR_BFD_SEARCH_STEP(/usr)
-
-  AVR_LIBIBERTY_SEARCH_STEP($with_libiberty_path)
-else
   AVR_LIBIBERTY_SEARCH_STEP(/usr)
 fi
 

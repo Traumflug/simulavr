@@ -1,5 +1,9 @@
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* m4/AX_AVR_ENVIRON.m4: Move libiberty check in libbfd directory.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* configure.ac: Add autotools Makefile.am. Builds but I have no way to
 	test.
 
