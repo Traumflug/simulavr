@@ -24,9 +24,9 @@ TCL_INCLUDE  = @AVR_TCL_INCLUDE@
 lib_LTLIBRARIES	= libsimulavr.la
 endif
 
-noinst_LIBRARIES=libsim.a
+noinst_LTLIBRARIES=libsim.la
 
-libsim_a_SOURCES = \
+libsim_la_SOURCES = \
   application.cpp at4433.cpp at8515.cpp atmega128.cpp avrdevice.cpp \
   avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp decoder_trace.cpp \
   flash.cpp gdbserver.cpp hardware.cpp helper.cpp hwacomp.cpp hwad.cpp \
@@ -39,7 +39,7 @@ libsim_a_SOURCES = \
 
 libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
 libsimulavr_la_LDFLAGS = -version-info 0:0:0 
-libsimulavr_la_LIBADD = $(libsim_a_OBJECTS) -lz \
+libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz \
   $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB) 
 
 pkginclude_HEADERS = \
@@ -58,7 +58,7 @@ pkginclude_HEADERS = \
 
 simulavr_SOURCES = main.cpp $(COMMON_SRC)
 
-simulavr_LDADD = libsim.a $(AVR_LIBBFD_LIB) -lz $(AVR_LIBIBERTY_LIB)
+simulavr_LDADD = $(libsim_la_OBJECTS) $(AVR_LIBBFD_LIB) -lz $(AVR_LIBIBERTY_LIB)
 
 TCLHEADER= serialtx.h serialrx.h avrdevice.h at8515.h atmega128.h \
     at4433.h systemclock.h ui.h hardware.h pin.h net.h trace.h gdb.h lcd.h 

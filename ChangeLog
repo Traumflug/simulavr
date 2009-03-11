@@ -1,3 +1,7 @@
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/Makefile.am: Rework a bit so links now on Cygwin.
+
 2009-03-11   	Joerg Wunsch <joerg_wunsch>
 
 	* mr/avr_local.m4: Look in lib64 for libbfd.a and libiberty.a so
