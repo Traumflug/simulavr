@@ -1,3 +1,7 @@
+2009-03-12	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* doc/.cvsignore: Account for dropping xx from name.
+
 2009-03-11  Eric B. Weddington  <eric.weddington@atmel.com>
 
         * configure.ac (AC_INIT): Change name to 'SimulAVR'. Change version name
