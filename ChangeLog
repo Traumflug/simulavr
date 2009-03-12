@@ -1,3 +1,12 @@
+2009-03-12	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac, doc/.cvsignore, doc/simulavr.texinfo, src/main.cpp: Use
+	autoconf to insert version number in documentation and source code.
+	Include version information in usage. Move usage to constant string
+	outside main() and make it fit cleanly into 80 columns. This
+	tightened the main() body.
+	* doc/config.texi.in: New file.
+
 2009-03-12  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* doc/simulavr.info: Remove hardcoded version numbers.

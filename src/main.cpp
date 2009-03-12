@@ -46,10 +46,38 @@ using namespace std;
 #include "trace.h"
 #include "scope.h"
 
-#define PRG_WISH "/usr/bin/wish"
+const char Usage[] = 
+"AVR-Simulator Version " VERSION "\n"
+"-u                    run with user interface for external pin\n"
+"                      handling at port 7777\n"
+"-f --file <name>      load elf-file <name> for simulation in simulated target\n"
+"-d --device <name>    simulate device <name> \n"
+"-g --gdbserver        run as gdb-server\n"
+"-G                    run as gdb-server and write debug info for gdb-connection\n"
+"-m  <nanoseconds>     maximum run time of <nanoseconds>\n"
+"-p  <port>            use <port> for gdb server\n"
+"-t --trace <file>     enable trace outputs to <file>\n"
+"-n --nogdbwait        do not wait for gdb connection\n"
+"-F --cpufrequency     set the cpu frequency to <Hz> \n"
+"-W --writetopipe <offset>,<file>\n"
+"                      add a special pipe register to device at\n"
+"                      IO-Offset and opens <file> for writing\n"
+"-R --readfrompipe <offset>,<file>\n"
+"                      add a special pipe register to device at IO-offset\n"
+"                      and opens <file> for reading\n"
+"-V --verbose          output some hints to console\n"
+"-T --terminate <label> or <address>\n"
+"                      stops simulation if PC runs on <label> or <address>\n"
+"-B --breakpoint <label> or <address>\n"
+"                      same as -T for backward compatibility\n"
+"\n"
+"Supported devices:\n"
+"  at90s4433\n"
+"  at90s8515\n"
+"  atmega128\n"
+"\n";
 
-//test only!
-
+            
 int main(int argc, char *argv[]) {
    int c;
    bool gdbserver_flag=0;
@@ -72,8 +100,6 @@ int main(int argc, char *argv[]) {
    string writeToPipeFileName="";
 
    vector<string> terminationArgs;
-
-
 
    while (1) {
       //int this_option_optind = optind ? optind : 1;
@@ -103,11 +129,8 @@ int main(int argc, char *argv[]) {
       switch (c) {
          case 'B':
          case 'T':
-            {
-               terminationArgs.push_back(optarg);
-            }
+            terminationArgs.push_back(optarg);
             break;
-
 
          case 'V':
             global_verbose_on=1;
@@ -173,46 +196,20 @@ int main(int argc, char *argv[]) {
             break;
 
          case 'v':
-            {
-               cout << "SimulAVR " << VERSION << endl;
-               cout << "See documentation for copyright and distribution terms" << endl;
-               cout << endl;
-               exit(0);
-            }
+            cout << "SimulAVR " << VERSION << endl;
+            cout << "See documentation for copyright and distribution terms" << endl;
+            cout << endl;
+            exit(0);
             break;
 
          case 'n':
-            { 
-               cout << "We will NOT wait for a gdb connection, simulation starts now!" << endl;
-               globalWaitForGdbConnection=false;
-            }
+            cout << "We will NOT wait for a gdb connection, simulation starts now!" << endl;
+            globalWaitForGdbConnection=false;
             break;
 
 
          default:
-            cout << "AVR-Simulator" << endl;
-            cout << "-u                           run with user interface for external pin handling at port 7777" << endl;
-            cout << "-f --file <name>             load elf-file <name> for simulation in simulated target" << endl; 
-            cout << "-d --device <device name>    simulate <device name> " << endl;
-            cout << "-g --gdbserver               run as gdb-server" << endl;
-            cout << "-G                           run as gdb-server and write debug info for gdb-connection" << endl;                             
-            cout << "-m  <nanoseconds>            maximum run time of <nanoseconds>" << endl;
-            cout << "-p  <port>                   use <port> for gdb server" << endl;
-            cout << "-t --trace <file name>       enable trace outputs to <file name>" << endl;
-            cout << "-n --nogdbwait               do not wait for gdb connection" << endl;
-            cout << "-F --cpufrequency            set the cpu frequency to <Hz> " << endl;
-            cout << "-W --writetopipe <offset>,<file> add a special pipe register to device at IO-Offset and opens <file> for writing" << endl;            
-            cout << "-R --readfrompipe <offset>,<file> add a special pipe register to device at IO-offset and opens <file> for reading" << endl;            
-            cout << "-V --verbose                 output some hints to console" << endl;
-            cout << "-T --terminate <label> or <address> stops simulation if PC runs on <label> or <address>" << endl;
-            cout << "-B --breakpoint <label> or <address> , same as -T for backward compatibility" << endl;
-            cout << endl;
-            cout << "Supported devices:" << endl;
-            cout << "at90s4433" << endl;
-            cout << "at90s8515" << endl;
-            cout << "atmega128" << endl;
-            cout << endl;
-
+            cout << Usage;
             exit(0);
 
       }

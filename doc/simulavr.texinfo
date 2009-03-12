@@ -1,6 +1,7 @@
 \input texinfo @c -*-texinfo-*-
 
 @include version.texi
+@include config.texi
 
 @c %**start of header
 @setfilename simulavr.info
