@@ -1,10 +1,11 @@
 \input texinfo @c -*-texinfo-*-
-@c %**start of header
-@setfilename simulavr.info
-@settitle SimulAVR Documentation 0.9cvs
-@c %**end of header
 
 @include version.texi
+
+@c %**start of header
+@setfilename simulavr.info
+@settitle SimulAVR Documentation @value{VERSION}
+@c %**end of header
 
 @copying
 This file documents the simulavr program.
@@ -580,12 +581,12 @@ free to start.
 @cindex Installing, Building SimulAVR
 
 SimulAVR uses GNU auto tools. This means that, given a tarball, for
-version 0.9, for example, you should be able to use the following
+version @value{VERSION}, for example, you should be able to use the following
 steps to build and install simulavr:
 
 @example
-tar zxvf simulavr-0.9.tar.gz
-cd simulavr-0.9
+tar zxvf simulavr-@value{VERSION}.tar.gz
+cd simulavr-@value{VERSION}
 configure
 make
 make install
@@ -611,8 +612,8 @@ make && make install
 Then I configure/install simulavr as follows:
 
 @example
-tar zxvf simulavr-0.9.tar.gz
-cd simulavr-0.9
+tar zxvf simulavr-@value{VERSION}.tar.gz
+cd simulavr-@value{VERSION}
 ./configure --prefix=/home/user/install
 make
 make install

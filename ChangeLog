@@ -1,3 +1,8 @@
+2009-03-12  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* doc/simulavr.info: Remove hardcoded version numbers.
+	* doc/version.texi (UPDATE): New date.
+
 2009-03-12	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* doc/.cvsignore: Account for dropping xx from name.
