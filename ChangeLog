@@ -1,5 +1,10 @@
 2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* INSTALL, README, configure.ac, doc/simulavr.texinfo,
+	m4/AX_AVR_ENVIRON.m4: Drop -path from all configure arguments.
+
+2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* configure.ac, regress/Makefile.am, src/main.cpp, src/rwmem.cpp,
 	src/rwmem.h: Add support for special abort and exit devices to
 	provide higher functionality compatability with avrtest. Add new

@@ -51,8 +51,8 @@ AC_MSG_CHECKING([Tcl desired])
 SIMULAVRXX_ENABLE_TCL
 AC_MSG_RESULT([${SIMULAVRXX_USE_TCL}])
 
-AC_ARG_WITH([tclconfig-path],
-  [AS_HELP_STRING([--with-tclconfig-path=path  directory with tclConfig.sh])],
+AC_ARG_WITH([tclconfig],
+  [AS_HELP_STRING([--with-tclconfig=path  directory with tclConfig.sh])],
   [if test ! -d ${with_tclconfig_path} ; then
      AC_MSG_ERROR([(${with_tclconfig_path}) is not a directory])
    fi
@@ -97,11 +97,11 @@ AM_CONDITIONAL([USE_TCL], [test x"${build_tcl_libs}" = x"yes"])
 ## We have to propagate all the configure flags we want to use when
 ## configuring for make distcheck
 DISTCHECK_CONFIGURE_FLAGS="${DISTCHECK_CONFIGURE_FLAGS} \
-  --with-bfd-path=${libbfd_root_location} \
-  --with-libiberty-path=${libiberty_root_location}"
+  --with-bfd=${libbfd_root_location} \
+  --with-libiberty=${libiberty_root_location}"
 if test X"${tclconfig_root_path}" != X ; then
   DISTCHECK_CONFIGURE_FLAGS="${DISTCHECK_CONFIGURE_FLAGS} \
-    --with-tclconfig-path=${tclconfig_root_path}"
+    --with-tclconfig=${tclconfig_root_path}"
 fi
 AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
 

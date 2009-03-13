@@ -14,13 +14,13 @@ AC_CHECK_PROG(NATIVE_NM, nm, nm)
 
 
 dnl Let's handle user-provided flags first.
-AC_ARG_WITH([bfd-path],
+AC_ARG_WITH([bfd],
         [AS_HELP_STRING([--with-bfd=path  location of AVR-binutils version of libbfd install where include/bfd.h and lib/libbfd.a are found (from binutils)])],
         [],
         [with_bfd_path=check])
 AC_MSG_RESULT([with_bfd_path = $with_bfd_path])
 
-AC_ARG_WITH([libiberty-path],
+AC_ARG_WITH([libiberty],
         [AS_HELP_STRING([--with-libiberty=path location of libiberty(from binutils)])],
         [],
         [with_libiberty_path=check])
@@ -40,7 +40,7 @@ fi
 if test -z "${bfd_a_location}"; then
   AC_MSG_ERROR([
     Could not locate libbfd.a or bfd.h.
-    Please use the --with-bfd-path=<path to your libbfd library>
+    Please use the --with-bfd=<path to your libbfd library>
  ])
 fi
 
@@ -78,7 +78,7 @@ if test -z "${libiberty_a_location}";
 then
   AC_MSG_ERROR([
     Could not locate libiberty.a
-    Please use the --with-libiberty-path=<path to your libiberty library>
+    Please use the --with-libiberty=<path to your libiberty library>
  ])
 fi
 

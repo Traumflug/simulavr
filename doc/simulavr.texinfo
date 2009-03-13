@@ -628,12 +628,12 @@ of the configure options.
 Use this option to specify the root directory to install simulavr
 to. /usr/local is the default.
 
-@item --with-bfd-path
+@item --with-bfd
 If configure tells you it can't find libbfd, try
---with-bfd-path=/your/path/. Notice that you are expected to point to
+--with-bfd=/your/path/. Notice that you are expected to point to
 the libbfd from binutils configured for AVR.
 
-@item --with-libiberty-path
+@item --with-libiberty
 In the unlikely event that your properly installed AVR binutils results
 in simulavr finding libbfd but not libiberty, use this option. Use of
 this option usually means the libiberty you are looking at did not come
@@ -647,9 +647,9 @@ requiring the Tcl GUI will be built.  By default, Tcl is enabled
 but if Tcl is not installed on your computer, Tcl will be automatically
 disabled.
 
-@item --with-tclconfig-path
+@item --with-tclconfig
 If configure tells you it can't find tclConfig.sh, try
---with-tclconfig-path=/your/path/.
+--with-tclconfig=/your/path/.
 
 @end table
 
