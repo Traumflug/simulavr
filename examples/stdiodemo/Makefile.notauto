@@ -1,3 +1,7 @@
+#
+#  $Id$
+#
+
 PRG            = stdiodemo
 OBJ            = stdiodemo.o hd44780.o lcd.o uart.o
 MCU_TARGET     = atmega128

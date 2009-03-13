@@ -1,3 +1,7 @@
+/*
+ *  $Id$
+ */
+
 /* Set cpu specific attributes in this file */
 
 #define    ATMEGA128    100

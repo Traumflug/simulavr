@@ -1,3 +1,7 @@
+/*
+ *  $Id$
+ */
+
 // PS-1 Keyboard interface test program
 
 #include <avr/io.h>

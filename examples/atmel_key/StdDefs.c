@@ -1,3 +1,7 @@
+/*
+ *  $Id$
+ */
+
 // Common routines used in most programs
 
 #include <avr/io.h>

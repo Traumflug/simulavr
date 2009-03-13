@@ -1,3 +1,16 @@
+2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* anacomp/README, anacomp/checkdebug.py, anacomp/main.c,
+	atmel_key/Makefile.notauto, atmel_key/Notes.txt, atmel_key/StdDefs.c,
+	atmel_key/StdDefs.h, atmel_key/kb.c, atmel_key/kb.h,
+	atmel_key/main.c, atmel_key/pindefs.h, atmel_key/scancodes.h,
+	atmel_key/serial.c, atmel_key/serial.h, stdiodemo/Makefile.notauto,
+	stdiodemo/checkdebug.gdb, stdiodemo/checkdebug.tcl.in,
+	stdiodemo/stdiodemo.dox: Add CVS Id and make spacing consistent at
+	the end of the header comment block. In some .h files moved the
+	inclusion protection ifdef to after the header comment block to be
+	consistent with most of the .h files.
+
 2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* anacomp/Makefile.am: make dist appears to put the correct set of

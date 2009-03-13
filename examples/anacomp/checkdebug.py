@@ -1,3 +1,7 @@
+#
+#  $Id$
+#
+
 # This is not ready for prime time yet...Please post your experiences
 # to the mailing list
 

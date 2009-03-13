@@ -1,3 +1,7 @@
+#
+#  $Id$
+#
+
 PS1 Keyboard Interface      Don Carveth  July 2002
 
 PS-2 (PC-AT) style keyboard interface.

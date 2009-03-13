@@ -1,3 +1,7 @@
+/*
+ *  $Id$
+ */
+
 //Key Code Assignments
 
 // Note: This file, as received from Atmel, contained some strange assignments.

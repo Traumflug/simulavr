@@ -1,3 +1,7 @@
+/*
+ *  $Id$
+ */
+
 #ifndef __SERIAL_INCLUDED
 #define __SERIAL_INCLUDED
 /* 

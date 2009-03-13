@@ -1,3 +1,7 @@
+/*
+ *  $Id$
+ */
+
 // Keyboard communication routines
 
 #ifndef __KB_INCLUDED
