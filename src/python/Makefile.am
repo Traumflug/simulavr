@@ -1,3 +1,7 @@
+#
+#  $Id$
+#
+
 # This is a placeholder. 
 
 DISTCLEANFILES:=${DISTCLEANFILES} simulavr.py  _simulavr.so simulavr_wrap.cpp

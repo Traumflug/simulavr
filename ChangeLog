@@ -1,5 +1,45 @@
 2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* AUTHORS, INSTALL, NEWS, doc/config.texi.in, doc/simulavr.texinfo,
+	doc/version.texi, m4/AX_AVR_ENVIRON.m4, m4/README, m4/ac_pkg_swig.m4,
+	m4/ac_python_devel.m4, m4/avr_local.m4, m4/avr_python.m4,
+	m4/avr_swig.m4, m4/avr_tcl.m4, m4/swig_enable_cxx.m4,
+	m4/swig_multi_module_support.m4, m4/swig_python.m4, regress/README,
+	src/application.cpp, src/application.h, src/at4433.cpp, src/at4433.h,
+	src/at8515.cpp, src/at8515.h, src/atmega128.cpp, src/atmega128.h,
+	src/avrdevice.cpp, src/avrdevice.h, src/avrdevice_impl.h,
+	src/avrerror.cpp, src/avrerror.h, src/avrfactory.cpp,
+	src/avrfactory.h, src/avrmalloc.cpp, src/avrmalloc.h,
+	src/breakpoint.h, src/config_deprecated.h, src/decoder.cpp,
+	src/decoder.h, src/decoder_trace.cpp, src/externaltype.h,
+	src/flash.cpp, src/flash.h, src/funktor.h, src/gdb.h,
+	src/gdbserver.cpp, src/global.h, src/hardware.cpp, src/hardware.h,
+	src/helper.cpp, src/helper.h, src/hwacomp.cpp, src/hwacomp.h,
+	src/hwad.cpp, src/hwad.h, src/hweeprom.cpp, src/hweeprom.h,
+	src/hwextirq.cpp, src/hwextirq.h, src/hwmegaextirq.cpp,
+	src/hwmegaextirq.h, src/hwmegatimer.cpp, src/hwmegatimer.h,
+	src/hwmegatimer0123irq.cpp, src/hwmegatimer0123irq.h, src/hwport.cpp,
+	src/hwport.h, src/hwspi.cpp, src/hwspi.h, src/hwsreg.cpp,
+	src/hwsreg.h, src/hwstack.cpp, src/hwstack.h, src/hwtimer.cpp,
+	src/hwtimer.h, src/hwtimer01irq.cpp, src/hwtimer01irq.h,
+	src/hwuart.cpp, src/hwuart.h, src/hwwado.cpp, src/hwwado.h,
+	src/ioregs.cpp, src/ioregs.h, src/irqsystem.cpp, src/irqsystem.h,
+	src/kbdgentables.cpp, src/keyboard.cpp, src/keyboard.h, src/lcd.cpp,
+	src/lcd.h, src/main.cpp, src/memory.cpp, src/memory.h,
+	src/mysocket.cpp, src/mysocket.h, src/net.cpp, src/net.h,
+	src/pin.cpp, src/pin.h, src/pinatport.cpp, src/pinatport.h,
+	src/pinnotify.h, src/printable.cpp, src/printable.h, src/rwmem.cpp,
+	src/rwmem.h, src/scope.cpp, src/scope.h, src/serialrx.cpp,
+	src/serialrx.h, src/serialtx.cpp, src/serialtx.h,
+	src/simulationmember.h, src/systemclock.cpp, src/systemclock.h,
+	src/systemclocktypes.h, src/trace.cpp, src/trace.h, src/types.h,
+	src/ui.cpp, src/ui.h, src/vpi.cpp, src/python/Makefile.am: Add CVS Id
+	and make spacing consistent at the end of the header comment block.
+	In some .h files moved the inclusion protection ifdef to after the
+	header comment block to be consistent with most of the .h files.
+
+2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* INSTALL, README, configure.ac, doc/simulavr.texinfo,
 	m4/AX_AVR_ENVIRON.m4: Drop -path from all configure arguments.
 

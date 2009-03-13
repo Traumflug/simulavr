@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  ****************************************************************************
+ *
+ *  $Id$
  */
+
 #include "hwuart.h"
 #include "avrdevice.h"
 #include "irqsystem.h"

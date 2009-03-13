@@ -1,4 +1,4 @@
- /*
+/*
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  ****************************************************************************
+ *
+ *  $Id$
  */
+
 #define BREAK_POINT    -2   
 #define	INVALID_OPCODE -1
 

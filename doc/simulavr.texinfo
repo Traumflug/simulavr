@@ -1,3 +1,7 @@
+@c
+@c  $Id$
+@c 
+
 \input texinfo @c -*-texinfo-*-
 
 @include version.texi
@@ -768,7 +772,7 @@ sc Add kbd
 These three commands create a Keyboard instance @code{kbd} with
 the name @code{"kbd1"}. For this instance the clock timing is
 set to 40000ns. simulavr internal timing for any asynchronous
-activity are multiples of 1ns. The third command addes the keyboard
+activity are multiples of 1ns. The third command adds the keyboard
 instance to the simulavr timer. The rest of the commands in
 @file{examples/atmel-key/checkdebug.tcl} is the normal for this
 simmulation. Create a CPU AtMega128 with 4MHz clock. Create indicators

@@ -1,3 +1,7 @@
+/*
+ *  $Id$
+ */
+
 #include "flash.h"
 #include "memory.h"
 #include "hweeprom.h"

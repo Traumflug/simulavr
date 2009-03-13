@@ -1,3 +1,7 @@
+/*
+ *  $Id$
+ */
+
 #ifndef EXTERNALTYPE
 #define EXTERNALTYPE
 #include <string>

@@ -1,3 +1,7 @@
+#
+#  $Id$
+#
+
 #define PRG_WISH "/usr/bin/wish"
 
 //#define WE_ACT_AS_SERVER 1

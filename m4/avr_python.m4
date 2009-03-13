@@ -1,3 +1,7 @@
+#
+#  $Id$
+#
+
 AC_DEFUN([AC_WAR_PYTHON],
 [
  dnl This macro searches for python version 2.1.1 or newer

@@ -53,6 +53,11 @@
 #   may extend this special exception to the GPL to apply to your
 #   modified version as well.
 
+#
+#  $Id$
+#
+
+
 ## NOTE: Old swig versions need -noruntime but it has been deprecated.
 ##       If you ever need to build with the old swig, then it will be
 ##       augment this test to detect if that option is supported.

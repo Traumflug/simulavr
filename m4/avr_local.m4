@@ -1,3 +1,7 @@
+#
+#  $Id$
+#
+
 dnl I still don't understand hwo to be productive with GNU autotools...so 
 dnl I'm sure I'm rolling my own when I shouldn't here...
 dnl

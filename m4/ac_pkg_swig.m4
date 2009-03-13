@@ -64,6 +64,10 @@
 #   may extend this special exception to the GPL to apply to your
 #   modified version as well.
 
+#
+#  $Id$
+#
+
 AC_DEFUN([AC_PROG_SWIG],[
         AC_PATH_PROG([SWIG],[swig])
         if test -z "$SWIG" ; then

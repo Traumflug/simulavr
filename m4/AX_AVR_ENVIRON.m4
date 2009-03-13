@@ -1,3 +1,7 @@
+#
+#  $Id$
+#
+
 dnl handle sanity checks for AVR environment and 
 dnl special build requirements such as libbfd and
 dnl libiberty built for the AVR toolchain.

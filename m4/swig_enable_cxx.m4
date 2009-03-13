@@ -49,6 +49,10 @@
 #   may extend this special exception to the GPL to apply to your
 #   modified version as well.
 
+#
+#  $Id$
+#
+
 AC_DEFUN([SWIG_ENABLE_CXX],[
         AC_REQUIRE([AC_PROG_SWIG])
         AC_REQUIRE([AC_PROG_CXX])

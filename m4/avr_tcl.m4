@@ -1,3 +1,7 @@
+#
+#  $Id$
+#
+
 AC_DEFUN([AC_WAR_TCL],
 [
    AC_PATH_PROG(TCL_WISH, wish wish8.4 wish8.3 wish8.2 )

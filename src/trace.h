@@ -1,3 +1,7 @@
+/*
+ *  $Id$
+ */
+
 #include <iostream>
 #include <fstream>
 
