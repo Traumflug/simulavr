@@ -1,5 +1,10 @@
 2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* src/main.cpp: Improve verbose message for -T/-B options.
+	* src/simulavr.i: Add keyboard.h
+
+2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* AUTHORS, INSTALL, NEWS, doc/config.texi.in, doc/simulavr.texinfo,
 	doc/version.texi, m4/AX_AVR_ENVIRON.m4, m4/README, m4/ac_pkg_swig.m4,
 	m4/ac_python_devel.m4, m4/avr_local.m4, m4/avr_python.m4,

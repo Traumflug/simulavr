@@ -283,7 +283,8 @@ int main(int argc, char *argv[]) {
    //if we have a file we can check out for termination lines.
    vector<string>::iterator ii;
    for (ii=terminationArgs.begin(); ii!=terminationArgs.end(); ii++) {
-      if (global_verbose_on) cout <<*ii<<endl;
+      if (global_verbose_on)
+         cout << "Termination or Breakpoint Symbol: " << *ii << endl;
       unsigned int epa=dev1->Flash->GetAddressAtSymbol(*ii);
       dev1->EP.push_back(epa);
    }
