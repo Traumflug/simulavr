@@ -138,5 +138,31 @@ RWReadFromPipe::operator unsigned char() const{
     return val; 
 } 
 
+// Exit the simulator magic address support
+unsigned char RWExit::operator=(unsigned char c)
+{
+  cerr << "Exiting at simulated program request" << endl;
+  exit((int) c); 
+}
 
+RWExit::operator unsigned char() const 
+{
+  cerr << "Exiting at simulated program request" << endl;
+  exit(0);
+  return 0;
+}
+
+// Abort the simulator magic address support
+unsigned char RWAbort::operator=(unsigned char c)
+{
+  cerr << "Aborting at simulated program request" << endl;
+  abort();
+}
+
+RWAbort::operator unsigned char() const 
+{
+  cerr << "Aborting at simulated program request" << endl;
+  abort();
+  return 0;
+}
 

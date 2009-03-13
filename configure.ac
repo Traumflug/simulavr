@@ -135,6 +135,7 @@ AC_CONFIG_FILES([\
   Makefile src/Makefile \
   doc/Makefile doc/config.texi \
   regress/Makefile regress/modules/Makefile regress/test_opcodes/Makefile \
+  regress/avrtest/Makefile \
   examples/Makefile examples/anacomp/Makefile examples/atmel_key/Makefile \
   examples/simple_ex1/Makefile examples/stdiodemo/Makefile \
 ])

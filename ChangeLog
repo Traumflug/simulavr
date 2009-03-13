@@ -1,3 +1,14 @@
+2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac, regress/Makefile.am, src/main.cpp, src/rwmem.cpp,
+	src/rwmem.h: Add support for special abort and exit devices to
+	provide higher functionality compatability with avrtest. Add new
+	regression test to exercise this functionality.
+	* regress/avrtest/.cvsignore, regress/avrtest/Makefile.am,
+	regress/avrtest/avrtest_help.c, regress/avrtest/avrtest_help.h,
+	regress/avrtest/test_abort.c, regress/avrtest/test_exit.c,
+	regress/avrtest/test_maxruntime.c: New files.
+
 2009-03-12	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* configure.ac, doc/.cvsignore, doc/simulavr.texinfo, src/main.cpp: Use

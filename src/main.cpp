@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
-//#include <signal.h>
 
 #include <map>
 
@@ -65,6 +64,12 @@ const char Usage[] =
 "-R --readfrompipe <offset>,<file>\n"
 "                      add a special pipe register to device at IO-offset\n"
 "                      and opens <file> for reading\n"
+"-a --writetoabort <offset>\n"
+"                      add a special register at IO-offset\n"
+"                      which aborts simulator run\n"
+"-e --writetoexit <offset>\n"
+"                      add a special register at IO-offset\n"
+"                      which exits simulator run\n"
 "-V --verbose          output some hints to console\n"
 "-T --terminate <label> or <address>\n"
 "                      stops simulation if PC runs on <label> or <address>\n"
@@ -96,6 +101,8 @@ int main(int argc, char *argv[]) {
 
    unsigned int writeToPipeOffset=0x20;
    unsigned int readFromPipeOffset=0x21;
+   unsigned int writeToAbort=0;
+   unsigned int writeToExit=0;
    string readFromPipeFileName="";
    string writeToPipeFileName="";
 
@@ -116,13 +123,15 @@ int main(int argc, char *argv[]) {
          {"cpufrequency", 1,0,'F'},
          {"readfrompipe", 1,0,'R'},
          {"writetopipe", 1,0,'W'},
+         {"writetoabort", 1,0,'a'},
+         {"writetoexit", 1,0,'e'},
          {"verbose", 0,0,'V'},
          {"terminate",1,0,'T'},
          {"breakpoint",1,0,'B'},
          {0, 0, 0, 0}
       };
 
-      c = getopt_long (argc, argv, "f:d:gGm:p:t:uxyzhvniF:R:W:VT:B:", long_options, &option_index);
+      c = getopt_long (argc, argv, "a:e:f:d:gGm:p:t:uxyzhvniF:R:W:VT:B:", long_options, &option_index);
       if (c == -1)
          break;
 
@@ -148,9 +157,18 @@ int main(int argc, char *argv[]) {
             writeToPipeFileName=dummy;
             break;
 
+         case 'a': // write to abort
+            writeToAbort = strtoul(optarg, &dummy, 16);
+            break;
+
+         case 'e': // write to exit
+            writeToExit = strtoul(optarg, &dummy, 16);
+            break;
+
          case 'F':
             fcpu=strtoll(optarg, NULL, 10);
-            if (global_verbose_on) cout << "Running with CPU frequency: " << fcpu << endl;
+            if (global_verbose_on)
+               cout << "Running with CPU frequency: " << fcpu << endl;
             break;
 
          case 'm':
@@ -160,58 +178,65 @@ int main(int argc, char *argv[]) {
             break;
 
          case 'u':
-            if (global_verbose_on) cout << "Run with User Interface at Port 7777" << endl;
+            if (global_verbose_on)
+               cout << "Run with User Interface at Port 7777" << endl;
             userinterface_flag=1;
             break;
 
          case 'f':
-            if (global_verbose_on) cout << "File to load: " << optarg << endl;
+            if (global_verbose_on)
+               cout << "File to load: " << optarg << endl;
             filename=optarg;
             break;
 
          case 'd':
-            if (global_verbose_on) cout << "Device to simulate: " << optarg << endl;
+            if (global_verbose_on)
+               cout << "Device to simulate: " << optarg << endl;
             devicename=optarg;
             break;
 
          case 'g':
-            if (global_verbose_on) cout << "Running as gdb-server" << endl;
+            if (global_verbose_on)
+               cout << "Running as gdb-server" << endl;
             gdbserver_flag=1;
             break;
 
          case 'G':
-            if (global_verbose_on) cout << "Running with debug information from gdbserver" << endl;
+            if (global_verbose_on)
+               cout << "Running with debug information from gdbserver" << endl;
             global_gdb_debug = 1;
             gdbserver_flag=1;
             break;
 
          case 'p':
-            if (global_verbose_on) cout << "Running on port: " << optarg << endl;
+            if (global_verbose_on)
+               cout << "Running on port: " << optarg << endl;
             global_gdbserver_port = atoi(optarg);
             break;
 
          case 't':
-            if (global_verbose_on) cout << "Running in Trace Mode" << endl;
+            if (global_verbose_on)
+               cout << "Running in Trace Mode" << endl;
             StartTrace(optarg);
             break;
 
          case 'v':
-            cout << "SimulAVR " << VERSION << endl;
-            cout << "See documentation for copyright and distribution terms" << endl;
-            cout << endl;
+            cout << "SimulAVR " << VERSION << endl
+                 << "See documentation for copyright and distribution terms"
+                     << endl
+                 << endl;
             exit(0);
             break;
 
          case 'n':
-            cout << "We will NOT wait for a gdb connection, simulation starts now!" << endl;
+            cout << "We will NOT wait for a gdb connection, "
+                    "simulation starts now!" << endl;
             globalWaitForGdbConnection=false;
             break;
-
 
          default:
             cout << Usage;
             exit(0);
-
       }
    }
 
@@ -220,16 +245,33 @@ int main(int argc, char *argv[]) {
 
    //if we want to insert some special "pipe" Registers we could do this here:
    if (readFromPipeFileName!="") {
-      if (global_verbose_on) cout << "Add ReadFromPipe-Register at 0x" << hex << readFromPipeOffset << " and read from file: " << readFromPipeFileName << endl;
+      if (global_verbose_on)
+         cout << "Add ReadFromPipe-Register at 0x"
+              << hex << readFromPipeOffset
+              << " and read from file: " << readFromPipeFileName << endl;
       dev1->ReplaceIoRegister(readFromPipeOffset, new RWReadFromPipe(dev1, readFromPipeFileName));
    }
 
    if (writeToPipeFileName!="") {
-      if (global_verbose_on) cout << "Add WriteToPipe-Register at 0x" << hex << writeToPipeOffset << " and write to file: " << writeToPipeFileName << endl;
+      if (global_verbose_on)
+         cout << "Add WriteToPipe-Register at 0x" <<
+                 hex << writeToPipeOffset <<
+                 " and write to file: " << writeToPipeFileName << endl;
       dev1->ReplaceIoRegister(writeToPipeOffset, new RWWriteToPipe(dev1, writeToPipeFileName));
    }
 
+   if (writeToAbort) {
+      if (global_verbose_on)
+        cout << "Add WriteToAbort-Register at 0x" << hex <<
+                 writeToAbort << endl;
+      dev1->ReplaceIoRegister(writeToAbort, new RWAbort(dev1));
+   }
 
+   if (writeToExit) {
+      if (global_verbose_on)
+        cout << "Add WriteToExit-Register at 0x" << hex << writeToExit << endl;
+      dev1->ReplaceIoRegister(writeToExit, new RWExit(dev1));
+   }
 
    if (filename != "unknown" ) {
       dev1->Load(filename.c_str());

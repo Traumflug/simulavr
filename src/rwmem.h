@@ -169,9 +169,28 @@ class RWReadFromPipe: public RWMemoryMembers {
 };
 
 
+// Exit the simulator magic address 
+class RWExit: public RWMemoryMembers {
 
+    public:
+        RWExit(AvrDevice *c)
+          : RWMemoryMembers(c) {}
 
+        virtual ~RWExit() {}
+        virtual unsigned char operator=(unsigned char);
+        virtual operator unsigned char() const;
+};
 
+// Abort the simulator magic address 
+class RWAbort: public RWMemoryMembers {
 
+    public:
+        RWAbort(AvrDevice *c)
+          : RWMemoryMembers(c) {}
+
+        virtual ~RWAbort() {}
+        virtual unsigned char operator=(unsigned char);
+        virtual operator unsigned char() const;
+};
 
 #endif
