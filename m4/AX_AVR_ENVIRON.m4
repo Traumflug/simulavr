@@ -21,22 +21,22 @@ dnl Let's handle user-provided flags first.
 AC_ARG_WITH([bfd],
         [AS_HELP_STRING([--with-bfd=path  location of AVR-binutils version of libbfd install where include/bfd.h and lib/libbfd.a are found (from binutils)])],
         [],
-        [with_bfd_path=check])
-AC_MSG_RESULT([with_bfd_path = $with_bfd_path])
+        [with_bfd=check])
+AC_MSG_RESULT([with_bfd = $with_bfd])
 
 AC_ARG_WITH([libiberty],
         [AS_HELP_STRING([--with-libiberty=path location of libiberty(from binutils)])],
         [],
-        [with_libiberty_path=check])
-AC_MSG_RESULT([with_libiberty_path = $with_libiberty_path])
+        [with_libiberty=check])
+AC_MSG_RESULT([with_libiberty = $with_libiberty])
 
 dnl need to use given library if it seems to be an avr-build
 dnl libbfd. If given library is not suitable, error out.
-dnl if no libbfd is given, and with_bfd_path is not "no", then search
+dnl if no libbfd is given, and with_bfd is not "no", then search
 dnl for libbfd. If none found, error out.
 
-if test x"${with_bfd_path}" != "xcheck"; then
-  AVR_BFD_SEARCH_STEP($with_bfd_path)
+if test x"${with_bfd}" != "xcheck"; then
+  AVR_BFD_SEARCH_STEP($with_bfd)
 else
   AVR_BFD_SEARCH_STEP(/usr)
 fi
@@ -52,11 +52,11 @@ AVR_LIBBFD_LIB=${bfd_a_location}/libbfd.a
 AVR_LIBBFD_INC=${bfd_h_location}
 
 ######### LIBIBERTY
-if test "x${with_libiberty_path}" != "xcheck"; then
-  AVR_LIBIBERTY_SEARCH_STEP($with_libiberty_path)
+if test "x${with_libiberty}" != "xcheck"; then
+  AVR_LIBIBERTY_SEARCH_STEP($with_libiberty)
 else
-  if test x"${with_bfd_path}" != "xcheck"; then
-    AVR_LIBIBERTY_SEARCH_STEP($with_bfd_path)
+  if test x"${with_bfd}" != "xcheck"; then
+    AVR_LIBIBERTY_SEARCH_STEP($with_bfd)
   fi
   AVR_LIBIBERTY_SEARCH_STEP(/usr)
 fi

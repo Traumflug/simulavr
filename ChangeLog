@@ -1,3 +1,10 @@
+2009-03-14	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
+
+	bug #25863: --with_bfd not working at configure under suse10.3
+	* m4/AX_AVR_ENVIRON.m4: change all {bfd,libiberty}_path
+	variables to just {bfd,libiberty} so they match their
+	respective -with-xxx option.
+
 2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* src/main.cpp: Improve verbose message for -T/-B options.
