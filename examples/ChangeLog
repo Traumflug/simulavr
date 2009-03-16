@@ -1,3 +1,12 @@
+2009-03-16	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* ChangeLog, Makefile.am: Fix buglet where it did not build inside the
+	source tree.
+
+2009-03-16	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* Makefile.am: Fix buglet where it
+
 2009-03-16	Knut Schwichtenberg <kschwi@web.de>
 
 	PR 25875/TestSuite
