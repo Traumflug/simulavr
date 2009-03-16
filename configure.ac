@@ -117,6 +117,9 @@ if test x"${build_tcl_libs}" = x"yes" -a x"${TCL_WISH}" != x"no" ; then
     [examples/anacomp/checkdebug.tcl],
     [chmod +x examples/anacomp/checkdebug.tcl])
   AC_CONFIG_FILES(
+    [examples/atmel_key/checkdebug.tcl],
+    [chmod +x examples/atmel_key/checkdebug.tcl])
+  AC_CONFIG_FILES(
     [examples/stdiodemo/checkdebug.tcl],
     [chmod +x examples/stdiodemo/checkdebug.tcl])
 else

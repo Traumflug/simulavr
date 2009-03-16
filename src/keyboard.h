@@ -37,7 +37,7 @@
 #include "pin.h"
 
 
-class Keyboard : public SimulationMember, ExternalType {
+class Keyboard : public SimulationMember, public ExternalType {
     protected:
         UserInterface *ui;
         string name;
@@ -62,14 +62,14 @@ class Keyboard : public SimulationMember, ExternalType {
 
         unsigned char actualChar;
          unsigned char lastPortValue;
-        
+
     public:
         void SetNewValueFromUi(const string &);
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
-        Keyboard(UserInterface *, const string &name);
+      Keyboard(UserInterface *, const char *name, const char *baseWindow);
         void SetClockFreq(SystemClockOffset f);
         virtual ~Keyboard();
-        Pin *GetPin(const char *name); 
+        Pin *GetPin(const char *name);
 
 };
 

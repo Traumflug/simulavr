@@ -1,3 +1,15 @@
+2009-03-16	Knut Schwichtenberg <kschwi@web.de>
+
+	PR 25878/Simulation
+	* configure.ac: Add examples/atmel_key/checkdebug.tcl.
+	* src/keyboard.cpp: Interface for constructor changed to
+	deprecated format.  If it is std::string format, at runtime the
+	TCL interpreter does not know the interface! Currently we have to
+	live with these warnings. 
+	* src/keyboard.h: Interface modified according to source and
+	change of the class definition.
+	* src/simulavr.i: Missing header files included. 
+
 2009-03-14	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
 
 	bug #25863: --with_bfd not working at configure under suse10.3

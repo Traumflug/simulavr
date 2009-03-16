@@ -177,10 +177,9 @@ int Keyboard::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
 */
     }
     if(timeToNextStepIn_ns!=0) *timeToNextStepIn_ns=myClockFreq; //call as fast as possible
-    return 0; 
+    return 0;
 }
-
-Keyboard::Keyboard(UserInterface *_ui, const string &_name): 
+Keyboard::Keyboard(UserInterface *_ui, const char *_name, const char *baseWindow):
 ui(_ui),
     name(_name),
     clk( &myPortValue, 1),
