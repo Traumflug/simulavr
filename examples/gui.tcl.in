@@ -19,7 +19,7 @@ class Kbd {
             set win $_win
             set objname $_objname
 
-            image create bitmap kbd -file "kbd.xbm"
+            image create bitmap kbd -file "../kbd.xbm"
 
             button $win.b -image kbd
             pack $win.b

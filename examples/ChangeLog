@@ -1,3 +1,12 @@
+2009-03-16	Knut Schwichtenberg <kschwi@web.de>
+
+	PR 25878/Simulation
+	* Makefile.am, gui.tcl.in, atmel_key/Makefile.am,
+	atmel_key/checkdebug.gdb: Get atmel_key example working. Knut did the
+	dirty work. Joel did the autoconf follow up.
+	* kbd.xbm, atmel_key/checkdebug.tcl.in: New files.
+	* atmel_key/debug.gdb, atmel_key/kbd.xbm: Removed.
+
 2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* anacomp/README, anacomp/checkdebug.py, anacomp/main.c,
