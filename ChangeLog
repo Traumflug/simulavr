@@ -1,3 +1,9 @@
+2009-03-16	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	PR 25877/Configure
+	* src/Makefile.am: Fix dependencies on simulavr_wrap.cxx.
+	* src/simulavr.i: keyboard.h included twice. Fixed.
+
 2009-03-16	Knut Schwichtenberg <kschwi@web.de>
 
 	PR 25878/Simulation

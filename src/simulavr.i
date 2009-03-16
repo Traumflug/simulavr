@@ -17,7 +17,6 @@
 #include "lcd.h"
 #include "serialrx.h"
 #include "serialtx.h"
-#include "keyboard.h"
 #include "scope.h"
 
 SystemClock &GetSystemClock() { return SystemClock::Instance(); }
@@ -42,7 +41,6 @@ SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %include "lcd.h"
 %include "serialrx.h"
 %include "serialtx.h"
-%include "keyboard.h"
 %include "scope.h"
 
 
