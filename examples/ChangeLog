@@ -1,5 +1,10 @@
 2009-03-16	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* atmel_key/.cvsignore, stdiodemo/.cvsignore: Adding files which were
+	missed when you build in the source tree.
+
+2009-03-16	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* ChangeLog, Makefile.am: Fix buglet where it did not build inside the
 	source tree.
 

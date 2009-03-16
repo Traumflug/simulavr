@@ -1,6 +1,7 @@
 Makefile.in
 Makefile
-atmel_key
+atmel_key.elf
+checkdebug.tcl
 serial.lst
 main.sym
 main.map
