@@ -1,5 +1,12 @@
 2009-03-16	Knut Schwichtenberg <kschwi@web.de>
 
+	PR 25875/TestSuite
+	* gui.tcl.in, anacomp/checkdebug.tcl.in, stdiodemo/Makefile.am,
+	stdiodemo/checkdebug.gdb, stdiodemo/checkdebug.tcl.in: stdiodemo did
+	not work. Fix issues in gui.tcl.
+
+2009-03-16	Knut Schwichtenberg <kschwi@web.de>
+
 	PR 25878/Simulation
 	* Makefile.am, gui.tcl.in, atmel_key/Makefile.am,
 	atmel_key/checkdebug.gdb: Get atmel_key example working. Knut did the

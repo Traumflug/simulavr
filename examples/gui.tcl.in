@@ -134,17 +134,16 @@ class SerialTx {
             set win $_win
             set objname $_objname 
 
-
             frame $win.$objname
             
 
             frame $win.$objname.tx
             text $win.$objname.tx.text -width 40 -height 6
-            label $win.$objname.tx.status -text "-----------"
+            label $win.$objname.tx.status -text "Serial transmitter of PC"
             label $win.$objname.tx.pin -text "-----------" 
 
             #bind $win.$objname.tx.text <<Modified>> "puts Hallo"
-            bind $win.$objname.tx.text <KeyPress> "$this NewCharEntered %K"
+            bind $win.$objname.tx.text <KeyPress> "$this NewCharEntered %K %A"
 
             frame $win.$objname.config
             label $win.$objname.config.baudrate -text "-----------"
@@ -157,8 +156,21 @@ class SerialTx {
 
         }
 
-        method NewCharEntered { c }  {
-            $parent SendToSimulator $objname $c
+        method NewCharEntered { c a}  {
+            #puts "$c   |$a|   " 
+
+            if { "$a" != ""}  {
+# Handle any character
+              $parent SendToSimulator $objname $a
+            } else {
+# Handle the special characters
+              switch $c {
+                     "Return" { set $a "\n"}
+              }
+              if { "$a" != ""}  {
+                $parent SendToSimulator $objname $a
+              }
+            }
         }
 
     }
@@ -184,7 +196,7 @@ class SerialRx {
             
             frame $win.$objname.rx
             text $win.$objname.rx.text -width 40 -height 6
-            label $win.$objname.rx.status -text "-----------"
+            label $win.$objname.rx.status -text "Serial receiver of PC"
             label $win.$objname.rx.pin -text "-----------"
 
             frame $win.$objname.config

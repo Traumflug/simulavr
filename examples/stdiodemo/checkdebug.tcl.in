@@ -115,8 +115,7 @@ puts "Simulation runs endless, please press CTRL-C to abort"
 GdbServer gdb1 $dev1 1212 0
 $sc Add gdb1
 
-## exec ddd  --debugger avr-gdb --command checkdebug.gdb &
-exec @DDD_WITH_ARGS@ avr-gdb --command checkdebug.gdb &
+exec @DDD_WITH_ARGS@ avr-gdb --command @srcdir@/checkdebug.gdb &
 
 #now run simulation
 $sc Endless
