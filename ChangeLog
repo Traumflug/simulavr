@@ -1,3 +1,7 @@
+2009-03-17	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/hwspi.cpp: Fix spelling error.
+
 2009-03-16	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	PR 25877/Configure

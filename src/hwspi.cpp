@@ -81,7 +81,7 @@ void HWSpi::SetSpdr(unsigned char val) {
 
 void HWSpi::SetSpsr(unsigned char val) { 
     if (core->trace_on) {
-        traceOut << "spsr is read onyl! ";
+        traceOut << "spsr is read only! ";
     } else {
         cerr << "spsr is read only! ";
     }
