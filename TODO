@@ -33,3 +33,58 @@
   - libiconv.a and libintl.a are not needed on Fedora 10 but required on
     Cygwin.  They are forced in on Cygwin now.  Can we know dynamically
     if these are needed?
+
++ Known limitations of the M128 as the most comprehensive currently simulated CPU
+  - TWI Serial Interface missing
+  - Analog to Digital Converter Subsystem need to be validated
+  - Self-Programming not supported
+  - Boot Loader Support (fuses, different reset vector, switching interrupt
+    vector table, ...) not supported
+  - Real Time Clock missing
+  - Watchdog Timer status unclear
+  - Sleep-command not working
+  - Reset-pin is not available. Also different reset reasons are not supported
+  - With activating the Tx-Pin of an UART the DDR-Register is not set properly
+    to output. Workaround: Set the Pin's default value to PULLUP. While the
+    Pin behaves as Open Colletor (pulls down only) the pull-up "resistor" lets
+    the system run as it should.
+  - There are always 64kByte of external memory automatically attached to the
+    Mega128. Different memory sizes are not supported.
+  - Segments dfferent than .text, .data, .bss are not supported
+
++ Known limitation of other CPU-models
+  - While Atmel changed some function details of the EEPROM, Watchdog Timer,
+    Timer Subsystem, ADC, and USART / USI these subsystems have identical
+    names but different functions.  Therefore adding a new CPU needs a detailed
+    analysis of the functions of each IO-subsystem
+  - CPUs with 24bit program counter are not supported
+  - USI-subsystem is missing
+  - CAN-subsystem is missing
+  - USB subsystem is missing
+  - X-Mega specifics are missing
+
++ Known issues of the simulator
+  - LCD subsystem is simlified to
+    - only a 4*20 character type is available
+    - the timing is fixed as described for the 5V-versions
+    - only the 4 bit interface is supported. At start-up the commands are
+      interpreted as if an eight bit interface is available (one write cycle
+      per command). After finishing the initialization switching to the four
+      bit interface is permitted at any time.
+    - the graphic representation is character based. Display of of characters
+       follows the rules of your display, not of the LCD character generator.
+    - loadable characters are not supported.
+    - reading of display is not supported.
+    - reading of busy flag does not give the current address in the lower bits.
+    - scrolling not supported.
+    - shift right / left of the display content is not supported.
+    - only one character set is supported - based on your diplay font.
+
+  - Scope subsystem is an empty frame
+
+  - Serial Rx/Tx is simplfied to
+    - only 8 bit data transmission is supported
+    - 9 bit handling (MPM) is not supported
+
+  - Waiting at a breakpoint for a GDB user input: the active wait-loop should
+    be replaced by something using less CPU power.
