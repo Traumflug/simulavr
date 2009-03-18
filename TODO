@@ -3,14 +3,11 @@
 #
 
 + Host specific issues
-  - Cygwin: Cannot use library objects built for DLL as static
+  - Cygwin: Basic Simulator Functionality Works.  Need to check Tcl/X.
   - Mingw: Uses BSD sockets.  Need to have WinSock as alternative
 
 + Feature parity with avrtest.  Known issues:
-  - Support avrtest magic addresses 
-      STDIO_PORT 0x52
-      EXIT_PORT  0x4F
-      ABORT_PORT 0x49
+  - Verify gcc test suite can be run with avrtest
 
 + Feature parity with simulavr.  Known issues:
   - avr-libc mostly tests with AT90S8515 and ATmega128 so most is OK

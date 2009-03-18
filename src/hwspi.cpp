@@ -26,6 +26,7 @@
 /*TODO if reading first the spsr and after that read spdr the SPIF Flag must be cleared! */
 
 #include "hwspi.h"
+#include "flash.h"
 #include "avrdevice.h"
 #include "trace.h"
 #include "irqsystem.h"
@@ -80,11 +81,10 @@ void HWSpi::SetSpdr(unsigned char val) {
 } 
 
 void HWSpi::SetSpsr(unsigned char val) { 
-    if (core->trace_on) {
-        traceOut << "spsr is read only! ";
-    } else {
-        cerr << "spsr is read only! ";
-    }
+    ((core->trace_on) ?
+      (traceOut) : (cerr))
+      << "spsr is read only! (0x" << hex << core->PC << " =  " <<
+         core->Flash->GetSymbolAtAddress(core->PC) << ")" << endl;
 }
 
 
@@ -92,7 +92,7 @@ void HWSpi::SetSpcr(unsigned char val) {
     unsigned char spcrold=spcr;
     spcr=val;
 
-    if ( ( spcr & SPE) != (spcrold & SPE) ) 
+    if ( (spcr & SPE) != (spcrold & SPE) ) 
     {
         if (spcr & SPE) 
         {
