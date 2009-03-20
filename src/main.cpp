@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
       static struct option long_options[] = {
          {"file", 1, 0, 'f'},
          {"device", 1, 0, 'd'},
-         {"gdbserver", 1, 0, 'g'},
+         {"gdbserver", 0, 0, 'g'},
          {"maxruntime", 1,0,'m'},
          {"nogdbwait",0,0,'n'},
          {"trace", 1, 0, 't'},

@@ -1,3 +1,9 @@
+2009-03-20	Ahmed Baizid <ahmed@baizid.org>
+
+	PR 25939
+	* src/main.cpp: The option --gdbserver requires an argument and this
+	was not specified in the long options structure.
+
 2009-03-20	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
 
 	* examples/Makefile.am: Use builddir rather than objdir, as that's what
