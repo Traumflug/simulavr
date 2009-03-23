@@ -1,3 +1,10 @@
+2009-03-23	Onno Kortmann <onno@gmx.net>
+
+	* doc/version.texi, regress/avrtest/test_exit.c, src/avrdevice.cpp,
+	src/rwmem.cpp: Prevent segfault on access to not implemented I/O
+	registers. If verbose, print message on accesses to reserved or
+	non-existent I/O registers.
+
 2009-03-23	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* README, configure.ac, doc/simulavr.texinfo, doc/version.texi,

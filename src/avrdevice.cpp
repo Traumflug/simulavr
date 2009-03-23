@@ -228,8 +228,15 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize, unsigned int IRamSize, unsigned 
          currentOffset++;
       }      
 
-      // no way to generate a generic IO-Space here, so we need a gap
-      currentOffset+=ioSpaceSize;
+    /* Create invalid registers in I/O space which will fail on access (to
+       make simulavrxx more robust!)  In all well implemented devices, these
+       should be overwritten by the particular device type. But accessing such
+       a register will at least notify the user that there is an unimplemented
+       feature. */
+    for (unsigned int ii=0; ii<ioSpaceSize; ii++ ) {
+	rw[currentOffset]=new NotAvailableIo(this, currentOffset);
+	currentOffset++;
+    }
 
       //create the internal ram handlers	
       for (unsigned int ii=0; ii<IRamSize; ii++ ) {
@@ -249,7 +256,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize, unsigned int IRamSize, unsigned 
          currentOffset++;
       }
 
-   }
+}
 
 //do a single core step, (0)->a real hardware step, (1) until the uC finish the opcode! 
 int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_ns) {
