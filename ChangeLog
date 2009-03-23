@@ -1,3 +1,7 @@
+2009-03-23	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* regress/avrtest/test_exit.c: Revert accidental commit.
+
 2009-03-23	Onno Kortmann <onno@gmx.net>
 
 	* doc/version.texi, regress/avrtest/test_exit.c, src/avrdevice.cpp,
