@@ -121,6 +121,9 @@ if test x"${build_tcl_libs}" = x"yes" -a x"${TCL_WISH}" != x"no" ; then
     [examples/atmel_key/checkdebug.tcl],
     [chmod +x examples/atmel_key/checkdebug.tcl])
   AC_CONFIG_FILES(
+    [examples/spi/check.tcl],
+    [chmod +x examples/spi/check.tcl])
+  AC_CONFIG_FILES(
     [examples/stdiodemo/checkdebug.tcl],
     [chmod +x examples/stdiodemo/checkdebug.tcl])
 else
@@ -141,7 +144,8 @@ AC_CONFIG_FILES([\
   regress/Makefile regress/modules/Makefile regress/test_opcodes/Makefile \
   regress/avrtest/Makefile \
   examples/Makefile examples/anacomp/Makefile examples/atmel_key/Makefile \
-  examples/simple_ex1/Makefile examples/stdiodemo/Makefile \
+  examples/simple_ex1/Makefile examples/spi/Makefile \
+  examples/stdiodemo/Makefile \
 ])
 AC_OUTPUT
 

@@ -1,3 +1,18 @@
+2009-03-23	Michael N. Moran <mike@mnmoran.org>
+
+	* configure.ac, src/Makefile.am, src/simulavr.i: Add SPI support.
+	* src/adcpin.cpp, src/adcpin.h, src/hwpinchange.cpp, src/hwpinchange.h,
+	src/pinmon.cpp, src/pinmon.h, src/spisink.cpp, src/spisink.h,
+	src/spisrc.cpp, src/spisrc.h: New files.
+	  + SpiSource - a class to stimulate the SPI bus using a file
+	  of input vectors.
+	  + SpiSink - a class to monitor the /SS SCLK and MISO SPI signals,
+	  decode the results, and display it on stdout.
+	  + PinMonitor - a class that displays state changes of a pin
+	  on stdout.
+	  + AdcPin - a class to stimulate an analog input pin with
+	  vectors from a file.
+
 2009-03-23	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* doc/simulavr.texinfo, src/at4433.cpp, src/at8515.cpp,
