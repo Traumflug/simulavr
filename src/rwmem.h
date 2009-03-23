@@ -106,8 +106,9 @@ class NotAvailableIo: public RWMemoryMembers {
 };
 
 class RWReserved: public RWMemoryMembers {
+    unsigned int myAddress;
     public:
-        RWReserved(AvrDevice *c): RWMemoryMembers(c) { }
+        RWReserved(AvrDevice* c, unsigned int number):RWMemoryMembers(c), myAddress(number) { }
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };

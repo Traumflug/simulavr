@@ -73,7 +73,7 @@ unsigned char ERam::operator=(unsigned char val) {
 unsigned char NotAvailableIo::operator=(unsigned char val) {
     if (core->trace_on==1)
       traceOut << "NOT AVAILABLE RAM[0x"<<hex<<myAddress<<"]=0x"<<hex<<(unsigned int)val<<dec<<" ";
-    if (global_verbose_on)
+    if (global_message_on_bad_access)
       cerr << "NOT AVAILABLE RAM[0x"<<hex<<myAddress<<"]=0x"<<hex<<(unsigned int)val<<dec<<" ";
     return val;
 }
@@ -81,7 +81,7 @@ unsigned char NotAvailableIo::operator=(unsigned char val) {
 NotAvailableIo::operator unsigned char() const {
     if (core->trace_on==1)
       traceOut << "NOT AVAILABLE RAM[0x"<<hex<<myAddress<<"] accessed ERROR!"<<dec;
-    if (global_verbose_on)
+    if (global_message_on_bad_access)
       cerr << "NOT AVAILABLE RAM[0x"<<hex<<myAddress<<"] accessed ERROR!"<<dec;
     return 0;
 }
@@ -127,14 +127,16 @@ unsigned char RWReserved::operator=(unsigned char val) {
     if (core->trace_on) {
         trioaccess("Reserved",val);
     }
-    if (global_verbose_on)
-      cerr << "ASSIGNMENT TO RESERVED ADDRESS" << endl;
+    if (global_message_on_bad_access)
+      cerr << "ASSIGNMENT TO RESERVED ADDRESS [0x" << hex << myAddress
+           << "] = 0x" << (int) val << dec << endl;
     return val;
 }
 
 RWReserved::operator unsigned char() const {
-    if (global_verbose_on)
-      cerr << "READ FROM RESERVED ADDRESS" << endl;
+    if (global_message_on_bad_access)
+      cerr << "READ FROM RESERVED ADDRESS [0x" << hex << myAddress
+           << dec << "]" << endl;
     return 0;
 }
 

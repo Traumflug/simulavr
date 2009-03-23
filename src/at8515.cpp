@@ -63,23 +63,23 @@ AvrDevice(64, 512, 0xfda0, 8192) {
 	rw[0x5f]= new RWSreg(this, status);
 	rw[0x5e]= new RWSph(this, stack);
 	rw[0x5d]= new RWSpl(this, stack);
-	rw[0x5c]= new RWReserved(this);
+	rw[0x5c]= new RWReserved(this, 0x5c);
 	rw[0x5b]= new RWGimsk(this, extirq, portd);
 	rw[0x5a]= new RWGifr(this, extirq, portd);
 	rw[0x59]= new RWTimsk(this, timer01irq);
 	rw[0x58]= new RWTifr(this, timer01irq);
 
-	rw[0x57]= new RWReserved(this);
-	rw[0x56]= new RWReserved(this);
+	rw[0x57]= new RWReserved(this, 0x57);
+	rw[0x56]= new RWReserved(this, 0x56);
 
 	rw[0x55]= new RWMcucr(this, mcucr, extirq);
 
-	rw[0x54]= new RWReserved(this);
+	rw[0x54]= new RWReserved(this, 0x54);
 
 	rw[0x53]= new RWTccr(this, timer0);	
 	rw[0x52]= new RWTcnt(this, timer0);	
-	rw[0x51]= new RWReserved(this);
-	rw[0x50]= new RWReserved(this);
+	rw[0x51]= new RWReserved(this, 0x51);
+	rw[0x50]= new RWReserved(this, 0x50);
 
 	rw[0x4f]= new RWTccra(this, timer1);
 	rw[0x4e]= new RWTccrb(this, timer1);
@@ -90,18 +90,18 @@ AvrDevice(64, 512, 0xfda0, 8192) {
 	rw[0x49]= new RWOcrbh(this, timer1);
 	rw[0x48]= new RWOcrbl(this, timer1);
 
-	rw[0x47]= new RWReserved(this);
-	rw[0x46]= new RWReserved(this);
+	rw[0x47]= new RWReserved(this, 0x47);
+	rw[0x46]= new RWReserved(this, 0x46);
 
 	rw[0x45]= new RWIcrh(this, timer1);
 	rw[0x44]= new RWIcrl(this, timer1);
 
-	rw[0x43]= new RWReserved(this);
-	rw[0x42]= new RWReserved(this);
+	rw[0x43]= new RWReserved(this, 0x43);
+	rw[0x42]= new RWReserved(this, 0x42);
 
 	rw[0x41]= new RWWdtcr(this, wado);
 
-	rw[0x40]= new RWReserved(this);
+	rw[0x40]= new RWReserved(this, 0x40);
 
 	rw[0x3f] = new RWEearh(this, eeprom);
 	rw[0x3e] = new RWEearl(this, eeprom);
@@ -135,14 +135,14 @@ AvrDevice(64, 512, 0xfda0, 8192) {
 
 	rw[0x28]= new RWAcsr(this, acomp);
 
-	rw[0x27]= new RWReserved(this);
-	rw[0x26]= new RWReserved(this);
-	rw[0x25]= new RWReserved(this);
-	rw[0x24]= new RWReserved(this);
-	rw[0x23]= new RWReserved(this);
-	rw[0x22]= new RWReserved(this);
-	rw[0x21]= new RWReserved(this);
-	rw[0x20]= new RWReserved(this);
+	rw[0x27]= new RWReserved(this, 0x27);
+	rw[0x26]= new RWReserved(this, 0x26);
+	rw[0x25]= new RWReserved(this, 0x25);
+	rw[0x24]= new RWReserved(this, 0x24);
+	rw[0x23]= new RWReserved(this, 0x23);
+	rw[0x22]= new RWReserved(this, 0x22);
+	rw[0x21]= new RWReserved(this, 0x21);
+	rw[0x20]= new RWReserved(this, 0x20);
 	Reset();
 }
 

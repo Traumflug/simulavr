@@ -1,5 +1,12 @@
 2009-03-23	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* doc/simulavr.texinfo, src/at4433.cpp, src/at8515.cpp,
+	src/atmega128.cpp, src/main.cpp, src/rwmem.cpp, src/rwmem.h,
+	src/trace.h: RWReserved now knows its address and reports a more
+	useful message.
+
+2009-03-23	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* regress/avrtest/test_exit.c: Revert accidental commit.
 
 2009-03-23	Onno Kortmann <onno@gmx.net>

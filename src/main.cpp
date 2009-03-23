@@ -57,6 +57,7 @@ const char Usage[] =
 "-g --gdbserver        run as gdb-server\n"
 "-G                    run as gdb-server and write debug info for gdb-connection\n"
 "-m  <nanoseconds>     maximum run time of <nanoseconds>\n"
+"-M                    disable messages for bad I/O and memory references\n"
 "-p  <port>            use <port> for gdb server\n"
 "-t --trace <file>     enable trace outputs to <file>\n"
 "-n --nogdbwait        do not wait for gdb connection\n"
@@ -85,6 +86,7 @@ const char Usage[] =
 "  atmega128\n"
 "\n";
 
+int global_message_on_bad_access = 1;
             
 int main(int argc, char *argv[]) {
    int c;
@@ -134,7 +136,7 @@ int main(int argc, char *argv[]) {
          {0, 0, 0, 0}
       };
 
-      c = getopt_long (argc, argv, "a:e:f:d:gGm:p:t:uxyzhvniF:R:W:VT:B:", long_options, &option_index);
+      c = getopt_long (argc, argv, "a:e:f:d:gGm:Mp:t:uxyzhvniF:R:W:VT:B:", long_options, &option_index);
       if (c == -1)
          break;
 
@@ -142,6 +144,10 @@ int main(int argc, char *argv[]) {
          case 'B':
          case 'T':
             terminationArgs.push_back(optarg);
+            break;
+
+         case 'M':
+            global_message_on_bad_access = 0;
             break;
 
          case 'V':
