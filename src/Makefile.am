@@ -15,7 +15,8 @@ LIBPYSIMULAVR=_pysimulavr.so
 endif
 endif
 
-bin_PROGRAMS    = simulavr kbdgentables
+bin_PROGRAMS    = simulavr
+@MAINT@ noinst_PROGRAMS = kbdgentables
 
 if USE_TCL
 TCL_WRAP_SRC = simulavr_wrap.cxx
@@ -70,12 +71,14 @@ simulavr_wrap.cxx: simulavr.i $(TCLHEADER)
 simulavr_wrap.o: simulavr_wrap.cxx
 	$(CXX) -I$(SRCDIR) -I$(TCL_INCLUDE) -c $<
 
-$(srcdir)/keyboard.cpp : keytrans.h 
+$(srcdir)/keyboard.cpp : $(srcdir)/keytrans.h 
 
-kbdgentables_SOURCES = kbdgentables.cpp
+@MAINT@ kbdgentables_SOURCES = kbdgentables.cpp
 
-keytrans.h: kbdgentables keynumber_to_scancode.dat xcode_to_keynumber.dat
-	./kbdgentables
+@MAINT@ $(srcdir)/keytrans.h: $(builddir)/kbdgentables \
+@MAINT@     $(srcdir)/keynumber_to_scancode.dat \
+@MAINT@     $(srcdir)/xcode_to_keynumber.dat
+@MAINT@		$(builddir)/kbdgentables $(srcdir)
 
 # Python bindings
 _pysimulavr.so: pysimulavr_wrap.cpp simulavr
@@ -89,7 +92,9 @@ pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
 
 EXTRA_DIST = simulavr.i pysimulavr.i vpi.cpp
 
-CLEANFILES = keytrans.h simulavr_wrap.cxx \
-   keytrans.h _pysimulavr.so pysimulavr.py pysimulavr_wrap.cpp
+MAINTAINERCLEANFILES = keytrans.h
+
+CLEANFILES = simulavr_wrap.cxx \
+   _pysimulavr.so pysimulavr.py pysimulavr_wrap.cpp
 
 all-am: $(LIBPYSIMULAVR)

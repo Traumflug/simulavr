@@ -655,6 +655,12 @@ disabled.
 If configure tells you it can't find tclConfig.sh, try
 --with-tclconfig=/your/path/.
 
+@item --enable-maintainer-mode
+If specified on the configure command, the generated Makefiles will
+do more dependency tracking.  In particular, they will check the
+dependencies on all automake and autoconf generated files.  When
+not building in maintainer mode, the file @c{src/keytrans.h} will
+not be built or dependencies checked.
 @end table
 
 

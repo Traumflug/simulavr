@@ -6,6 +6,7 @@ AC_INIT([SimulAVR], [0.9cvs], [simulavr-devel@nongnu.org])
 AM_INIT_AUTOMAKE([1.10 -Wall -Werror foreign])
 AC_PREREQ([2.61])
 AC_CONFIG_MACRO_DIR([m4])
+AM_MAINTAINER_MODE
 AC_PROG_LIBTOOL
 AC_PROG_CXX
 AC_PROG_SWIG(1.3.17)

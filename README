@@ -33,6 +33,9 @@ Building From CVS
 make
 make check
 
+NOTE: If you are modifying Makefile.am and configure.ac files, you
+      need to configure with --enable-maintainer-mode.
+
 Examples
 ========
 Look in the examples subdirectory for a variety of examples

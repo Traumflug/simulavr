@@ -5,7 +5,6 @@ simulavr_wrap.cxx
 .libs
 config.h
 kbdgentables
-keytrans.h
 libsimulavr.la
 libsim.la
 simulavr

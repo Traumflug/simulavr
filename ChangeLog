@@ -1,3 +1,11 @@
+2009-03-23	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* README, configure.ac, doc/simulavr.texinfo, doc/version.texi,
+	src/.cvsignore, src/Makefile.am, src/kbdgentables.cpp: Add
+	--enable-maintainer-mode. keytrans.h is considered maintainer mode
+	only.
+	* src/keytrans.h: New file.
+
 2009-03-20	Ahmed Baizid <ahmed@baizid.org>
 
 	PR 25939
