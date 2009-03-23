@@ -1,3 +1,8 @@
+2009-03-23	Michael N. Moran <mike@mnmoran.org>
+
+	* Makefile.am: Add spi example.
+	* spi/.cvsignore, spi/Makefile.am, spi/README, spi/anadata,
+	spi/check.tcl.in, spi/main.cpp, spi/spidata: New files.
 2009-03-16	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* atmel_key/.cvsignore, stdiodemo/.cvsignore: Adding files which were

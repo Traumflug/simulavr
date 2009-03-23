@@ -1,0 +1,92 @@
+#
+#  $Id$
+#
+
+Demonstrates the following Stimulation classes:
+
+	o SpiSink - monitors the /SS, SCLK and MISO pins and prints
+		each byte to stdout.
+
+	o SpiSource - drives the /SS, SCLK and MOSI pins with data from
+		the spidata file.
+
+	o PinMonitor - monitors Port A Bit 0 and prints changes in its
+		binary status to stdout.
+
+	o AdcPin - Stimulates Port F Bit 0 with the values contained
+		in the anadata file.
+
+The AVR program alternately (every other byte) echoes the byte received
+on the SPI or the ADCH value read from a recenet A/D converter, to the SPI.
+
+The spidata file contains an HDLC encoded stream of *mostly* flags
+that was used in my project at work. (We're running a form of
+PPP/HDLC over SPI.)
+
+The format of the spidata file consists of comments (lines
+that start with a '#') and data lines. Each data line consists
+of 3 values.
+
+o First Value - the value (0 or non-zero)of /SS
+o Second Value - the value (0 or non-zero) of SCLK
+o Third Value - the value (0 or non-zero) of MOSI
+
+When the SpiSource program stimulator reaches the end-of-file,
+it rewinds and repeats ad-nauseum.
+
+The anadata file contains analog data that that is read by the
+AdcPin class and written to the Port F Bit 0 analog input of
+the ATMega128.
+
+The format of the anadata file consists of comments (lines
+that start with a '#' character) and analog input lines.
+Each input line consists of 2 values separated by whitespace.
+
+o First Value - number of nano-seconds before the next value
+	is read and applied to the analog input.
+o Second Value - signed integer "analogValue" to be applied
+	to the analog input.
+
+To try it:
+
+Step 1:
+	Configure and build the simulavr (simulavr.so in particular)
+
+Step 2:
+	Build the AVR test program in this directory.
+	$ make
+
+Step 3:
+	Run the test TCL script from this directory.
+	$ check.tcl
+
+Step 4:
+	Marvel at the stdio activity.
+
+Step 5:
+	Try modifying the spidata file and see the results.
+
+
+What you'll see on stdout:
+
+Note: Comments added on the right.
+
+spisink: /SS asserted		; SPI /SS goes LOW (printed by SpiSink)
+spisink: 0x00				; 0x00 byte received on MISO from AVR (printed by SpiSink)
+PORTA0: ASSERT				; Port A Bit 0 set low by AVR (printed by PinMonitor)
+spisink: 0x00				; Analog Data from AVR on SPI MISO
+spisink: 0x02				; echoed HDLC Data from AVR on SPI MISO
+spisink: 0x99				; Analog data from AVR on SPI MISO
+spisink: 0xD3				; echoed HDLC data from AVR on SPI MISO
+spisink: 0x66				; Analog data from AVR on SPI MISO
+spisink: 0x7E				; echoed HDLC data from AVR on SPI MISO
+spisink: 0x33				; Analog data from AVR on SPI MISO
+spisink: 0x7E				; echoed HDLC data from AVR on SPI MISO
+...
+...
+spisink: 0x7E				; echoed HDLC data from AVR on SPI MISO
+spisink: 0x04				; Analog data from AVR on SPI MISO
+spisink: /SS negated		; SPI /SS goes HIGH (printed by SpiSink)
+spisink: /SS asserted		; SPI /SS goes LOW (printed by SpiSink)
+spisink: 0x7E				; echoed HDLC data
+
