@@ -14,6 +14,7 @@
 #include "trace.h"
 #include "gdb.h"
 #include "lcd.h"
+#include "rwmem.h"
 #include "serialrx.h"
 #include "serialtx.h"
 
@@ -36,6 +37,7 @@ SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %include "net.h"
 %include "gdb.h"
 %include "lcd.h"
+%include "rwmem.h"
 %include "serialrx.h"
 %include "serialtx.h"
 

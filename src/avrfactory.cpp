@@ -36,8 +36,8 @@ using namespace std;
 /* FIXME: Replace this factory with an automatically and pluggable
 factory pattern. (-> AVR devices register themselves.) */
 
-AvrDevice* AvrFactory::makeDevice(const std::string in) {
-    string c(in); // use copy to transform to lower case
+AvrDevice* AvrFactory::makeDevice(const char *device) {
+    string c(device); // use copy to transform to lower case
 
     if (c == "at90s4433") 
         return new AvrDevice_at90s4433();

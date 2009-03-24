@@ -37,7 +37,7 @@ class AvrFactory {
       Right now, the configuration string is simply the full name of the AVR
       device, like AT90S4433 or ATMEGA128.
       */
-    AvrDevice* makeDevice(const std::string configuration);
+    AvrDevice* makeDevice(const char *device);
 
     //! Singleton class access. 
     static AvrFactory& instance();

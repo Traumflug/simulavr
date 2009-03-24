@@ -248,7 +248,7 @@ int main(int argc, char *argv[]) {
    }
 
    /* now we create the device */
-   AvrDevice *dev1=AvrFactory::instance().makeDevice(devicename);
+   AvrDevice *dev1=AvrFactory::instance().makeDevice(devicename.c_str());
 
    //if we want to insert some special "pipe" Registers we could do this here:
    if (readFromPipeFileName!="") {
@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
          cout << "Add ReadFromPipe-Register at 0x"
               << hex << readFromPipeOffset
               << " and read from file: " << readFromPipeFileName << endl;
-      dev1->ReplaceIoRegister(readFromPipeOffset, new RWReadFromPipe(dev1, readFromPipeFileName));
+      dev1->ReplaceIoRegister(readFromPipeOffset, new RWReadFromPipe(dev1, readFromPipeFileName.c_str()));
    }
 
    if (writeToPipeFileName!="") {
@@ -264,7 +264,7 @@ int main(int argc, char *argv[]) {
          cout << "Add WriteToPipe-Register at 0x" <<
                  hex << writeToPipeOffset <<
                  " and write to file: " << writeToPipeFileName << endl;
-      dev1->ReplaceIoRegister(writeToPipeOffset, new RWWriteToPipe(dev1, writeToPipeFileName));
+      dev1->ReplaceIoRegister(writeToPipeOffset, new RWWriteToPipe(dev1, writeToPipeFileName.c_str()));
    }
 
    if (writeToAbort) {
@@ -289,8 +289,7 @@ int main(int argc, char *argv[]) {
    for (ii=terminationArgs.begin(); ii!=terminationArgs.end(); ii++) {
       if (global_verbose_on)
          cout << "Termination or Breakpoint Symbol: " << *ii << endl;
-      unsigned int epa=dev1->Flash->GetAddressAtSymbol(*ii);
-      dev1->EP.push_back(epa);
+      dev1->RegisterTerminationSymbol((*ii).c_str());
    }
 
    if (userinterface_flag==1) {

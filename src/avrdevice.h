@@ -90,6 +90,7 @@ class AvrDevice: public SimulationMember {
         void RemoveFromCycleList(Hardware *hw);
         void Load(const char* n);
         void ReplaceIoRegister(unsigned int offset, RWMemoryMembers *);
+        void RegisterTerminationSymbol(const char *symbol);
 
         Pin *GetPin(const char *name);
 #ifndef SWIG

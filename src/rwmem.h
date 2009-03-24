@@ -46,7 +46,9 @@ class RWMemoryMembers{
         RWMemoryMembers(AvrDevice *c): core(c) {}
 
         virtual unsigned char operator=(unsigned char val) =0;
+#ifndef SWIG
         virtual operator unsigned char() const =0 ;
+#endif
         void operator=(const RWMemoryMembers &mm);
         virtual ~RWMemoryMembers(){};
 };
@@ -64,7 +66,9 @@ class RWMemoryWithOwnMemory: public RWMemoryMembers {
         }
 
         unsigned char operator=(unsigned char val);
+#ifndef SWIG
         operator unsigned char() const;
+#endif
 };
 
 class AvrDevice;
@@ -76,7 +80,9 @@ class CPURegister: public RWMemoryWithOwnMemory {
     CPURegister(AvrDevice *c, unsigned int number): RWMemoryWithOwnMemory(c), myNumber(number){}
 
     unsigned char operator=(unsigned char val);
+#ifndef SWIG
     operator unsigned char() const;
+#endif
 };
 
 
@@ -85,7 +91,9 @@ class IRam: public RWMemoryWithOwnMemory {
     public:
     IRam(AvrDevice *c, unsigned int number):RWMemoryWithOwnMemory(c), myAddress(number) { }
     unsigned char operator=(unsigned char val); 
+#ifndef SWIG
     operator unsigned char() const;
+#endif
 };
 
 //TODO this Ram must be connected to the special io register for controlling ext ram!
@@ -102,7 +110,9 @@ class NotAvailableIo: public RWMemoryMembers {
     NotAvailableIo(AvrDevice* c, unsigned int number):RWMemoryMembers(c), myAddress(number) { }
 
     unsigned char operator=(unsigned char val); 
+#ifndef SWIG
     operator unsigned char() const;
+#endif
 };
 
 class RWReserved: public RWMemoryMembers {
@@ -110,7 +120,9 @@ class RWReserved: public RWMemoryMembers {
     public:
         RWReserved(AvrDevice* c, unsigned int number):RWMemoryMembers(c), myAddress(number) { }
         virtual unsigned char operator=(unsigned char);
+#ifndef SWIG
         virtual operator unsigned char() const;
+#endif
 };
 
 
@@ -125,14 +137,15 @@ class MemoryOffsets {
             myOffset=offset;
         }
 
+#ifndef SWIG
         RWMemoryMembers &operator[](unsigned int externOffset) const;
-
-
+#endif
 };
 
 
 //;-------------------------------------------------------
 #include <fstream>
+#include <string.h>
 using namespace std;
 class RWWriteToPipe: public RWMemoryMembers {
     protected:
@@ -141,14 +154,12 @@ class RWWriteToPipe: public RWMemoryMembers {
         string pipeName;
 
     public:
-        RWWriteToPipe(AvrDevice *c, const string &name)
-           : RWMemoryMembers(c), os((name=="-")?std::cout:ofs), pipeName(name) 
-         {
-         if( name != "-" )ofs.open(name.c_str());
-         }
+        RWWriteToPipe(AvrDevice *c, const char *name);
         virtual ~RWWriteToPipe() {}
         virtual unsigned char operator=(unsigned char);
+#ifndef SWIG
         virtual operator unsigned char() const;
+#endif
 };
 
 //We need a ifstream pointer because all the "virtual operator unsigned char" functions are defined const.
@@ -162,14 +173,12 @@ class RWReadFromPipe: public RWMemoryMembers {
         string pipeName;
 
     public:
-        RWReadFromPipe(AvrDevice *c, const string &name)
-           : RWMemoryMembers(c), is((name=="-")?std::cin:ifs), pipeName(name) 
-         {
-         if( name != "-" )ifs.open(name.c_str());
-         }
+        RWReadFromPipe(AvrDevice *c, const char *name);
         virtual ~RWReadFromPipe() {}
         virtual unsigned char operator=(unsigned char) ;
+#ifndef SWIG
         virtual operator unsigned char() const;
+#endif
 };
 
 
@@ -182,7 +191,9 @@ class RWExit: public RWMemoryMembers {
 
         virtual ~RWExit() {}
         virtual unsigned char operator=(unsigned char);
+#ifndef SWIG
         virtual operator unsigned char() const;
+#endif
 };
 
 // Abort the simulator magic address 
@@ -194,7 +205,9 @@ class RWAbort: public RWMemoryMembers {
 
         virtual ~RWAbort() {}
         virtual unsigned char operator=(unsigned char);
+#ifndef SWIG
         virtual operator unsigned char() const;
+#endif
 };
 
 #endif

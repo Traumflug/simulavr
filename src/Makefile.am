@@ -63,8 +63,8 @@ simulavr_SOURCES = main.cpp $(COMMON_SRC)
 simulavr_LDADD = $(libsim_la_OBJECTS) $(AVR_LIBBFD_LIB) -lz $(AVR_LIBIBERTY_LIB)
 
 TCLHEADER = avrdevice.h at8515.h atmega128.h at4433.h gdb.h hardware.h \
-    keyboard.h lcd.h net.h pin.h keyboard.h scope.h serialrx.h serialtx.h \
-    systemclock.h systemclocktypes.h trace.h ui.h
+    keyboard.h lcd.h net.h pin.h keyboard.h rwmem.h scope.h serialrx.h \
+    serialtx.h systemclock.h systemclocktypes.h trace.h ui.h
 
 simulavr_wrap.cxx: simulavr.i $(TCLHEADER)
 	@SWIG@ -o $@ $(srcdir)/simulavr.i

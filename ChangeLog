@@ -1,5 +1,13 @@
 2009-03-24	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* src/Makefile.am, src/avrdevice.cpp, src/avrdevice.h,
+	src/avrfactory.cpp, src/avrfactory.h, src/main.cpp, src/pysimulavr.i,
+	src/rwmem.cpp, src/rwmem.h, src/simulavr.i, src/trace.cpp,
+	src/trace.h: More functionality available to Tcl. You should be able
+	to tweak every flag main.cpp can now.
+
+2009-03-24	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* src/main.cpp, src/trace.cpp: Global variables go in trace.cpp not
 	main.cpp since main.cpp is not in the shared library.
 

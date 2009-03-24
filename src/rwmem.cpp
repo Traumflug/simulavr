@@ -142,9 +142,25 @@ RWReserved::operator unsigned char() const {
 
 //---------------------------------------------------------
 
+RWWriteToPipe::RWWriteToPipe(AvrDevice *c, const char *name)
+   : RWMemoryMembers(c),
+     os((!strcmp(name, "-"))?std::cout:ofs),
+     pipeName(name)
+{
+  if( pipeName != "-" )
+    ofs.open(name);
+}
 unsigned char RWWriteToPipe::operator=(unsigned char val) { os << val; os.flush(); return val; } 
 RWWriteToPipe::operator unsigned char() const { return 0; } 
 
+RWReadFromPipe::RWReadFromPipe(AvrDevice *c, const char *name)
+   : RWMemoryMembers(c),
+     is((!strcmp(name,"-"))?std::cin:ifs),
+     pipeName(name) 
+{
+  if( pipeName != "-")
+    ifs.open(name);
+}
 unsigned char RWReadFromPipe::operator=(unsigned char val) { return 0; } 
 RWReadFromPipe::operator unsigned char() const{ 
     char val;

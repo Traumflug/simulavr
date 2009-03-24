@@ -3,6 +3,7 @@
 %{
 #include "systemclocktypes.h"
 #include "avrdevice.h"
+#include "avrfactory.h"
 #include "at8515.h"
 #include "atmega128.h"
 #include "at4433.h"
@@ -21,6 +22,7 @@
 #include "spisink.h"
 #include "adcpin.h"
 #include "pinmon.h"
+#include "rwmem.h"
 #include "scope.h"
 
 SystemClock &GetSystemClock() { return SystemClock::Instance(); }
@@ -32,6 +34,7 @@ SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %include "mysocket.h"
 %include "pinnotify.h"
 %include "avrdevice.h"
+%include "avrfactory.h"
 %include "at8515.h"
 %include "atmega128.h"
 %include "at4433.h"
@@ -49,13 +52,10 @@ SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %include "spisink.h"
 %include "adcpin.h"
 %include "pinmon.h"
+%include "rwmem.h"
 %include "scope.h"
 
-
+void setVerbose(int value);
+void setMessageOnBadAccess(int value);
 void StartTrace(const char*);
 SystemClock &GetSystemClock();
-
-
-
-
-
