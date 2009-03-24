@@ -86,8 +86,6 @@ const char Usage[] =
 "  atmega128\n"
 "\n";
 
-int global_message_on_bad_access = 1;
-            
 int main(int argc, char *argv[]) {
    int c;
    bool gdbserver_flag=0;
