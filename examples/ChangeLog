@@ -1,3 +1,17 @@
+2009-03-25	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* .cvsignore, gui.tcl.in, anacomp/Makefile.am, anacomp/checkdebug.py,
+	anacomp/main.c, atmel_key/Makefile.am, simple_ex1/Makefile.am,
+	stdiodemo/Makefile.am: Add shared framework simulavr.tcl. Switch some
+	of the tests to providing a support file and using the shared Tcl
+	framework.
+	* simulavr.tcl.in, anacomp/anacomp.tcl, atmel_key/atmel_key.tcl,
+	stdiodemo/stdiodemo.tcl: New files.
+	* anacomp/check.tcl.in, anacomp/checkdebug.gdb,
+	anacomp/checkdebug.tcl.in, atmel_key/Makefile.notauto,
+	atmel_key/checkdebug.gdb, atmel_key/checkdebug.tcl.in,
+	stdiodemo/Makefile.notauto: Removed.
+
 2009-03-23	Michael N. Moran <mike@mnmoran.org>
 
 	* Makefile.am: Add spi example.

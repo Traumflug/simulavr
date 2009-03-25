@@ -1,6 +1,8 @@
 #
 #  $Id$
 #
+#
+#  TBD: Require to be styled after goal of simulavr.tcl.  
 
 # This is not ready for prime time yet...Please post your experiences
 # to the mailing list
@@ -65,6 +67,7 @@ print "Simulation runs endless, please press CTRL-C to abort"
 gdb1 = GdbServer( dev1, 1212, 0 )
 sc.Add( gdb1 )
 
+print "TBD: Generate avr-gdb-cmds on the fly like simulavr.tcl"
 os.system("exec ddd --debugger avr-gdb --command checkdebug.gdb &")
 
 #now run simulation

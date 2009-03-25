@@ -20,8 +20,10 @@ int main () {
     DDRB=0xff;
     volatile int x;
 
+#if 0
     for( i=0; i<10000; ++i )
        *( (volatile char*) 0x20)='*';
+#endif
 
     do {
         if (ACSR & (1<<ACO) ) {

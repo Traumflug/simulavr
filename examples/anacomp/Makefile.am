@@ -9,24 +9,25 @@ noinst_DATA = anacomp
 
 CLEANFILES = anacomp anacomp.o trace
 
-EXTRA_DIST = main.c checkdebug.py checkdebug.gdb
+EXTRA_DIST = main.c checkdebug.py
+
+AVR_CPU=at90s4433
 
 do: anacomp
-	$(TCL_WISH) check.tcl
+	../simulavr.tcl -d $(AVR_CPU) -f anacomp -u \
+	    -s $(srcdir)/anacomp.tcl
 
 dogdb: anacomp
-	$(TCL_WISH) checkdebug.tcl
+	../simulavr.tcl -d $(AVR_CPU) -f anacomp -u \
+	    -s $(srcdir)/anacomp.tcl -g
 
 do_python: anacomp
 	$(PYTHON) $(srcdir)/checkdebug.py
 
-
-# WAR: should detect avr-toolset first!
-
 anacomp.o : $(srcdir)/main.c
-	$(AVR_GCC) -g -O2 -mmcu=at90s4433 -c -o $@ $<
+	$(AVR_GCC) -g -O2 -mmcu=$(AVR_CPU) -c -o $@ $<
 
 anacomp : anacomp.o
-	$(AVR_GCC) -mmcu=at90s4433 -o $@ $<
+	$(AVR_GCC) -mmcu=$(AVR_CPU) -o $@ $<
 
 SUBDIRS =

@@ -6,6 +6,18 @@
 package require Itcl
 namespace import itcl::*
 
+proc locateInDirs {name dirs} {
+
+  foreach dir ${dirs}  {
+     set toTest ${dir}/${name}
+     if { [file exists ${toTest}] } {
+       return ${toTest}
+     }
+  }
+  error "unable to locate ${name}"
+}
+
+#load the avr-simulator package
 class Kbd {
     protected {
         variable parent
@@ -19,7 +31,13 @@ class Kbd {
             set win $_win
             set objname $_objname
 
-            image create bitmap kbd -file "../kbd.xbm"
+            if { ! [info exists GuiDir] } { set GuiDir "" }
+            set prefix "@prefix@"
+            set kbdImage [locateInDirs kbd.xbm \
+               [list ${GuiDir} . .. examples \
+                  ../@srcdir@ @srcdir@ \
+                  @datadir@ /usr/share]]
+            image create bitmap kbd -file ${kbdImage}
 
             button $win.b -image kbd
             pack $win.b
