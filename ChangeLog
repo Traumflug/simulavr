@@ -1,3 +1,8 @@
+2009-03-25	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Add shared framework simulavr.tcl. Switch some of the
+	tests to providing a support file and using the shared Tcl framework.
+
 2009-03-24	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* src/Makefile.am, src/avrdevice.cpp, src/avrdevice.h,

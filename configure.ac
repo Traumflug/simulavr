@@ -112,20 +112,14 @@ if test x"${build_tcl_libs}" = x"yes" -a x"${TCL_WISH}" != x"no" ; then
     [examples/gui.tcl],
     [chmod +x examples/gui.tcl])
   AC_CONFIG_FILES(
-    [examples/anacomp/check.tcl],
-    [chmod +x examples/anacomp/check.tcl])
-  AC_CONFIG_FILES(
-    [examples/anacomp/checkdebug.tcl],
-    [chmod +x examples/anacomp/checkdebug.tcl])
-  AC_CONFIG_FILES(
-    [examples/atmel_key/checkdebug.tcl],
-    [chmod +x examples/atmel_key/checkdebug.tcl])
-  AC_CONFIG_FILES(
-    [examples/spi/check.tcl],
-    [chmod +x examples/spi/check.tcl])
+    [examples/simulavr.tcl],
+    [chmod +x examples/simulavr.tcl])
   AC_CONFIG_FILES(
     [examples/stdiodemo/checkdebug.tcl],
     [chmod +x examples/stdiodemo/checkdebug.tcl])
+  AC_CONFIG_FILES(
+    [examples/spi/check.tcl],
+    [chmod +x examples/spi/check.tcl])
 else
   AC_MSG_WARN([])
   AC_MSG_WARN([Tcl Development Kit Not Installed])
