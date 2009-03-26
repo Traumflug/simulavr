@@ -315,15 +315,15 @@ AvrDevice_Load ${dev1} "${AvrExecutable}"
 
 AvrDevice_RegisterTerminationSymbol ${dev1} "exit"
 
+#systemclock must know that this device will be stepped from application
+set sc [GetSystemClock]
+$sc Add ${dev1}
+
 # Invoke the user extension for just before adding the CPU
 if { "${sourceFile}" != "" } {
   set extensionPoint "CPU"
   source ${sourceFile}
 }
-
-#systemclock must know that this device will be stepped from application
-set sc [GetSystemClock]
-$sc Add ${dev1}
 
 if { ${hasUserInterface} == 1 } {
   #start the user interface client 

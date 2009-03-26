@@ -23,11 +23,11 @@ $(objdir)/anadata: $(srcdir)/anadata
 
 # 1000000000ns/1000000MHz == 1000ns
 do: $(EXAMPLE).elf
-	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE).elf -u -F 1000 \
+	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE).elf -F 1000 \
 	    -s $(srcdir)/$(EXAMPLE).tcl
 
 dogdb: $(EXAMPLE).elf
-	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE).elf -u -F 1000 \
+	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE).elf -F 1000 \
 	    -s $(srcdir)/$(EXAMPLE).tcl -g
 
 # remove when do/dogdb work

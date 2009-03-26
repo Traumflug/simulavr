@@ -1,5 +1,11 @@
 2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* simulavr.tcl.in, spi/Makefile.am, spi/spi.tcl: system clock and cpu
+	instance are now available at CPU extension invocation. spi does not
+	use a gui.
+
+2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* spi/Makefile.am: spi now runs with only a warning about spsr not
 	writable.
 

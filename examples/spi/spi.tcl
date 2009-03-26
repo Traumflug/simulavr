@@ -11,12 +11,6 @@ switch ${extensionPoint} {
     if { ! [info exists dev1] } {
       error "MCU Device Required"
     }
-  }
-
-  Gui {
-    if { ! [info exists ui] } {
-      error "User Interface Required"
-    }
 
     set netB0	[new_Net]
     set netB1	[new_Net]
@@ -66,6 +60,9 @@ switch ${extensionPoint} {
     $sc Add spiSource
     $sc Add spiSink
     $sc Add adcPinSource
+  }
+
+  Gui {
   }
 
   GdbCommands {
