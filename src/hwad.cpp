@@ -35,8 +35,16 @@
 #define ADCBG 0x40 //currently not supported
 
 
-HWAdmux::HWAdmux( AvrDevice *c, PinAtPort _ad0, PinAtPort _ad1, PinAtPort _ad2, 
-        PinAtPort _ad3, PinAtPort _ad4, PinAtPort _ad5) : 
+HWAdmux::HWAdmux(	AvrDevice*	c,
+					Pin*		_ad0,
+					Pin*		_ad1,
+					Pin*		_ad2, 
+					Pin*		_ad3,
+					Pin*		_ad4,
+					Pin*		_ad5,
+					Pin*		_ad6,
+					Pin*		_ad7
+					) : 
 Hardware(c), core(c) {
 
     ad[0]=_ad0;
@@ -45,7 +53,8 @@ Hardware(c), core(c) {
     ad[3]=_ad3;
     ad[4]=_ad4;
     ad[5]=_ad5;
-
+    ad[6]=_ad6;
+    ad[7]=_ad7;
 
     Reset();
 }
@@ -63,7 +72,12 @@ unsigned char HWAdmux::GetAdmux() {
 }
 
 int HWAdmux::GetMuxOutput() {
-    return ad[admux&(MUX2|MUX1|MUX0)].GetAnalog();
+	Pin*	p	= ad[admux&(MUX2|MUX1|MUX0)];
+	if(!p){
+		cerr << "HWAdmux::GetMuxOutput null pin" << endl;
+		return 0;
+	}
+    return p->GetAnalog();
 }
 
 unsigned char RWAdmux::operator=(unsigned char val) { if (core->trace_on) trioaccess("Admux",val); admux->SetAdmux(val);  return val; } 
@@ -99,7 +113,9 @@ void HWAd::Reset() {
 
 unsigned char HWAd::GetAdch() { adchLocked=false; return adch; }
 unsigned char HWAd::GetAdcl() { adchLocked=true; return adcl; }
-unsigned char HWAd::GetAdcsr() { return adcsr; }
+unsigned char HWAd::GetAdcsr() {
+	return adcsr;
+	}
 
 void HWAd::SetAdcsr(unsigned char val) {
     unsigned char old=adcsr&(ADIF|ADSC);

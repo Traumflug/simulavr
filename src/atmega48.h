@@ -1,9 +1,8 @@
-/*
+ /*
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
  * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
- * Copyright (C) 2007 Onno Kortmann
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,48 +19,42 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  ****************************************************************************
- *
- *  $Id$
  */
+#ifndef ATMEGA48
+#define ATMEGA48
 
 
-#include "config.h"
-#include "at4433.h"
-#include "at8515.h"
-#include "atmega48.h"
-#include "atmega128.h"
-#include "avrfactory.h"
+#include "avrdevice.h"
+#include "hardware.h"
+#include "hwmega48extirq.h"
+#include "hwuart.h"
+#include "hwad.h"
+#include "hwport.h"
+#include "hwspi.h"
+#include "hwtimer.h"
+#include "hwmegax8timer.h"
+#include "hwmegax8timerirq.h"
 
-using namespace std;
-
-/* FIXME: Replace this factory with an automatically and pluggable
-factory pattern. (-> AVR devices register themselves.) */
-
-AvrDevice* AvrFactory::makeDevice(const char *device) {
-    string c(device); // use copy to transform to lower case
-
-    if (c == "at90s4433") 
-        return new AvrDevice_at90s4433();
-    if (c == "at90s8515")
-        return new AvrDevice_at90s8515();
-    if (c == "atmega48")
-        return new AvrDevice_atmega48();
-    if (c == "atmega128")
-        return new AvrDevice_atmega128();
-    else {
-        cerr << "Invalid device specification: " << c << endl;
-        exit(1);
-    }
-}
-
-AvrFactory& AvrFactory::instance() {
-    static AvrFactory *f=0;
-    if (!f) {
-        f=new AvrFactory();
-    }
-
-    return *f;
-}
-
-AvrFactory::AvrFactory() {}
-
+class AvrDevice_atmega48:public AvrDevice {
+	protected:
+		Pin					aref;
+		Pin					adc6;
+		Pin					adc7;
+	   	HWPort				portb;
+	   	HWPort				portc;
+	   	HWPort				portd;
+		HWPrescaler			prescaler;
+        HWMega48ExtIrq*		extirq;
+        HWAdmux				admux;
+        HWAd*				ad;
+        HWMegaSpi*			spi;
+        HWUsart*			usart0;
+		HWMegaX8TimerIrq*	timerIrq0;
+		HWMegaX8Timer0*		timer0;
+	public:
+		AvrDevice_atmega48();
+		~AvrDevice_atmega48(); 
+		unsigned char GetRampz();
+		void SetRampz(unsigned char);
+};
+#endif

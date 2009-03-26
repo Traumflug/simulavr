@@ -60,7 +60,9 @@ AvrDevice(64, 128, 0, 4*1024) {
 	porty= new HWPort(this, "Y");	//AREF on pin 0 ("Y0") 
 
 	// irqSystem = new HWIrqSystem;
-	admux= new HWAdmux(this, PinAtPort( portc, 0), PinAtPort( portc, 1), PinAtPort( portc, 2), PinAtPort( portc, 3), PinAtPort( portc, 4), PinAtPort (portc,5));
+	admux= new HWAdmux(this,
+          &portc->GetPin(0), &portc->GetPin(1), &portc->GetPin(2),
+          &portc->GetPin(3), &portc->GetPin(4), &portc->GetPin(5),0,0);
 	ad= new HWAd( this, admux, irqSystem, porty->GetPin(0), 11); //vec 11 ADConversion Complete
 	spi= new HWSpi(this, irqSystem, PinAtPort( portb, 3), PinAtPort( portb, 4), PinAtPort( portb, 5), PinAtPort(portb, 2),/*irqvec*/ 7) ;
 	uart= new HWUart( this, irqSystem, PinAtPort(portd,1), PinAtPort(portd, 0),8,9,10) ;

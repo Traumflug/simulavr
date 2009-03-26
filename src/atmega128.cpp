@@ -44,7 +44,7 @@ AvrDevice(224, 4096, 0xef00, 128*1024),
 aref()
 {
 	irqSystem = new HWIrqSystem(this, 4); //4 bytes per vector
-	eeprom = new HWMegaEeprom( this, irqSystem, 4096, 22); 
+	eeprom = new HWMegaEeprom(this, irqSystem, 4096, 22); 
 	stack = new HWStack(this, Sram, 0xffff);
 	porta= new HWPort(this, "A");
 	portb= new HWPort(this, "B");
@@ -58,12 +58,15 @@ aref()
 	portx= new HWPort(this, "X"); //could be used if there are pins which are not GPIO
 	rampz= new HWRampz(this);
 
-	admux= new HWAdmux(this, PinAtPort( portf, 0), PinAtPort( portf, 1), PinAtPort( portf, 2), PinAtPort( portf, 3), PinAtPort( portf, 4), PinAtPort (portf,5));
-	ad= new HWAd( this, admux, irqSystem, aref, 21); //vec 21 ADConversion Complete
+	admux= new HWAdmux(this,
+          &portf->GetPin(0), &portf->GetPin(1), &portf->GetPin(2),
+          &portf->GetPin(3), &portf->GetPin(4), &portf->GetPin(5),0,0);
 
-	spi= new HWMegaSpi(this, irqSystem, PinAtPort( portb, 2), PinAtPort( portb, 3), PinAtPort( portb, 1), PinAtPort(portb, 0),/*irqvec*/ 17);
+	ad= new HWAd(this, admux, irqSystem, aref, 21); //vec 21 ADConversion Complete
 
-	extirq= new HWMegaExtIrq( this, irqSystem, 
+	spi= new HWMegaSpi(this, irqSystem, PinAtPort(portb, 2), PinAtPort(portb, 3), PinAtPort(portb, 1), PinAtPort(portb, 0),/*irqvec*/ 17);
+
+	extirq= new HWMegaExtIrq(this, irqSystem, 
             PinAtPort(portd, 0), PinAtPort(portd, 1), PinAtPort(portd, 2),PinAtPort(portd, 3),
             PinAtPort(porte, 4), PinAtPort(porte, 5), PinAtPort(porte, 6),PinAtPort(porte, 7),
             1,2,3,4,5,6,7,8);
@@ -76,7 +79,7 @@ aref()
 	usart0=new HWUsart(this, irqSystem, PinAtPort(porte,1), PinAtPort(porte,0), PinAtPort(porte, 2), 18, 19, 20);
 	usart1=new HWUsart(this, irqSystem, PinAtPort(portd,3), PinAtPort(portd,2), PinAtPort(portd, 5), 30, 31, 32);
 
-	timer0123irq= new HWMegaTimer0123Irq( this, irqSystem,
+	timer0123irq= new HWMegaTimer0123Irq(this, irqSystem,
 			15 , /*tpComp*/
 			16 , /*t0Ovf*/
 			12 , /*t1compa*/

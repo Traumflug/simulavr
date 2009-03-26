@@ -28,13 +28,14 @@ endif
 noinst_LTLIBRARIES=libsim.la
 
 libsim_la_SOURCES = \
-  adcpin.cpp application.cpp at4433.cpp at8515.cpp atmega128.cpp \
+  adcpin.cpp application.cpp at4433.cpp at8515.cpp atmega48.cpp atmega128.cpp \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp gdbserver.cpp hardware.cpp helper.cpp \
-  hwacomp.cpp hwad.cpp hweeprom.cpp hwextirq.cpp hwmegaextirq.cpp \
-  hwmegatimer.cpp hwmegatimer0123irq.cpp hwpinchange.cpp hwport.cpp hwspi.cpp \
-  hwsreg.cpp hwstack.cpp hwtimer.cpp hwtimer01irq.cpp hwuart.cpp \
-  hwwado.cpp ioregs.cpp irqsystem.cpp keyboard.cpp lcd.cpp memory.cpp \
+  hwacomp.cpp hwad.cpp hweeprom.cpp hwextirq.cpp hwmega48extirq.cpp \
+  hwmegaextirq.cpp hwmegatimer0123irq.cpp hwmegatimer.cpp hwmegax8timer.cpp \
+  hwmegax8timerirq.cpp hwpinchange.cpp hwport.cpp hwspi.cpp hwsreg.cpp \
+  hwstack.cpp hwtimer01irq.cpp hwtimer.cpp hwuart.cpp hwwado.cpp \
+  ioregs.cpp irqsystem.cpp keyboard.cpp lcd.cpp memory.cpp \
   mysocket.cpp net.cpp pin.cpp pinatport.cpp pinmon.cpp printable.cpp \
   rwmem.cpp scope.cpp serialrx.cpp serialtx.cpp spisrc.cpp spisink.cpp \
   systemclock.cpp trace.cpp ui.cpp 
@@ -45,13 +46,13 @@ libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz \
   $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB) 
 
 pkginclude_HEADERS = \
-  adcpin.h application.h at4433.h at8515.h atmega128.h avrdevice.h \
+  adcpin.h application.h at4433.h at8515.h atmega48.h atmega128.h avrdevice.h \
   avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h breakpoint.h \
   config_deprecated.h decoder.h externaltype.h flash.h \
-  funktor.h gdb.h global.h hardware.h helper.h hwacomp.h \
-  hwad.h hweeprom.h hwextirq.h hwmegaextirq.h hwmegatimer.h \
-  hwmegatimer0123irq.h hwpinchange.h hwport.h hwspi.h hwsreg.h hwstack.h \
-  hwtimer.h hwtimer01irq.h hwuart.h hwwado.h ioregs.h \
+  funktor.h hwacomp.h hwad.h hweeprom.h hwextirq.h hwmega48extirq.h \
+  hwmegaextirq.h hwmegatimer0123irq.h hwmegatimer.h hwmegax8timer.h \
+  hwmegax8timerirq.h hwpinchange.h hwport.h hwspi.h hwsreg.h hwstack.h \
+  hwtimer01irq.h hwtimer.h hwuart.h hwwado.h ioregs.h \
   irqsystem.h keyboard.h keynumber_to_scancode.dat lcd.h \
   memory.h mysocket.h net.h pin.h pinatport.h pinnotify.h pinmon.h \
   printable.h rwmem.h scope.h serialrx.h serialtx.h simulationmember.h \

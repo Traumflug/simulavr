@@ -1,9 +1,8 @@
-/*
+ /*
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
  * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
- * Copyright (C) 2007 Onno Kortmann
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,48 +19,46 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  ****************************************************************************
- *
- *  $Id$
  */
+#ifndef HWMEGAX8TIMERIRQ
+#define HWMEGAX8TIMERIRQ
 
+#include "hardware.h"
+class HWIrqSystem;
 
-#include "config.h"
-#include "at4433.h"
-#include "at8515.h"
-#include "atmega48.h"
-#include "atmega128.h"
-#include "avrfactory.h"
+class HWMegaX8TimerIrq: public Hardware {
+	protected:
+		HWIrqSystem *irqSystem;
 
-using namespace std;
+		unsigned char timsk;
+		unsigned char tifr;
+		unsigned char etimsk;
+		unsigned char etifr;
 
-/* FIXME: Replace this factory with an automatically and pluggable
-factory pattern. (-> AVR devices register themselves.) */
+		unsigned int vectorOvf0; 
 
-AvrDevice* AvrFactory::makeDevice(const char *device) {
-    string c(device); // use copy to transform to lower case
+		unsigned int vectorOvf;
+		unsigned int vectorCompA;
+		unsigned int vectorCompB;
 
-    if (c == "at90s4433") 
-        return new AvrDevice_at90s4433();
-    if (c == "at90s8515")
-        return new AvrDevice_at90s8515();
-    if (c == "atmega48")
-        return new AvrDevice_atmega48();
-    if (c == "atmega128")
-        return new AvrDevice_atmega128();
-    else {
-        cerr << "Invalid device specification: " << c << endl;
-        exit(1);
-    }
-}
+	public:
+		HWMegaX8TimerIrq(	AvrDevice*		core,
+							HWIrqSystem*	irqSys,
+							unsigned int	ovfVect,
+							unsigned int	compAVect,
+							unsigned int	compBVect
+							);
+		unsigned char GetTimsk();
+		unsigned char GetTifr();
 
-AvrFactory& AvrFactory::instance() {
-    static AvrFactory *f=0;
-    if (!f) {
-        f=new AvrFactory();
-    }
+		void SetTimsk(unsigned char);
+		void SetTifr(unsigned char);
+		
+		void AddFlagToTifr(unsigned char val);
 
-    return *f;
-}
+		void ClearIrqFlag(unsigned int vector);
+        void CheckForNewSetIrq(unsigned char);
+        void CheckForNewClearIrq(unsigned char);
+};
 
-AvrFactory::AvrFactory() {}
-
+#endif

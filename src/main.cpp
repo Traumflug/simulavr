@@ -83,6 +83,7 @@ const char Usage[] =
 "Supported devices:\n"
 "  at90s4433\n"
 "  at90s8515\n"
+"  atmega48\n"
 "  atmega128\n"
 "\n";
 

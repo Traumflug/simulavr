@@ -34,11 +34,20 @@
 class HWAdmux: public Hardware {
     protected:
         unsigned char admux;
-        PinAtPort ad[6]; //6 pins selectable from the mux
+        Pin* ad[8]; //8 pins selectable from the mux
         AvrDevice *core;
 
     public:
-        HWAdmux(AvrDevice *c, PinAtPort ad0, PinAtPort ad1, PinAtPort ad2, PinAtPort ad3, PinAtPort ad4, PinAtPort ad5);
+        HWAdmux(	AvrDevice*	c,
+					Pin*		ad0,
+					Pin*		ad1,
+					Pin*		ad2,
+					Pin*		ad3,
+					Pin*		ad4,
+					Pin*		ad5,
+					Pin*		ad6,
+					Pin*		ad7
+					);
         unsigned char GetAdmux();
         void SetAdmux(unsigned char);
         //unsigned int CpuCycle(); //not used!

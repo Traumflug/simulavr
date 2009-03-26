@@ -1,5 +1,15 @@
 2009-03-26	Michael N. Moran <mike@mnmoran.org>
 
+	Patch 4609
+	* src/atmega48.cpp, src/atmega48.h, src/hwmega48extirq.cpp,
+	src/hwmega48extirq.h, src/hwmegax8timer.cpp, src/hwmegax8timer.h,
+	src/hwmegax8timerirq.cpp, src/hwmegax8timerirq.h: New files.
+	* configure.ac, src/Makefile.am, src/at4433.cpp, src/atmega128.cpp,
+	src/avrfactory.cpp, src/hwad.cpp, src/hwad.h, src/main.cpp,
+	src/simulavr.i: Add ATMega48 simulation support.
+
+2009-03-26	Michael N. Moran <mike@mnmoran.org>
+
 	Patch 4595
 	* src/hwspi.cpp, src/hwspi.h, src/pin.cpp: The SPI simulation did not
 	double buffer the RX data register.  This problem was solved by
