@@ -5,7 +5,7 @@
 
 SUBDIRS = simple_ex1 anacomp atmel_key
 if USE_TCL
-SUBDIRS += anacomp spi stdiodemo
+SUBDIRS += anacomp atmega48 spi stdiodemo
 endif
 
 noinst_DATA = kbd.xbm

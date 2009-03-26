@@ -1,3 +1,12 @@
+2009-03-26	Michael N. Moran <mike@mnmoran.org>
+
+	Patch 4609
+	* Makefile.am: Add new atmega48 example.
+	* atmega48/Makefile.am, atmega48/Makefile.notauto, atmega48/README,
+	atmega48/anadata1, atmega48/anadata2, atmega48/anadata3,
+	atmega48/atmega48.tcl, atmega48/check.tcl.in, atmega48/main.cpp,
+	atmega48/spidata: New files.
+
 2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* simulavr.tcl.in, spi/Makefile.am, spi/spi.tcl: system clock and cpu

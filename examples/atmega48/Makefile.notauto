@@ -1,0 +1,15 @@
+#
+# This makefile builds the AVR test program.
+#
+
+AVR_GCC=avr-gcc
+
+main : main.o
+	$(AVR_GCC) -mmcu=atmega48 -o $@ $<
+
+main.o : main.cpp
+	$(AVR_GCC) -g -O2 -mmcu=atmega48 -c -o $@ $<
+
+clean:
+	rm main main.o
+

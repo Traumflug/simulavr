@@ -1,0 +1,94 @@
+#
+#  $Id$
+#
+
+Demonstrates the ATMega48 and following Stimulation classes:
+
+	o HWAdmux - with additional pin inputs for not GPIO port support.
+
+	o SpiSink - monitors the /SS, SCLK and MISO pins and prints
+		each byte to stdout.
+
+	o SpiSource - drives the /SS, SCLK and MOSI pins with data from
+		the spidata file.
+
+	o PinMonitor - monitors Port A Bit 0 and prints changes in its
+		binary status to stdout.
+
+	o AdcPin - Stimulates Port F Bit 0 with the values contained
+		in the anadata{1,2,3} files.
+
+The AVR program alternately (every other byte) echoes the byte received
+on the SPI or the ADCH value read from a recenet A/D converter, to the SPI.
+Also, the value from the A/D converter rotates through the values at
+the pins PC5, ADC6, and ADC7.
+
+The spidata file contains an HDLC encoded stream of *mostly* flags
+that was used in my project at work. (We're running a form of
+PPP/HDLC over SPI.)
+
+The format of the spidata file consists of comments (lines
+that start with a '#') and data lines. Each data line consists
+of 3 values.
+
+o First Value - the value (0 or non-zero)of /SS
+o Second Value - the value (0 or non-zero) of SCLK
+o Third Value - the value (0 or non-zero) of MOSI
+
+When the SpiSource program stimulator reaches the end-of-file,
+it rewinds and repeats ad-nauseum.
+
+The anadata{1,2,3} files contains analog data that that is read by the
+AdcPin class and written to the Port C Bit 5, ADC6 and ADC7 analog
+inputs of the ATMega48.
+
+The format of the anadata{1,2,3} files consists of comments (lines
+that start with a '#' character) and analog input lines.
+Each input line consists of 2 values separated by whitespace.
+
+o First Value - number of nano-seconds before the next value
+	is read and applied to the analog input.
+o Second Value - signed integer "analogValue" to be applied
+	to the analog input.
+
+To try it:
+
+Step 1:
+	Configure and build the simulavr (simulavr.so in particular)
+
+Step 2:
+	Build the AVR test program in this directory.
+	$ make
+
+Step 3:
+	Run the test TCL script from this directory.
+	$ check.tcl
+
+Step 4:
+	Marvel at the stdio activity.
+
+Step 5:
+	Try modifying the spidata file and see the results.
+
+
+What you'll see on stdout:
+
+Note: Comments added on the right.
+
+spisink: /SS negated		; SPI /SS goes HIGH (printed by SpiSink)
+spisink: /SS asserted		; SPI /SS goes LOW (printed by SpiSink)
+spisink: 0x7E				; echoed HDLC Data from AVR on SPI MISO
+spisink: 0x66				; Analog Data from AVR PC5 as decoded on SPI MISO
+spisink: 0x02				; echoed HDLC Data from AVR on SPI MISO
+spisink: 0x33				; Analog Data from AVR ADC6 as decoded on SPI MISO
+spisink: 0xD3				; echoed HDLC Data from AVR on SPI MISO
+spisink: 0x28				; Analog Data from AVR ADC7 as decoded on SPI MISO
+spisink: 0x7E				; echoed HDLC Data from AVR on SPI MISO
+spisink: 0x23				; Analog Data from AVR PC5 as decoded on SPI MISO
+...
+...
+spisink: 0x7E				; echoed HDLC Data from AVR on SPI MISO
+spisink: 0x04				; Analog Data from AVR {PC5,ADC6, ADC7} as decoded on SPI MISO
+PORTB0: NEGATE				; Port B Bit 0 (interrupt output) set high by AVR (printed by PinMonitor)
+...
+...

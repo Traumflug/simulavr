@@ -1,0 +1,22 @@
+#
+# This is an analog pin data file. Each must be either a comment
+# or an analog entry with the format:
+#
+# <delayInNanoseconds> <signed analog integer value>
+#
+# The delay is the amount of time before the following line
+# is read and executed.
+#
+13333333  5900100
+13333333  4900100
+13333333  3900100
+13333333  2900100
+13333333  1900100
+13333333  990010
+13333333  890010
+13333333  790010
+13333333  690010
+13333333  590010
+13333333  490010
+13333333  390010
+13333333  290010
