@@ -1,5 +1,10 @@
 2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* spi/Makefile.am: spi now runs with only a warning about spsr not
+	writable.
+
+2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* spi/Makefile.am: Fix typo that prevented make do from working.
 
 2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>

@@ -5,7 +5,7 @@
 EXAMPLE=spi
 AVR_GCC=@AVR_GCC@
 AVR_CPU=atmega128
-AVR_CFLAGS  = -g -O2 -mmcu=$(AVR_CPU)
+AVR_CFLAGS  = -g -Os -mmcu=$(AVR_CPU)
 
 noinst_DATA = $(EXAMPLE).elf
 
@@ -42,4 +42,4 @@ do_old:
 main.o : $(srcdir)/main.cpp
 
 $(EXAMPLE).elf : main.o
-	$(AVR_GCC) $(AVR_FLAGS) -o $@ $<
+	$(AVR_GCC) $(AVR_CFLAGS) -o $@ $<
