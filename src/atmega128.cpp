@@ -40,7 +40,9 @@
 //#include "avrdevice_impl.h"
 AvrDevice_atmega128::~AvrDevice_atmega128() {}
 AvrDevice_atmega128::AvrDevice_atmega128():
-AvrDevice(224, 4096, 0xef00, 128*1024) { 
+AvrDevice(224, 4096, 0xef00, 128*1024),
+aref()
+{
 	irqSystem = new HWIrqSystem(this, 4); //4 bytes per vector
 	eeprom = new HWMegaEeprom( this, irqSystem, 4096, 22); 
 	stack = new HWStack(this, Sram, 0xffff);
@@ -52,8 +54,12 @@ AvrDevice(224, 4096, 0xef00, 128*1024) {
 	portf= new HWPort(this, "F");
 	portg= new HWPort(this, "G");
 
+	RegisterPin("AREF", &aref);
 	portx= new HWPort(this, "X"); //could be used if there are pins which are not GPIO
 	rampz= new HWRampz(this);
+
+	admux= new HWAdmux(this, PinAtPort( portf, 0), PinAtPort( portf, 1), PinAtPort( portf, 2), PinAtPort( portf, 3), PinAtPort( portf, 4), PinAtPort (portf,5));
+	ad= new HWAd( this, admux, irqSystem, aref, 21); //vec 21 ADConversion Complete
 
 	spi= new HWMegaSpi(this, irqSystem, PinAtPort( portb, 2), PinAtPort( portb, 3), PinAtPort( portb, 1), PinAtPort(portb, 0),/*irqvec*/ 17);
 
@@ -241,11 +247,11 @@ AvrDevice(224, 4096, 0xef00, 128*1024) {
 	rw[0x2a]= new RWUcsrb(this, usart0); //RWUcsrb();
 	rw[0x29]= new RWUbrr(this, usart0); //RWUbrrl();
 	rw[0x28]= new RWReserved(this, 0x28); //RWAcsr(this, );
-	rw[0x27]= new RWReserved(this, 0x27); //RWAdmux(this, );
-	rw[0x26]= new RWReserved(this, 0x26); //RWAdcsra(this, );
+	rw[0x27]= new RWAdmux(this, admux);
+	rw[0x26]= new RWAdcsr(this, ad);
 
-	rw[0x25]= new RWReserved(this, 0x25); //RWAdch(this, );
-	rw[0x24]= new RWReserved(this, 0x24); //RWAdcl(this, );
+	rw[0x25]= new RWAdch(this, ad);
+	rw[0x24]= new RWAdcl(this, ad);
 
 	rw[0x23]= new RWPort(this, porte);
 	rw[0x22]= new RWDdr(this, porte);

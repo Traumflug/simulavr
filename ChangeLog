@@ -1,3 +1,22 @@
+2009-03-26	Michael N. Moran <mike@mnmoran.org>
+
+	Patch 4594
+	* src/at4433.cpp, src/atmega128.cpp, src/atmega128.h, src/hwad.cpp,
+	src/hwad.h, src/hwport.cpp, src/hwport.h: This patch is to add
+	previously unsupported functionality to the ATMega128. In particular,
+	the following features have been added: 
+	  + The analog voltage reference input (AREF) pin.
+	  + The A/D converter section.
+	  + The A/D convert multiplexer section.
+	  + Fixes to the address of SPCR and SPSR spy registers.
+	  + Add watchdog functionality.
+	In the process of adding this functionality, the HWAd class was
+	modified slightly to support the AREF input. This caused a change
+	in its constructor, and thus a small change in the other AVR that
+	used the constructor at4433.cpp.  The ADLAR (left justification)
+	function of the ADC was found to be missing and was fixed
+	(in hwad.cpp) as a part of the ADC testing with my application.
+
 2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* src/rwmem.cpp: Add trace output for reserved accesses.

@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -132,17 +132,24 @@ string HWPort::GetPortString() {
 }
 
 
-unsigned char RWPort::operator=(unsigned char val) { if (core->trace_on) trioaccess("Port",val);hwport->SetPort(val); return val; } 
+unsigned char RWPort::operator=(unsigned char val) {
+  if (core->trace_on)
+    trioaccess("Port",val);
+  hwport->SetPort(val);
+  return val;
+} 
 
 unsigned char RWPin::operator=(unsigned char val) { 
     if (core->trace_on) {
         trioaccess("Pin",val);
-        traceOut << "Not allowed to write to Pin! Read-Only!" << endl;
+        traceOut << "Not allowed to write to Pin (" << hwport->GetName()
+                 << ")! Read-Only!" << endl; 
     }
     
-    cerr << "Not allowed to write to Pin! Read-Only!" << endl; 
+    cerr << "Not allowed to write to Pin (" << hwport->GetName()
+         << ")! Read-Only!" << endl; 
     return 0;
-} 
+}
 
 unsigned char RWDdr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ddr",val);hwport->SetDdr(val); return val; } 
 

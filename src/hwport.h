@@ -69,6 +69,7 @@ class HWPort: public Hardware {
         void SetDdr(unsigned char val) { ddr=val;CalcOutputs();}
         Pin& GetPin(unsigned char pinNo) ;
         void CalcPin();
+        string GetName() { return myName; } 
 
         unsigned char GetPort() { return port; }
         unsigned char GetDdr() { return ddr;}

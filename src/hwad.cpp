@@ -78,9 +78,9 @@ RWAdmux::operator unsigned char() const { return admux->GetAdmux(); }
 #define ADPS2 0x04
 #define ADPS1 0x02
 #define ADPS0 0x01
-
-
-HWAd::HWAd( AvrDevice *c, HWAdmux *a, HWIrqSystem *i, PinAtPort _aref, unsigned int iv) :
+#define ADLAR (1<<5)
+ 
+HWAd::HWAd( AvrDevice *c, HWAdmux *a, HWIrqSystem *i, Pin& _aref, unsigned int iv) :
 Hardware(c), core(c), admux(a), irqSystem(i), aref(_aref), irqVec(iv) {
     core->AddToCycleList(this);
 //    irqSystem->RegisterIrqPartner(this, iv);
@@ -195,7 +195,7 @@ unsigned int HWAd::CpuCycle() {
                     if (clk==1.5*2) { //sampling
                         adSample= admux->GetMuxOutput();
                         int adref= aref.GetAnalog();
-                        if (adSample>adref) adSample=aref;
+                        if (adSample>adref) adSample=adref;
                         if (adref==0) {
                             adSample=INT_MAX;
                         } else {
@@ -204,7 +204,10 @@ unsigned int HWAd::CpuCycle() {
 
                     } else if ( clk== 13*2) {
                         //calc sample to go to 10 bit value
-                        adSample= adSample>>(sizeof(int)*8 -(10+1)); 
+			if(admux->GetAdmux() & ADLAR){
+				adSample <<= (16-10); // Left-justify sample
+			}
+
                         if (adchLocked) {
                             if (core->trace_on) {
                                 traceOut<< "AD-Result lost adch is locked!" << endl;

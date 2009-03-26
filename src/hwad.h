@@ -56,7 +56,7 @@ class HWAd: public Hardware {
         AvrDevice *core;
         HWAdmux *admux;
         HWIrqSystem *irqSystem;
-        PinAtPort aref;
+	Pin&	aref;
         unsigned int irqVec;
 
         bool usedBefore; //adc must initialzed ?
@@ -76,7 +76,7 @@ class HWAd: public Hardware {
 
 
     public:
-        HWAd(AvrDevice *core, HWAdmux *m, HWIrqSystem *, PinAtPort aref, unsigned int irqVec) ;
+        HWAd(AvrDevice *core, HWAdmux *m, HWIrqSystem *, Pin& aref, unsigned int irqVec) ;
         unsigned int CpuCycle();
 
         unsigned char GetAdch();
