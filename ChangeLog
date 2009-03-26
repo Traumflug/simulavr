@@ -1,3 +1,7 @@
+2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/rwmem.cpp: Add trace output for reserved accesses.
+
 2009-03-25	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* configure.ac: Add shared framework simulavr.tcl. Switch some of the

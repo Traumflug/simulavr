@@ -124,9 +124,9 @@ CPURegister::operator unsigned char() const {
 }
 
 unsigned char RWReserved::operator=(unsigned char val) { 
-    if (core->trace_on) {
-        trioaccess("Reserved",val);
-    }
+    if (core->trace_on)
+      traceOut << "ASSIGNMENT TO RESERVED ADDRESS [0x" << hex << myAddress
+               << "] = 0x" << (int) val << dec << endl;
     if (global_message_on_bad_access)
       cerr << "ASSIGNMENT TO RESERVED ADDRESS [0x" << hex << myAddress
            << "] = 0x" << (int) val << dec << endl;
@@ -134,6 +134,9 @@ unsigned char RWReserved::operator=(unsigned char val) {
 }
 
 RWReserved::operator unsigned char() const {
+    if (core->trace_on)
+      traceOut << "READ FROM RESERVED ADDRESS [0x" << hex << myAddress
+               << dec << "]" << endl;
     if (global_message_on_bad_access)
       cerr << "READ FROM RESERVED ADDRESS [0x" << hex << myAddress
            << dec << "]" << endl;
