@@ -1,5 +1,12 @@
 2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* anacomp/Makefile.am, atmel_key/Makefile.am, simple_ex1/Makefile.am,
+	spi/Makefile.am, stdiodemo/Makefile.am: Clean up Makefiles. Add
+	spi.tcl.
+	* spi/spi.tcl: New file.
+
+2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* simulavr.tcl.in, anacomp/Makefile.am, spi/Makefile.am: spi example
 	not working but broken in same way using check.tcl and new Tcl
 	Simulavr framework.

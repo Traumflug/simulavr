@@ -2,14 +2,16 @@
 #  $Id$
 #
 
+EXAMPLE=spi
 AVR_GCC=@AVR_GCC@
 AVR_CPU=atmega128
+AVR_CFLAGS  = -g -O2 -mmcu=$(AVR_CPU)
 
-noinst_DATA = spi.elf
+noinst_DATA = $(SPI).elf
 
-CLEANFILES = spi.elf main.o trace
+CLEANFILES = $(SPI).elf main.o trace
 
-EXTRA_DIST = main.cpp spidata anadata spi.tcl
+EXTRA_DIST = main.cpp spidata anadata $(SPI).tcl
 
 all-local: $(objdir)/spidata $(objdir)/anadata
 
@@ -20,13 +22,13 @@ $(objdir)/anadata: $(srcdir)/anadata
 	test -r anadata || cp $(srcdir)/anadata anadata
 
 # 1000000000ns/1000000MHz == 1000ns
-do: spi.elf
-	../simulavr.tcl -d $(AVR_CPU) -f spi.elf -u -F 1000 \
-	    -s $(srcdir)/spi.tcl
+do: $(SPI).elf
+	../simulavr.tcl -d $(AVR_CPU) -f $(SPI).elf -u -F 1000 \
+	    -s $(srcdir)/$(SPI).tcl
 
-dogdb: spi.elf
-	../simulavr.tcl -d $(AVR_CPU) -f spi.elf -u -F 1000 \
-	    -s $(srcdir)/spi.tcl -g
+dogdb: $(SPI).elf
+	../simulavr.tcl -d $(AVR_CPU) -f $(SPI).elf -u -F 1000 \
+	    -s $(srcdir)/$(SPI).tcl -g
 
 # remove when do/dogdb work
 do_old:
@@ -34,10 +36,10 @@ do_old:
 
 # WAR: should detect avr-toolset first!
 
+%.o: $(srcdir)/%.cpp
+	$(AVR_GCC) $(AVR_CFLAGS) -c -o $@ $<
+
 main.o : $(srcdir)/main.cpp
-	$(AVR_GCC) -g -O2 -mmcu=$(AVR_CPU) -c -o $@ $<
 
-spi.elf : main.o
-	$(AVR_GCC) -mmcu=$(AVR_CPU) -o $@ $<
-
-SUBDIRS =
+$(SPI).elf : main.o
+	$(AVR_GCC) $(AVR_FLAGS) -o $@ $<

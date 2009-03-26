@@ -2,32 +2,33 @@
 #  $Id$
 #
 
+EXAMPLE=anacomp
 AVR_GCC=@AVR_GCC@
 PYTHON=@PYTHON@
-
-noinst_DATA = anacomp
-
-CLEANFILES = anacomp anacomp.o trace
-
-EXTRA_DIST = main.c checkdebug.py anacomp.tcl
-
 AVR_CPU=at90s4433
+AVR_CFLAGS  = -g -O2 -mmcu=$(AVR_CPU)
 
-do: anacomp
-	../simulavr.tcl -d $(AVR_CPU) -f anacomp -u \
-	    -s $(srcdir)/anacomp.tcl
+noinst_DATA = $(EXAMPLE)
 
-dogdb: anacomp
-	../simulavr.tcl -d $(AVR_CPU) -f anacomp -u \
-	    -s $(srcdir)/anacomp.tcl -g
+CLEANFILES = $(EXAMPLE) anacomp.o trace $(EXAMPLE).lst
 
-do_python: anacomp
+EXTRA_DIST = main.c checkdebug.py $(EXAMPLE).tcl
+
+do: $(EXAMPLE)
+	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE) -u \
+	    -s $(srcdir)/$(EXAMPLE).tcl
+
+dogdb: $(EXAMPLE)
+	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE) -u \
+	    -s $(srcdir)/$(EXAMPLE).tcl -g
+
+do_python: $(EXAMPLE)
 	$(PYTHON) $(srcdir)/checkdebug.py
 
-anacomp.o : $(srcdir)/main.c
-	$(AVR_GCC) -g -O2 -mmcu=$(AVR_CPU) -c -o $@ $<
+$(EXAMPLE): main.o
+	$(AVR_GCC) $(AVR_CFLAGS) -o $@ $<
 
-anacomp : anacomp.o
-	$(AVR_GCC) -mmcu=$(AVR_CPU) -o $@ $<
+%.o: $(srcdir)/%.c
+	$(AVR_GCC) $(AVR_CFLAGS) -c -o $@ $<
 
-SUBDIRS =
+main.o: $(srcdir)/main.c
