@@ -9,7 +9,7 @@ noinst_DATA = anacomp
 
 CLEANFILES = anacomp anacomp.o trace
 
-EXTRA_DIST = main.c checkdebug.py
+EXTRA_DIST = main.c checkdebug.py anacomp.tcl
 
 AVR_CPU=at90s4433
 

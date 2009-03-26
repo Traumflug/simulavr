@@ -1,3 +1,10 @@
+2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* simulavr.tcl.in, anacomp/Makefile.am, spi/Makefile.am: spi example
+	not working but broken in same way using check.tcl and new Tcl
+	Simulavr framework.
+	* spi/Makefile.notauto: New file.
+
 2009-03-25	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* .cvsignore, gui.tcl.in, anacomp/Makefile.am, anacomp/checkdebug.py,

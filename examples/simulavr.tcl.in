@@ -275,9 +275,6 @@ if { "$traceFile" != "" } {
   SimulationMember_trace_on_set $dev1 1
 }
 
-#create new device -- exits if invalid
-set dev1 [AvrFactory_makeDevice [AvrFactory_instance] ${AvrCPUModel}]
-
 #set the clock cycle time [ns]
 AvrDevice_SetClockFreq ${dev1} [expr $Frequency / 250]
 
