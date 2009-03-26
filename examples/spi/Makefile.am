@@ -7,11 +7,11 @@ AVR_GCC=@AVR_GCC@
 AVR_CPU=atmega128
 AVR_CFLAGS  = -g -O2 -mmcu=$(AVR_CPU)
 
-noinst_DATA = $(SPI).elf
+noinst_DATA = $(EXAMPLE).elf
 
-CLEANFILES = $(SPI).elf main.o trace
+CLEANFILES = $(EXAMPLE).elf main.o trace
 
-EXTRA_DIST = main.cpp spidata anadata $(SPI).tcl
+EXTRA_DIST = main.cpp spidata anadata $(EXAMPLE).tcl
 
 all-local: $(objdir)/spidata $(objdir)/anadata
 
@@ -22,13 +22,13 @@ $(objdir)/anadata: $(srcdir)/anadata
 	test -r anadata || cp $(srcdir)/anadata anadata
 
 # 1000000000ns/1000000MHz == 1000ns
-do: $(SPI).elf
-	../simulavr.tcl -d $(AVR_CPU) -f $(SPI).elf -u -F 1000 \
-	    -s $(srcdir)/$(SPI).tcl
+do: $(EXAMPLE).elf
+	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE).elf -u -F 1000 \
+	    -s $(srcdir)/$(EXAMPLE).tcl
 
-dogdb: $(SPI).elf
-	../simulavr.tcl -d $(AVR_CPU) -f $(SPI).elf -u -F 1000 \
-	    -s $(srcdir)/$(SPI).tcl -g
+dogdb: $(EXAMPLE).elf
+	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE).elf -u -F 1000 \
+	    -s $(srcdir)/$(EXAMPLE).tcl -g
 
 # remove when do/dogdb work
 do_old:
@@ -41,5 +41,5 @@ do_old:
 
 main.o : $(srcdir)/main.cpp
 
-$(SPI).elf : main.o
+$(EXAMPLE).elf : main.o
 	$(AVR_GCC) $(AVR_FLAGS) -o $@ $<

@@ -1,5 +1,9 @@
 2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* spi/Makefile.am: Fix typo that prevented make do from working.
+
+2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* anacomp/Makefile.am, atmel_key/Makefile.am, simple_ex1/Makefile.am,
 	spi/Makefile.am, stdiodemo/Makefile.am: Clean up Makefiles. Add
 	spi.tcl.
