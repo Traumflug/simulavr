@@ -23,17 +23,43 @@
  *  $Id$
  */
 
-#include "trace.h"
 #include "hwstack.h"
+#include "trace.h"
 
 
+unsigned char RWSph::operator=(unsigned char val) {
+  hwstack->SetSph(val);
+  return val;
+}
 
-unsigned char RWSph::operator=(unsigned char val) { hwstack->SetSph(val); return val;} 
-unsigned char RWSpl::operator=(unsigned char val) { hwstack->SetSpl(val); return val;} 
-RWSpl::operator unsigned char() const { return hwstack->GetSpl();  } 
-RWSph::operator unsigned char() const { return hwstack->GetSph();  } 
+RWSph::operator unsigned char() const {
+  return hwstack->GetSph();
+} 
 
+unsigned char RWSphFake::operator=(unsigned char val) {
+  string s("ASSIGNMENT TO NON-EXISTENT SPH REGISTER -- FROM GCC?\n");
 
+  if (core->trace_on) traceOut << s;
+  if (global_message_on_bad_access) cerr << s;
+  hwstack->SetSph(val);
+  return val;
+} 
+
+RWSphFake::operator unsigned char() const {
+  string s("READ FROM NON-EXISTENT SPH REGISTER -- FROM GCC?\n");
+
+  if (core->trace_on) traceOut << s;
+  if (global_message_on_bad_access) cerr << s;
+  return hwstack->GetSph();
+} 
+
+unsigned char RWSpl::operator=(unsigned char val) {
+  hwstack->SetSpl(val);
+  return val;
+} 
+RWSpl::operator unsigned char() const {
+  return hwstack->GetSpl();
+} 
 
 HWStack::HWStack(AvrDevice *c, MemoryOffsets *sr, unsigned int mask):Hardware(c), core(c) {
     stackMask=mask;

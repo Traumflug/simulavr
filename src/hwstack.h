@@ -68,6 +68,13 @@ class RWSph: public RWMemoryMembers {
 		virtual operator unsigned char() const;
 };
 
+class RWSphFake: public RWSph {
+	public:
+		RWSphFake(AvrDevice *c, HWStack *stack): RWSph(c, stack){}
+		virtual unsigned char operator=(unsigned char) ;
+		virtual operator unsigned char() const;
+};
+
 class RWSpl: public RWMemoryMembers {
 	protected:
 		HWStack *hwstack;

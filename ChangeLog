@@ -1,3 +1,10 @@
+2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/at4433.cpp, src/hwstack.cpp, src/hwstack.h: Add RWSphFake for AVR
+	models which do not have nor need the sph register since they cannot
+	access more than 0xff bytes of SRAM. But gcc generates accesses to
+	this register and apparently it is benign in real hardware.
+
 2009-03-26	Michael N. Moran <mike@mnmoran.org>
 
 	Patch 4609

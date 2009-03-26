@@ -76,7 +76,7 @@ AvrDevice(64, 128, 0, 4*1024) {
 	mcucr= new HWMcucr(this); //, irqSystem, PinAtPort(portd, 2), PinAtPort(portd, 3));
 
 	rw[0x5f]= new RWSreg(this, status);
-	rw[0x5e]= new RWReserved(this, 0x5e);
+	rw[0x5e]= new RWSphFake(this, stack);  // not really but benign
 	rw[0x5d]= new RWSpl(this, stack);  //only 8 Bit Stack Pointer in 4433
 	rw[0x5c]= new RWReserved(this, 0x5c);
 	rw[0x5b]= new RWGimsk(this, extirq, portd);
