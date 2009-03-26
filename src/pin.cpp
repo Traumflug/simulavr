@@ -34,6 +34,17 @@
 #include <sstream>
 using namespace std;
 
+// This is the value used to set the analogValue
+// when the pin output is TRISTATE. Originally, the
+// value was simply (INT_MAX/2), but when I was debugging
+// a glitch in a pin used as an open-drain output, I
+// found that Pin::operator bool() chose to convert this
+// to a LOW condition during a CalcNet() using MirroNet.
+// Thus, I added one to the value and the glitch went away.
+// This is probably not the absolute correct fix, but it
+// works for this case.
+enum {TRISTATE_ANALOG_VALUE = (INT_MAX/2)+1};
+
 void Pin::SetOutState( T_Pinstate s) { 
     outState=s;
 }
@@ -99,7 +110,7 @@ Pin::Pin(T_Pinstate ps) {
             break;
 
         case TRISTATE:
-            analogValue=INT_MAX/2;
+            analogValue=TRISTATE_ANALOG_VALUE;
             break;
 
         default:
@@ -111,7 +122,7 @@ Pin::Pin() {
     pinOfPort=0; 
     connectedTo= new MirrorNet(this); 
     outState=TRISTATE;
-    analogValue=INT_MAX/2;
+    analogValue=TRISTATE_ANALOG_VALUE;
     //ui=0;
 }
 
@@ -186,7 +197,7 @@ Pin& Pin::operator= (unsigned char c) {
         case 'S': outState=SHORTED; analogValue=0; break;
         case 'H': outState=HIGH; analogValue=INT_MAX; break;
         case 'h': outState=PULLUP; analogValue=INT_MAX; break;
-        case 't': outState=TRISTATE; analogValue=INT_MAX/2; break;
+        case 't': outState=TRISTATE; analogValue=TRISTATE_ANALOG_VALUE; break;
         case 'l': outState=PULLDOWN; analogValue=0; break;
         case 'L': outState=LOW; analogValue=0; break;
 
@@ -212,7 +223,7 @@ Pin::Pin(const OpenDrain &od) {
     bool res=(bool) od;
     if (res==0) {
         outState=TRISTATE;
-        analogValue=INT_MAX/2;
+        analogValue=TRISTATE_ANALOG_VALUE;
     }
     else {
         outState=LOW; 

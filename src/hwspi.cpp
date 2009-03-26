@@ -25,6 +25,7 @@
 
 /*TODO if reading first the spsr and after that read spdr the SPIF Flag must be cleared! */
 
+#include <stdio.h>
 #include "hwspi.h"
 #include "flash.h"
 #include "avrdevice.h"
@@ -185,30 +186,48 @@ unsigned int HWSpi::CpuCycle() {
                 bool sampling; //0->setup, 1->sampling
                 if ( oldSck != pinSck) { //something has changed for sck
                     //bool sckVal= pinSck;
-                    if ( (( spsr & CPOL ) !=0 ) ^ ( ( spsr & CPHA) !=0 ) ^ ((bool)pinSck) ) {
-                        sampling=1;
-                    } else {
-                        sampling=0;
-                    }
+					oldSck	= pinSck;
+					if(spcr & CPOL){
+						// Clock is HIGH when idle
+						if(spcr & CPHA){
+							// Sample on trailing edge
+							sampling	= ((bool)pinSck)?1:0;
+							}
+						else {
+							// Sample on leading edge
+							sampling	= ((bool)pinSck)?0:1;
+							}
+						}
+					else {
+						// Clock is LOW when idle
+						if(spcr & CPHA){
+							// Sample on trailing edge
+							sampling	= ((bool)pinSck)?0:1;
+							}
+						else {
+							// Sample on leading edge
+							sampling	= ((bool)pinSck)?1:0;
+							}
+						}
 
                     if (sampling) {
                         if (spcr & DORD) { // LSB first
-                            ror(&spdrRead);
-                            spdrRead&=0x7f;
-                            if (pinMiso) { //pin == 1
-                                spdrRead|=0x80;
+							spdrShiftReg >>= 1;
+                            if (pinMosi) { //pin == 1
+                                spdrShiftReg|=0x80;
                             }
-                        } else {
-                            rol(&spdrRead);
-                            spdrRead&=0xfe;
-                            if (pinMiso) { //pin == 1
-                                spdrRead|=0x01;
+                        } else {	// MSB first
+							spdrShiftReg <<= 1;
+                            if (pinMosi) { //pin == 1
+                                spdrShiftReg|=0x01;
                             }
                         }
                         bitCnt++;
-                        if (bitCnt==7) { //ready
+                        if (bitCnt==8) { //ready
                             state= READY;
                             spsr|=SPIF;
+							spdrRead	= spdrShiftReg;
+							spdrShiftReg	= 0;	// I'm not sure if this is the correct behavior or not.
                             if (spsr&SPIE) { irqSystem->SetIrqFlag(this, vectorForSpif); }
                             spifWeak=0; 	//after accessing the spsr the spif is weak not yet
                         } // end of all bits sampled
@@ -377,6 +396,7 @@ void HWSpi::Reset() {
     spsr=0;
     spdrWrite=0;
     spdrRead=0;
+	spdrShiftReg=0;
 }
 
 unsigned char HWSpi::GetSpdr() {

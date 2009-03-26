@@ -1,5 +1,23 @@
 2009-03-26	Michael N. Moran <mike@mnmoran.org>
 
+	Patch 4595
+	* src/hwspi.cpp, src/hwspi.h, src/pin.cpp: The SPI simulation did not
+	double buffer the RX data register.  This problem was solved by
+	creating a shift register, and only copying the shift register
+	to the SPDR RX register after it is filled with 8 bits.  The bit
+	count for receiving the SPI data was also incorrect (7 instead of 8).
+	Also, the logic for detecting the clock sample point was cleaned-up
+	and verified.
+	  The bug in the Pin class was found when an output glitch was
+	noticed while monitoring the state of a pin. The pin was configured
+	as an input and the associated PORT register was written with a
+	HIGH in preparation for changing the port to an open-drain output.
+	The act of writting the PORT register caused the output to go LOW
+	since the "analogValue" of the pin was less than INT_MAX/2. By
+	simply adding one to the INT_MAX/2 default of the port, this bad
+	behavior stopped. 
+2009-03-26	Michael N. Moran <mike@mnmoran.org>
+
 	Patch 4594
 	* src/at4433.cpp, src/atmega128.cpp, src/atmega128.h, src/hwad.cpp,
 	src/hwad.h, src/hwport.cpp, src/hwport.h: This patch is to add

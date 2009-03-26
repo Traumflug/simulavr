@@ -35,6 +35,7 @@ class HWIrqSystem;
 
 class HWSpi: public Hardware {
 	protected:
+		unsigned char spdrShiftReg;
 		unsigned char spdrRead;
 		unsigned char spdrWrite;
 		unsigned char spsr;
