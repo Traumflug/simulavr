@@ -1,0 +1,173 @@
+#! @TCL_SHELL@
+#
+#  $Id$
+#
+
+package require Itcl
+namespace import itcl::*
+
+proc locateInDirs {name dirs} {
+
+  foreach dir ${dirs}  {
+     set toTest ${dir}/${name}
+     if { [file exists ${toTest}] } {
+       return ${toTest}
+     }
+  }
+  error "unable to locate ${name}"
+}
+
+# Dummy Class to satisfy GUI port
+class UpdateControl {
+  protected {
+    variable objname
+    variable win
+    variable parent
+  }
+
+  public {
+    constructor {  _parent _objname _win } {
+      set parent $_parent
+      set win $_win
+      set objname $_objname
+    }
+  }
+}
+
+class Net {
+  protected {
+    variable inState
+    variable objname
+    variable win
+    variable parent
+  }
+
+  public {
+    constructor {  _parent _objname _win } {
+      set parent $_parent
+      set win $_win
+      set objname $_objname
+    }
+  }
+
+  method ChangeValue { newValue } {
+    set inState $newValue
+  }
+
+}
+
+class SerialRx {
+  protected {
+    variable inState
+    variable objname
+    variable win
+    variable parent
+  }
+
+  public {
+    constructor {  _parent _objname _win } {
+      set parent $_parent
+      set win $_win
+      set objname $_objname
+    }
+
+    method ChangeValue { newValue } {
+      set inState $newValue
+      puts "SerialRx: ${newValue}"
+    }
+  }
+}
+
+class SerialTx {
+  protected {
+    variable objname
+    variable win
+    variable parent
+  }
+
+  public {
+    constructor {  _parent _objname _win } {
+      set parent $_parent
+      set win $_win
+      set objname $_objname
+    }
+  }
+}
+
+class Master {
+  protected {
+    variable sock
+  }
+
+  public {
+    constructor { _sock } {
+      #puts "Constructor from Master called!"
+      set sock $_sock
+      #set sock [socket localhost $socketNo]
+      fileevent $sock readable "$this ReadFromSimulavr"
+      fconfigure $sock -blocking 0
+    }
+
+    method ReadFromSimulavr { } {
+      if { ![eof $sock] } {
+        gets $sock x
+        puts "FDBK RECV: --->$x<---"
+        set readList [split $x]
+        set offset [string first " " $x ]
+        set sub [string range $x $offset end ]
+
+        # puts "offset: $offset    rest: $sub"
+
+        # create class objName parent win objName
+
+        set front [lrange $x 1 2]
+        set back [lrange $x 3 end]
+        set objName [lindex $x 2]
+
+
+        switch [lindex $readList 0] {
+          create {
+            puts "FDBK CREATE: $front $this $objName $back"
+            if { [catch { eval "$front $this $objName $back" }]  } {
+              puts "exception .. are we missing class $front?"
+            }
+          }
+
+          set {
+            puts "FDBK SET: [lindex $readList 1] ChangeValue [lindex $readList 2]"
+            catch {
+              eval "[lindex $readList 1] ChangeValue [lindex $readList 2]"
+            }
+          }
+          default {
+            puts "FDBK DEFAULT: >$x<"
+            eval $x
+          }
+        }
+
+        puts -nonewline $sock "__ack X "
+        flush $sock
+      } else {
+        error "Error condition in io input handler"
+      }
+    }
+
+    method SendToSimulator { id val } {
+      puts "GUI SEND: Update the var $id to $val"
+      puts -nonewline $sock "$id $val "
+      flush $sock
+      update
+    }
+  }
+}
+
+# create a server socket
+socket -server NewConnection 7777
+
+proc NewConnection { _sock _address _port } {
+  puts "New Connection on Simulation Feedback Server established!"
+  puts "Socket: $_sock  from Address $_address  and port $_port"
+  Master guiMaster_$_sock $_sock
+}
+
+vwait forever

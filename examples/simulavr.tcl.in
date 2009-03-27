@@ -1,4 +1,4 @@
-#! /usr/bin/tclsh
+#! @TCL_SHELL@
 #
 #  This demonstrates how to implement a custom Tcl "main" for the
 #  simulavr dynamic library and to access the behavioral modification
@@ -13,6 +13,8 @@
 #                    this file.
 #    + -l library  - specify the name of the simulavr dynamic library to use
 #                    Otherwise searches along a reasonable path
+#    + -S Tcl file - specify the name of a user provided simulation feedback
+#                    Tcl file
 #
 #  Command Line Issues:
 #    + The -T and -B arguments do not behave like the C++.  Currently I
@@ -108,12 +110,12 @@ proc Getopts {alistname args} {
 
 #parse arguments?
 
-Getopts argv "hVt:Mm:f:d:F:ua:e:W:R:gGp:ns:l:" \
+Getopts argv "hVt:Mm:f:d:F:ua:e:W:R:gGp:ns:l:S:" \
   doHelp verbose traceFile noMsgOnBadAccess maxRunTime \
   AvrExecutable AvrCPUModel Frequency hasUserInterface\
   abortOffset exitOffset writeToArgs readFromArgs \
   gdbEnable gdbDebugEnable gdbPort gdbWaitArg \
-  sourceFile libraryDir
+  sourceFile libraryDir simFeedbackFile
 
 proc splitOffset {str off ofile} {
   upvar $off loff
@@ -127,7 +129,6 @@ proc splitOffset {str off ofile} {
   } else {
     set lofile "-"
   }
-
 }
 
 splitOffset $writeToArgs writeToOffset writeToFile
@@ -185,6 +186,7 @@ if { ${verbose} == 1 } {
   puts "gdbDebugEnable    : ${gdbDebugEnable}"
   puts "gdbPort           : ${gdbPort}"
   puts "gdbWait           : ${gdbWait}"
+  puts "simFeedbackFile   : ${simFeedbackFile}"
 }
 
 if { ${doHelp} == 1 } {
@@ -220,12 +222,22 @@ if { ${doHelp} == 1 } {
   puts "  -s <Tcl File>     source the <Tcl File> and allow the user to further"
   puts "                    tailor or augment the simulation"
   puts "  -l <library>      path of the simulavrxx dynamic <library>"
+  puts "  -S <Tcl file>     specify <Tcl file> as a simulation feedback module"
   exit
 }
 
 if { "${AvrExecutable}" == "" } {
-  puts "Executable name not set"
-  exit
+  error "Executable name not set"
+}
+
+if { ${hasUserInterface} == 1 && ${simFeedbackFile} == "" } {
+  error "Cannot enable  GUI and Simulation Feedback"
+}
+
+if { ${simFeedbackFile} != "" } {
+  if { ! [file executable ${simFeedbackFile}] } {
+    error "${simFeedbackFile} is not executable"
+  }
 }
 
 if { "${Frequency}" == "" } {
@@ -240,8 +252,7 @@ proc locateInDirs {name dirs} {
        return ${toTest}
      }
   }
-  puts "unable to locate ${name}"
-  exit
+  error "unable to locate ${name}"
 }
 
 set prefix  @prefix@
@@ -256,7 +267,7 @@ set libraryFile [locateInDirs libsimulavr.so \
 if { ${verbose} == 1 } { puts "Loading ${libraryFile}" }
 load ${libraryFile}
 
-# spawn the GUI
+# optionally spawn the GUI
 set GuiDir ""
 if { ${hasUserInterface} == 1 } {
   set GuiFile [locateInDirs gui.tcl \
@@ -264,6 +275,12 @@ if { ${hasUserInterface} == 1 } {
   if { ${verbose} == 1 } { puts "Loading ${libraryFile}" }
   #start external generic gui server 
   exec @TCL_WISH@ ${GuiFile} &
+}
+
+# optionally spawn a simulation feedback instance
+if { ${simFeedbackFile} != "" } {
+  exec xterm -sb -T "Simulation Feedback ${simFeedbackFile}" \
+    -e "${simFeedbackFile}" &
 }
 
 #create new device -- exits if invalid
@@ -325,9 +342,9 @@ if { "${sourceFile}" != "" } {
   source ${sourceFile}
 }
 
-if { ${hasUserInterface} == 1 } {
-  #start the user interface client 
-  set ui [new_UserInterface 7777 ]
+# start the user interface client 
+if { ${hasUserInterface} == 1 || ${simFeedbackFile} != "" } {
+  set ui [new_UserInterface 7777]
 }
 
 # Invoke the user extension for just before adding the GUI

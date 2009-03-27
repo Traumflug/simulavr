@@ -1,3 +1,14 @@
+2009-03-27	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* Makefile.am, simulavr.tcl.in: Add new test to demonstrate how one can
+	externally generate feedback with a program running on the simulator
+	without having a GUI. This is the foundation for system level
+	testing.
+	* feedback/.cvsignore, feedback/Makefile.am, feedback/debugio.c,
+	feedback/debugio.h, feedback/defines.h, feedback/feedback.tcl,
+	feedback/main.c, feedback/simfeedback.tcl.in, feedback/uart.c,
+	feedback/uart.h: New files.
+
 2009-03-26	Michael N. Moran <mike@mnmoran.org>
 
 	Patch 4609
