@@ -1,5 +1,11 @@
 2009-03-27	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* configure.ac: Add new test to demonstrate how one can externally
+	generate feedback with a program running on the simulator without
+	having a GUI. This is the foundation for system level testing.
+
+2009-03-27	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* configure.ac, m4/avr_tcl.m4: Move TCL checks into m4 macro.
 
 2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>

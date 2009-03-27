@@ -69,6 +69,9 @@ if test x"${build_tcl_libs}" = x"yes" -a x"${HAVE_TCL}" != x"no" ; then
   AC_CONFIG_FILES(
     [examples/simulavr.tcl],
     [chmod +x examples/simulavr.tcl])
+  AC_CONFIG_FILES(
+    [examples/feedback/simfeedback.tcl],
+    [chmod +x examples/feedback/simfeedback.tcl])
   # TBD: The following need to be removed once it is confirmed these examples
   # TBD: run with the Tcl simulavr framework.
   AC_CONFIG_FILES(
@@ -98,8 +101,9 @@ AC_CONFIG_FILES([\
   regress/Makefile regress/modules/Makefile regress/test_opcodes/Makefile \
   regress/avrtest/Makefile \
   examples/Makefile examples/anacomp/Makefile examples/atmega48/Makefile \
-  examples/atmel_key/Makefile examples/simple_ex1/Makefile \
-  examples/spi/Makefile examples/stdiodemo/Makefile \
+  examples/atmel_key/Makefile examples/feedback/Makefile \
+  examples/simple_ex1/Makefile examples/spi/Makefile \
+  examples/stdiodemo/Makefile \
 ])
 AC_OUTPUT
 
