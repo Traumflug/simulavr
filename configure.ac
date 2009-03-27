@@ -47,53 +47,8 @@ AC_SUBST([DDD_WITH_ARGS],${DDD_WITH_ARGS})
 AC_CHECK_PROGS(TEX, [tex], [no])
 AM_CONDITIONAL([HAVE_TEX], [test x"${TEX}" != x"no"])
 
-## Check if Tcl is desired
-AC_MSG_CHECKING([Tcl desired])
-SIMULAVRXX_ENABLE_TCL
-AC_MSG_RESULT([${SIMULAVRXX_USE_TCL}])
-
-AC_ARG_WITH([tclconfig],
-  [AS_HELP_STRING([--with-tclconfig=path  directory with tclConfig.sh])],
-  [if test ! -d ${with_tclconfig_path} ; then
-     AC_MSG_ERROR([(${with_tclconfig_path}) is not a directory])
-   fi
-  ],
-  [with_tclconfig_path=/usr/lib]
-)
-
-AC_MSG_RESULT([tclConfig.sh directory = $with_tclconfig_path])
-# Check if Tcl development kit installed
-if test x"${SIMULAVRXX_USE_TCL}" = x"yes" ; then
-  # If we can find tclConfig.sh, forget hacking at it
-  AC_CHECK_FILE(
-    [${with_tclconfig_path}/tclConfig.sh],
-    [source ${with_tclconfig_path}/tclConfig.sh
-     Tcl_h_found=yes
-     tclconfig_root_patch=${with_tclconfig_path}
-     AC_SUBST([AVR_TCL_LIB],[${TCL_LIB_SPEC}])
-     AC_SUBST([AVR_TCL_INCLUDE],[${TCL_INCLUDE_SPEC}])
-    ],
-    [AC_MSG_WARN([tclConfig.sh not found .. guessing])
-     AC_CHECK_HEADER([tcl.h], [Tcl_h_found=yes], [Tcl_h_found=no])
-     AC_CHECK_HEADER([tcl.h], [Tcl_h_found=yes], [Tcl_h_found=no])
-     AC_SUBST([AVR_TCL_LIB],[-ltcl8.5])
-     AC_SUBST([AVR_TCL_INCLUDE],[])
-    ]
-  )
-fi
-
-## Some of the examples include GUIs written in Wish
-AC_PATH_PROG(TCL_WISH, [wish], [/usr/bin/wish], [no])
-test "${TCL_WISH}" = no && AC_MSG_WARN([wish not found])
-
-# If they did not want Tcl or it is not installed, do not use it
-if test x"${SIMULAVRXX_USE_TCL}" = x"yes" -a x"${Tcl_h_found}" = x"yes"; then
-  build_tcl_libs=yes
-else
-  build_tcl_libs=no
-fi
-
-AM_CONDITIONAL([USE_TCL], [test x"${build_tcl_libs}" = x"yes"])
+## Check all about Tcl and parse command line arguments
+AX_TCL_ENVIRONMENT
 
 ## We have to propagate all the configure flags we want to use when
 ## configuring for make distcheck
@@ -107,7 +62,7 @@ fi
 AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
 
 ## Certain files should only be generated if Tcl is available and enabled
-if test x"${build_tcl_libs}" = x"yes" -a x"${TCL_WISH}" != x"no" ; then
+if test x"${build_tcl_libs}" = x"yes" -a x"${HAVE_TCL}" != x"no" ; then
   AC_CONFIG_FILES(
     [examples/gui.tcl],
     [chmod +x examples/gui.tcl])

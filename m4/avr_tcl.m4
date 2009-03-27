@@ -2,32 +2,64 @@
 #  $Id$
 #
 
-AC_DEFUN([AC_WAR_TCL],
+AC_DEFUN([AX_TCL_ENVIRONMENT],
 [
-   AC_PATH_PROG(TCL_WISH, wish wish8.4 wish8.3 wish8.2 )
-   AC_SUBST([TCL_WISH])
+## Check if Tcl is desired
+AC_MSG_CHECKING([Tcl desired])
+SIMULAVRXX_ENABLE_TCL
+AC_MSG_RESULT([${SIMULAVRXX_USE_TCL}])
 
-   AM_CONDITIONAL([HAVE_WISH], [test x$TCL_WISH != x])
-
-   # look for tcl config file...it should give us good information. again ignores user parameter ;-(
-   AC_PATH_PROGS(TCL_CONFIG, [tclConfig.sh], [""], [/usr/lib/tcl /usr/lib/tcl8.4 /usr/lib/tcl8.3 /usr/lib/tcl8.2 /usr/lib])
-
-   # find any old tcl, if present. (AC_SEARCH_LIBS more useful here? I
-   # think we don't want to always include it in LIBS which AC_SERCH_LIBS
-   # seems to do)
-   if test x"${TCL_CONFIG}" != "x"; then
-       source ${TCL_CONFIG}
-       # WAR: I don't know what I'm doing...TCL_LIB_SPEC contains
-       # an unepanded variable ${TCL_DBGX} when I looked..
-       MYTCL_LIB_SPEC=`eval echo "${TCL_LIB_SPEC}"`
-       echo "MYTCL_LIB_SPEC=$MYTCL_LIB_SPEC"
-   else
-       AC_MSG_WARN([Failed to find tclConfig.sh... tcl dependent code may fail to build...ask package maintainer to update configure process])
+AC_ARG_WITH([tclconfig],
+  [AS_HELP_STRING([--with-tclconfig=path  directory with tclConfig.sh])],
+  [if test ! -d ${with_tclconfig_path} ; then
+     AC_MSG_ERROR([(${with_tclconfig_path}) is not a directory])
    fi
-   AM_CONDITIONAL([HAVE_TCL_DEV], [test x$TCL_INCLUDE_SPEC != x])
-   
-   
-   AC_SUBST([TCL_INCLUDE_SPEC])
-   AC_SUBST([TCL_LIB_SPEC])
-   AC_SUBST([MYTCL_LIB_SPEC])
+  ],
+  [with_tclconfig_path=/usr/lib]
+)
+
+AC_MSG_RESULT([tclConfig.sh directory = $with_tclconfig_path])
+# Check if Tcl development kit installed
+if test x"${SIMULAVRXX_USE_TCL}" = x"yes" ; then
+  # If we can find tclConfig.sh, forget hacking at it
+  AC_CHECK_FILE(
+    [${with_tclconfig_path}/tclConfig.sh],
+    [source ${with_tclconfig_path}/tclConfig.sh
+     Tcl_h_found=yes
+     tclconfig_root_patch=${with_tclconfig_path}
+     AC_SUBST([AVR_TCL_LIB],[${TCL_LIB_SPEC}])
+     AC_SUBST([AVR_TCL_INCLUDE],[${TCL_INCLUDE_SPEC}])
+    ],
+    [AC_MSG_WARN([tclConfig.sh not found .. guessing])
+     AC_CHECK_HEADER([tcl.h], [Tcl_h_found=yes], [Tcl_h_found=no])
+     AC_CHECK_HEADER([tcl.h], [Tcl_h_found=yes], [Tcl_h_found=no])
+     AC_SUBST([AVR_TCL_LIB],[-ltcl8.5])
+     AC_SUBST([AVR_TCL_INCLUDE],[])
+    ]
+  )
+fi
+
+HAVE_TCL_SHELLS=yes
+
+## Some of the examples include GUIs written in Wish
+AC_PATH_PROG(TCL_WISH, wish wish8.4 wish8.3 wish8.2 )
+test "${TCL_WISH}" = no && AC_MSG_WARN([wish not found])
+AM_CONDITIONAL([HAVE_WISH], [test x$TCL_WISH != x])
+AC_SUBST([TCL_WISH])
+test x$TCL_WISH = x && HAVE_TCL_SHELLS=no
+
+## Some of the examples include feedback modules written in Tclsh
+AC_PATH_PROG(TCL_SHELL, tclsh )
+AM_CONDITIONAL([HAVE_TCLSH], [test x$TCL_SHELL != x])
+AC_SUBST([TCL_SHELL])
+test x$TCL_SHELL = x && HAVE_TCL_SHELLS=no
+
+# If they did not want Tcl or it is not installed, do not use it
+if test x"${SIMULAVRXX_USE_TCL}" = x"yes" -a x"${Tcl_h_found}" = x"yes"; then
+  build_tcl_libs=yes
+else
+  build_tcl_libs=no
+fi
+
+AM_CONDITIONAL([USE_TCL], [test x"${build_tcl_libs}" = x"yes"])
 ])

@@ -1,3 +1,7 @@
+2009-03-27	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac, m4/avr_tcl.m4: Move TCL checks into m4 macro.
+
 2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* src/at4433.cpp, src/hwstack.cpp, src/hwstack.h: Add RWSphFake for AVR
