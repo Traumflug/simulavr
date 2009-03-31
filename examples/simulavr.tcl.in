@@ -230,7 +230,7 @@ if { "${AvrExecutable}" == "" } {
   error "Executable name not set"
 }
 
-if { ${hasUserInterface} == 1 && ${simFeedbackFile} == "" } {
+if { ${hasUserInterface} == 1 && ${simFeedbackFile} != "" } {
   error "Cannot enable  GUI and Simulation Feedback"
 }
 

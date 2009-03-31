@@ -14,15 +14,15 @@ CLEANFILES = $(EXAMPLE) fred.o trace
 EXTRA_DIST = fred.c
 
 run_sim: $(EXAMPLE)
-	../../src/simulavr --device $(AVR_MCU) -f $(EXAMPLE) \
+	../../src/simulavr --device $(AVR_CPU) -f $(EXAMPLE) \
 	    -W 0x20,- -R 0x22,- -T exit
 
 do:
-	../simulavr.tcl -d $(AVR_MCU) -f $(EXAMPLE) \
+	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE) \
 	    -W 0x20,- -R 0x22,- -T exit
 
 dogdb:
-	../simulavr.tcl -d $(AVR_MCU) -f $(EXAMPLE) \
+	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE) \
 	    -W 0x20,- -R 0x22,- -T exit -g
 
 %.o: $(srcdir)/%.c

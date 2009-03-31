@@ -37,8 +37,8 @@ switch ${extensionPoint} {
     ser_rxD0 Add [SerialRxBasic_GetPin mysrx "rx"]
 
     # wire the serial display transmitter
-    ser_txD0 Add [AvrDevice_GetPin $dev1 "E0"]
-    ser_txD0 Add exttxD0
+    #ser_txD0 Add [AvrDevice_GetPin $dev1 "E0"]
+    #ser_txD0 Add exttxD0
     ser_txD0 Add [SerialTxBuffered_GetPin mystx "tx"]
   }
 
