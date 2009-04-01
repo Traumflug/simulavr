@@ -1,5 +1,10 @@
 2009-04-01	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
 
+	* examples/feedback/.cvsignore: Match ELF file name with reality.
+	* examples/atmega48/.cvsignore: (Ditto.)
+
+2009-04-01	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
+
 	* examples/atmega48/main.cpp: replace SIGNAL by ISR, use new-style
 	vector name, drop <avr/signal.h>
 	* examples/spi/main.cpp: (Ditto.)

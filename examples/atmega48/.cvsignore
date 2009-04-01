@@ -1,4 +1,4 @@
 Makefile
 Makefile.in
 check.tcl
-atmega.elf
+atmega48.elf
