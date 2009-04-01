@@ -11,22 +11,22 @@ AC_MSG_RESULT([${SIMULAVRXX_USE_TCL}])
 
 AC_ARG_WITH([tclconfig],
   [AS_HELP_STRING([--with-tclconfig=path  directory with tclConfig.sh])],
-  [if test ! -d ${with_tclconfig_path} ; then
-     AC_MSG_ERROR([(${with_tclconfig_path}) is not a directory])
+  [if test ! -d ${with_tclconfig} ; then
+     AC_MSG_ERROR([(${with_tclconfig}) is not a directory])
    fi
   ],
-  [with_tclconfig_path=/usr/lib]
+  [with_tclconfig=/usr/lib]
 )
 
-AC_MSG_RESULT([tclConfig.sh directory = $with_tclconfig_path])
+AC_MSG_RESULT([tclConfig.sh directory = $with_tclconfig])
 # Check if Tcl development kit installed
 if test x"${SIMULAVRXX_USE_TCL}" = x"yes" ; then
   # If we can find tclConfig.sh, forget hacking at it
   AC_CHECK_FILE(
-    [${with_tclconfig_path}/tclConfig.sh],
-    [source ${with_tclconfig_path}/tclConfig.sh
+    [${with_tclconfig}/tclConfig.sh],
+    [source ${with_tclconfig}/tclConfig.sh
      Tcl_h_found=yes
-     tclconfig_root_patch=${with_tclconfig_path}
+     tclconfig_root_patch=${with_tclconfig}
      AC_SUBST([AVR_TCL_LIB],[${TCL_LIB_SPEC}])
      AC_SUBST([AVR_TCL_INCLUDE],[${TCL_INCLUDE_SPEC}])
     ],
@@ -42,7 +42,7 @@ fi
 HAVE_TCL_SHELLS=yes
 
 ## Some of the examples include GUIs written in Wish
-AC_PATH_PROG(TCL_WISH, wish wish8.4 wish8.3 wish8.2 )
+AC_PATH_PROGS(TCL_WISH, wish wish8.4 wish8.3 wish8.2 )
 test "${TCL_WISH}" = no && AC_MSG_WARN([wish not found])
 AM_CONDITIONAL([HAVE_WISH], [test x$TCL_WISH != x])
 AC_SUBST([TCL_WISH])

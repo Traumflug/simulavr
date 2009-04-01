@@ -1,3 +1,9 @@
+2009-01-01	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
+
+	* m4/avr_tcl.m4: with_tcl_config_path => with_tcl_config;
+	when checking for several versions of wish, use AC_CHECK_PROGS
+	rather than AC_CHECK_PROG.
+
 2009-03-27	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* configure.ac: Add new test to demonstrate how one can externally
