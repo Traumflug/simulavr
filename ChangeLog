@@ -1,4 +1,10 @@
-2009-01-01	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
+2009-04-01	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
+
+	* examples/atmega48/main.cpp: replace SIGNAL by ISR, use new-style
+	vector name, drop <avr/signal.h>
+	* examples/spi/main.cpp: (Ditto.)
+
+2009-04-01	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
 
 	* m4/avr_tcl.m4: with_tcl_config_path => with_tcl_config;
 	when checking for several versions of wish, use AC_CHECK_PROGS

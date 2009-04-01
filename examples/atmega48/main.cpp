@@ -4,7 +4,6 @@
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
-#include <avr/signal.h>
 #include <stdint.h>
 
 uint8_t				txData;
@@ -63,13 +62,13 @@ static void	negatePB0(){
 uint8_t	count;
 uint8_t	adcData;
 
-SIGNAL(SIG_ADC)
+ISR(ADC_vect)
 {
 	adcData	= ADCH;
 	startADC();
 }
 
-SIGNAL(SIG_SPI)
+ISR(SPI_STC_vect)
 {
 	rxData	= SPDR;
 	if(count % 2){
