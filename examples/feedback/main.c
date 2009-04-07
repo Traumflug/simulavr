@@ -11,7 +11,7 @@ void putstring(const char *c)
 
   for ( ; *p ; p++ ) {
     fputc( *p, &uart0_str );
-    fputc( *p, &debug_str );
+//    fputc( *p, &debug_str );
   }
 }
 

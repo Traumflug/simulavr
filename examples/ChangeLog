@@ -1,3 +1,8 @@
+2009-04-07	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* feedback/feedback.tcl, feedback/main.c, feedback/simfeedback.tcl.in,
+	feedback/uart.c: Clean up so others can review and help.
+
 2009-03-31	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* simulavr.tcl.in, feedback/feedback.tcl, simple_ex1/Makefile.am: Fix

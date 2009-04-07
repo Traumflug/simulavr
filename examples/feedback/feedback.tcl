@@ -17,29 +17,23 @@ switch ${extensionPoint} {
     if { ! [info exists ui] } {
       error "User Interface Required"
     }
-    # Serial transmitter and receiver Net
+    # Serial receiver net (tx from AVR, rx to outside world)
     Net ser_rxD0
-    Net ser_txD0
-
-    #create a Pin for serial in and serial out of the LCD-board
-    ExtPin exttxD0 $Pin_PULLUP $ui "txD0" ".x"
-    ExtPin extrxD0 $Pin_PULLUP $ui "rxD0" ".x"
-
-    #create a serial in and serial out component
     SerialRx mysrx $ui "serialRx0" ".x"
     SerialRxBasic_SetBaudRate mysrx 9600
-    SerialTx mystx $ui "serialTx0" ".x"
-    SerialTxBuffered_SetBaudRate mystx 9600
-
-    # wire the serial display receiver
-    ser_rxD0 Add [AvrDevice_GetPin $dev1 "E1"]
-    ser_rxD0 Add extrxD0
     ser_rxD0 Add [SerialRxBasic_GetPin mysrx "rx"]
+    ser_rxD0 Add [AvrDevice_GetPin $dev1 "E1"]
+    $sc Add mysrx
 
-    # wire the serial display transmitter
+    # Serial receiver net (rx to AVR, tx from outside world)
+    #Net ser_txD0
+    #SerialTx mystx $ui "serialTx0" ".x"
+    #SerialTxBuffered_SetBaudRate mystx 9600
+    ##ser_txD0 Add [SerialTxBuffered_GetPin mystx "txData"]
+    #ser_txD0 Add [SerialTxBuffered_GetPin mystx "tx"]
     #ser_txD0 Add [AvrDevice_GetPin $dev1 "E0"]
-    #ser_txD0 Add exttxD0
-    ser_txD0 Add [SerialTxBuffered_GetPin mystx "tx"]
+    #$sc Add mystx
+
   }
 
   GdbCommands {

@@ -27,7 +27,6 @@
 void
 uart_init(void)
 {
-printk( "-uart init-" );
 #if F_CPU < 2000000UL && defined(U2X)
   UCSR0A = _BV(U2X);             /* improve baud rate error by using 2x clk */
   UBRR0L = (F_CPU / (8UL * UART_BAUD)) - 1;
@@ -45,7 +44,6 @@ int
 uart_putchar(char c, FILE *stream)
 {
 
-printk( "-%c-", c );
   if (c == '\a')
     {
       fputs("*ring*\n", stderr);

@@ -83,6 +83,7 @@ class SerialTx {
     variable objname
     variable win
     variable parent
+    variable inState
   }
 
   public {
@@ -90,6 +91,11 @@ class SerialTx {
       set parent $_parent
       set win $_win
       set objname $_objname
+    }
+
+    method ChangeValue { newValue } {
+      set inState $newValue
+      puts "SerialTx: ${newValue}"
     }
   }
 }
