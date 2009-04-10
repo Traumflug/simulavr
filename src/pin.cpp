@@ -179,16 +179,19 @@ Pin::operator bool() const {
 */
 
 Pin::operator bool() const {
-    if ((outState==HIGH)||(outState==PULLUP)) return 1;
-    if ((outState==ANALOG) || (outState==TRISTATE)) { //maybe for TRISTATE not handled complete in simulavr... TODO
+    if ((outState==HIGH) || (outState==PULLUP))
+      return true;
+
+    //maybe for TRISTATE not handled complete in simulavr... TODO
+    if ((outState==ANALOG) || (outState==TRISTATE)) {
         if (analogValue > (INT_MAX/2)) {
-            return 1;
+            return true;
         } else {
-            return 0;
+            return false;
         }
     }
 
-    return 0;
+    return false;
 }
 
 

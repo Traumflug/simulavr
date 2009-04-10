@@ -1,5 +1,10 @@
 2009-04-10	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* src/pin.cpp: Return true/false instead of 1/0 for method returning
+	bool.
+
+2009-04-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* src/hwport.cpp, src/pin.cpp, src/pin.h: Pin values are regular
 	characters not unsigned characters. Fix and remove unnecessary casts.
 
