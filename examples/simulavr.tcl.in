@@ -293,7 +293,11 @@ if { "$traceFile" != "" } {
 }
 
 #set the clock cycle time [ns]
-AvrDevice_SetClockFreq ${dev1} [expr $Frequency / 250]
+set ClockCycleNS [expr 1000000000 / $Frequency ]
+if { ${verbose} == 1 } {
+  puts "Clock Cycle Time: ${ClockCycleNS} nanoseconds"
+}
+AvrDevice_SetClockFreq ${dev1} ${ClockCycleNS}
 
 # Abort magic register
 if { ${abortOffset} != "" } {
