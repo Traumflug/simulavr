@@ -148,7 +148,7 @@ void Pin::RegisterNet(Net *n) {
     connectedTo=n;
 }
 
-Pin::operator unsigned char() const { 
+Pin::operator char() const { 
     switch(outState) {
         case SHORTED: return 'S';
         case HIGH: return 'H';
@@ -192,7 +192,7 @@ Pin::operator bool() const {
 }
 
 
-Pin& Pin::operator= (unsigned char c) {
+Pin& Pin::operator= (char c) {
     switch (c) {
         case 'S': outState=SHORTED; analogValue=0; break;
         case 'H': outState=HIGH; analogValue=INT_MAX; break;
@@ -319,7 +319,7 @@ ExtPin::ExtPin ( T_Pinstate ps, UserInterface *_ui, const char *_extName, const 
 }
 
 void ExtPin::SetInState(const Pin &p) {
-    ui->SendUiNewState(extName, (unsigned char)p);
+    ui->SendUiNewState(extName, p);
 }
 
 void ExtPin::SetNewValueFromUi(const string& s) {
@@ -348,6 +348,6 @@ ExtAnalogPin::ExtAnalogPin ( unsigned int value, UserInterface *_ui, const char 
 }
 
 void ExtAnalogPin::SetInState(const Pin &p) {
-    ui->SendUiNewState(extName, (unsigned char)p);
+    ui->SendUiNewState(extName, p);
 }
 

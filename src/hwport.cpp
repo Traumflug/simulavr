@@ -121,14 +121,14 @@ void HWPort::CalcOutputs() { //Calculate the new output value to be transmitted 
 } //end of Calc()
 
 string HWPort::GetPortString() {
-    unsigned char dummy[9];
+    char dummy[9];
     unsigned int tt;
     for (tt=0; tt<8; tt++) {
-        dummy[7-tt]=(unsigned char)p[tt];
+        dummy[7-tt]=p[tt];
     }
 
     dummy[tt]=0;
-    return string((char*)dummy);
+    return string(dummy);
 }
 
 

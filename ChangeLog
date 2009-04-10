@@ -1,5 +1,10 @@
 2009-04-10	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* src/hwport.cpp, src/pin.cpp, src/pin.h: Pin values are regular
+	characters not unsigned characters. Fix and remove unnecessary casts.
+
+2009-04-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* src/serialrx.cpp, src/serialrx.h: Add SetHexOutput() method so
 	there is a way to get raw output through reliably. Tab/spacing was
 	inconsistent so replaced few tabs with spaces.

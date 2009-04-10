@@ -77,8 +77,8 @@ class Pin {
         Pin();
         Pin( unsigned char *parentPin, unsigned char mask); 
 #ifndef SWIG
-        operator unsigned char() const;
-        virtual Pin &operator= (unsigned char);
+        operator char() const;
+        virtual Pin &operator= (char);
         virtual operator bool() const;
         virtual Pin operator+ (const Pin& p);
         virtual Pin operator+= (const Pin& p);
