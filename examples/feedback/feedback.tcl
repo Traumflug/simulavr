@@ -17,22 +17,34 @@ switch ${extensionPoint} {
     if { ! [info exists ui] } {
       error "User Interface Required"
     }
-    # Serial receiver net (tx from AVR, rx to outside world)
+
+    # Serial transmitter and receiver Net
     Net ser_rxD0
+    Net ser_txD0
+
+    # If you want to see bit transitions in the feedback.tcl
+    #create a Pin for serial in and serial out of "the board" into "feedback"
+    #ExtPin exttxD0 $Pin_PULLUP $ui "txD0" ".x"
+    #ExtPin extrxD0 $Pin_PULLUP $ui "rxD0" ".x"
+
+    #create a serial in and serial out component
     SerialRx mysrx $ui "serialRx0" ".x"
     SerialRxBasic_SetBaudRate mysrx 9600
-    ser_rxD0 Add [SerialRxBasic_GetPin mysrx "rx"]
-    ser_rxD0 Add [AvrDevice_GetPin $dev1 "E1"]
-    $sc Add mysrx
+    SerialRxBasic_SetHexOutput mysrx 1
+    SerialTx mystx $ui "serialTx0" ".x"
+    SerialTxBuffered_SetBaudRate mystx 9600
 
-    # Serial receiver net (rx to AVR, tx from outside world)
-    #Net ser_txD0
-    #SerialTx mystx $ui "serialTx0" ".x"
-    #SerialTxBuffered_SetBaudRate mystx 9600
-    ##ser_txD0 Add [SerialTxBuffered_GetPin mystx "txData"]
-    #ser_txD0 Add [SerialTxBuffered_GetPin mystx "tx"]
-    #ser_txD0 Add [AvrDevice_GetPin $dev1 "E0"]
-    #$sc Add mystx
+    # wire the serial display receiver
+    ser_rxD0 Add [AvrDevice_GetPin $dev1 "E1"]
+    # If you want to see bit transitions in the "feedback"
+    #ser_rxD0 Add extrxD0
+    ser_rxD0 Add [SerialRxBasic_GetPin mysrx "rx"]
+
+    # wire the serial display transmitter
+    ser_txD0 Add [AvrDevice_GetPin $dev1 "E0"]
+    # If you want to see bit transitions in the "feedback"
+    #ser_txD0 Add exttxD0
+    ser_txD0 Add [SerialTxBuffered_GetPin mystx "tx"]
 
   }
 

@@ -17,6 +17,16 @@ proc locateInDirs {name dirs} {
   error "unable to locate ${name}"
 }
 
+proc toChar { value } {
+    return [format %c $value]
+}
+
+proc toASCII { char } {
+    scan $char %c value
+    return $value
+}
+
+
 # Dummy Class to satisfy GUI port
 class UpdateControl {
   protected {
@@ -73,7 +83,9 @@ class SerialRx {
 
     method ChangeValue { newValue } {
       set inState $newValue
-      puts "SerialRx: ${newValue}"
+      #puts "SerialRx: ${newValue}"
+      puts -nonewline [toChar ${newValue}]
+      flush stdout
     }
   }
 }
@@ -117,7 +129,7 @@ class Master {
     method ReadFromSimulavr { } {
       if { ![eof $sock] } {
         gets $sock x
-        puts "FDBK RECV: --->$x<---"
+        #puts "FDBK RECV: --->$x<---"
         set readList [split $x]
         set offset [string first " " $x ]
         set sub [string range $x $offset end ]
@@ -133,20 +145,20 @@ class Master {
 
         switch [lindex $readList 0] {
           create {
-            puts "FDBK CREATE: $front $this $objName $back"
+            #puts "FDBK CREATE: $front $this $objName $back"
             if { [catch { eval "$front $this $objName $back" }]  } {
               puts "exception .. are we missing class $front?"
             }
           }
 
           set {
-            puts "FDBK SET: [lindex $readList 1] ChangeValue [lindex $readList 2]"
+            #puts "FDBK SET: [lindex $readList 1] ChangeValue [lindex $readList 2]"
             catch {
               eval "[lindex $readList 1] ChangeValue [lindex $readList 2]"
             }
           }
           default {
-            puts "FDBK DEFAULT: >$x<"
+            #puts "FDBK DEFAULT: >$x<"
             eval $x
           }
         }

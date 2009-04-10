@@ -1,5 +1,12 @@
 2009-04-10	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* feedback/debugio.c, feedback/feedback.tcl, feedback/main.c,
+	feedback/simfeedback.tcl.in, feedback/uart.c: Improve feedback
+	example so it prints no debug output and correctly displays three
+	lines of hello world in the feedback window.
+
+2009-04-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* simulavr.tcl.in: Fix algorithm for computation of cpu cycle time.
 
 2009-04-07	Joel Sherrill <joel.sherrill@oarcorp.com>

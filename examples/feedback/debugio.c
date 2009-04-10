@@ -43,7 +43,6 @@ FILE uart0_str =
  */
 void debugio_init(void)
 {
-  printk( "Initialize debug io\n" );
   uart_init();
 }
 
