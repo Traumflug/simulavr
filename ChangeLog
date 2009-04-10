@@ -1,3 +1,9 @@
+2009-04-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/serialrx.cpp, src/serialrx.h: Add SetHexOutput() method so
+	there is a way to get raw output through reliably. Tab/spacing was
+	inconsistent so replaced few tabs with spaces.
+
 2009-04-01	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
 
 	* examples/feedback/.cvsignore: Match ELF file name with reality.

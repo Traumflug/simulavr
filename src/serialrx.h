@@ -57,9 +57,11 @@ class SerialRxBasic: public SimulationMember, public HasPinNotifyFunction {
 
         T_RxState rxState;
 
+        bool sendInHex;
 
     public:
     	void SetBaudRate(SystemClockOffset baud);
+    	void SetHexOutput(bool newValue);
         SerialRxBasic();
         void Reset();
         virtual Pin* GetPin(const char *name) ;

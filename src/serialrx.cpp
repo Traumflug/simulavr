@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003, 2004   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003, 2004   Klaus Rudolph    
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,30 +27,30 @@
 #include "systemclock.h"
 #include "systemclocktypes.h"
 
-
 SerialRxBasic::SerialRxBasic(){
-	rx.RegisterCallback(this);
+    rx.RegisterCallback(this);
     allPins["rx"]= &rx;
+    sendInHex = false;
     Reset();
-};
+}
 
 void SerialRxBasic::PinStateHasChanged(Pin* p){
-	if (0==(bool)(*p)) { //Low
+    if (!*p) { //Low
         if (rxState== RX_WAIT_LOWEDGE) {
             rxState=RX_READ_STARTBIT;
             SystemClock::Instance().Add(this); //as next Step() is called
         }
     }
-};
+}
 
 void SerialRxBasic::Reset(){
-	baudrate=115200;
+    baudrate=115200;
     maxBitCnt=10; //Start+8Data+Stop
     rxState=RX_WAIT_LOWEDGE;
-};
+}
 
 Pin* SerialRxBasic::GetPin(const char* name){
-	return allPins[name];
+    return allPins[name];
 }
 
 int SerialRxBasic::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
@@ -65,7 +65,7 @@ int SerialRxBasic::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns
         case RX_READ_DATABIT_FIRST:   //(1/7)
             *timeToNextStepIn_ns= (SystemClockOffset)1e9/baudrate/16;
             rxState= RX_READ_DATABIT_SECOND;
-            if ((bool)(rx)) {
+            if (rx) {
                 highCnt++;
             }
             break;
@@ -73,7 +73,7 @@ int SerialRxBasic::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns
         case RX_READ_DATABIT_SECOND: //(1/8)
             *timeToNextStepIn_ns= (SystemClockOffset)1e9/baudrate/16;
             rxState= RX_READ_DATABIT_THIRD;
-            if ((bool)(rx)) {
+            if (rx) {
                 highCnt++;
             }
 
@@ -81,7 +81,7 @@ int SerialRxBasic::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns
 
         case RX_READ_DATABIT_THIRD: //(1/9)
             rxState= RX_READ_DATABIT_FIRST;
-            if ((bool)(rx)) {
+            if (rx) {
                 highCnt++;
             }
 
@@ -94,11 +94,11 @@ int SerialRxBasic::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns
             dataByte=dataByte>>1;
             bitCnt++;
             if (bitCnt>=maxBitCnt) {
-            	// this bit IS STOP BIT... 
+                // this bit IS STOP BIT... 
                 *timeToNextStepIn_ns= -1; //nothing more please
                 rxState= RX_WAIT_LOWEDGE;
-                
-                /// @todo This is bug if frame format is different (eg 7 oor 9 bits)
+
+                /// @todo This is bug if frame format is different (eg 7 or 9 bits)
                 unsigned char c=(unsigned char)((dataByte>>(16-maxBitCnt))&0xff); 
                 CharReceived(c);
             } else {
@@ -113,11 +113,15 @@ int SerialRxBasic::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns
     }
 
     return 0;
-};
+}
 
 void SerialRxBasic::SetBaudRate(SystemClockOffset baud){
-	baudrate = baud;
-};
+    baudrate = baud;
+}
+
+void SerialRxBasic::SetHexOutput(bool newValue){
+    sendInHex = newValue;
+}
 
 
 // ===========================================================================
@@ -125,18 +129,18 @@ void SerialRxBasic::SetBaudRate(SystemClockOffset baud){
 // ===========================================================================
 
 void SerialRxBuffered::CharReceived(unsigned char c){
-	buffer.push_back(c);
-};
+    buffer.push_back(c);
+}
 
 unsigned char SerialRxBuffered::Get(){
-	unsigned char c = buffer[0];
-	buffer.erase(buffer.begin());
-	return c;
-};
+    unsigned char c = buffer[0];
+    buffer.erase(buffer.begin());
+    return c;
+}
 
 long SerialRxBuffered::Size(){
-	return buffer.size();
-};
+    return buffer.size();
+}
 
 
 // ===========================================================================
@@ -174,18 +178,23 @@ ui(_ui), name(_name)  {
 
 void SerialRx::CharReceived(unsigned char c){
     ostringstream os;
-    if (isprint(c)) {
+
+    os << "set" << " " << name << " ";
+    if (sendInHex) {
+        os << hex << "0x" << (unsigned int)c;
+    } else if (isprint(c)) {
         if (isspace(c)) {
-            os << "set" << " " << name << " " << '_' << endl; 
+            os << '_';
         } else {
-            os << "set" << " " << name << " " << c << endl; 
+            os << c;
         }
     } else {
-        os << "set" << " " << name << " " << "0x" << hex << (unsigned int)c << endl;
+        os << "0x" << (unsigned int)c;
     }
 
+    os << endl;
     ui->Write(os.str());
-};
+}
 
 
 //not used
