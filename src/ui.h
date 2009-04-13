@@ -46,7 +46,14 @@ class UserInterface: public SimulationMember, public Socket, public ExternalType
 
     public:
         void SetNewValueFromUi(const string &); //this is mainly for conroling the ui interface itself from the gui
-        void AddExternalType(const string &name, ExternalType *p) { extMembers[name]=p;}
+        void AddExternalType(const char *name, ExternalType *p) {
+          extMembers[name]=p;
+        }
+#ifndef SWIG
+        void AddExternalType(const string name, ExternalType *p) {
+          AddExternalType(name.c_str(), p);
+        }
+#endif
         UserInterface(int port, bool withUpdateControl=true);
         ~UserInterface();
         void SendUiNewState(const string &s, const char &c);

@@ -97,8 +97,8 @@ int UserInterface::Step(bool &dummy1, SystemClockOffset *nextStepIn_ns) {
                         if (ii != extMembers.end() ) {
                             (ii->second)->SetNewValueFromUi(par);
                         } else {
-                            cerr << "Netz nicht gefunden:" << net << endl;
-                            //cerr << "Start with string >>" << debug << "<<" << endl;
+                            // cerr << "Netz nicht gefunden:" << net << endl;
+                            // cerr << "Start with string >>" << net << "<<" << endl;
                         }
 
                         //if (trace_on!=0) traceOut << "Net: " << net << "changed to " << par << endl;

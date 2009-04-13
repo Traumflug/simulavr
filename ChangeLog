@@ -1,5 +1,10 @@
 2009-04-13	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* src/ui.cpp, src/ui.h: AddExternalType must take const char * not C++
+	string to be accessible from Tcl.
+
+2009-04-13	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* src/adcpin.h: Fix spacing.
 
 2009-04-10	Joel Sherrill <joel.sherrill@oarcorp.com>
