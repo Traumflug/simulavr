@@ -346,19 +346,19 @@ if { "${sourceFile}" != "" } {
   source ${sourceFile}
 }
 
-# start the user interface client 
+# start the remote interface client 
 if { ${hasUserInterface} == 1 || ${simFeedbackFile} != "" } {
   set ui [new_UserInterface 7777]
 }
 
-# Invoke the user extension for just before adding the GUI
+# Invoke the user extension for tailoring the external objects
 if { "${sourceFile}" != "" } {
   set extensionPoint "Gui"
   source ${sourceFile}
 }
 
-if { ${hasUserInterface} == 1 } {
-  #also the gui updates after each cycle
+# also the UI to GUI or Feedback updates after each cycle
+if { ${hasUserInterface} == 1 || ${simFeedbackFile} != "" } {
   $sc AddAsyncMember $ui
 }
 

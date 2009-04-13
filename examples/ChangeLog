@@ -1,3 +1,8 @@
+2009-04-13	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* simulavr.tcl.in: Whether you are doing an external GUI or system
+	feedback, you do need the simulator's UI module enabled.
+
 2009-04-10	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* feedback/debugio.c, feedback/feedback.tcl, feedback/main.c,
