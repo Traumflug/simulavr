@@ -86,6 +86,12 @@ class SerialRx {
       #puts "SerialRx: ${newValue}"
       puts -nonewline [toChar ${newValue}]
       flush stdout
+      # If we see 1, 2, or 3, change the ADC0 value.
+      switch ${newValue} {
+        0x31 { $parent SendToSimulator adc0 100000 }
+        0x32 { $parent SendToSimulator adc0 200000 }
+        0x33 { $parent SendToSimulator adc0 300000 }
+      }
     }
   }
 }
@@ -124,6 +130,9 @@ class Master {
       #set sock [socket localhost $socketNo]
       fileevent $sock readable "$this ReadFromSimulavr"
       fconfigure $sock -blocking 0
+
+      # set initial ADC0 value
+      SendToSimulator adc0 0
     }
 
     method ReadFromSimulavr { } {
@@ -171,7 +180,7 @@ class Master {
     }
 
     method SendToSimulator { id val } {
-      puts "GUI SEND: Update the var $id to $val"
+      #puts "GUI SEND: Update the var $id to $val"
       puts -nonewline $sock "$id $val "
       flush $sock
       update

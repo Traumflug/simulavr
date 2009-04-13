@@ -8,7 +8,7 @@ PYTHON=@PYTHON@
 AVR_CPU=atmega128
 AVR_FREQUENCY=4000000
 AVR_CFLAGS= -g -O2 -mmcu=$(AVR_CPU) -DF_CPU=$(AVR_FREQUENCY)
-AVR_OBJS=main.o debugio.o uart.o
+AVR_OBJS=main.o debugio.o uart.o adc.o
 SIMULAVR_ARGS=-d $(AVR_CPU) -f $(EXAMPLE) -s $(srcdir)/$(EXAMPLE).tcl \
     -W 0x20,/dev/stderr -R 0x22,- -F $(AVR_FREQUENCY) -T exit \
     -S ./simfeedback.tcl
