@@ -70,8 +70,11 @@ TCLHEADER = avrdevice.h at8515.h atmega128.h at4433.h gdb.h hardware.h \
 simulavr_wrap.cxx: simulavr.i $(TCLHEADER)
 	@SWIG@ -o $@ $(srcdir)/simulavr.i
 
-simulavr_wrap.o: simulavr_wrap.cxx
-	$(CXX) -I$(SRCDIR) -I$(TCL_INCLUDE) -c $<
+#simulavr_wrap.o: simulavr_wrap.cxx
+#	$(CXX) -I$(SRCDIR) -I$(TCL_INCLUDE) -c $<
+
+simulavr_wrap.lo: simulavr_wrap.cxx
+	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TCL_INCLUDE) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT $@ -MD -MP -MF .deps/simulavr_wrap.Tpo -c -o $@ $<
 
 $(srcdir)/keyboard.cpp : $(srcdir)/keytrans.h 
 
