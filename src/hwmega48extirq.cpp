@@ -120,7 +120,7 @@ void HWMega48ExtIrq::PinStateHasChanged(Pin *p) {
     unsigned char eicr;
 	eicr=eicra;
 
-    for (int tt =0; tt<4; tt++) {
+    for (int tt =0; tt<2; tt++) {
         unsigned char actualPin= tt;
         unsigned int actVec=vectorInt[actualPin];
         switch ((eicr>>(tt<<1))&0x03) {
