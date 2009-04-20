@@ -1,0 +1,25 @@
+#
+#  $Id$
+#
+
+This example illustrates how one can provide a program external to the
+simulated AVR which provides "feedback" to the simulated program.  A
+feedback program can interact with the AVR hosted program just like devices
+would in the "real world." 
+
+This example is certainly a primitive example of this but it illustrates
+the principle.  The application writes the following lines to UART0:
+
+hello world #1
+hello world #2
+hello world #3
+hello world #1
+
+The initial input value of ADC0 is 0.  When the feedback modules seens
+1, 2 or 3, it changes the "voltage" on ADC0.  The debug output expected is:
+
+ADC0=10 expect 10
+ADC0=20 expect 20
+ADC0=30 expect 30
+ADC0=10 expect 10
+

@@ -235,8 +235,10 @@ if { ${hasUserInterface} == 1 && ${simFeedbackFile} != "" } {
 }
 
 if { ${simFeedbackFile} != "" } {
-  if { ! [file executable ${simFeedbackFile}] } {
-    error "${simFeedbackFile} is not executable"
+  if { ${simFeedbackFile} != "-" } {
+    if { ! [file executable ${simFeedbackFile}] } {
+      error "${simFeedbackFile} is not executable"
+    }
   }
 }
 
@@ -278,7 +280,7 @@ if { ${hasUserInterface} == 1 } {
 }
 
 # optionally spawn a simulation feedback instance
-if { ${simFeedbackFile} != "" } {
+if { ${simFeedbackFile} != "" && ${simFeedbackFile} != "-" } {
   exec xterm -sb -T "Simulation Feedback ${simFeedbackFile}" \
     -e "${simFeedbackFile}" &
 }

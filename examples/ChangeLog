@@ -1,3 +1,9 @@
+2009-04-20	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* simulavr.tcl.in: If feedback filename is "-", then assume the user
+	will be explicitly starting a feedback program.
+	* feedback/README: New file.
+
 2009-04-13	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* feedback/Makefile.am, feedback/feedback.tcl, feedback/main.c,
