@@ -1,4 +1,4 @@
-#! @TCL_SHELL@
+#!  @TCL_SHELL@
 #
 #  $Id$
 #
@@ -44,6 +44,27 @@ class UpdateControl {
   }
 }
 
+class AnalogNet {
+  protected {
+    variable inState
+    variable objname
+    variable win
+    variable parent
+  }
+
+  public {
+    constructor {  _parent _objname _win } {
+      set parent $_parent
+      set win $_win
+      set objname $_objname
+    }
+  }
+
+  method ChangeValue { newValue } {
+    set inState $newValue
+  }
+}
+
 class Net {
   protected {
     variable inState
@@ -79,6 +100,18 @@ class SerialRx {
       set parent $_parent
       set win $_win
       set objname $_objname
+
+      # set all ADC's to 0
+      for {set adc 0} {$adc <= 7} {incr adc} {
+        $parent SendToSimulator [format "adc%d" $adc] 0
+      }
+    }
+
+    method WriteADCs { base } {
+      for {set adc 0} {$adc <= 7} {incr adc} {
+        $parent SendToSimulator [format "adc%d" $adc] \
+            [format "%d00000" [expr ($adc + $base) % 8] ]
+      }
     }
 
     method ChangeValue { newValue } {
@@ -86,11 +119,9 @@ class SerialRx {
       #puts "SerialRx: ${newValue}"
       puts -nonewline [toChar ${newValue}]
       flush stdout
-      # If we see 1, 2, or 3, change the ADC0 value.
-      switch ${newValue} {
-        0x31 { $parent SendToSimulator adc0 100000 }
-        0x32 { $parent SendToSimulator adc0 200000 }
-        0x33 { $parent SendToSimulator adc0 300000 }
+      # If we see 0-9, change the ADC0 value.
+      if { ${newValue} >= 0x30  && ${newValue} <= 0x39 } {
+        WriteADCs [expr ${newValue} - 0x30 - 1]
       }
     }
   }
@@ -133,6 +164,7 @@ class Master {
 
       # set initial ADC0 value
       SendToSimulator adc0 0
+      SendToSimulator adc1 0
     }
 
     method ReadFromSimulavr { } {

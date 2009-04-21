@@ -53,12 +53,69 @@ switch ${extensionPoint} {
     $netAref Add $aRef
     $aRef setAnalogValue 5000000
 
+    # F0/ADC0
+    if { ${verbose} == 1 } { puts "Adding ADC0" }
     set netF0   [new_Net]
     $netF0 Add [AvrDevice_GetPin $dev1 "F0"]
-
     set extAdc0 [new_ExtAnalogPin 0 $ui "adc0" ".x"]
     UserInterface_AddExternalType $ui "adc0" $extAdc0
     $netF0 Add $extAdc0
+
+    if { ${verbose} == 1 } { puts "Adding ADC1" }
+    # F1/ADC1
+    set netF1   [new_Net]
+    $netF1 Add [AvrDevice_GetPin $dev1 "F1"]
+    set extAdc1 [new_ExtAnalogPin 0 $ui "adc1" ".x"]
+    UserInterface_AddExternalType $ui "adc1" $extAdc1
+    $netF1 Add $extAdc1
+
+    # F2/ADC2
+    if { ${verbose} == 1 } { puts "Adding ADC2" }
+    set netF2   [new_Net]
+    $netF2 Add [AvrDevice_GetPin $dev1 "F2"]
+    set extAdc2 [new_ExtAnalogPin 0 $ui "adc2" ".x"]
+    UserInterface_AddExternalType $ui "adc2" $extAdc2
+    $netF2 Add $extAdc2
+
+    # F3/ADC3
+    if { ${verbose} == 1 } { puts "Adding ADC3" }
+    set netF3   [new_Net]
+    $netF3 Add [AvrDevice_GetPin $dev1 "F3"]
+    set extAdc3 [new_ExtAnalogPin 0 $ui "adc3" ".x"]
+    UserInterface_AddExternalType $ui "adc3" $extAdc3
+    $netF3 Add $extAdc3
+
+    # F4/ADC4
+    if { ${verbose} == 1 } { puts "Adding ADC4" }
+    set netF4   [new_Net]
+    $netF4 Add [AvrDevice_GetPin $dev1 "F4"]
+    set extAdc4 [new_ExtAnalogPin 0 $ui "adc4" ".x"]
+    UserInterface_AddExternalType $ui "adc4" $extAdc4
+    $netF4 Add $extAdc4
+
+    # F5/ADC5
+    if { ${verbose} == 1 } { puts "Adding ADC5" }
+    set netF5   [new_Net]
+    $netF5 Add [AvrDevice_GetPin $dev1 "F5"]
+    set extAdc5 [new_ExtAnalogPin 0 $ui "adc5" ".x"]
+    UserInterface_AddExternalType $ui "adc5" $extAdc5
+    $netF5 Add $extAdc5
+
+    # F6/ADC6
+    if { ${verbose} == 1 } { puts "Adding ADC6" }
+    set netF6   [new_Net]
+    $netF6 Add [AvrDevice_GetPin $dev1 "F6"]
+    set extAdc6 [new_ExtAnalogPin 0 $ui "adc6" ".x"]
+    UserInterface_AddExternalType $ui "adc6" $extAdc6
+    $netF6 Add $extAdc6
+
+    # F7/ADC7
+    if { ${verbose} == 1 } { puts "Adding ADC7" }
+    set netF7   [new_Net]
+    $netF7 Add [AvrDevice_GetPin $dev1 "F7"]
+    set extAdc7 [new_ExtAnalogPin 0 $ui "adc7" ".x"]
+    UserInterface_AddExternalType $ui "adc7" $extAdc7
+    $netF7 Add $extAdc7
   }
 
   GdbCommands {

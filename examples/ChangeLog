@@ -1,3 +1,9 @@
+2009-04-21	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* feedback/feedback.tcl, feedback/main.c, feedback/simfeedback.tcl.in:
+	Now sample ADC0-7 and print them on a single line. Feedback rotates
+	value through them.
+
 2009-04-20	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* simulavr.tcl.in: If feedback filename is "-", then assume the user

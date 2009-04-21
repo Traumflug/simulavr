@@ -9,9 +9,13 @@ unsigned char getAdc(unsigned char);
 
 void printIt(int n)
 {
+  int i;
+
   printu0( "hello world #%d\n", n );
   _delay_ms( 100.0 );
-  printk( "ADC0=%d expect %d\n", getAdc(0), n * 10 );
+  for ( i=0 ; i<8 ; i++ ) 
+    printk( "ADC%d=%3d ", i, getAdc(i) );
+  printk( "\n" );
 }
 
 int main(
@@ -19,12 +23,13 @@ int main(
   char **argv
 )
 {
+  int i;
+
   /* for printk and printu0 (-R/-W IO and uart0 IO) */
   debugio_init();
-  printIt( 1 );
-  printIt( 2 );
-  printIt( 3 );
-  printIt( 1 );
+  
+  for ( i=1 ; i<13 ; i++ )
+    printIt( i%8 );
 
   /* don't exit until the user forces to */
   while(1);
