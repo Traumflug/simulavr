@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,8 @@ aref()
 
 	admux= new HWAdmux(this,
           &portf->GetPin(0), &portf->GetPin(1), &portf->GetPin(2),
-          &portf->GetPin(3), &portf->GetPin(4), &portf->GetPin(5),0,0);
+          &portf->GetPin(3), &portf->GetPin(4), &portf->GetPin(5),
+          &portf->GetPin(6), &portf->GetPin(7));
 
 	ad= new HWAd(this, admux, irqSystem, aref, 21); //vec 21 ADConversion Complete
 

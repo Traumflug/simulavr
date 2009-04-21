@@ -1,3 +1,8 @@
+2009-04-21	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/atmega128.cpp: Attach pins F6 and F6 to ADMUX.
+	* src/hwad.cpp, src/hwad.h: A few lines had tabs, most of file did not.
+
 2009-04-16	Knut Schwichtenberg <kschwi@web.de>
 
 	* src/hwmega48extirq.cpp: Correct number of pins created in loop.

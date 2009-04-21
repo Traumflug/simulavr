@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,16 +38,17 @@ class HWAdmux: public Hardware {
         AvrDevice *core;
 
     public:
-        HWAdmux(	AvrDevice*	c,
-					Pin*		ad0,
-					Pin*		ad1,
-					Pin*		ad2,
-					Pin*		ad3,
-					Pin*		ad4,
-					Pin*		ad5,
-					Pin*		ad6,
-					Pin*		ad7
-					);
+        HWAdmux(
+           AvrDevice* c,
+           Pin*  _ad0,
+           Pin*  _ad1,
+           Pin*  _ad2, 
+           Pin*  _ad3,
+           Pin*  _ad4,
+           Pin*  _ad5,
+           Pin*  _ad6,
+           Pin*  _ad7
+        );
         unsigned char GetAdmux();
         void SetAdmux(unsigned char);
         //unsigned int CpuCycle(); //not used!
@@ -65,14 +66,12 @@ class HWAd: public Hardware {
         AvrDevice *core;
         HWAdmux *admux;
         HWIrqSystem *irqSystem;
-	Pin&	aref;
+        Pin& aref;
         unsigned int irqVec;
 
         bool usedBefore; //adc must initialzed ?
         unsigned char prescaler;
         unsigned char clk;
-
-
 
         enum T_State {
             IDLE,

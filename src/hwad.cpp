@@ -35,18 +35,18 @@
 #define ADCBG 0x40 //currently not supported
 
 
-HWAdmux::HWAdmux(	AvrDevice*	c,
-					Pin*		_ad0,
-					Pin*		_ad1,
-					Pin*		_ad2, 
-					Pin*		_ad3,
-					Pin*		_ad4,
-					Pin*		_ad5,
-					Pin*		_ad6,
-					Pin*		_ad7
-					) : 
+HWAdmux::HWAdmux(
+   AvrDevice* c,
+   Pin*  _ad0,
+   Pin*  _ad1,
+   Pin*  _ad2, 
+   Pin*  _ad3,
+   Pin*  _ad4,
+   Pin*  _ad5,
+   Pin*  _ad6,
+   Pin*  _ad7
+) : 
 Hardware(c), core(c) {
-
     ad[0]=_ad0;
     ad[1]=_ad1;
     ad[2]=_ad2;
@@ -72,11 +72,13 @@ unsigned char HWAdmux::GetAdmux() {
 }
 
 int HWAdmux::GetMuxOutput() {
-	Pin*	p	= ad[admux&(MUX2|MUX1|MUX0)];
-	if(!p){
-		cerr << "HWAdmux::GetMuxOutput null pin" << endl;
-		return 0;
-	}
+
+    int   pin = admux&(MUX2|MUX1|MUX0);
+    Pin*  p = ad[pin];
+    if(!p){
+        cerr << "HWAdmux::GetMuxOutput null pin on " << pin << endl;
+        return 0;
+    }
     return p->GetAnalog();
 }
 
