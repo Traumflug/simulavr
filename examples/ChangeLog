@@ -1,3 +1,7 @@
+2009-05-05	Knut Schwichtenberg <kschwi@web.de>
+
+	* anacomp/main.c: Fix comments and clean up.
+
 2009-04-22	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* feedback/simfeedback.tcl.in: Analog values are now mostly multiples
