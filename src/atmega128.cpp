@@ -63,13 +63,17 @@ aref()
           &portf->GetPin(3), &portf->GetPin(4), &portf->GetPin(5),
           &portf->GetPin(6), &portf->GetPin(7));
 
-	ad= new HWAd(this, admux, irqSystem, aref, 21); //vec 21 ADConversion Complete
+    // vector 21 ADConversion Complete
+    ad= new HWAd(this, admux, irqSystem, aref, 21);
 
-	spi= new HWMegaSpi(this, irqSystem, PinAtPort(portb, 2), PinAtPort(portb, 3), PinAtPort(portb, 1), PinAtPort(portb, 0),/*irqvec*/ 17);
+    spi= new HWMegaSpi(this, irqSystem,
+            PinAtPort(portb, 2), PinAtPort(portb, 3), PinAtPort(portb, 1),
+            PinAtPort(portb, 0),/*irqvec*/ 17);
 
 	extirq= new HWMegaExtIrq(this, irqSystem, 
-            PinAtPort(portd, 0), PinAtPort(portd, 1), PinAtPort(portd, 2),PinAtPort(portd, 3),
-            PinAtPort(porte, 4), PinAtPort(porte, 5), PinAtPort(porte, 6),PinAtPort(porte, 7),
+            PinAtPort(portd, 0), PinAtPort(portd, 1), PinAtPort(portd, 2),
+            PinAtPort(portd, 3), PinAtPort(porte, 4), PinAtPort(porte, 5),
+            PinAtPort(porte, 6),PinAtPort(porte, 7),
             1,2,3,4,5,6,7,8);
 
 	prescaler123=new HWPrescaler(this);
@@ -77,8 +81,12 @@ aref()
 
 	wado = new HWWado(this);
 
-	usart0=new HWUsart(this, irqSystem, PinAtPort(porte,1), PinAtPort(porte,0), PinAtPort(porte, 2), 18, 19, 20);
-	usart1=new HWUsart(this, irqSystem, PinAtPort(portd,3), PinAtPort(portd,2), PinAtPort(portd, 5), 30, 31, 32);
+    usart0=new HWUsart(this, irqSystem,
+           PinAtPort(porte,1), PinAtPort(porte,0), PinAtPort(porte, 2),
+           18, 19, 20);
+    usart1=new HWUsart(this, irqSystem,
+           PinAtPort(portd,3), PinAtPort(portd,2), PinAtPort(portd, 5),
+           30, 31, 32);
 
 	timer0123irq= new HWMegaTimer0123Irq(this, irqSystem,
 			15 , /*tpComp*/
@@ -100,12 +108,16 @@ aref()
 	timer0=new HWMegaTimer0(this, prescaler0, timer0123irq, PinAtPort(portb, 4));
 
 	timer1= new HWMegaTimer1(this, prescaler123, timer0123irq, 1, //is timer1
-		PinAtPort(portd, 6), PinAtPort(portb, 5), PinAtPort (portb, 6), PinAtPort (portb , 7));
+            PinAtPort(portd, 6), PinAtPort(portb, 5), PinAtPort (portb, 6),
+            PinAtPort (portb , 7));
 
-	timer2=new HWMegaTimer2(this, prescaler123, timer0123irq, PinAtPort(portd, 7), PinAtPort(portb, 7));
+    timer2=new HWMegaTimer2(this, prescaler123, timer0123irq,
+            PinAtPort(portd, 7), PinAtPort(portb, 7));
 
-	timer3=new HWMegaTimer1(this, prescaler123, timer0123irq,  0, //is not timer1
-		PinAtPort(porte, 6), PinAtPort(porte, 3), PinAtPort (porte, 4), PinAtPort (porte, 5));
+    timer3=new HWMegaTimer1(this, prescaler123, timer0123irq,
+           0, //is not timer1
+           PinAtPort(porte, 6), PinAtPort(porte, 3), PinAtPort (porte, 4),
+           PinAtPort (porte, 5));
 
 
 	for (int ii=0x9e; ii<=0xff; ii++) { rw[ii]=new RWReserved(this, ii); }
@@ -117,7 +129,7 @@ aref()
 	rw[0x98]= new RWUbrrhi(this, usart1); //RWUbbrh;
 	rw[0x97]= new RWReserved(this, 0x97);
 	rw[0x96]= new RWReserved(this, 0x96);
-	rw[0x95]= new RWReserved(this, 0x95); //RWUcsrc
+    rw[0x95]= new RWUcsrc(this, usart0); //RWucsrc;
 	rw[0x94]= new RWReserved(this, 0x94);
 	rw[0x93]= new RWReserved(this, 0x93);
 	rw[0x92]= new RWReserved(this, 0x92);
