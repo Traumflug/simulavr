@@ -1,3 +1,9 @@
+2009-05-07	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* feedback/debugio.c, feedback/main.c, feedback/uart.c,
+	feedback/uart.h: Switch from polled to interrupt driven serial IO. Do
+	some minor clean up.
+
 2009-05-05	Knut Schwichtenberg <kschwi@web.de>
 
 	* anacomp/main.c: Fix comments and clean up.

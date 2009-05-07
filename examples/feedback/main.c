@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include "debugio.h"
-#include <avr/delay.h>
+#include <util/delay.h>
 unsigned char getAdc(unsigned char);
 
 void printIt(int n)
@@ -25,8 +25,9 @@ int main(
 {
   int i;
 
-  /* for printk and printu0 (-R/-W IO and uart0 IO) */
   debugio_init();
+
+  /* for printk and printu0 (-R/-W IO and uart0 IO) */
   
   for ( i=1 ; i<13 ; i++ )
     printIt( i%8 );
