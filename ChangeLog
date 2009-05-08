@@ -1,5 +1,9 @@
 2009-05-08	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* configure.ac: Add example of using ATMega128 timer.
+
+2009-05-08	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* src/string2_template.h: Add comment block.
 
 2009-05-08	Joel Sherrill <joel.sherrill@oarcorp.com>

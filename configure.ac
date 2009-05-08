@@ -101,9 +101,9 @@ AC_CONFIG_FILES([\
   regress/Makefile regress/modules/Makefile regress/test_opcodes/Makefile \
   regress/avrtest/Makefile \
   examples/Makefile examples/anacomp/Makefile examples/atmega48/Makefile \
-  examples/atmel_key/Makefile examples/feedback/Makefile \
-  examples/simple_ex1/Makefile examples/spi/Makefile \
-  examples/stdiodemo/Makefile \
+  examples/atmega128_timer/Makefile examples/atmel_key/Makefile \
+  examples/feedback/Makefile examples/simple_ex1/Makefile \
+  examples/spi/Makefile examples/stdiodemo/Makefile \
 ])
 AC_OUTPUT
 
