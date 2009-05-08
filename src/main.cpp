@@ -47,6 +47,38 @@ using namespace std;
 #include "keyboard.h"
 #include "trace.h"
 #include "scope.h"
+#include "string2.h"
+
+const char *SplitOffsetFile(
+  const char    *arg,
+  const char    *name,
+  int            base,
+  unsigned long *offset
+)
+{
+  char *end;
+
+  if (!StringToUnsignedLong(arg, offset, &end, base)) {
+    cerr << name << " offset is not a number" << endl;
+    exit(1);
+  }
+  //position behind the "," or any other delimiter for the offset
+  if (!*end) {
+    cerr << name << " argument ends before filename" << endl;
+    exit(1);
+  }
+  if (*end != ',') {
+    cerr << name << " argument does not have comma before filename" << endl;
+    exit(1);
+  }
+  ++end;
+  if (!*end) {
+    cerr << name << " argument has comma but no filename" << endl;
+    exit(1);
+  }
+
+  return end;
+}
 
 const char Usage[] = 
 "AVR-Simulator Version " VERSION "\n"
@@ -93,7 +125,7 @@ int main(int argc, char *argv[]) {
    string filename("unknown");
    string devicename("unknown");
    string tracefilename("unknown");
-   int global_gdbserver_port    = 1212;
+   long global_gdbserver_port    = 1212;
    int global_gdb_debug         = 0;
    bool globalWaitForGdbConnection=true; //please wait for gdb connection
    int userinterface_flag=0;
@@ -103,10 +135,10 @@ int main(int argc, char *argv[]) {
 
    global_trace_on=0;
 
-   unsigned int writeToPipeOffset=0x20;
-   unsigned int readFromPipeOffset=0x21;
-   unsigned int writeToAbort=0;
-   unsigned int writeToExit=0;
+   unsigned long writeToPipeOffset=0x20;
+   unsigned long readFromPipeOffset=0x21;
+   unsigned long writeToAbort=0;
+   unsigned long writeToExit=0;
    string readFromPipeFileName="";
    string writeToPipeFileName="";
 
@@ -154,33 +186,51 @@ int main(int argc, char *argv[]) {
             break;
 
          case 'R': //read from pipe 
-            readFromPipeOffset=strtoul( optarg, &dummy, 16);
-            dummy++; //position behind the "," or any other delimiter for the offset
-            readFromPipeFileName=dummy;
+            readFromPipeFileName = 
+              SplitOffsetFile(optarg, "readFromPipe", 16, &readFromPipeOffset);
             break;
 
          case 'W': //write to pipe
-            writeToPipeOffset=strtoul( optarg, &dummy, 16);
-            dummy++; //position behind the "," or any other delimiter for the offset
-            writeToPipeFileName=dummy;
+            writeToPipeFileName = 
+              SplitOffsetFile(optarg, "writeToPipe", 16, &writeToPipeOffset);
             break;
 
          case 'a': // write to abort
-            writeToAbort = strtoul(optarg, &dummy, 16);
+            if (!StringToUnsignedLong(optarg, &writeToAbort, NULL, 16)) {
+              cerr << "writeToAbort is not a number" << endl;
+              exit(1);
+            }
             break;
 
          case 'e': // write to exit
-            writeToExit = strtoul(optarg, &dummy, 16);
+            if (!StringToUnsignedLong(optarg, &writeToExit, NULL, 16)) {
+              cerr << "writeToExit is not a number" << endl;
+              exit(1);
+            }
             break;
 
          case 'F':
-            fcpu=strtoll(optarg, NULL, 10);
+            if ( !StringToUnsignedLongLong( optarg, &fcpu, NULL, 10 ) ) {
+              cerr << "frequency is not a number" << endl;
+              exit(1);
+            }
+            if ( fcpu == 0 ) {
+              cerr << "frequency is zero" << endl;
+              exit(1);
+            }
             if (global_verbose_on)
                cout << "Running with CPU frequency: " << fcpu << endl;
             break;
 
          case 'm':
-            maxRunTime=strtoll(optarg, NULL, 10);
+            if ( !StringToUnsignedLongLong( optarg, &maxRunTime, NULL, 10 ) ) {
+              cerr << "maxRunTime is not a number" << endl;
+              exit(1);
+            }
+            if ( maxRunTime == 0 ) {
+              cerr << "maxRunTime is zero" << endl;
+              exit(1);
+            }
             if (global_verbose_on)
                cout << "Maximum Run Time: " << maxRunTime << endl;
             break;
@@ -217,9 +267,12 @@ int main(int argc, char *argv[]) {
             break;
 
          case 'p':
+            if ( !StringToLong( optarg, &global_gdbserver_port, NULL, 10 ) ) {
+              cerr << "GDB Server Port is not a number" << endl;
+              exit(1);
+            }
             if (global_verbose_on)
                cout << "Running on port: " << optarg << endl;
-            global_gdbserver_port = atoi(optarg);
             break;
 
          case 't':
@@ -248,6 +301,11 @@ int main(int argc, char *argv[]) {
       }
    }
 
+   if ( !gdbserver_flag && filename == "unknown" ) {
+     cerr << "No executable file specified" << endl;
+     exit(1);
+   }
+
    /* now we create the device */
    AvrDevice *dev1=AvrFactory::instance().makeDevice(devicename.c_str());
 
@@ -257,7 +315,10 @@ int main(int argc, char *argv[]) {
          cout << "Add ReadFromPipe-Register at 0x"
               << hex << readFromPipeOffset
               << " and read from file: " << readFromPipeFileName << endl;
-      dev1->ReplaceIoRegister(readFromPipeOffset, new RWReadFromPipe(dev1, readFromPipeFileName.c_str()));
+      dev1->ReplaceIoRegister(
+        readFromPipeOffset,
+        new RWReadFromPipe(dev1, readFromPipeFileName.c_str())
+      );
    }
 
    if (writeToPipeFileName!="") {
@@ -265,7 +326,10 @@ int main(int argc, char *argv[]) {
          cout << "Add WriteToPipe-Register at 0x" <<
                  hex << writeToPipeOffset <<
                  " and write to file: " << writeToPipeFileName << endl;
-      dev1->ReplaceIoRegister(writeToPipeOffset, new RWWriteToPipe(dev1, writeToPipeFileName.c_str()));
+      dev1->ReplaceIoRegister(
+        writeToPipeOffset,
+        new RWWriteToPipe(dev1, writeToPipeFileName.c_str())
+      );
    }
 
    if (writeToAbort) {

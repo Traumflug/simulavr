@@ -59,7 +59,7 @@ pkginclude_HEADERS = \
   spisrc.h spisink.h systemclock.h systemclocktypes.h trace.h types.h \
   ui.h xcode_to_keynumber.dat
 
-simulavr_SOURCES = main.cpp $(COMMON_SRC)
+simulavr_SOURCES = main.cpp string2.cpp $(COMMON_SRC)
 
 simulavr_LDADD = $(libsim_la_OBJECTS) $(AVR_LIBBFD_LIB) -lz $(AVR_LIBIBERTY_LIB)
 
