@@ -1,5 +1,9 @@
 2009-05-08	Joel Sherrill <joel.sherrill@oarcorp.com>
 
+	* src/string2_template.h: Add comment block.
+
+2009-05-08	Joel Sherrill <joel.sherrill@oarcorp.com>
+
 	* src/Makefile.am, src/main.cpp: Add wrappers for strtoXX methods so we
 	can better detect errors. Add better parsing of port,offset arguments
 	to detect more errors. Hopefully we will not core dump on bad
