@@ -1,3 +1,10 @@
+2009-05-08	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* Makefile.am: Add example of using ATMega128 timer.
+	* atmega128_timer/.cvsignore, atmega128_timer/Makefile.am,
+	atmega128_timer/README, atmega128_timer/debugio.c,
+	atmega128_timer/debugio.h, atmega128_timer/main.c: New files.
+
 2009-05-07	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* feedback/debugio.c, feedback/main.c, feedback/uart.c,

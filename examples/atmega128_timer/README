@@ -1,0 +1,6 @@
+#
+#  $Id$
+#
+
+This example uses Timer 2 on the ATMega128 to generate a periodic interrupt.
+It prints 1 to 500 as the number of ticks increases.

@@ -3,7 +3,7 @@
 #
 #
 
-SUBDIRS = simple_ex1 anacomp atmel_key
+SUBDIRS = simple_ex1 anacomp atmel_key atmega128_timer
 if USE_TCL
 SUBDIRS += anacomp atmega48 spi stdiodemo feedback
 endif
