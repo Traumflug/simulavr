@@ -1,3 +1,9 @@
+2009-05-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* feedback/main.c, feedback/simfeedback.tcl.in: Add exit command to ui
+	interpreter. This allows external feedback to shutdown the AVR
+	simulation. This should be useful for automated testing.
+
 2009-05-08	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* Makefile.am: Add example of using ATMega128 timer.

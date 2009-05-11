@@ -32,7 +32,8 @@ int main(
   for ( i=1 ; i<13 ; i++ )
     printIt( i%8 );
 
-  /* don't exit until the user forces to */
-  while(1);
+  printk( "Sending exit request\n" );
+  printu0( "E\n" );
+  while(1) ; /* kill time until forced to exit */
   return 0;
 }

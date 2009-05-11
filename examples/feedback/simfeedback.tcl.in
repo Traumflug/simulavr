@@ -123,6 +123,10 @@ class SerialRx {
       if { ${newValue} >= 0x30  && ${newValue} <= 0x39 } {
         WriteADCs [expr ${newValue} - 0x30 - 1]
       }
+      if { ${newValue} == 0x45 } {
+        $parent SendToSimulator "exit" "0"
+        exit 0
+      }
     }
   }
 }
