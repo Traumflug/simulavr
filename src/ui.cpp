@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,6 +81,11 @@ int UserInterface::Step(bool &dummy1, SystemClockOffset *nextStepIn_ns) {
                     string net=dummy.substr(0, pos);
                     string rest=dummy.substr(pos+1); //vfrom pos+1 to end
 
+                    if (net == "exit" ) {
+                        cerr << "Exiting at external UI request" << endl;
+                        exit(0);
+                    }
+
                     string par;
                     int pos2=rest.find(" ");
 
@@ -89,6 +94,7 @@ int UserInterface::Step(bool &dummy1, SystemClockOffset *nextStepIn_ns) {
                     par= rest.substr(0, pos2);
                     dummy=rest.substr(pos2+1);
 
+                    // cerr << "UI: net=" << net << "- rest=" << rest << endl;
                     if (net == "__ack" ) {
                         waitOnAckFromTclDone++;
                     } else {

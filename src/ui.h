@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,8 @@ class UserInterface: public SimulationMember, public Socket, public ExternalType
         int waitOnAckFromTclDone;
 
     public:
-        void SetNewValueFromUi(const string &); //this is mainly for conroling the ui interface itself from the gui
+        //this is mainly for controlling the ui interface itself from the gui
+        void SetNewValueFromUi(const string &);
         void AddExternalType(const char *name, ExternalType *p) {
           extMembers[name]=p;
         }
