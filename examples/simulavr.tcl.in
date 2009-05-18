@@ -264,7 +264,7 @@ set guidir  @prefix@/shared
 #load the avr-simulator package
 set libraryFile [locateInDirs libsimulavr.so \
   [list ${libraryDir} \
-        src/.libs ../src/.libs ../../src/.libs \
+        . src/.libs ../src/.libs ../../src/.libs \
         ${libdir}/lib /lib /usr/lib]]
 if { ${verbose} == 1 } { puts "Loading ${libraryFile}" }
 load ${libraryFile}

@@ -1,3 +1,8 @@
+2009-05-18	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* simulavr.tcl.in: Search for shared library in current directory. This
+	allows you to create a simple standalone kit.
+
 2009-05-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* feedback/main.c, feedback/simfeedback.tcl.in: Add exit command to ui
