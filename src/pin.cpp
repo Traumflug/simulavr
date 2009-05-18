@@ -203,7 +203,8 @@ Pin& Pin::operator= (char c) {
         case 't': outState=TRISTATE; analogValue=TRISTATE_ANALOG_VALUE; break;
         case 'l': outState=PULLDOWN; analogValue=0; break;
         case 'L': outState=LOW; analogValue=0; break;
-
+        case 'a': outState=ANALOG; analogValue=0; break;
+        case 'A': outState=ANALOG_SHORTED; analogValue=0; break;
     }
 
     connectedTo->CalcNet();

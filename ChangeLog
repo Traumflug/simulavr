@@ -1,3 +1,7 @@
+2009-05-18	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/pin.cpp: Add missing analog values a and A.
+
 2009-05-11	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* src/ui.cpp, src/ui.h: Add exit command to ui interpreter. This allows
