@@ -1,3 +1,9 @@
+2009-05-19	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* feedback/debugio.c, feedback/debugio.h, feedback/defines.h,
+	feedback/feedback.tcl, feedback/main.c, feedback/uart.c: Add use of
+	USART1.
+
 2009-05-18	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* simulavr.tcl.in: Search for shared library in current directory. This

@@ -136,7 +136,6 @@ Purpose:  called when the UART is ready to transmit the next byte
 {
     unsigned char tmptail;
 
-
     if ( UART_1_TxHead != UART_1_TxTail) {
         /* calculate and store new buffer index */
         tmptail = (UART_1_TxTail + 1) & UART_TX_BUFFER_MASK;
@@ -220,9 +219,9 @@ void uart_1_putc(unsigned char data)
 
 
     tmphead  = (UART_1_TxHead + 1) & UART_TX_BUFFER_MASK;
-
+ 
     while ( tmphead == UART_1_TxTail ){
-        ;/* wait for free s pace in buffer */
+        ;/* wait for free space in buffer */
     }
 
     UART_1_TxBuf[tmphead] = data;
@@ -260,7 +259,6 @@ void uart_1_send_char(unsigned char ch) //send one character via the serial port
   UDR1 = ch;                 //send the character   			
 }
 
-#include "debugio.h"
 /////////////////////////////////////UART 0///////////////////////////////////////
 ISR(UART0_RECEIVE_INTERRUPT)
 /*************************************************************************
@@ -382,7 +380,7 @@ void uart_0_putc(unsigned char data)
     tmphead  = (UART_0_TxHead + 1) & UART_TX_BUFFER_MASK;
 
     while ( tmphead == UART_0_TxTail ){
-        ;/* wait for free s pace in buffer */
+        ;/* wait for free space in buffer */
     }
 
     UART_0_TxBuf[tmphead] = data;

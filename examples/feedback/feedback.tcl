@@ -18,6 +18,7 @@ switch ${extensionPoint} {
       error "User Interface Required"
     }
 
+    ######################## UART 0
     # Serial transmitter and receiver Net
     Net ser_rxD0
     Net ser_txD0
@@ -44,6 +45,35 @@ switch ${extensionPoint} {
     # If you want to drive bit transitions from the "feedback"
     #ExtPin exttxD0 $Pin_PULLUP $ui "txD0" ".x"
     #ser_txD0 Add exttxD0
+
+
+    ######################## UART 1
+    # Serial transmitter and receiver Net
+    Net ser_rxD1
+    Net ser_txD1
+
+    #create a serial out (from AVR) component
+    SerialRx mysrx1 $ui "serialRx1" ".x"
+    SerialRxBasic_SetBaudRate mysrx1 19200
+    SerialRxBasic_SetHexOutput mysrx1 1
+    #create a serial in (to AVR) component
+    SerialTx mystx1 $ui "serialTx1" ".x"
+    SerialTxBuffered_SetBaudRate mystx1 19200
+
+    # wire the serial receiver and "to byte" device
+    ser_rxD1 Add [AvrDevice_GetPin $dev1 "D3"]
+    ser_rxD1 Add [SerialRxBasic_GetPin mysrx1 "rx"]
+    # If you want to see bit transitions in the "feedback"
+    # create a Pin for serial in and serial out of "the board" into "feedback"
+    #ExtPin extrxD1 $Pin_PULLUP $ui "rxD1" ".x"
+    #ser_rxD1 Add extrxD1
+
+    # wire the serial transmitter and "from byte" device
+    ser_txD1 Add [AvrDevice_GetPin $dev1 "D2"]
+    ser_txD1 Add [SerialTxBuffered_GetPin mystx1 "tx"]
+    # If you want to drive bit transitions from the "feedback"
+    #ExtPin exttxD1 $Pin_PULLUP $ui "txD1" ".x"
+    #ser_txD1 Add exttxD1
 
     # Analog Support
     set netAref [new_Net]

@@ -51,11 +51,29 @@ FILE uart0_str =
   FDEV_SETUP_STREAM(uart_0_putchar, uart_0_getchar, _FDEV_SETUP_RW);
 
 /*
+ *  UART1 IO Support
+ */
+
+int uart_1_putchar(char c, FILE *stream)
+{
+  uart_1_putc(c);
+}
+
+int uart_1_getchar(FILE *stream)
+{
+  return uart_1_getc();
+}
+
+FILE uart1_str =
+  FDEV_SETUP_STREAM(uart_1_putchar, uart_1_getchar, _FDEV_SETUP_RW);
+
+/*
  *  Initialize whatever we have to
  */
 void debugio_init(void)
 {
-  uart_0_init(UART_BAUD, F_CPU);
+  uart_0_init(UART0_BAUD, F_CPU);
+  uart_1_init(UART1_BAUD, F_CPU);
   sei();
 }
 
