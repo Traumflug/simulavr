@@ -387,7 +387,7 @@ void uart_0_putc(unsigned char data)
     UART_0_TxHead = tmphead;
 
     /* enable UDRE interrupt */
-    UART0_CONTROL    |= _BV(UART1_UDRIE);
+    UART0_CONTROL    |= _BV(UART0_UDRIE);
 
 }/* uart_putc */
 

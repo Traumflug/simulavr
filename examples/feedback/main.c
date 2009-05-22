@@ -27,8 +27,10 @@ int main(
 
   debugio_init();
 
-  printu1( "what is up\n" );
+#if 1
+  uart_1_puts( "what is up\n" );
   _delay_ms( 100.0 );
+#endif
 
   /* for printk and printu0 (-R/-W IO and uart0 IO) */
   

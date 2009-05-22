@@ -1,3 +1,9 @@
+2009-05-22	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* feedback/feedback.tcl: Improve comment.
+	* feedback/main.c: Write to UART1.
+	* feedback/uart.c: Fix constant.
+
 2009-05-19	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* feedback/debugio.c, feedback/debugio.h, feedback/defines.h,

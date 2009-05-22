@@ -23,11 +23,11 @@ switch ${extensionPoint} {
     Net ser_rxD0
     Net ser_txD0
 
-    #create a serial out (from AVR) component
+    #create a serial out (from AVR) component (we Rx bytes)
     SerialRx mysrx $ui "serialRx0" ".x"
     SerialRxBasic_SetBaudRate mysrx 9600
     SerialRxBasic_SetHexOutput mysrx 1
-    #create a serial in (to AVR) component
+    #create a serial in (to AVR) component (we Tx bytes)
     SerialTx mystx $ui "serialTx0" ".x"
     SerialTxBuffered_SetBaudRate mystx 9600
 
