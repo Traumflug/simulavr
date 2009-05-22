@@ -81,12 +81,10 @@ void HWMegaTimer0::SetTccr(unsigned char val)
 
     unsigned char cksource= tccr&((1<<CS02)|(1<<CS01)|(1<<CS00));
 
-    if (cksourceold!=cksource) {
-        if (cksource) { //switch of cpu cycle, counter is stopped 
-            core->AddToCycleList(this);
-        } else {
-            core->RemoveFromCycleList(this);
-        }
+    if (cksource) { //switch of cpu cycle, counter is stopped 
+	core->AddToCycleList(this);
+    } else {
+	core->RemoveFromCycleList(this);
     }
 }
 
@@ -370,12 +368,10 @@ void HWMegaTimer2::SetTccr(unsigned char val)
     CheckForMode();
     unsigned char cksource= tccr&((1<<CS02)|(1<<CS01)|(1<<CS00));
 
-    if (cksourceold!=cksource) {
-        if (cksource) { //switch of cpu cycle, counter is stopped 
-            core->AddToCycleList(this);
-        } else {
-            core->RemoveFromCycleList(this);
-        }
+    if (cksource) { //switch of cpu cycle, counter is stopped 
+	core->AddToCycleList(this);
+    } else {
+	core->RemoveFromCycleList(this);
     }
 }
 
@@ -668,12 +664,10 @@ void HWMegaTimer1::SetTccr1b(unsigned char val)
     CheckForMode(); 
     unsigned char cksource= tccr1b&((1<<CS02)|(1<<CS01)|(1<<CS00));
 
-    if (cksourceold!=cksource) {
-        if (cksource) { //switch of cpu cycle, counter is stopped 
-            core->AddToCycleList(this);
-        } else {
-            core->RemoveFromCycleList(this);
-        }
+    if (cksource) { //switch of cpu cycle, counter is stopped 
+	core->AddToCycleList(this);
+    } else {
+	core->RemoveFromCycleList(this);
     }
 }
 

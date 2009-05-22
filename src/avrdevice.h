@@ -85,9 +85,18 @@ class AvrDevice: public SimulationMember {
         vector<Hardware *> hwResetList; 
         vector<Hardware *> hwCycleList; 
 
+	/*! Adds to the list of parts to reset. If already in that list, does
+	  nothing. */
         void AddToResetList(Hardware *hw);
+
+	/*! Adds to the list of parts to cycle per clock tick. If already in that list, does
+	  nothing. */
         void AddToCycleList(Hardware *hw);
+
+	//! Removes from the cycle list, if possible.
+	/*! Does nothing if the part is not in the cycle list. */
         void RemoveFromCycleList(Hardware *hw);
+	
         void Load(const char* n);
         void ReplaceIoRegister(unsigned int offset, RWMemoryMembers *);
         void RegisterTerminationSymbol(const char *symbol);

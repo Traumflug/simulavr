@@ -75,12 +75,10 @@ void HWMegaX8Timer0::SetTccrb(unsigned char val)
 
     unsigned char cksource= tccrb&((1<<CS02)|(1<<CS01)|(1<<CS00));
 
-    if (cksourceold!=cksource) {
-        if (cksource) { //switch of cpu cycle, counter is stopped 
-            core->AddToCycleList(this);
-        } else {
-            core->RemoveFromCycleList(this);
-        }
+    if (cksource) { //switch of cpu cycle, counter is stopped 
+	core->AddToCycleList(this);
+    } else {
+	core->RemoveFromCycleList(this);
     }
 }
 

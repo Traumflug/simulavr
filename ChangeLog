@@ -1,3 +1,19 @@
+2009-05-22	Onno Kortmann <onno@gmx.net>
+
+	* src/atmega128.cpp, src/avrdevice.cpp, src/avrdevice.h,
+	src/hweeprom.cpp, src/hwmegatimer.cpp, src/hwmegax8timer.cpp,
+	src/hwtimer.cpp: Simplify the logic for adding to/removing from
+	the CycleList.  (See associated mailing list posts about the SPI
+	interface, the timer etc, to see how much headache this may cause).
+
+	The current code gives an 'internal error' when any object is added
+	twice to the cycle list. This behaviour needs state-keeping code in
+	the various objects
+
+	This patch is a simpler approach. It ensures that an object is in or
+	out of the cycle list with the avrdevice method calls. All
+	the state-keeping code becomes superfluous.
+
 2009-05-18	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* src/pin.cpp: Add missing analog values a and A.

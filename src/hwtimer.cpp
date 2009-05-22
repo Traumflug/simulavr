@@ -47,15 +47,12 @@ HWTimer0::HWTimer0(AvrDevice *c, HWPrescaler *p, HWTimer01Irq *s, PinAtPort pi):
 }
 
 void HWTimer0::SetTccr(unsigned char val) {
-    unsigned char tccrold=tccr;
     tccr=val; 
 
-    if ((tccr & 0x07 ) != ( tccrold & 0x07)) {
-        if ( tccr & 0x07) {
-            core->AddToCycleList(this);
-        } else {
-            core->RemoveFromCycleList(this);
-        }
+    if ( tccr & 0x07) {
+        core->AddToCycleList(this);
+    } else {
+        core->RemoveFromCycleList(this);
     }
 }
 
@@ -353,15 +350,12 @@ unsigned int HWTimer1::CpuCycle(){
 }
 
 void HWTimer1::SetTccr1b(unsigned char val) {
-    unsigned char tccrold=tccr1b;
     tccr1b=val;
 
-    if ((tccr1b & 0x07 ) != ( tccrold & 0x07 ) ) {
-        if (tccr1b & 0x07) {
-            core->AddToCycleList(this);
-        } else {
-            core->RemoveFromCycleList(this);
-        }
+    if (tccr1b & 0x07) {
+	core->AddToCycleList(this);
+    } else {
+	core->RemoveFromCycleList(this);
     }
 }
 

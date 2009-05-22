@@ -105,10 +105,9 @@ void HWEeprom::SetEecr(unsigned char newval) {
             }
         } else { //read enable
             cpuHoldCycles=4;
-            if (state != READ) {
-                state=READ;
-                core->AddToCycleList(this);
-            }
+
+	    state=READ;
+	    core->AddToCycleList(this);
 
             eecr=0x01 | localIrqFlag;
             if (core->trace_on==1) traceOut << " EEPROM: Read ";

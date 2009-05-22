@@ -36,26 +36,21 @@
 #include "avrdevice_impl.h"
 
 void AvrDevice::AddToResetList(Hardware *hw) {
-   if (find(hwResetList.begin(), hwResetList.end(), hw)!=hwResetList.end()) {
-      cerr << "INTERNAL ERROR: device would be twice in reset list.\n";
-      exit(1);
-   }
-   hwResetList.push_back(hw);
+   if (find(hwResetList.begin(), hwResetList.end(), hw)!=hwResetList.end())
+     hwResetList.push_back(hw);
 }
 
 void AvrDevice::AddToCycleList(Hardware *hw) {
-   if (find(hwCycleList.begin(), hwCycleList.end(), hw)!=hwCycleList.end()) {
-      cerr << "INTERNAL ERROR: device would be twice in cycle list.\n";
-      exit(1);
-   }
-   hwCycleList.push_back(hw);
+   if (find(hwCycleList.begin(), hwCycleList.end(), hw)!=hwCycleList.end())
+     hwCycleList.push_back(hw);
 }
 
 void AvrDevice::RemoveFromCycleList(Hardware *hw) {
    vector<Hardware*>::iterator element;
 
    element=find(hwCycleList.begin(), hwCycleList.end(), hw);
-   if (element != hwCycleList.end()) hwCycleList.erase(element);
+   if (element != hwCycleList.end())
+     hwCycleList.erase(element);
 }
 
 void AvrDevice::Load(const char* fname) {

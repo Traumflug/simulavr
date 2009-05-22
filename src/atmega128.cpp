@@ -40,7 +40,7 @@
 //#include "avrdevice_impl.h"
 AvrDevice_atmega128::~AvrDevice_atmega128() {}
 AvrDevice_atmega128::AvrDevice_atmega128():
-AvrDevice(224, 4096, 0xef00, 128*1024),
+AvrDevice(224, 4096, 0xef00, 256*1024),
 aref()
 {
 	irqSystem = new HWIrqSystem(this, 4); //4 bytes per vector
