@@ -97,9 +97,7 @@ void HWSpi::SetSpcr(unsigned char val) {
     {
         if (spcr & SPE) 
         {
-            core->AddToCycleList(this);
         } else {
-            core->RemoveFromCycleList(this);
         }
     }
         
@@ -386,7 +384,7 @@ unsigned int HWSpi::CpuCycle() {
     HWSpi::HWSpi( AvrDevice *_c, HWIrqSystem *is, PinAtPort mo, PinAtPort mi, PinAtPort sc, PinAtPort s, unsigned int vfs): 
 Hardware(_c), core(_c), irqSystem(is), pinMosi(mo), pinMiso(mi), pinSck(sc), pinSs(s), vectorForSpif(vfs) 
 {
-    //core->AddToCycleList(this);
+    core->AddToCycleList(this);
     //irqSystem->RegisterIrqPartner(this, vfs);	//we are assigned for handling irq's with vector no vfs here!
     Reset();
 }
@@ -484,7 +482,7 @@ void HWMegaSpi::SetSpcr(unsigned char val) {
     HWMegaSpi::HWMegaSpi( AvrDevice *core, HWIrqSystem *is, PinAtPort mo, PinAtPort mi, PinAtPort sc, PinAtPort s, unsigned int vfs): 
 HWSpi( core, is, mo, mi, sc, s, vfs) 
 {
-    core->AddToCycleList(this);
+//    core->AddToCycleList(this);
     //irqSystem->RegisterIrqPartner(this, vfs);	//we are assigned for handling irq's with vector no vfs here!
     Reset();
 }

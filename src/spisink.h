@@ -6,9 +6,13 @@
 // prints the results one byte at a time to stdout.
 class SpiSink : public SimulationMember {
 	private:
+		unsigned char	_port;
 		Pin				_ss;	// Output to AVR
 		Pin				_sclk;	// Output to AVR
 		Pin				_miso;	// Output to AVR
+		bool			_ssState;
+		bool			_sclkState;
+		bool			_misoState;
 		unsigned		_state;
 		unsigned char	_sr;
 		bool			_clockIsIdleHigh;
@@ -24,6 +28,7 @@ class SpiSink : public SimulationMember {
 					) throw();
 	private:	// SimulationMember
         int	Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
+
 	};
 
 #endif

@@ -1,3 +1,11 @@
+2009-05-22	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/hwspi.cpp, src/spisink.cpp, src/spisink.h: (1) The HWSpi was
+	adding itself to the cycle list inappropriately. (2) The SpiSink
+	class, which is used to decode the output of the SPI device, was not
+	working, possibly due to an architectural change in simulavrxx at
+	some point.
+
 2009-05-22	Onno Kortmann <onno@gmx.net>
 
 	* src/atmega128.cpp, src/avrdevice.cpp, src/avrdevice.h,

@@ -1,15 +1,25 @@
 #include <iostream>
 #include "spisink.h"
 
+enum {
+		SSBIT = 0,
+		SCLKBIT = 1,
+		MISOBIT = 2
+		};
+
 SpiSink::SpiSink(	Net&		ssNet,
 					Net&		sclkNet,
 					Net&		misoNet,
 					bool		clockIsIdleHigh,
 					bool		clockSampleOnLeadingEdge
 					) throw():
-		_ss(),
-		_sclk(),
-		_miso(),
+		_port(0),
+		_ss( &_port, (unsigned char)(1<<SSBIT) ),
+		_sclk( &_port, (unsigned char)(1<<SCLKBIT) ),
+		_miso( &_port, (unsigned char)(1<<MISOBIT) ),
+		_ssState(false),
+		_sclkState(false),
+		_misoState(false),
 		_state(0),
 		_sr(0),
 		_clockIsIdleHigh(clockIsIdleHigh),
@@ -31,29 +41,33 @@ int	SpiSink::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
 	*timeToNextStepIn_ns	= 1000;	// Once every microsecond
 	bool	sample = false;
 
-	if(!_ss){
-		if(_prevClkState != (bool)_sclk){
-			_prevClkState	= (bool)_sclk;
+	_ssState	= (_port & (1<<SSBIT))?true:false;
+	_sclkState	= (_port & (1<<SCLKBIT))?true:false;
+	_misoState	= (_port & (1<<MISOBIT))?true:false;
+
+	if(!_ssState){
+		if(_prevClkState != _sclkState){
+			_prevClkState	= _sclkState;
 			if(_clockIsIdleHigh){
 				// Clock is HIGH when idle
 				if(_clockSampleOnLeadingEdge){
 					// Sample on leading edge
-					sample	= ((bool)_sclk)?false:true;
+					sample	= (_sclkState)?false:true;
 					}
 				else {
 					// Sample on trailing edge
-					sample	= ((bool)_sclk)?true:false;
+					sample	= (_sclkState)?true:false;
 					}
 				}
 			else {
 				// Clock is LOW when idle
 				if(_clockSampleOnLeadingEdge){
 					// Sample on leading edge
-					sample	= ((bool)_sclk)?true:false;
+					sample	= (_sclkState)?true:false;
 					}
 				else {
 					// Sample on trailing edge
-					sample	= ((bool)_sclk)?false:true;
+					sample	= (_sclkState)?false:true;
 					}
 				}
 			}
@@ -66,7 +80,7 @@ int	SpiSink::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
 	for(;;){
 		switch(_state){
 			case 0:	// Waiting for /SS
-				if(!_ss){
+				if(!_ssState){
 					_state	= 1;
 					continue;
 					}
@@ -80,7 +94,7 @@ int	SpiSink::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
 			case 7:	// Seventh sample
 				if(sample){
 					_sr	<<= 1;
-					if(_miso){
+					if(_misoState){
 						_sr	|= 0x01;
 						}
 					++_state;
@@ -89,7 +103,7 @@ int	SpiSink::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
 			case 8:	// First sample
 				if(sample){
 					_sr	<<= 1;
-					if(_miso){
+					if(_misoState){
 						_sr	|= 0x01;
 						}
 					_state	= 1;
@@ -112,14 +126,14 @@ int	SpiSink::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
 		break;
 		}
 
-	if((bool)_ss != _prevSS){
-		if(_ss){
+	if(_ssState != _prevSS){
+		if(_ssState){
 			cout << "spisink: /SS negated" << endl;
 			}
 		else {
 			cout << "spisink: /SS asserted" << endl;
 			}
-		_prevSS	= _ss;
+		_prevSS	= _ssState;
 		}
 
 	return 0;
