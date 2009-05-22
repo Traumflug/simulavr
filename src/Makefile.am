@@ -38,7 +38,7 @@ libsim_la_SOURCES = \
   ioregs.cpp irqsystem.cpp keyboard.cpp lcd.cpp memory.cpp \
   mysocket.cpp net.cpp pin.cpp pinatport.cpp pinmon.cpp printable.cpp \
   rwmem.cpp scope.cpp serialrx.cpp serialtx.cpp spisrc.cpp spisink.cpp \
-  systemclock.cpp trace.cpp ui.cpp 
+  string2.cpp systemclock.cpp trace.cpp ui.cpp 
 
 nodist_libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
 libsimulavr_la_LDFLAGS = -version-info 0:0:0 
@@ -59,7 +59,7 @@ pkginclude_HEADERS = \
   spisrc.h spisink.h systemclock.h systemclocktypes.h trace.h types.h \
   ui.h xcode_to_keynumber.dat
 
-simulavr_SOURCES = main.cpp string2.cpp $(COMMON_SRC)
+simulavr_SOURCES = main.cpp $(COMMON_SRC)
 
 simulavr_LDADD = $(libsim_la_OBJECTS) $(AVR_LIBBFD_LIB) -lz $(AVR_LIBIBERTY_LIB)
 

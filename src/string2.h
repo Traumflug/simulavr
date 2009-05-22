@@ -26,6 +26,13 @@
 #ifndef __String2_h
 #define __String2_h
 
+bool StringToUnsignedChar (
+  const char     *s,
+  unsigned char  *n,
+  char          **endptr,
+  int             base
+);
+
 bool StringToLong (
   const char  *s,
   long        *n,

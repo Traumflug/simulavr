@@ -51,11 +51,13 @@ class SerialTxBuffered: public SimulationMember {
         unsigned int bitCnt;
         unsigned int maxBitCnt;
        
+        bool receiveInHex;
 
     public:
         SerialTxBuffered();
         void Reset();
         virtual ~SerialTxBuffered(){};
+    	void SetHexInput(bool newValue);
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
         virtual void Send(unsigned char data);
         virtual void SetBaudRate(SystemClockOffset baud);

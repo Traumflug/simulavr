@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003, 2004   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003, 2004   Klaus Rudolph
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,32 +25,39 @@
 
 #include "serialtx.h"
 #include "systemclock.h"
+#include "string2.h"
 
+SerialTxBuffered::SerialTxBuffered()
+{
+    allPins["tx"] = &tx;
+    Reset();
+}
 
-SerialTxBuffered::SerialTxBuffered(){
-	allPins["tx"] = &tx;
-	Reset();
-};
-
-void SerialTxBuffered::Reset(){
-	txState=TX_DISABLED;
+void SerialTxBuffered::Reset()
+{
+    txState=TX_DISABLED;
+    receiveInHex=false;
     baudrate=115200;
     maxBitCnt=8;
     tx='H'; 
-};
-
-Pin* SerialTxBuffered::GetPin(const char* name){
-	return allPins[name];
 }
 
-int SerialTxBuffered::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
+Pin* SerialTxBuffered::GetPin(const char* name)
+{
+    return allPins[name];
+}
+
+int SerialTxBuffered::Step(
+  bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns)
+{
     switch (txState) {
         case TX_SEND_STARTBIT:
             data=*(inputBuffer.begin());
             inputBuffer.erase(inputBuffer.begin());
             tx='L';
             bitCnt=0;
-            *timeToNextStepIn_ns=(SystemClockOffset)1e9/baudrate; //all we measures are in ns !;
+            //all we measures are in ns !;
+            *timeToNextStepIn_ns=(SystemClockOffset)1e9/baudrate;
             txState=TX_SEND_DATABIT;
             break;
 
@@ -60,7 +67,8 @@ int SerialTxBuffered::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn
             } else {
                 tx='L';
             }
-            *timeToNextStepIn_ns=(SystemClockOffset)1e9/baudrate; //all we measures are in ns !;
+            //all we measures are in ns !;
+            *timeToNextStepIn_ns=(SystemClockOffset)1e9/baudrate;
             bitCnt++;
             if(bitCnt>=maxBitCnt) txState=TX_SEND_STOPBIT;
             break;
@@ -68,11 +76,12 @@ int SerialTxBuffered::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn
         case TX_SEND_STOPBIT:
             tx='H';
             txState=TX_STOPPING;
-            *timeToNextStepIn_ns=(SystemClockOffset)1e9/baudrate; //last step, do not continue
+            //all we measures are in ns !;
+            *timeToNextStepIn_ns=(SystemClockOffset)1e9/baudrate;
             break;
             
         case TX_STOPPING:
-        	if (inputBuffer.size()>0) { //another char to send!
+            if (inputBuffer.size()>0) { //another char to send!
                 txState=TX_SEND_STARTBIT;
                 *timeToNextStepIn_ns=0;//(SystemClockOffset)1e9/baudrate;
             } else {
@@ -92,22 +101,25 @@ int SerialTxBuffered::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn
 
 }
 
-void SerialTxBuffered::Send(unsigned char data){
-	inputBuffer.push_back(data); //write new char to input buffer
+void SerialTxBuffered::Send(unsigned char data)
+{
+    inputBuffer.push_back(data); //write new char to input buffer
 
+    cerr << "TX: " << hex << data << " ";
     //if we not active, activate tx machine now
     if (txState==TX_DISABLED) {
         txState=TX_SEND_STARTBIT;
         SystemClock::Instance().Add(this);
     }
-};
+}
 
 void SerialTxBuffered::SetBaudRate(SystemClockOffset baud){
-	baudrate = baud;
-};
+    baudrate = baud;
+}
 
-
-
+void SerialTxBuffered::SetHexInput(bool newValue){
+    receiveInHex = newValue;
+}
 
 
 
@@ -136,5 +148,18 @@ ui(_ui), name(_name)  {
 }
 
 void SerialTx::SetNewValueFromUi(const string &s) {
-    Send(s[0]);
+    if ( receiveInHex ) {
+       unsigned char value;
+       bool          rc;
+       rc = StringToUnsignedChar( s.c_str(), &value, NULL, 16 );
+       if ( !rc ) {
+         cerr << "SerialTx::SetNewValueFromUi:: bad conversion" << endl;
+       } else {
+         // cerr << "SerialTx::Send " << hex << (unsigned int) value << endl;
+         Send(value);
+       }
+    } else {
+      for(int i=0; i < s.length(); i++)
+        Send(s[i]);
+    }
 }

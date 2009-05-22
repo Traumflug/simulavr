@@ -28,6 +28,20 @@
 #include <limits.h>
 
 /*
+ *  Instantiate an error checking wrapper for strtol (unsigned char)
+ */
+#undef STRING_TO_TYPE
+#undef STRING_TO_NAME
+#undef STRING_TO_METHOD
+#undef STRING_TO_MAX
+#undef STRING_TO_MIN
+#define STRING_TO_TYPE unsigned char
+#define STRING_TO_NAME StringToUnsignedChar
+#define STRING_TO_METHOD strtoul
+#define STRING_TO_MAX ULONG_MAX
+#include "string2_template.h"
+
+/*
  *  Instantiate an error checking wrapper for strtol (long)
  */
 #undef STRING_TO_TYPE
