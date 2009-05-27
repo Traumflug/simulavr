@@ -36,21 +36,20 @@
 #include "avrdevice_impl.h"
 
 void AvrDevice::AddToResetList(Hardware *hw) {
-   if (find(hwResetList.begin(), hwResetList.end(), hw)!=hwResetList.end())
-     hwResetList.push_back(hw);
+    if (find(hwResetList.begin(), hwResetList.end(), hw)==hwResetList.end())
+	hwResetList.push_back(hw);
 }
 
 void AvrDevice::AddToCycleList(Hardware *hw) {
-   if (find(hwCycleList.begin(), hwCycleList.end(), hw)!=hwCycleList.end())
-     hwCycleList.push_back(hw);
+    if (find(hwCycleList.begin(), hwCycleList.end(), hw)==hwCycleList.end())
+	hwCycleList.push_back(hw);
 }
-
+        
 void AvrDevice::RemoveFromCycleList(Hardware *hw) {
-   vector<Hardware*>::iterator element;
-
-   element=find(hwCycleList.begin(), hwCycleList.end(), hw);
-   if (element != hwCycleList.end())
-     hwCycleList.erase(element);
+    vector<Hardware*>::iterator element;
+    element=find(hwCycleList.begin(), hwCycleList.end(), hw);
+    if (element != hwCycleList.end())
+	hwCycleList.erase(element);
 }
 
 void AvrDevice::Load(const char* fname) {

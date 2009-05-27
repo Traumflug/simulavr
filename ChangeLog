@@ -1,3 +1,7 @@
+2009-05-27	Onno Kortmann <onno@gmx.net>
+
+	* src/avrdevice.cpp: Remove superfluous logic.
+
 2009-05-22	Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* src/Makefile.am, src/string2.cpp, src/string2.h: Add string to
