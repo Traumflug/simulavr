@@ -85,3 +85,24 @@
 
   - Waiting at a breakpoint for a GDB user input: the active wait-loop should
     be replaced by something using less CPU power.
+
++ Testing
+  - All tests need to be integrated into a nice regression test suite (Maybe
+    python unittest?)
+    Right now, the tests are split up and there is a custom made regression
+    test suite for testing the handling of instructions in the core.
+
++ Proper teardown
+  Currently, there are various points in the simulator where a simple
+  exit(x) is performed. This may hurt additional instrumentation software
+  which may need to close files or it may hurt any external program
+  which is controlling simulavr.
+
++ State saving support
+  Saving/restoring the complete state of the simulation (this needs
+  a lot of infrastructure)
+
++ Export additional hardware (LCDs etc.) to verilog
+
++ Clean up the private/protected/public declaration scopes
+  for the various classes. This is quite inconsistent.
