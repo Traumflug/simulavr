@@ -44,8 +44,8 @@ AvrDevice(224, 4096, 0xef00, 256*1024),
 aref()
 {
 	irqSystem = new HWIrqSystem(this, 4); //4 bytes per vector
-	eeprom = new HWMegaEeprom(this, irqSystem, 4096, 22); 
-	stack = new HWStack(this, Sram, 0xffff);
+        eeprom = new HWMegaEeprom( this, irqSystem, 4096, 22); 
+	stack = new HWStack(this, Sram, 0x10000);
 	porta= new HWPort(this, "A");
 	portb= new HWPort(this, "B");
 	portc= new HWPort(this, "C");

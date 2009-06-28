@@ -34,17 +34,37 @@
 #include <map>
 
 
+/*! Implementation of the special three-level deep hardware stack which is
+  not accessible in any memory space on the devices which have this, for
+  example the ATTiny15L or the good old AT90S1200. */
+class ThreeLevelStack : public MemoryOffsets {
+ public:
+    ThreeLevelStack() : MemoryOffsets(0, 0) {
+		rwHandler=(RWMemoryMembers**)malloc(sizeof(RWMemoryMembers*) * 6);
+		for (size_t i=0; i < 6; i++) {
+		    rwHandler[i]=new RWMemoryWithOwnMemory(0);
+		}
+    }
+    ~ThreeLevelStack() {
+	free(rwHandler);
+    }
+};
+
+
 class HWStack: public Hardware {
 	protected:
         AvrDevice *core;
 		MemoryOffsets *mem;
 		unsigned int stackPointer;
-        unsigned int stackMask;
+        unsigned int stackCeil;
         multimap<unsigned int , Funktor* > breakPointList; //later the second parameter should be a function Pointer!
 
 	public:
-        //the mask give the max width of the stack pointer, in smaller devices there are not all 16 bits available!
-		HWStack(AvrDevice *core, MemoryOffsets *sr, unsigned int mask);
+        /*!Ceil gives the maximum value (+1) for the stack pointer, in smaller devices
+	  there are not all 16 bits available!
+	  Ceil does not need to be a power of two.
+	  */
+	HWStack(AvrDevice *core, MemoryOffsets *sr, unsigned int ceil);
 		void Push(unsigned char val);
 		unsigned char Pop();
 

@@ -59,7 +59,7 @@ admux(	this,
 	irqSystem	= new HWIrqSystem(this,2);
 
     eeprom = new HWMegaEeprom( this, irqSystem, 256, 23); 
-	stack = new HWStack(this, Sram, 0xffff);
+	stack = new HWStack(this, Sram, 0x10000);
 
 	RegisterPin("AREF", &aref);
 	RegisterPin("ADC6", &adc6);

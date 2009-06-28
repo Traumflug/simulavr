@@ -40,7 +40,7 @@ AvrDevice(64, 512, 0xfda0, 8192) {
     eeprom= new HWEeprom(this, 512);
 
 	irqSystem = new HWIrqSystem(this, 2);
-	stack = new HWStack(this, Sram, 0xffff);
+	stack = new HWStack(this, Sram, 0x10000);
 
 	porta= new HWPort(this, "A");
 	portb= new HWPort(this, "B");
