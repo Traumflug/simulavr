@@ -87,12 +87,12 @@ $(srcdir)/keyboard.cpp : $(srcdir)/keytrans.h
 @MAINT@		$(builddir)/kbdgentables $(srcdir)
 
 # Python bindings
-_pysimulavr.so: pysimulavr_wrap.cpp simulavr
-	$(CXX) -I$(srcdir) $(PYTHON_CPPFLAGS) $< \
-	    $(patsubst %.lo,%.o,$(libsimulavr_la_OBJECTS)) \
-	    -lbfd $(LIBIBERTY) -lc -lm -lncurses -shared \
+_pysimulavr.so: pysimulavr_wrap.cpp simulavr $(libsim_la_OBJECTS) $(libsim_la_DEPENDENCIES)
+	$(CXXLINK) -I$(srcdir) $(PYTHON_CPPFLAGS) -fPIC -shared $< \
+	    $(libsim_la_OBJECTS) $(libsim_la_LIBADD) $(LIBS) \
+	    -lbfd $(LIBIBERTY) -lc -lm -lncurses \
 	    -o $@ $(NonPortableDarwin_GXX_Flags)
-
+	    
 pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
 	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_CPPFLAGS) -o $@ $?
 
