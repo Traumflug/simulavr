@@ -1,0 +1,6 @@
+*.elf
+*.vcd
+!Makefile
+*.vvp
+*.trace
+obj_dir

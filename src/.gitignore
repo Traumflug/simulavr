@@ -1,0 +1,11 @@
+Makefile
+config.h
+devices.cfg
+kbdgentables
+simulavr
+stamp-h1
+.deps
+.libs
+avr_AT*.cpp
+avr_AT*.h
+*.la
