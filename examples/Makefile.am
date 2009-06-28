@@ -10,11 +10,11 @@ endif
 
 noinst_DATA = kbd.xbm
 
-CLEANFILES = $(builddir)/kbd.xbm
+#CLEANFILES = $(builddir)/kbd.xbm
 
 all-local: $(builddir)/kbd.xbm
 
 $(builddir)/kbd.xbm: $(srcdir)/kbd.xbm
-	test -r $(builddir)/kbd.xbm || cp $(srcdir)/kbd.xbm $(builddir)/kbd.xbm
+	-test -r $(builddir)/kbd.xbm || cp $(srcdir)/kbd.xbm $(builddir)/kbd.xbm
 
 EXTRA_DIST = kbd.xbm
