@@ -73,22 +73,8 @@ static PLI_INT32 avr_create_tf(char *xx) {
     std::string progname=value.value.str;
 
     // FIXME: Better error handling than exit(...) here. Exceptions!
-    AvrDevice* dev;
-    devices.push_back(dev=AvrFactory::instance().makeDevice(device));
-    
-    /*
-    if (device=="AT90S4433") {
-	devices.push_back(dev=new AvrDevice_at90s4433());
-    } else {
-	vpi_printf("Invalid AVR device: %s\n", device.c_str());
-	vpi_control(vpiFinish, 1);
-	return 0;
-    }
-    if (!dev) {
-	vpi_printf("Can't create backend AVR simulavrxx device.");
-	vpi_control(vpiFinish, 1);
-	return 0;
-	}*/
+    AvrDevice* dev=AvrFactory::instance().makeDevice(device.c_str());
+    devices.push_back(dev);
     
     dev->Load(progname.c_str());
     

@@ -30,6 +30,10 @@
 #include "hweeprom.h"
 #include "hwwado.h"
 #include "hwmega48extirq.h"
+#include "avrfactory.h"
+
+AVR_REGISTER(atmega48, AvrDevice_atmega48);
+
 
 AvrDevice_atmega48::~AvrDevice_atmega48() {}
 AvrDevice_atmega48::AvrDevice_atmega48():

@@ -35,6 +35,9 @@
 #include "hweeprom.h"
 #include "hwmegatimer0123irq.h"
 #include "hwwado.h"
+#include "avrfactory.h"
+
+AVR_REGISTER(atmega128, AvrDevice_atmega128);
 
 
 //#include "avrdevice_impl.h"

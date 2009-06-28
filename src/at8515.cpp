@@ -31,6 +31,9 @@
 #include "hwport.h"
 #include "hwtimer01irq.h"
 #include "hwwado.h"
+#include "avrfactory.h"
+
+AVR_REGISTER(at90s8515, AvrDevice_at90s8515);
 
 
 

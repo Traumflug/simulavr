@@ -33,17 +33,35 @@ class AvrDevice;
 
 class AvrFactory {
  public:
+    typedef AvrDevice*(*AvrDeviceCreator)();
+    
     /*! Produces an AVR device according to the configuration string.
       Right now, the configuration string is simply the full name of the AVR
       device, like AT90S4433 or ATMEGA128.
       */
-    AvrDevice* makeDevice(const char *device);
+    AvrDevice* makeDevice(const char *config);
 
     //! Singleton class access. 
     static AvrFactory& instance();
+    static std::string supportedDevices();
+
+    //! Register a creation static method with the factory
+    static void reg(const std::string name,
+		    AvrDeviceCreator create);
  private:
     AvrFactory();
 };
 
+#define AVR_REGISTER(name, class) 		\
+    struct AVRFactoryEntryMaker_ ## name {	\
+	public:					\
+    static AvrDevice *create_one() {			\
+	return new class;			\
+    }						\
+    AVRFactoryEntryMaker_ ## name() {		\
+	AvrFactory::reg(#name, create_one);	\
+    }						\
+};						\
+AVRFactoryEntryMaker_ ## name maker_ ##name;
 
 #endif

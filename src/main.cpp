@@ -111,12 +111,6 @@ const char Usage[] =
 "                      stops simulation if PC runs on <label> or <address>\n"
 "-B --breakpoint <label> or <address>\n"
 "                      same as -T for backward compatibility\n"
-"\n"
-"Supported devices:\n"
-"  at90s4433\n"
-"  at90s8515\n"
-"  atmega48\n"
-"  atmega128\n"
 "\n";
 
 int main(int argc, char *argv[]) {
@@ -297,6 +291,9 @@ int main(int argc, char *argv[]) {
 
          default:
             cout << Usage;
+            cout << "Supported devices:" << endl;
+            cout << AvrFactory::supportedDevices();
+            cout << endl;
             exit(0);
       }
    }

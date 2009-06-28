@@ -23,44 +23,53 @@
  *
  *  $Id$
  */
-
-
+#include <map>
+#include <iostream>
+#include <cstdlib>
 #include "config.h"
-#include "at4433.h"
-#include "at8515.h"
-#include "atmega48.h"
-#include "atmega128.h"
 #include "avrfactory.h"
 
 using namespace std;
+typedef map<std::string, AvrFactory::AvrDeviceCreator> AVRDeviceMap;
 
-/* FIXME: Replace this factory with an automatically and pluggable
-factory pattern. (-> AVR devices register themselves.) */
+AVRDeviceMap devmap;
 
-AvrDevice* AvrFactory::makeDevice(const char *device) {
-    string c(device); // use copy to transform to lower case
-
-    if (c == "at90s4433") 
-        return new AvrDevice_at90s4433();
-    if (c == "at90s8515")
-        return new AvrDevice_at90s8515();
-    if (c == "atmega48")
-        return new AvrDevice_atmega48();
-    if (c == "atmega128")
-        return new AvrDevice_atmega128();
+void AvrFactory::reg(const std::string name,
+				 AvrDeviceCreator create) {
+    AVRDeviceMap::iterator i=devmap.find(name);
+    if (i==devmap.end())
+	devmap[name]=create;
     else {
-        cerr << "Invalid device specification: " << c << endl;
-        exit(1);
+	cerr << "Duplicate device specification " << name << endl;
+	exit(1);
     }
 }
 
-AvrFactory& AvrFactory::instance() {
-    static AvrFactory *f=0;
-    if (!f) {
-        f=new AvrFactory();
+AvrDevice* AvrFactory::makeDevice(const char *in) {
+    AVRDeviceMap::iterator i=devmap.find(in);
+    if (i==devmap.end()) {
+	cerr << "Invalid device specification: " << in << endl;
+	exit(1);
     }
 
-    return *f;
+    return devmap[in]();
+}
+
+std::string AvrFactory::supportedDevices() {
+    std::string ret;
+    
+    for (AVRDeviceMap::iterator i=devmap.begin();
+	 i!=devmap.end(); i++)
+	ret+=i->first+"\n";
+    return ret;
+}
+
+AvrFactory& AvrFactory::instance() {
+    static AvrFactory *f;
+    if (!f) {
+	f=new AvrFactory();
+	return *f;
+    }
 }
 
 AvrFactory::AvrFactory() {}

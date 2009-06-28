@@ -39,9 +39,9 @@
 #include "ioregs.h" //mcucr
 #include "hwtimer01irq.h"
 #include "hwad.h"
+#include "avrfactory.h"
 
-
-
+AVR_REGISTER(at90s4433, AvrDevice_at90s4433);
 
 
 AvrDevice_at90s4433::AvrDevice_at90s4433():
@@ -173,3 +173,4 @@ unsigned char AvrDevice_at90s4433::GetRampz() {
 void AvrDevice_at90s4433::SetRampz(unsigned char val) {
 	cerr << "Illegal RAMPZ operation in at90s4433 core";
 }
+
