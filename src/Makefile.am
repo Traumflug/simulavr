@@ -41,9 +41,9 @@ libsim_la_SOURCES = \
   string2.cpp systemclock.cpp trace.cpp ui.cpp 
 
 nodist_libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
-libsimulavr_la_LDFLAGS = -version-info 0:0:0 
-libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz \
-  $(AVR_LIBBFD_LIB) $(AVR_LIBIBERTY_LIB) 
+
+libsimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
+libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz -lbfd $(AVR_LIBIBERTY_LIB)
 
 pkginclude_HEADERS = \
   adcpin.h application.h at4433.h at8515.h atmega48.h atmega128.h avrdevice.h \
@@ -61,7 +61,8 @@ pkginclude_HEADERS = \
 
 simulavr_SOURCES = main.cpp $(COMMON_SRC)
 
-simulavr_LDADD = $(libsim_la_OBJECTS) $(AVR_LIBBFD_LIB) -lz $(AVR_LIBIBERTY_LIB)
+simulavr_LDADD = libsimulavr.la -lbfd \
+   -lz $(TCL_LIB) $(AVR_LIBIBERTY_LIB)
 
 TCLHEADER = avrdevice.h at8515.h atmega128.h at4433.h gdb.h hardware.h \
     keyboard.h lcd.h net.h pin.h keyboard.h rwmem.h scope.h serialrx.h \
@@ -89,7 +90,7 @@ $(srcdir)/keyboard.cpp : $(srcdir)/keytrans.h
 _pysimulavr.so: pysimulavr_wrap.cpp simulavr
 	$(CXX) -I$(srcdir) $(PYTHON_CPPFLAGS) $< \
 	    $(patsubst %.lo,%.o,$(libsimulavr_la_OBJECTS)) \
-	    $(AVR_LIBBFD_LIB) $(LIBIBERTY) -lc -lm -lncurses -shared \
+	    -lbfd $(LIBIBERTY) -lc -lm -lncurses -shared \
 	    -o $@ $(NonPortableDarwin_GXX_Flags)
 
 pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i

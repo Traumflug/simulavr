@@ -43,12 +43,12 @@ fi
 
 if test -z "${bfd_a_location}"; then
   AC_MSG_ERROR([
-    Could not locate libbfd.a or bfd.h.
+    Could not locate libbfd.so or bfd.h.
     Please use the --with-bfd=<path to your libbfd library>
  ])
 fi
 
-AVR_LIBBFD_LIB=${bfd_a_location}/libbfd.a
+AVR_LIBBFD_LIB=${bfd_a_location}/libbfd.so
 AVR_LIBBFD_INC=${bfd_h_location}
 
 ######### LIBIBERTY
