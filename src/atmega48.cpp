@@ -82,14 +82,15 @@ admux(	this,
 	timer0		= new HWMegaX8Timer0( this, &prescaler,timerIrq0,PinAtPort(&portd, 6),PinAtPort(&portd, 5));
 
 	ad	= new HWAd( this, &admux, irqSystem, aref, 21);
-	spi	= new HWMegaSpi(	this,
-							irqSystem,
-							PinAtPort(&portb, 3),	// MOSI
-							PinAtPort(&portb, 4),	// MISO
-							PinAtPort(&portb, 5),	// SCK
-							PinAtPort(&portb, 2),	// /SS
-							/*irqvec*/ 17
-							);
+	spi	= new HWSpi(	this,
+				irqSystem,
+				PinAtPort(&portb, 3),	// MOSI
+				PinAtPort(&portb, 4),	// MISO
+				PinAtPort(&portb, 5),	// SCK
+				PinAtPort(&portb, 2),	// /SS
+				/*irqvec*/ 17,
+				true
+				);
     
 	wado= new HWWado(this);
 

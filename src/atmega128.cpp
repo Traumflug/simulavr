@@ -69,9 +69,9 @@ aref()
     // vector 21 ADConversion Complete
     ad= new HWAd(this, admux, irqSystem, aref, 21);
 
-    spi= new HWMegaSpi(this, irqSystem,
+    spi= new HWSpi(this, irqSystem,
             PinAtPort(portb, 2), PinAtPort(portb, 3), PinAtPort(portb, 1),
-            PinAtPort(portb, 0),/*irqvec*/ 17);
+		   PinAtPort(portb, 0),/*irqvec*/ 17, true);
 
 	extirq= new HWMegaExtIrq(this, irqSystem, 
             PinAtPort(portd, 0), PinAtPort(portd, 1), PinAtPort(portd, 2),

@@ -3,7 +3,7 @@
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
  * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
- * 
+ * Copyright (C) 2009 Onno Kortmann
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -33,96 +33,118 @@
 class AvrDevice;
 class HWIrqSystem;
 
+/*! Implements the I/O hardware necessary to do SPI transfers. */
 class HWSpi: public Hardware {
-	protected:
-		unsigned char spdrShiftReg;
-		unsigned char spdrRead;
-		unsigned char spdrWrite;
-		unsigned char spsr;
-		unsigned char spcr;
+ private:
+    /*! Register into which incoming data is shifted first before
+      it ends in spdrRead (double buffer). */
+    unsigned char shift_in;
+    /*! Contents which appear when SPDR is read. */
+    unsigned char data_read;
+    /*! Byte to send, accessed by SPDR write. */
+    unsigned char data_write;
+    unsigned char spsr;
+    unsigned char spcr;
 
-        AvrDevice *core;
-		HWIrqSystem *irqSystem;
+    AvrDevice *core;
+    HWIrqSystem *irq;
 
-		PinAtPort pinMosi;
-		PinAtPort pinMiso;
-		PinAtPort pinSck;
-		PinAtPort pinSs;
-		unsigned int vectorForSpif;
+    PinAtPort MOSI;
+    PinAtPort MISO;
+    PinAtPort SCK;
+    PinAtPort SS;
+    unsigned int irq_vector;
 
-		unsigned char clkDiv;
+    /*! Clock divider for SPI transfers; the system clock
+      is divided by this amount before being fed to the state logic. */
+    int clkdiv;
 
-		enum T_State {
-			READY,
-			START_AS_MASTER,
-			BIT_MASTER,
-			START_AS_SLAVE,
-			BIT_SLAVE
-				
-		};
+    //! Takes info from registers and updates clkdiv
+    void updatePrescaler();
+    
+    /*! If this is true, SPSR has been read (see for example ATmega 8 DS 10/06,
+      p. 131 */
+    bool spsr_read;
 
-		T_State state;
+    // For edge detection of SCK in slave mode
+    bool oldsck;
 
-		void rol(unsigned char *);
-		void ror(unsigned char *);
-		bool spifWeak; 
-		bool oldSck; //remember old sck for edge detection of sck in slave mode
+    /*! Bit counter counting from zero (start bit) to eight (idle). */
+    int bitcnt;
 
-        int bitCnt;
-        int clkCnt;
+    /*! Main clock cycles (will be divided to yield SPI clock cycles) */
+    unsigned clkcnt;
+    
+    /* Counter which counts SPI cycles, which is main clk / clkDiv. */
+    int spi_cycles;
 
-	public:
-		HWSpi(AvrDevice *core, HWIrqSystem *, PinAtPort mo, PinAtPort mi, PinAtPort sc, PinAtPort s, unsigned int vfs); 
-		unsigned int CpuCycle();
-		void Reset();
+    /*!
+      mega mode: Iff true, the SPI2X option becomes available and SPSR will
+      be R/W. */
+    bool mega_mode;
 
-		void SetSpdr(unsigned char val);
-		void SetSpsr(unsigned char val); // it is read only! but we need it for rwmem-> only tell that we have an error 
-		void SetSpcr(unsigned char val);
+    //! finished transmission?
+    bool finished;
+    
+    //! Send/receive one bit 
+    void txbit(const int bitpos);
+    void rxbit(const int bitpos);
+
+    //! Handle end of transmission if necessary
+    void trxend();
+
+    //! Called for all SPDR access to clear the WCOL and SPIF flags if needed
+    void spdr_access();
+ public:
+    HWSpi(AvrDevice *core,
+	  HWIrqSystem *,
+	  PinAtPort mosi,
+	  PinAtPort miso,
+	  PinAtPort sck,
+	  PinAtPort ss,
+	  unsigned int irq_vec,
+	  bool mega_mode=true);
+    
+    unsigned int CpuCycle();
+    void Reset();
+
+    void SetSPDR(unsigned char val);
+    void SetSPSR(unsigned char val); // it is read only! but we need it for rwmem-> only tell that we have an error 
+    void SetSPCR(unsigned char val);
 
 
-		unsigned char GetSpdr();
-		unsigned char GetSpsr();
-		unsigned char GetSpcr();
+    unsigned char GetSPDR();
+    unsigned char GetSPSR();
+    unsigned char GetSPCR();
 
-
-		//bool IsIrqFlagSet(unsigned int);
-		void ClearIrqFlag(unsigned int);
-};
-
-class HWMegaSpi: public HWSpi {
-    public:
-		HWMegaSpi(AvrDevice *core, HWIrqSystem *, PinAtPort mo, PinAtPort mi, PinAtPort sc, PinAtPort s, unsigned int vfs); 
-		void SetSpsr(unsigned char val); // it is NOT read only in mega devices
-		void SetSpcr(unsigned char val);
-
+    void ClearIrqFlag(unsigned int);
 };
 
 
 
 class RWSpdr: public RWMemoryMembers {
-    protected:
-        HWSpi* spi;
-    public:
-        RWSpdr(AvrDevice *c, HWSpi *s): RWMemoryMembers(c), spi(s) {}
+ protected:
+    HWSpi* spi;
+ public:
+    RWSpdr(AvrDevice *c, HWSpi *s): RWMemoryMembers(c), spi(s) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
 
 class RWSpsr: public RWMemoryMembers {
-    protected:
-        HWSpi* spi;
-    public:
-        RWSpsr(AvrDevice *c, HWSpi *s): RWMemoryMembers(c), spi(s) {}
+ protected:
+    HWSpi* spi;
+ public:
+    RWSpsr(AvrDevice *c, HWSpi *s): RWMemoryMembers(c), spi(s) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };
 
 class RWSpcr: public RWMemoryMembers {
-    protected:
-        HWSpi* spi;
-    public:
-        RWSpcr(AvrDevice *c, HWSpi *s): RWMemoryMembers(c), spi(s) {}
+ protected:
+    HWSpi* spi;
+ public:
+    RWSpcr(AvrDevice *c, HWSpi *s): RWMemoryMembers(c), spi(s) {}
         virtual unsigned char operator=(unsigned char);
         virtual operator unsigned char() const;
 };

@@ -47,7 +47,7 @@ class AvrDevice_atmega48:public AvrDevice {
         HWMega48ExtIrq*		extirq;
         HWAdmux				admux;
         HWAd*				ad;
-        HWMegaSpi*			spi;
+        HWSpi*			        spi;
         HWUsart*			usart0;
 		HWMegaX8TimerIrq*	timerIrq0;
 		HWMegaX8Timer0*		timer0;

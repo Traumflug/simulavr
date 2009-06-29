@@ -52,7 +52,7 @@ AvrDevice(64, 512, 0xfda0, 8192) {
 	portx= new HWPort(this, "X"); //only used for ocr1b, this pin is not a gpio!
 
 	//	irqSystem = new HWIrqSystem;
-	spi= new HWSpi(this, irqSystem, PinAtPort( portb, 5), PinAtPort( portb, 6), PinAtPort( portb, 7), PinAtPort(portb, 4),/*irqvec*/ 8) ;
+	spi= new HWSpi(this, irqSystem, PinAtPort( portb, 5), PinAtPort( portb, 6), PinAtPort( portb, 7), PinAtPort(portb, 4),/*irqvec*/ 8, false);
 	uart= new HWUart( this, irqSystem, PinAtPort(portd,1), PinAtPort(portd, 0),9,10,11) ;
 	acomp= new HWAcomp(this, irqSystem, PinAtPort(portb,2), PinAtPort(portb, 3),12);
 	timer01irq= new HWTimer01Irq( this, irqSystem, 3,4,5,6,7);

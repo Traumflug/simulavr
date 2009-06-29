@@ -2,7 +2,8 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph
+ * Copyright (C) 2009 Onno Kortmann
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,500 +24,320 @@
  *  $Id$
  */
 
-/*TODO if reading first the spsr and after that read spdr the SPIF Flag must be cleared! */
-
 #include <stdio.h>
 #include "hwspi.h"
 #include "flash.h"
 #include "avrdevice.h"
 #include "trace.h"
 #include "irqsystem.h"
+
 //configuration
 #define SPIE 0x80
-#define SPE 0x40
+#define SPE  0x40
 #define DORD 0x20
 #define MSTR 0x10
 #define CPOL 0x08
 #define CPHA 0x04
 #define SPR1 0x02
 #define SPR0 0x01
+
 //status
 #define SPIF 0x80
 #define WCOL 0x40
-
 #define SPI2X 0x01  //only on mega devices speed x 2
 
-void HWSpi::ror(unsigned char *val) {
-    unsigned int x;
-    bool bit=*val&0x01;
-    x=*val>>1;
-    if (bit) {
-        x|=0x80;
+
+/* SPI verbosity level
+   FIXME: Make this configurable through the command line interface. */
+#define SPI_VERBOSE	0
+
+void HWSpi::spdr_access() {
+    if (spsr_read) {
+	// if status is read with SPIF == 1
+	//we can remove the SPIF and WCOL flag after reading
+	//data register
+	spsr&=~(SPIF|WCOL);
+	spsr_read=false;
     }
-    *val=x;
 }
 
-void HWSpi::rol(unsigned char *val) {
-    unsigned int x;
-    bool bit=*val&0x80;
-    x=*val<<1;
-    if (bit) {
-        x|=0x01;
+unsigned char HWSpi::GetSPDR() {
+    spdr_access();
+    return data_read;
+}
+
+unsigned char HWSpi::GetSPSR() { 
+    spsr_read=true;
+    return spsr;
+}
+
+unsigned char HWSpi::GetSPCR() {
+    return spcr;
+}
+
+void HWSpi::SetSPDR(unsigned char val) {
+    spdr_access();
+    data_write=val;
+    if (spcr & MSTR) { // mster mode?
+	if (bitcnt<8) {
+	    spsr|=WCOL; // not yet ready -> Write Collision
+	} else {
+	    bitcnt=0;
+	    finished=false;
+	    clkcnt=0;
+	}
     }
-    *val=x;
+}
+
+void HWSpi::updatePrescaler() {
+    int fac2x=(spsr&SPI2X) ? 1 : 2;
+    switch (spcr & (SPR1|SPR0)) {
+    case 0: clkdiv=1; break;
+    case SPR0: clkdiv=4; break;
+    case SPR1: clkdiv=16; break;
+    case SPR1|SPR0: clkdiv=32; break;
+    }
+    clkdiv*=fac2x;
+}
+
+void HWSpi::SetSPSR(unsigned char val) {
+    if (mega_mode) {
+	spsr&=~SPI2X;
+	spsr|=val&SPI2X;
+	updatePrescaler();
+    } else {
+	((core->trace_on) ?
+	 (traceOut) : (cerr))
+	    << "spsr is read only! (0x" << hex << core->PC << " =  " <<
+	    core->Flash->GetSymbolAtAddress(core->PC) << ")" << endl;
+    }
 }
 
 
-
-void HWSpi::SetSpdr(unsigned char val) { 
-    spdrWrite=val;
-    if (spcr& SPE) { //spi is enabled
-        if (spcr&MSTR) { //we are master
-            if (state!=READY) { 
-                spsr|=WCOL; //Write Collision
-            } else {
-                state=START_AS_MASTER;
-            }
-        }
-    }
-} 
-
-void HWSpi::SetSpsr(unsigned char val) { 
-    ((core->trace_on) ?
-      (traceOut) : (cerr))
-      << "spsr is read only! (0x" << hex << core->PC << " =  " <<
-         core->Flash->GetSymbolAtAddress(core->PC) << ")" << endl;
-}
-
-
-void HWSpi::SetSpcr(unsigned char val) { 
-    unsigned char spcrold=spcr;
+void HWSpi::SetSPCR(unsigned char val) { 
     spcr=val;
-
-    if ( (spcr & SPE) != (spcrold & SPE) ) 
-    {
-        if (spcr & SPE) 
-        {
-        } else {
-        }
-    }
-        
-
-    
-
     if ( spcr & SPE) { //SPI is enabled
+	core->AddToCycleList(this);
         if (spcr & MSTR) { //master
-            pinMiso.SetUseAlternateDdr(1);
-            pinMiso.SetAlternateDdr(0); //ever input
-            pinMosi.SetUseAlternatePortIfDdrSet(1);
-            pinSck.SetUseAlternatePortIfDdrSet(1);
-            if (spcr & CPOL) { // high idle
-                pinSck.SetAlternatePort(1);
-            } else {
-                pinSck.SetAlternatePort(0);
-            }
+            MISO.SetUseAlternateDdr(1);
+            MISO.SetAlternateDdr(0); //always input
+            MOSI.SetUseAlternatePortIfDdrSet(1);
 
+	    /* according to the graphics in the atmega8 datasheet, p.132
+	       (10/06), MOSI is high when idle. FIXME: check whether
+	       this applies to real hardware. */
+	    MOSI.SetAlternatePort(1);
+            SCK.SetUseAlternatePortIfDdrSet(1);
+	    SCK.SetAlternatePort(spcr & CPOL);
         } else { //slave
-            pinMiso.SetUseAlternatePortIfDdrSet(1);
-            pinMosi.SetUseAlternateDdr(1);
-            pinMosi.SetAlternateDdr(0);
-            pinSck.SetUseAlternateDdr(1);
-            pinSck.SetAlternateDdr(0);
-            pinSs.SetUseAlternateDdr(1);
-            pinSs.SetAlternateDdr(0);
+            MISO.SetUseAlternatePortIfDdrSet(1);
+            MOSI.SetUseAlternateDdr(1);
+            MOSI.SetAlternateDdr(0);
+            SCK.SetUseAlternateDdr(1);
+            SCK.SetAlternateDdr(0);
+            SS.SetUseAlternateDdr(1);
+            SS.SetAlternateDdr(0);
         } 
-        //selecting the clockDivider
-
-        switch (spcr & (SPR1|SPR0) ) {
-            case 0: clkDiv=4; break;
-            case SPR0: clkDiv=16; break;
-            case SPR1: clkDiv=64; break;
-            case SPR1|SPR0: clkDiv=128; break;
-        } // end of switch
-
-
     } else { //Spi is off so unset alternate pin functions
-        pinMosi.SetUseAlternatePortIfDdrSet(0);
-        pinMiso.SetUseAlternatePortIfDdrSet(0);
-        pinSck.SetUseAlternatePortIfDdrSet(0);
-        pinMosi.SetUseAlternateDdr(0);
-        pinMiso.SetUseAlternateDdr(0);
-        pinSck.SetUseAlternateDdr(0);
-        pinSs.SetUseAlternateDdr(0);
+
+	/* FIXME: Check whether these will be really tied
+	   to reset state as long as the SPI is off. Check
+	   the switch on/off behaviour of the SPI interface! */
+	bitcnt=8;
+	finished=false;
+	core->RemoveFromCycleList(this);
+        MOSI.SetUseAlternatePortIfDdrSet(0);
+        MISO.SetUseAlternatePortIfDdrSet(0);
+        SCK.SetUseAlternatePortIfDdrSet(0);
+        MOSI.SetUseAlternateDdr(0);
+        MISO.SetUseAlternateDdr(0);
+        SCK.SetUseAlternateDdr(0);
+        SS.SetUseAlternateDdr(0);
     }
-
-
-
+    updatePrescaler();
 }
 
-unsigned int HWSpi::CpuCycle() {
-    //check for external SS activation
-    if (spcr & SPE ) { //spi is enabled
-        if ( spcr & MSTR) { //we are currently master
-            if ( pinSs.GetDdr()==0) { // the pin is input, so that is SS!
-                if (pinSs==0) { // the /SS is set to 0, so we become a slave
-                    SetSpcr(spcr&(0xff-MSTR)); //clear the Master Flag, Set all Port directions 
-                    spsr|=SPIF;
-                    if (spsr&SPIE) { irqSystem->SetIrqFlag(this, vectorForSpif); }
-                    state=START_AS_SLAVE;
-                } // end of ss is low
-            } // end of pin ss is input 
-        }// end of we are master
 
-        clkCnt++;
-
-        if ( state == READY ) {
-            if (( spcr & MSTR ) ==0) { //we are slave
-                if (pinSs==0) { //activate SPI for reading
-                    state=START_AS_SLAVE;
-                    bitCnt=0;
-                }
-            }
-        }
-
-        if (state==START_AS_SLAVE) state=BIT_SLAVE; //remove that state later if all is fine here
-
-        if (state==BIT_SLAVE) {
-            if (pinSs==1) { 	//break the receiving while Ss comes High
-                state=READY;
-            } else {
-
-                bool sampling; //0->setup, 1->sampling
-                if ( oldSck != pinSck) { //something has changed for sck
-                    //bool sckVal= pinSck;
-					oldSck	= pinSck;
-					if(spcr & CPOL){
-						// Clock is HIGH when idle
-						if(spcr & CPHA){
-							// Sample on trailing edge
-							sampling	= ((bool)pinSck)?1:0;
-							}
-						else {
-							// Sample on leading edge
-							sampling	= ((bool)pinSck)?0:1;
-							}
-						}
-					else {
-						// Clock is LOW when idle
-						if(spcr & CPHA){
-							// Sample on trailing edge
-							sampling	= ((bool)pinSck)?0:1;
-							}
-						else {
-							// Sample on leading edge
-							sampling	= ((bool)pinSck)?1:0;
-							}
-						}
-
-                    if (sampling) {
-                        if (spcr & DORD) { // LSB first
-							spdrShiftReg >>= 1;
-                            if (pinMosi) { //pin == 1
-                                spdrShiftReg|=0x80;
-                            }
-                        } else {	// MSB first
-							spdrShiftReg <<= 1;
-                            if (pinMosi) { //pin == 1
-                                spdrShiftReg|=0x01;
-                            }
-                        }
-                        bitCnt++;
-                        if (bitCnt==8) { //ready
-                            state= READY;
-                            spsr|=SPIF;
-							spdrRead	= spdrShiftReg;
-							spdrShiftReg	= 0;	// I'm not sure if this is the correct behavior or not.
-                            if (spsr&SPIE) { irqSystem->SetIrqFlag(this, vectorForSpif); }
-                            spifWeak=0; 	//after accessing the spsr the spif is weak not yet
-                        } // end of all bits sampled
-
-                    } else { //setup
-                        int bitPos;
-                        if (spcr & DORD) { //LSB first
-                            bitPos=bitCnt;
-                        } else { 			// MSB fisrt
-                            bitPos=7-bitCnt;
-                        }
-                        bool outBit=(spdrWrite&(1<<bitPos))>>bitPos;
-                        pinMiso.SetAlternatePort(outBit);
-                    } //end of ?sampling
-                } //end of sck changed
-            } // end of else Ss==1
-        } // end of BIT_SLAVE
-
-        if (( clkCnt%(clkDiv/4))==0) {
-            switch( state) {
-                case READY:
-                    break;
-
-                case START_AS_MASTER:
-                    {
-                        clkCnt=3; //we synchronise to 0 here for following procedure
-                        state=BIT_MASTER;
-                        bitCnt=0;
-                        int bitPos;
-                        if (spcr & DORD) { //LSB first
-                            bitPos=bitCnt;
-                        } else { 			// MSB fisrt
-                            bitPos=7-bitCnt;
-                        }
-                        bool outBit=(spdrWrite&(1<<bitPos))>>bitPos;
-                        pinMosi.SetAlternatePort( outBit);
-                    }
-
-                    break;
-
-                case BIT_MASTER:
-                    {
-                        int bitPos;
-                        if (spcr & DORD) { //LSB first
-                            bitPos=bitCnt;
-                        } else { 			// MSB fisrt
-                            bitPos=7-bitCnt;
-                        }
-
-                        bool valClkIdle= (spsr  & CPOL); 
-                        bool valClkValid= !(spsr & CPOL);
-                        if ( spcr & CPHA) { //==1
-                            switch (clkCnt%(clkDiv/4)) {
-
-                                case 0:	
-                                    pinSck.SetAlternatePort(valClkIdle);
-                                    break;
-
-                                case 1:	
-                                    break;
-
-                                case 2: 
-                                    if (spcr & DORD) { // LSB first
-                                        ror(&spdrRead);
-                                        spdrRead&=0x7f;
-                                        if (pinMiso) { //pin == 1
-                                            spdrRead|=0x80;
-                                        }
-                                    } else {
-                                        rol(&spdrRead);
-                                        spdrRead&=0xfe;
-                                        if (pinMiso) { //pin == 1
-                                            spdrRead|=0x01;
-                                        }
-                                    }
-                                    pinSck.SetAlternatePort(valClkValid);
-
-
-                                    break;
-
-                                case 3:
-                                    {
-                                        bitCnt++;
-                                        if (bitCnt==7) {
-                                            state=READY;
-                                            spsr|=SPIF;
-                                            if (spsr&SPIE) { irqSystem->SetIrqFlag(this, vectorForSpif); }
-                                            spifWeak=0;
-                                            pinMosi.SetAlternatePort( 1) ; //defaults to high??
-                                        } else {
-                                            bool outBit=(spdrWrite&(1<<bitPos))>>bitPos;
-                                            pinMosi.SetAlternatePort( outBit);
-                                        }
-                                    }
-                                    break;
-
-                            } //end of switch 1/4 spi clock
-                        } //end of CPHA ==1 
-                        else
-                        { //CPHA == 0
-
-                            switch (clkCnt%(clkDiv/4)) {
-
-                                case 0:	
-                                    if (spcr & DORD) { // LSB first
-                                        ror(&spdrRead);
-                                        spdrRead&=0x7f;
-                                        if (pinMiso) { //pin == 1
-                                            spdrRead|=0x80;
-                                        }
-                                    } else {
-                                        rol(&spdrRead);
-                                        spdrRead&=0xfe;
-                                        if (pinMiso) { //pin == 1
-                                            spdrRead|=0x01;
-                                        }
-                                    }
-                                    pinSck.SetAlternatePort(valClkValid);
-
-                                    break;
-
-                                case 1:	
-                                    {
-                                        bool outBit=(spdrWrite&(1<<bitPos))>>bitPos;
-                                        pinMosi.SetAlternatePort( outBit);
-                                    }
-                                    break;
-
-                                case 2:
-                                    pinSck.SetAlternatePort(valClkIdle);	
-                                    break;
-
-                                case 3: 
-                                    ; //realy nothing? 
-                                    break;
-                            } //end of switch 1/4 spi clock
-                        }
-
-                    }
-                    break; //end of case BIT_MASTER
-
-                case BIT_SLAVE:	//only against warning here :-)
-                case START_AS_SLAVE:
-                    break;
-            } //switch state
-
-
-        } //end of if clkDiv/4 
-
-
-    } //end of spi is enabled
-
-    return 0;
-}
-
-    HWSpi::HWSpi( AvrDevice *_c, HWIrqSystem *is, PinAtPort mo, PinAtPort mi, PinAtPort sc, PinAtPort s, unsigned int vfs): 
-Hardware(_c), core(_c), irqSystem(is), pinMosi(mo), pinMiso(mi), pinSck(sc), pinSs(s), vectorForSpif(vfs) 
-{
-    core->AddToCycleList(this);
-    //irqSystem->RegisterIrqPartner(this, vfs);	//we are assigned for handling irq's with vector no vfs here!
+HWSpi::HWSpi(AvrDevice *_c,
+	     HWIrqSystem *_irq,
+	     PinAtPort mosi,
+	     PinAtPort miso,
+	     PinAtPort sck,
+	     PinAtPort ss,
+	     unsigned int ivec,
+	     bool mm) : 
+    Hardware(_c), core(_c), irq(_irq),
+    MOSI(mosi), MISO(miso), SCK(sck), SS(ss),
+    irq_vector(ivec), mega_mode(mm)  {
+    bitcnt=8;
+    finished=false;
     Reset();
 }
 
 void HWSpi::Reset() {
-    SetSpcr(0);
+    SetSPCR(0);
     spsr=0;
-    spdrWrite=0;
-    spdrRead=0;
-	spdrShiftReg=0;
+    data_write=data_read=shift_in=0;
 }
-
-unsigned char HWSpi::GetSpdr() {
-    clkCnt=0;
-    if (spsr&SPIF) {
-        if (spifWeak==1) {
-            spsr&=0xff-SPIF-WCOL; 	//if status is read with SPIF == 1
-            //we can remove spif flag after reading
-            //data register	
-        }
-    }
-    return spdrRead;
-}
-
-unsigned char HWSpi::GetSpsr() { 
-    spifWeak=1;
-    return spsr;
-}
-
-unsigned char HWSpi::GetSpcr() { return spcr; }
 
 void HWSpi::ClearIrqFlag(unsigned int vector) {
-    if (vector== vectorForSpif) {
-        spsr&=0xff-SPIF;
-        irqSystem->ClearIrqFlag( vectorForSpif);
+    if (vector==irq_vector) {
+        spsr&=~SPIF;
+        irq->ClearIrqFlag(irq_vector);
     } else {
-        cerr << "WWWWAAAARRRNNNNIIIINNNNGGG  Warning there is HWSPI called to get a irq vector which is not assigned for!?!?!?!?";
+        cerr << "WARNING: There is HWSPI called to get a irq vector which is not assigned for!?!?!?!?";
     }
 }
 
-void HWMegaSpi::SetSpcr(unsigned char val) { 
-    spcr=val;
+void HWSpi::txbit(const int bitpos) {
+    //  set next output bit
+    PinAtPort *out=(spcr & MSTR) ? &MOSI : &MISO;
+    out->SetAlternatePort(data_write&(1<<bitpos));
+}
 
-    if ( spcr & SPE) { //SPI is enabled
-        if (spcr & MSTR) { //master
-            pinMiso.SetUseAlternateDdr(1);
-            pinMiso.SetAlternateDdr(0); //ever input
-            pinMosi.SetUseAlternatePortIfDdrSet(1);
-            pinSck.SetUseAlternatePortIfDdrSet(1);
-            if (spcr & CPOL) { // high idle
-                pinSck.SetAlternatePort(1);
-            } else {
-                pinSck.SetAlternatePort(0);
-            }
+void HWSpi::rxbit(const int bitpos) {
+    // sample input
+    bool bit=(spcr & MSTR) ? MISO : MOSI;
+    if (bit)
+	shift_in|=(1<<bitpos);
+}
 
-        } else { //slave
-            pinMiso.SetUseAlternatePortIfDdrSet(1);
-            pinMosi.SetUseAlternateDdr(1);
-            pinMosi.SetAlternateDdr(0);
-            pinSck.SetUseAlternateDdr(1);
-            pinSck.SetAlternateDdr(0);
-            pinSs.SetUseAlternateDdr(1);
-            pinSs.SetAlternateDdr(0);
-        } 
-        //selecting the clockDivider
-
-        if ((spsr&SPI2X)==0) {
-            switch (spcr & (SPR1|SPR0) ) {
-                case 0: clkDiv=4; break;
-                case SPR0: clkDiv=16; break;
-                case SPR1: clkDiv=64; break;
-                case SPR1|SPR0: clkDiv=128; break;
-            }
-        } else {
-            switch (spcr & (SPR1|SPR0) ) {
-                case 0: clkDiv=2; break;
-                case SPR0: clkDiv=8; break;
-                case SPR1: clkDiv=32; break;
-                case SPR1|SPR0: clkDiv=64; break;
-            }
-        }
-
-
-    } else { //Spi is off so unset alternate pin functions
-        pinMosi.SetUseAlternatePortIfDdrSet(0);
-        pinMiso.SetUseAlternatePortIfDdrSet(0);
-        pinSck.SetUseAlternatePortIfDdrSet(0);
-        pinMosi.SetUseAlternateDdr(0);
-        pinMiso.SetUseAlternateDdr(0);
-        pinSck.SetUseAlternateDdr(0);
-        pinSs.SetUseAlternateDdr(0);
+void HWSpi::trxend() {
+    if (finished) {
+	finished=false;
+	if (core->trace_on && SPI_VERBOSE)
+	    traceOut << "SPI: READ " << int(shift_in) << endl;
+	/* set also data_write to allow continuous shifting
+	   when slave. */
+	data_write=data_read=shift_in; 
+				       
+	spsr|=SPIF;
+	if (spcr&SPIE) {
+	    irq->SetIrqFlag(this, irq_vector);
+	}	
+	spsr_read=false;
     }
 }
 
-    HWMegaSpi::HWMegaSpi( AvrDevice *core, HWIrqSystem *is, PinAtPort mo, PinAtPort mi, PinAtPort sc, PinAtPort s, unsigned int vfs): 
-HWSpi( core, is, mo, mi, sc, s, vfs) 
-{
-//    core->AddToCycleList(this);
-    //irqSystem->RegisterIrqPartner(this, vfs);	//we are assigned for handling irq's with vector no vfs here!
-    Reset();
+unsigned int HWSpi::CpuCycle() {
+    if (spcr & SPE) { // active at all?
+	int bitpos=(spcr&DORD) ? bitcnt : 7-bitcnt;
+	int bitpos_prec=(spcr&DORD) ? bitcnt-1 : 8-bitcnt;
+	
+	if (core->trace_on && SPI_VERBOSE) {
+	    traceOut << "SPI: " << bitcnt << ", " << bitpos << ", " << clkcnt << endl;
+	}
+	
+	if (spcr & MSTR) {
+	    /* Check whether we're externally driven into slave mode.
+	       FIXME: It is unclear atleast from mega8 docs if this behaviour is
+	       also right when the SPI is inactive!*/
+	    if ((!SS.GetDdr()) &&
+		(!SS)) {
+		SetSPCR(spcr&~MSTR);
+		// request interrupt
+		spsr|=SPIF;
+		if (spcr&SPIE) {
+		    irq->SetIrqFlag(this, irq_vector);
+		}
+		bitcnt=8; // slave and idle
+		finished=false;
+		clkcnt=0;
+	    }
+	    if (!(clkcnt%clkdiv)){ // TRX bits
+		if (bitcnt<8) {
+		    if (bitcnt==0)
+			shift_in=0;
+		    switch ((clkcnt/clkdiv)&1) {
+		    case 0:
+			// set idle clock
+			SCK.SetAlternatePort(spcr&CPOL);
+			// late phase (for last bit)?
+			if (spcr&CPHA) {
+			    if (bitcnt) {
+				rxbit(bitpos_prec);
+			    }
+			} else {
+			    txbit(bitpos);
+			}
+			break;
+		    case 1:
+			// set valid clock
+			SCK.SetAlternatePort(!(spcr&CPOL));
+			if (spcr&CPHA) {
+			    txbit(bitpos);
+			} else {
+			    rxbit(bitpos);
+			}
+ 			bitcnt++;
+			break;
+		    }
+		    finished=(bitcnt==8);
+		} else if (finished) {
+		    if (spcr&CPHA) {
+			rxbit(bitpos_prec);
+		    }
+		    trxend();
+		    // set idle clock
+		    SCK.SetAlternatePort(spcr&CPOL);
+		    // set idle MOSI (high if CPHA==0)
+		    if (!(spcr&CPHA))
+			MOSI.SetAlternatePort(1);
+		}
+	    }    
+	} else {
+	    // possible slave mode
+	    if (SS) {
+		// slave selected lifted-> force end of transmission
+		bitcnt=8;
+	    } else {
+		// Slave mode
+		
+		// start slave if necessary
+		if (bitcnt==8) {
+		    bitcnt=0;
+		    finished=false;
+		    shift_in=0;
+		    oldsck=SCK;
+		} else {
+		    /* Set initial bit for CPHA==0 */
+		    if (!(spcr&CPHA)) {
+			txbit(bitpos);
+		    }
+		}
+		if (SCK!=oldsck) { // edge detection
+		    bool leading=false; // leading edge clock?
+		    if (spcr&CPOL) {
+			// leading edge is falling edge
+			leading=!SCK;
+		    } else leading=SCK;
+
+		    // determine whether we should sample or setup
+		    bool sample=leading ^ ((spcr&CPHA)!=0);
+
+		    if (sample)
+			rxbit(bitpos);
+		    else
+			txbit(bitpos);
+
+		    if (!leading) {
+			bitcnt++;
+			finished=(bitcnt==8);
+		    }
+		}
+		trxend();
+		oldsck=SCK;
+	    }
+	}
+	clkcnt++;
+    }
+    return 0;
 }
 
+unsigned char RWSpdr::operator=(unsigned char val) { if (core->trace_on) trioaccess("SPDR",val);spi->SetSPDR(val);  return val; } 
+unsigned char RWSpsr::operator=(unsigned char val) { if (core->trace_on) trioaccess("SPSR",val);spi->SetSPSR(val);  return val; } 
+unsigned char RWSpcr::operator=(unsigned char val) { if (core->trace_on) trioaccess("SPCR",val);spi->SetSPCR(val);  return val; } 
 
-
-
-void HWMegaSpi::SetSpsr(unsigned char val) { 
-    spsr&=(0xff-SPI2X);
-    spsr|=val&(0xff-SPI2X);
-
-
-    if ((spsr&SPI2X)==0) {
-        switch (spcr & (SPR1|SPR0) ) {
-            case 0: clkDiv=4; break;
-            case SPR0: clkDiv=16; break;
-            case SPR1: clkDiv=64; break;
-            case SPR1|SPR0: clkDiv=128; break;
-        }
-    } else {
-        switch (spcr & (SPR1|SPR0) ) {
-            case 0: clkDiv=2; break;
-            case SPR0: clkDiv=8; break;
-            case SPR1: clkDiv=32; break;
-            case SPR1|SPR0: clkDiv=64; break;
-        }
-    }
-
-} 
-
-unsigned char RWSpdr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Spdr",val);spi->SetSpdr(val);  return val; } 
-unsigned char RWSpsr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Spsr",val);spi->SetSpsr(val);  return val; } 
-unsigned char RWSpcr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Spcr",val);spi->SetSpcr(val);  return val; } 
-
-RWSpdr::operator unsigned char() const { return spi->GetSpdr(); } 
-RWSpsr::operator unsigned char() const { return spi->GetSpsr(); }
-RWSpcr::operator unsigned char() const { return spi->GetSpcr(); }
+RWSpdr::operator unsigned char() const { return spi->GetSPDR(); } 
+RWSpsr::operator unsigned char() const { return spi->GetSPSR(); }
+RWSpcr::operator unsigned char() const { return spi->GetSPCR(); }

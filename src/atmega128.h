@@ -37,7 +37,7 @@
 
 #include "ioregs.h" //only for rampz here
 
-class HWMegaSpi;
+class HWSpi;
 
 
 class AvrDevice_atmega128:public AvrDevice {
@@ -64,7 +64,7 @@ class AvrDevice_atmega128:public AvrDevice {
 		HWMegaTimer1 *timer3;
 		HWMegaTimer2 *timer2;
 		HWMegaTimer0123Irq *timer0123irq;
-		HWMegaSpi *spi;
+		HWSpi *spi;
 		HWUsart *usart0;
 		HWUsart *usart1;
 	public:

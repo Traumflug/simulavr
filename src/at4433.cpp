@@ -64,7 +64,7 @@ AvrDevice(64, 128, 0, 4*1024) {
           &portc->GetPin(0), &portc->GetPin(1), &portc->GetPin(2),
           &portc->GetPin(3), &portc->GetPin(4), &portc->GetPin(5),0,0);
 	ad= new HWAd( this, admux, irqSystem, porty->GetPin(0), 11); //vec 11 ADConversion Complete
-	spi= new HWSpi(this, irqSystem, PinAtPort( portb, 3), PinAtPort( portb, 4), PinAtPort( portb, 5), PinAtPort(portb, 2),/*irqvec*/ 7) ;
+	spi= new HWSpi(this, irqSystem, PinAtPort( portb, 3), PinAtPort( portb, 4), PinAtPort( portb, 5), PinAtPort(portb, 2),/*irqvec*/ 7, false);
 	uart= new HWUart( this, irqSystem, PinAtPort(portd,1), PinAtPort(portd, 0),8,9,10) ;
 	acomp= new HWAcomp(this, irqSystem, PinAtPort(portd, 6), PinAtPort(portd, 7), 13);
 	timer01irq= new HWTimer01Irq( this, irqSystem, 3,4,0,5,6); //overflow B not available
