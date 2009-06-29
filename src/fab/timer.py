@@ -1,0 +1,29 @@
+# Copyright (C) 2009 Onno Kortmann <onno@gmx.net>
+#  
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#  
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#  
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#  
+from converter import *
+
+class Timer(Converter):
+    def doit(self, xml, tmpl):
+        # there does not seem to be a timerless device
+        tmpl.has_prescaler=True
+        try:
+            tmpl.has_timer1=navtxt(xml, "IO_MODULE/TIMER_COUNTER_1/ID")[:3]=="t16"
+        except:
+            tmpl.has_timer1=False
+            
+
+            

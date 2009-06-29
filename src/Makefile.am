@@ -27,8 +27,12 @@ endif
 
 noinst_LTLIBRARIES=libsim.la
 
+FAB_CPP=avr_ATtiny2313.cpp avr_ATtiny15.cpp
+FAB_HEADER=avr_ATtiny2313.h avr_ATtiny15.h
+
 libsim_la_SOURCES = \
   adcpin.cpp application.cpp at4433.cpp at8515.cpp atmega48.cpp atmega128.cpp \
+  $(FAB_CPP) \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp gdbserver.cpp hardware.cpp helper.cpp \
   hwacomp.cpp hwad.cpp hweeprom.cpp hwextirq.cpp hwmega48extirq.cpp \
@@ -47,6 +51,7 @@ libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz -lbfd $(AVR_LIBIBERTY_LIB)
 
 pkginclude_HEADERS = \
   adcpin.h application.h at4433.h at8515.h atmega48.h atmega128.h avrdevice.h \
+  $(FAB_HEADER) \
   avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h breakpoint.h \
   config_deprecated.h decoder.h externaltype.h flash.h \
   funktor.h hwacomp.h hwad.h hweeprom.h hwextirq.h hwmega48extirq.h \
@@ -92,7 +97,7 @@ _pysimulavr.so: pysimulavr_wrap.cpp simulavr $(libsim_la_OBJECTS) $(libsim_la_DE
 	    $(libsim_la_OBJECTS) $(libsim_la_LIBADD) $(LIBS) \
 	    -lbfd $(LIBIBERTY) -lc -lm -lncurses \
 	    -o $@ $(NonPortableDarwin_GXX_Flags)
-	    
+
 pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
 	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_CPPFLAGS) -o $@ $?
 
@@ -102,5 +107,8 @@ MAINTAINERCLEANFILES = keytrans.h
 
 CLEANFILES = simulavr_wrap.cxx \
    _pysimulavr.so pysimulavr.py pysimulavr_wrap.cpp
+
+$(FAB_CPP) $(FAB_HEADER): fab/* fab/atmel-xml/*
+	cd fab ; ./avr-fab.py	
 
 all-am: $(LIBPYSIMULAVR)

@@ -1,0 +1,80 @@
+ /*
+ ****************************************************************************
+ *
+ * simulavr - A simulator for the Atmel AVR family of microcontrollers.
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2008 Onno Kortmann
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ ****************************************************************************
+ *
+ * THIS FILE HAS BEEN AUTOMATICALLY GENERATED FROM avr_tmpl.cpp.
+ *                     --- DO NOT EDIT MANUALLY! ---
+ */
+\#include "avr_$(part).h"
+
+## FIXME: Include only those parts which are needed!
+\#include "irqsystem.h"
+\#include "avrfactory.h"
+\#include "hweeprom.h"
+\#include "hwstack.h"
+\#include "hwport.h"
+\#include "hwwado.h"
+\#include "hwtimer.h"
+\#include "hwtimer01irq.h"
+\#include "ioregs.h"
+
+AVR_REGISTER($(part), AVR_$(part));
+
+AVR_$part::~AVR_$(part)() {}
+
+AVR_$part::AVR_$(part)() : AvrDevice($io_size,
+				   $iram_size,
+				   $eram_size,
+				   $flash_size) {
+    irqSystem = new HWIrqSystem(this, $irq_vec_size); 
+
+#include "eeprom_tmpl.cpp"
+    
+#if $iram_size>0
+    stack = new HWStack(this, Sram, $stack.ceil);
+#else
+    stack = new HWStack(this, new ThreeLevelStack(), 0x06);
+#endif
+
+    wado			= new HWWado(this);
+    rw[$io["WDTCR"].addr]	= new RWWdtcr(this, wado);
+    
+    prescaler	= new HWPrescaler(this);
+    mcucr	= new HWMcucr(this); //FIXME! MCUCR reg!
+    rw[$io["SREG"].addr]	= new RWSreg(this, status);
+
+#if "SPL" in $io
+    rw[$io["SPL"].addr]= new RWSpl(this, stack);
+#endif
+#if "SPH" in $io
+    rw[$io["SPH"].addr]= new RWSph(this, stack);
+#endif    
+    
+
+    
+#include "port_tmpl.cpp"
+
+#include "timer_tmpl.cpp"
+    
+    Reset();
+}
+
+
