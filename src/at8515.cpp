@@ -59,7 +59,7 @@ AvrDevice(64, 512, 0xfda0, 8192) {
 	wado= new HWWado(this);
 	prescaler = new HWPrescaler(this);
 	timer0= new HWTimer0(this, prescaler, timer01irq, PinAtPort(portb, 0));
-	timer1= new HWTimer1(this, prescaler, timer01irq, PinAtPort(portb, 1), PinAtPort(portd, 5), PinAtPort(portx, 0));
+	timer1= new HWTimer1(this, prescaler, timer01irq, PinAtPort(portb, 1), PinAtPort(portd, 5), PinAtPort(portx, 0), PinAtPort(portx, 0));
 	extirq= new HWExtIrq( this, irqSystem, PinAtPort(portd, 2), PinAtPort(portd, 3), 1,2);
 	mcucr= new HWMcucr(this); //, irqSystem, PinAtPort(portd, 2), PinAtPort(portd, 3));
 

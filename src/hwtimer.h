@@ -128,10 +128,10 @@ class HWTimer1 : public Hardware {
 		PinAtPort pin_t1;
 		PinAtPort pin_oc1a;
 		PinAtPort pin_oc1b;
+		PinAtPort pin_icp;
 
-		bool icp;	//input capture
 		bool icp_old;
-
+		
 		bool last_ocr1a;
 		bool last_ocr1b;
 		unsigned char inputCaptureNoiseCnt; //count for 4 cycles if set in ICNC1
@@ -153,7 +153,7 @@ class HWTimer1 : public Hardware {
 		void TimerCompareAfterCount();
 
 	public:
-		HWTimer1(AvrDevice *core, HWPrescaler *p, HWTimer01Irq *s, PinAtPort t1, PinAtPort oca, PinAtPort ocb);
+		HWTimer1(AvrDevice *core, HWPrescaler *p, HWTimer01Irq *s, PinAtPort t1, PinAtPort oca, PinAtPort ocb, PinAtPort pin_icp);
 		void Reset()
 		{
 

@@ -116,8 +116,9 @@ unsigned int HWTimer0::CpuCycle(){
 }
 
 
-HWTimer1::HWTimer1(AvrDevice *c, HWPrescaler *p, HWTimer01Irq *s, PinAtPort t1, PinAtPort oca, PinAtPort ocb):
-Hardware(c), core(c), pin_t1(t1), pin_oc1a(oca), pin_oc1b(ocb) { 
+HWTimer1::HWTimer1(AvrDevice *c, HWPrescaler *p, HWTimer01Irq *s, PinAtPort t1, PinAtPort oca, PinAtPort ocb,
+		   PinAtPort icp):
+    Hardware(c), core(c), pin_t1(t1), pin_oc1a(oca), pin_oc1b(ocb), pin_icp(icp) { 
     //c->AddToCycleList(this);
     cntDir=1; //start with upcounting
 	prescaler=p, 
@@ -329,23 +330,24 @@ unsigned int HWTimer1::CpuCycle(){
 	}
 
 	//input capture register
-	//
-	if ( icp!=icp_old) { //pin change for capture detected
-		inputCaptureNoiseCnt++;
-		if ( ((tccr1b&0x80)==0) || (inputCaptureNoiseCnt>=4)) {
-			inputCaptureNoiseCnt=0;
-			icp_old=icp;
 
-			//Edge detection
-			if (( icp ^ (tccr1b&0x40)>>6)==1) {
-				//edge OK
-				timer01irq->AddFlagToTifr(0x08);	//set ICF1 in TIFR
-				icr1=tcnt1;	//Capture
+	// edge detection
+	if ((pin_icp != icp_old) && (pin_icp == ((tccr1b&0x40)==0x40)))
+	    inputCaptureNoiseCnt=1;
+	// and noise cancelling
+	else if (inputCaptureNoiseCnt && (pin_icp == ((tccr1b&0x40)==0x40)))
+	    inputCaptureNoiseCnt+=1;
+	else
+	    inputCaptureNoiseCnt=0;
 
-
-			}	//end of edge detection
-		} // end of noise canceler 
-	} // end of pin change 
+	if (inputCaptureNoiseCnt>3*((tccr1b&0x80)==0x80)) {
+	    // captured!!
+	    inputCaptureNoiseCnt=0;
+	    timer01irq->AddFlagToTifr(0x08);	//set ICF1 in TIFR
+	    icr1=tcnt1;	//Capture
+	}
+	
+	icp_old=pin_icp;
 	return 0;
 }
 
