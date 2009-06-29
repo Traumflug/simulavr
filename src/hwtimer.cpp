@@ -35,7 +35,7 @@ HWPrescaler::HWPrescaler(AvrDevice *core): Hardware(core) {
 
 void HWTimer0::TimerCompareAfterCount() {
 	if ((tcnt==1) ) { //overflow occured! when leaving 0
-		timer01irq->AddFlagToTifr(0x02);	//set TOV0 in TIFR
+		timer01irq->AddFlagToTifr(timer01irq->TOV0);	//set TOV0 in TIFR
 	}
 }
 
@@ -135,9 +135,8 @@ void HWTimer1::TimerCompareAfterCount() {
 
 
 	if ((tcnt1==1) && (cntDir==1)) { //overflow occured! while leaving 0 upward
-		timer01irq->AddFlagToTifr(0x80);	//set TOV1 in TIFR
+		timer01irq->AddFlagToTifr(timer01irq->TOV1);	//set TOV1 in TIFR
 	}
-
 	if (tcnt1==ocr1a) {
 		if ((tccr1b&0x08)!=0) { //CTC1 is set -> compareA: reset counter
 			tcnt1=0;
@@ -198,8 +197,7 @@ void HWTimer1::TimerCompareAfterCount() {
 
 
 		}
-
-		timer01irq->AddFlagToTifr(0x40);	//set OCF1A in TIFR
+		timer01irq->AddFlagToTifr(timer01irq->OCF1A);	//set OCF1A in TIFR
 
 	} //end of compare
 
@@ -257,7 +255,7 @@ void HWTimer1::TimerCompareAfterCount() {
 
 		}
 
-		timer01irq->AddFlagToTifr(0x20);	//set OCF1B in TIFR
+		timer01irq->AddFlagToTifr(timer01irq->OCF1B);	//set OCF1B in TIFR
 	} // end of compare
 }
 
@@ -343,7 +341,7 @@ unsigned int HWTimer1::CpuCycle(){
 	if (inputCaptureNoiseCnt>3*((tccr1b&0x80)==0x80)) {
 	    // captured!!
 	    inputCaptureNoiseCnt=0;
-	    timer01irq->AddFlagToTifr(0x08);	//set ICF1 in TIFR
+	    timer01irq->AddFlagToTifr(timer01irq->ICF1);	//set ICF1 in TIFR
 	    icr1=tcnt1;	//Capture
 	}
 	

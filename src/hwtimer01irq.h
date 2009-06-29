@@ -55,6 +55,20 @@ class HWTimer01Irq: public Hardware {
 		void ClearIrqFlag(unsigned int vector);
         void CheckForNewSetIrq(unsigned char);
         void CheckForNewClearIrq(unsigned char);
+
+	/* Timer/Counter Interrupt MaSK register meanings */
+	unsigned char TOIE1;
+	unsigned char OCIE1A;
+	unsigned char OCIE1B;
+	unsigned char TICIE1;
+	unsigned char TOIE0;
+
+	/* Timer/Counter Interrupt Flag register meanings */
+	unsigned char TOV1;
+	unsigned char OCF1A;
+	unsigned char OCF1B;
+	unsigned char ICF1;
+	unsigned char TOV0;
 };
 
 #endif
