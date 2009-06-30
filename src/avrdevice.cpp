@@ -412,12 +412,12 @@ void AvrDevice::DeleteAllBreakpoints() {
 }
 
 void AvrDevice::ReplaceIoRegister(unsigned int offset, RWMemoryMembers *newMember){
-   if (offset>ioSpaceSize) {
-      cerr << "Could not replace register in non existing IoRegisterSpace" << endl;
-      exit(0);
-   }
+    if (offset >= ioSpaceSize+ioreg->getOffset()) {
+	cerr << "Could not replace register in non existing IoRegisterSpace" << endl;
+	exit(0);
+    }
 
-   rw[offset]=newMember;
+    rw[offset]=newMember;
 
 }
 
