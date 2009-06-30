@@ -45,6 +45,9 @@ class AVR_$(part) : public AvrDevice {
 #if $has_timer1
     HWTimer01Irq *timer01irq;
     HWTimer1 *timer1;
+#endif
+#if $has_spi
+    HWMegaSpi *spi;
 #endif    
 };
 \#endif

@@ -34,6 +34,7 @@
 \#include "hwwado.h"
 \#include "hwtimer.h"
 \#include "hwtimer01irq.h"
+\#include "hwspi.h"
 \#include "ioregs.h"
 
 AVR_REGISTER($(part), AVR_$(part));
@@ -73,6 +74,8 @@ AVR_$part::AVR_$(part)() : AvrDevice($io_size,
 #include "port_tmpl.cpp"
 
 #include "timer_tmpl.cpp"
+
+#include "spi_tmpl.cpp"
     
     Reset();
 }

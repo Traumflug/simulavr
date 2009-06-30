@@ -16,5 +16,6 @@ class HWTimer01Irq;
 class HWAdmux;
 class HWAd;
 class HWMcucr;
+class HWSpi;
 //-----------------------------------------------------------------------------
 #endif

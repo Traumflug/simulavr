@@ -39,5 +39,3 @@ class Timer(Converter):
             except:
                 pass
         return res
-    
-            

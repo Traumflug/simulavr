@@ -24,13 +24,15 @@ from port import Ports
 from irq import IRQTable
 from timer import Timer
 from pins import Pins
+from spi import SPI
 
 converters=[
     Core(),
     IRQTable(),
     Ports(),
     Timer(),
-    Pins()
+    Pins(),
+    SPI()
     ]
 
 
