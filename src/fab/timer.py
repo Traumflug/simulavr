@@ -22,8 +22,22 @@ class Timer(Converter):
         tmpl.has_prescaler=True
         try:
             tmpl.has_timer1=navtxt(xml, "IO_MODULE/TIMER_COUNTER_1/ID")[:3]=="t16"
+            if tmpl.has_timer1:
+                tmpl.timer1_timsk=self.bit_meanings(xml, "IO_MODULE/TIMER_COUNTER_1/TIMSK")
+                tmpl.timer1_tifr=self.bit_meanings(xml, "IO_MODULE/TIMER_COUNTER_1/TIFR")
         except:
             tmpl.has_timer1=False
             
-
+    def bit_meanings(self, xml, path):
+        """ Gives back a dictionary which mappes bit names to their values when anding/oring (already 1<< shifted!). """
+        res={}
+        for i in range(8):
+            try:
+                name=navtxt(xml, path+("/BIT%d/NAME" % i))
+                if len(name):
+                    res[name]=1<<i
+            except:
+                pass
+        return res
+    
             

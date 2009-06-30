@@ -24,7 +24,26 @@
 				   $irq_bysrc["TIMER1 OVF"].addr,
 				   $irq_bysrc["TIMER0 OVF"].addr
 				   );
+    timer01irq->TOIE1=$timer1_timsk["TOIE1"];
+    timer01irq->OCIE1A=$timer1_timsk["OCIE1A"];
+    timer01irq->OCIE1B=$timer1_timsk["OCIE1B"];
+#if "TICIE1"    in $timer1_timsk
+    timer01irq->TICIE1=$timer1_timsk["TICIE1"];
+#else
+    timer01irq->TICIE1=$timer1_timsk["ICIE1"];
+#endif    
+#if "TOIE0" in $timer1_timsk
+    timer01irq->TOIE0=$timer1_timsk["TOIE0"];
+#endif    
 
+    timer01irq->TOV1=$timer1_tifr["TOV1"];
+    timer01irq->OCF1A=$timer1_tifr["OCF1A"];
+    timer01irq->OCF1B=$timer1_tifr["OCF1B"];
+    timer01irq->ICF1=$timer1_tifr["ICF1"];
+#if "TOV0" in $timer1_tifr    
+    timer01irq->TOV0=$timer1_tifr["TOV0"];
+#endif    
+    
     timer1	= new HWTimer1(this,
 			       prescaler,
 			       timer01irq,
