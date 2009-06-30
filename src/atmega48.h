@@ -36,25 +36,25 @@
 #include "hwmegax8timerirq.h"
 
 class AvrDevice_atmega48:public AvrDevice {
-	protected:
-		Pin					aref;
-		Pin					adc6;
-		Pin					adc7;
-	   	HWPort				portb;
-	   	HWPort				portc;
-	   	HWPort				portd;
-		HWPrescaler			prescaler;
-        HWMega48ExtIrq*		extirq;
-        HWAdmux				admux;
-        HWAd*				ad;
-        HWSpi*			        spi;
-        HWUsart*			usart0;
-		HWMegaX8TimerIrq*	timerIrq0;
-		HWMegaX8Timer0*		timer0;
-	public:
-		AvrDevice_atmega48();
-		~AvrDevice_atmega48(); 
-		unsigned char GetRampz();
-		void SetRampz(unsigned char);
+ public:
+    Pin aref;
+    Pin adc6;
+    Pin	adc7;
+    HWPort portb;
+    HWPort portc;
+    HWPort portd;
+    HWPrescaler prescaler;
+    HWMega48ExtIrq* extirq;
+    HWAdmux admux;
+    HWAd* ad;
+    HWSpi* spi;
+    HWUsart* usart0;
+    HWMegaX8TimerIrq* timerIrq0;
+    HWMegaX8Timer0* timer0;
+
+    AvrDevice_atmega48();
+    ~AvrDevice_atmega48(); 
+    unsigned char GetRampz();
+    void SetRampz(unsigned char);
 };
 #endif

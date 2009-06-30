@@ -32,7 +32,7 @@ class AVR_$(part) : public AvrDevice {
  public:
     AVR_$(part)();
     ~AVR_$(part)();
- private:
+
 #for $Letter in $io_ports
     HWPort *port$Letter.lower;
 #endfor

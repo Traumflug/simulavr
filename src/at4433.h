@@ -40,29 +40,30 @@ class HWAdmux;
 class HWAd;
 
 class AvrDevice_at90s4433:public AvrDevice {
-	public:
-		~AvrDevice_at90s4433();
-		HWPort *portb;
-		HWPort *portc;
-		HWPort *portd;
-        HWPort *portx; //TODO XXX there is no need for portx in 4433, but we
-                        //have not rewritten the timer1 now, so please do this later
-        HWPort *porty; //we need an analog pin (aref) but we would remove
-                        //portx later so another port (y) is used
-        HWAdmux *admux;
-        HWAd *ad;
-		HWSpi *spi;
-		HWUart *uart;
-		HWAcomp *acomp;
-		HWPrescaler *prescaler;
-		HWTimer0 *timer0;
-		HWTimer1 *timer1;
-		HWMcucr *mcucr;
-		HWExtIrq *extirq;
-		HWTimer01Irq *timer01irq;
-		AvrDevice_at90s4433();
-		unsigned char GetRampz();
-		void SetRampz(unsigned char);
+ private:
+    HWPort *portx; //TODO XXX there is no need for portx in 4433, but we
+    //have not rewritten the timer1 now, so please do this later
+    HWPort *porty; //we need an analog pin (aref) but we would remove
+    //portx later so another port (y) is used
+ public:
+    ~AvrDevice_at90s4433();
+    HWPort *portb;
+    HWPort *portc;
+    HWPort *portd;
+    HWAdmux *admux;
+    HWAd *ad;
+    HWSpi *spi;
+    HWUart *uart;
+    HWAcomp *acomp;
+    HWPrescaler *prescaler;
+    HWTimer0 *timer0;
+    HWTimer1 *timer1;
+    HWMcucr *mcucr;
+    HWExtIrq *extirq;
+    HWTimer01Irq *timer01irq;
+    AvrDevice_at90s4433();
+    unsigned char GetRampz();
+    void SetRampz(unsigned char);
 };
 #endif
 

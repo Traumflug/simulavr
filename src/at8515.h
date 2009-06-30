@@ -38,25 +38,26 @@
 
 
 class AvrDevice_at90s8515:public AvrDevice {
-	public:
-		~AvrDevice_at90s8515();
-		HWPort *porta;
-		HWPort *portb;
-		HWPort *portc;
-		HWPort *portd;
-		HWPort *portx; //only used for oc1b (Timer1)
-		HWSpi *spi;
-		HWUart *uart;
-		HWAcomp *acomp;
-		HWPrescaler *prescaler;
-		HWTimer0 *timer0;
-		HWTimer1 *timer1;
-		HWMcucr *mcucr;
-		HWExtIrq *extirq;
-		HWTimer01Irq *timer01irq;
-		AvrDevice_at90s8515();
-		unsigned char GetRampz();
-		void SetRampz(unsigned char);
+ private:
+    HWPort *portx; //only used for oc1b (Timer1)
+ public:
+    ~AvrDevice_at90s8515();
+    HWPort *porta;
+    HWPort *portb;
+    HWPort *portc;
+    HWPort *portd;
+    HWSpi *spi;
+    HWUart *uart;
+    HWAcomp *acomp;
+    HWPrescaler *prescaler;
+    HWTimer0 *timer0;
+    HWTimer1 *timer1;
+    HWMcucr *mcucr;
+    HWExtIrq *extirq;
+    HWTimer01Irq *timer01irq;
+    AvrDevice_at90s8515();
+    unsigned char GetRampz();
+    void SetRampz(unsigned char);
 };
 #endif
 

@@ -41,36 +41,37 @@ class HWSpi;
 
 
 class AvrDevice_atmega128:public AvrDevice {
-	protected:
-		Pin	aref;
-		HWPort *porta;
-		HWPort *portb;
-		HWPort *portc;
-		HWPort *portd;
-		HWPort *porte;
-		HWPort *portf;
-		HWPort *portg;
-		HWPort *portx;
-		HWRampz *rampz;
-		HWMegaExtIrq *extirq;
+ private:
+    HWPort *portx;
+ public:
+    Pin	aref;
+    HWPort *porta;
+    HWPort *portb;
+    HWPort *portc;
+    HWPort *portd;
+    HWPort *porte;
+    HWPort *portf;
+    HWPort *portg;
+    HWRampz *rampz;
+    HWMegaExtIrq *extirq;
 
-		HWAdmux *admux;
-		HWAd *ad;
+    HWAdmux *admux;
+    HWAd *ad;
 
-		HWPrescaler *prescaler0;
-		HWPrescaler *prescaler123;
-		HWMegaTimer0 *timer0;
-		HWMegaTimer1 *timer1;
-		HWMegaTimer1 *timer3;
-		HWMegaTimer2 *timer2;
-		HWMegaTimer0123Irq *timer0123irq;
-		HWSpi *spi;
-		HWUsart *usart0;
-		HWUsart *usart1;
-	public:
-		AvrDevice_atmega128();
-		~AvrDevice_atmega128(); 
-		unsigned char GetRampz();
-		void SetRampz(unsigned char);
+    HWPrescaler *prescaler0;
+    HWPrescaler *prescaler123;
+    HWMegaTimer0 *timer0;
+    HWMegaTimer1 *timer1;
+    HWMegaTimer1 *timer3;
+    HWMegaTimer2 *timer2;
+    HWMegaTimer0123Irq *timer0123irq;
+    HWSpi *spi;
+    HWUsart *usart0;
+    HWUsart *usart1;
+
+    AvrDevice_atmega128();
+    ~AvrDevice_atmega128(); 
+    unsigned char GetRampz();
+    void SetRampz(unsigned char);
 };
 #endif
