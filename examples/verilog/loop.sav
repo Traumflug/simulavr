@@ -1,0 +1,9 @@
+[size] 1672 994
+[pos] -1 -1
+*-13.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] test.
+[treeopen] test.avr.
+@28
+test.clock.clk
+@22
+test.avr.PB[7:0]

@@ -1,0 +1,18 @@
+[size] 1000 600
+[pos] -1 -1
+*-24.000000 362 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] test.
+[treeopen] test.lavr.
+[treeopen] test.ravr.
+@28
+test.lclock.clk
+test.rclock.clk
+test.lrconn
+@22
+test.lavr.core.PCb[16:0]
+test.ravr.core.PCb[16:0]
+@28
+test.lavr.pb3.output_active
+test.ravr.pb2.output_active
+@22
+test.simsend[7:0]
