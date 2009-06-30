@@ -47,7 +47,11 @@ class AVR_$(part) : public AvrDevice {
     HWTimer1 *timer1;
 #endif
 #if $has_spi
-    HWMegaSpi *spi;
+    HWSpi *spi;
+#endif
+#if $has_usart
+    ## FIXME: USART!=UART!
+    HWUart *usart;
 #endif    
 };
 \#endif

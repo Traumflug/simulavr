@@ -25,6 +25,7 @@ from irq import IRQTable
 from timer import Timer
 from pins import Pins
 from spi import SPI
+from usart import USART
 
 converters=[
     Core(),
@@ -32,7 +33,8 @@ converters=[
     Ports(),
     Timer(),
     Pins(),
-    SPI()
+    SPI(),
+    USART()
     ]
 
 

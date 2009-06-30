@@ -1,4 +1,4 @@
- /*
+/*
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -36,6 +36,7 @@
 \#include "hwtimer01irq.h"
 \#include "hwspi.h"
 \#include "ioregs.h"
+\#include "hwuart.h"
 
 AVR_REGISTER($(part), AVR_$(part));
 
@@ -76,7 +77,8 @@ AVR_$part::AVR_$(part)() : AvrDevice($io_size,
 #include "timer_tmpl.cpp"
 
 #include "spi_tmpl.cpp"
-    
+
+#include "usart_tmpl.cpp"    
     Reset();
 }
 
