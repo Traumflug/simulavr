@@ -56,7 +56,8 @@ from os import listdir
     
 
 for fn in ["ATtiny15.xml",
-            "ATtiny2313.xml"
+           "ATtiny2313.xml",
+           "ATmega8.xml"
            ]:
     print "Parsing %s" % fn
     p=parse("atmel-xml/%s" % fn)

@@ -27,8 +27,8 @@ endif
 
 noinst_LTLIBRARIES=libsim.la
 
-FAB_CPP=avr_ATtiny2313.cpp avr_ATtiny15.cpp
-FAB_HEADER=avr_ATtiny2313.h avr_ATtiny15.h
+FAB_CPP=avr_ATtiny2313.cpp avr_ATtiny15.cpp avr_ATmega8.cpp
+FAB_HEADER=avr_ATtiny2313.h avr_ATtiny15.h avr_ATmega8.h
 
 libsim_la_SOURCES = \
   adcpin.cpp application.cpp at4433.cpp at8515.cpp atmega48.cpp atmega128.cpp \
