@@ -125,18 +125,16 @@ class RWReserved: public RWMemoryMembers {
 #endif
 };
 
-
-
 class MemoryOffsets {
-    protected:
-        unsigned int myOffset;
-        RWMemoryMembers **rwHandler;
-
-    public:
-        MemoryOffsets(unsigned int offset, RWMemoryMembers **rw):rwHandler(rw){
-            myOffset=offset;
-        }
-
+ private:
+    unsigned int myOffset;
+ protected:
+    RWMemoryMembers **rwHandler;
+ public:
+    MemoryOffsets(unsigned int offset, RWMemoryMembers **rw):rwHandler(rw){
+	myOffset=offset;
+    }
+    unsigned getOffset() const { return myOffset; }
 #ifndef SWIG
         RWMemoryMembers &operator[](unsigned int externOffset) const;
 #endif
