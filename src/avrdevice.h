@@ -108,7 +108,7 @@ class AvrDevice: public SimulationMember {
 
         AvrDevice(unsigned int ioSpaceSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int flashSize);
 	/*! Steps the AVR core.
-	  \param untilCoreStepFinished if true, steps a core step and not a
+	  \param untilCoreStepFinished iff true, steps a core step and not a
 	  single clock cycle. */
         int Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_ns =0);
         void Reset();

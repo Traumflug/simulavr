@@ -72,6 +72,7 @@ by the Free Software Foundation.
 * Tracing::
 * Graphic User Interface::
 * Building and Installing SimulAVR::
+* The VPI interface to Verilog::
 * Examples::
 * Platform Related Notes::
 * Limitations::
@@ -583,7 +584,7 @@ simulation GUI.
 If there is anyone looking for a task to create an all-purpose GUI feel
 free to start.
 
-@node Building and Installing SimulAVR, Examples, Graphic User Interface, Top
+@node Building and Installing SimulAVR, The VPI interface to Verilog, Graphic User Interface, Top
 @chapter Building and Installing SimulAVR
 @cindex Installing, Building SimulAVR
 
@@ -665,8 +666,95 @@ not building in maintainer mode, the file @c{src/keytrans.h} will
 not be built or dependencies checked.
 @end table
 
+@node The VPI interface to Verilog, Examples, Building and Installing SimulAVR, Top
+@chapter The VPI interface to Verilog
+@cindex The VPI interface to Verilog
 
-@node Examples, Platform Related Notes, Building and Installing SimulAVR, Top
+Verilog, as a language designed for @strong{veri}fying @strong{log}ic 
+allows to describe a hardware setup in a very general way. Simulators,
+such as Icarus Verilog can then be used to simulate this hardware
+setup. Tools such as @file{gtkwave} can be used to verify the
+output of a circuit by looking at the waveforms the simulation
+generates.
+
+Simulavr comes with an interface to (Icarus) Verilog. If the
+@command{configure} script finds the necessary header file for the
+interface, the so called VPI (Verilog Procedural Interface) to Icarus
+Verilog will be build. The result of this is a file called
+@file{avr.vpi}. This file, in essence a shared library, can then be
+used as an externally loaded module after compilation:
+@example
+$ iverilog [...]          # compile verilog .v into .vvp
+
+$ vvp -M<path-to-avr.vpi> -mavr [...] # run compiled verilog 
+                                      # with additional
+                                      # avr.vpi module
+@end example
+
+
+In principle, it would also be possible to implement the AVR
+completely in verilog (and there are several existing models, see e.g.
+opencores.org), but this would result in decreased performance
+and duplicated effort, as not only the core needs to be implemented,
+but also the complex on-board periphery.
+
+@section Usage
+The Verilog interface comes with glue code on the verilog side, for
+which the main file is @file{avr.v} in @file{src/verilog}. This is a
+thin wrapper in Verilog around the exported methods from the core of
+Simulavr, consisting of the @code{AVRCORE} module encapsulating one
+AVR core and @code{avr_pin} for I/O through any AVR pin. On top of
+this, files named @file{avr_*.v} exist in the same directory which
+contain verilog modules reflecting particular AVR models from
+Simulavr. The modules in these files are meant to be the interface to
+be used to connect to simulavr by the user, they have a very simple signature:
+@example
+
+module AVRxyz(CLK, port1, port2, ...);
+
+@end example
+where @code{port1}, @code{port2}, ... are simple arrays of
+@code{inout} wires representing the various ports of the selected
+AVR. Note that the width of the arrays as visible from the Verilog 
+side is always eight; this does not mean that all bits are connected
+on the simulavr side!
+
+Clock generation and distribution to the AVR cores is done from the
+verilog side. Simply connect a clock source with the preferred
+frequency to the CLK input of the AVR code.
+
+The more complete, low level interface to simulavr in @file{avr.vpi}
+can be accessed directly. For documentation of the available
+functions, see either @file{src/vpi.cpp} or look into the
+implementation of the high level modules in @file{avr_*.v}.
+
+@section Example @file{iverilog} command line
+A simple run with the @file{avr.vpi} interface could look like this:
+@example
+$ iverilog -s test -v -I. $(AVRS)/avr.v $(AVRS)/avr_ATtiny15.v \
+  $(AVRS)/avr_ATtiny2313.v -o test.vvp
+@end example
+Here for a model having both an ATtiny15 and an ATtiny2313 in the
+simulation, and the top module @code{test} and the environment
+variable @var{$AVRS} pointing to the right directory.
+
+A set of a few simple examples has been put into the
+@file{verilog/examples} subdirectory of the Simulavr source
+distribution. This directory also contains a @file{Makefile} which can
+be used as an example of command sequences for compiling
+verilog, running it and producing @file{.vcd} output files to be
+viewed with @file{gtkwave}.
+
+@section Bugs and particularities 
+@itemize @bullet
+@item No problems have been found when instantiating multiple AVR instances
+inside verilog.
+@item Analog pins have not been tested and will probably need some changes
+in the verilog-side wrapper code.
+@end itemize
+
+
+@node Examples, Platform Related Notes, The VPI interface to Verilog, Top
 @chapter Examples
 @cindex Examples
 

@@ -20,6 +20,12 @@ AC_WAR_PYTHON
 ## Check about the AVR cross compilation environment
 AX_AVR_ENVIRONMENT
 
+AC_CHECK_HEADER([vpi_user.h],
+	        [AC_DEFINE(HAVE_VERILOG, [1], Icarus verilog interface)
+		 WE_HAVE_VERILOG="yes"],	
+                [])
+AM_CONDITIONAL([USE_VERILOG], [test "$WE_HAVE_VERILOG"])
+
 ## Examples compile to avr code.  Do not build them if avr tools not installed
 ## NOTE: Cheap check -- only seeing if avr-gcc was found
 if test X"${AVR_GCC}" = X"" ; then

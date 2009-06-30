@@ -18,11 +18,17 @@ endif
 bin_PROGRAMS    = simulavr
 @MAINT@ noinst_PROGRAMS = kbdgentables
 
+lib_LTLIBRARIES = 
+
 if USE_TCL
 TCL_WRAP_SRC = simulavr_wrap.cxx
 TCL_LIB      = @AVR_TCL_LIB@
 TCL_INCLUDE  = @AVR_TCL_INCLUDE@
-lib_LTLIBRARIES	= libsimulavr.la
+lib_LTLIBRARIES	+= libsimulavr.la
+endif
+
+if USE_VERILOG
+lib_LTLIBRARIES	+= libavrvpi.la
 endif
 
 noinst_LTLIBRARIES=libsim.la
@@ -73,6 +79,21 @@ TCLHEADER = avrdevice.h at8515.h atmega128.h at4433.h gdb.h hardware.h \
     keyboard.h lcd.h net.h pin.h keyboard.h rwmem.h scope.h serialrx.h \
     serialtx.h systemclock.h systemclocktypes.h trace.h ui.h
 
+if USE_VERILOG
+libavrvpi_la_SOURCES =	   \
+	$(libsim_la_SOURCES) \
+	vpi.cpp
+
+libavrvpi_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
+libavrvpi_la_LIBADD=			\
+	-L$(AVR_LIBIBERTY_INC)/../lib -lbfd $(AVR_LIBIBERTY_LIB) -lz	
+
+all-local:	avr.vpi
+
+avr.vpi:	libavrvpi.la
+	cp .libs/libavrvpi.so avr.vpi
+endif
+
 simulavr_wrap.cxx: simulavr.i $(TCLHEADER)
 	@SWIG@ -o $@ $(srcdir)/simulavr.i
 
@@ -106,7 +127,7 @@ EXTRA_DIST = simulavr.i pysimulavr.i vpi.cpp
 MAINTAINERCLEANFILES = keytrans.h
 
 CLEANFILES = simulavr_wrap.cxx \
-   _pysimulavr.so pysimulavr.py pysimulavr_wrap.cpp
+   _pysimulavr.so pysimulavr.py pysimulavr_wrap.cpp avr.vpi
 
 $(FAB_CPP) $(FAB_HEADER): fab/* fab/atmel-xml/*
 	cd fab ; ./avr-fab.py	

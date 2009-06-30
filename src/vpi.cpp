@@ -26,6 +26,9 @@
 #include  <vpi_user.h>
 #include "avrdevice.h"
 #include "avrfactory.h"
+#include "rwmem.h"
+#include "trace.h"
+
 
 static std::vector<AvrDevice*> devices;
 
@@ -44,43 +47,100 @@ static bool checkHandle(int h) {
     return true;
 }
 
+#define VPI_UNPACKS(name)					\
+    {								\
+	vpiHandle name	= vpi_scan(argv);			\
+	if (! name) {						\
+	    vpi_printf("%s: " #name " parameter missing.\n", xx);\
+	    vpi_free_object(argv);				\
+	    return 0;						\
+	}							\
+	value.format = vpiStringVal;				\
+	vpi_get_value(name, &value);				\
+    }								\
+    std::string name = value.value.str;
+
+#define VPI_UNPACKI(name)					\
+    {								\
+	vpiHandle name	= vpi_scan(argv);			\
+	if (! name) {						\
+	    vpi_printf("%s: " #name " parameter missing.\n", xx);\
+	    vpi_free_object(argv);				\
+	    return 0;						\
+	}							\
+	value.format = vpiIntVal;				\
+	vpi_get_value(name, &value);				\
+    }								\
+    int name = value.value.integer;
+
+#define VPI_RETURN_INT(val) 					\
+    value.format = vpiIntVal;					\
+    value.value.integer = (val);				\
+    vpi_put_value(ch, &value, 0, vpiNoDelay);			\
+    return 0;
+
+#define AVR_HCHECK()						\
+    if (!checkHandle(handle)) {					\
+	vpi_printf("%s: Invalid handle parameter.\n", xx);	\
+	return 0;						\
+    }
+
+#define VPI_BEGIN()						\
+    s_vpi_value value;						\
+    vpiHandle ch	= vpi_handle(vpiSysTfCall, 0);		\
+    vpiHandle argv	= vpi_iterate(vpiArgument, ch);
+
+#define VPI_END()						\
+    vpi_free_object(argv);
+
+#define VPI_REGISTER_TASK(name)					\
+    {								\
+	s_vpi_systf_data tf_data;				\
+	tf_data.type      = vpiSysTask;				\
+	tf_data.tfname    = "$" #name;				\
+	tf_data.calltf    = name ## _tf;			\
+	tf_data.compiletf = 0;					\
+	tf_data.sizetf    = 0;					\
+	tf_data.user_data = "$" #name;				\
+	vpi_register_systf(&tf_data);				\
+    }
+
+#define VPI_REGISTER_FUNC(name)					\
+    {								\
+	s_vpi_systf_data tf_data;				\
+	tf_data.type      = vpiSysFunc;				\
+	tf_data.tfname    = "$" #name;				\
+	tf_data.calltf    = name ## _tf;			\
+	tf_data.compiletf = 0;					\
+	tf_data.sizetf    = 0;					\
+	tf_data.user_data = "$" #name;				\
+	vpi_register_systf(&tf_data);				\
+    }
+
 /*!
   This function creates a new AVR core and `returns' a handle to it
   Usage from Verilog:
 
-  $avr_create(handle, device, progname)
+  $avr_create(device, progname) -> handle
 
   where
   handle is an integer handle by which the avr can be accessed in all other
   calls here
-  devic is the name of the AVR device to create
+  device is the name of the AVR device to create
   progname is the path to the flash program elf binary
 */
 static PLI_INT32 avr_create_tf(char *xx) {
-    s_vpi_value value;
-    vpiHandle ch = vpi_handle(vpiSysTfCall, 0);
-    vpiHandle argv = vpi_iterate(vpiArgument, ch);
-    vpiHandle handle=vpi_scan(argv);
-    vpiHandle _device=vpi_scan(argv);
-    vpiHandle _progname=vpi_scan(argv);
-
-    value.format = vpiStringVal;
-    vpi_get_value(_device, &value);
-    std::string device=value.value.str;
-
-    value.format = vpiStringVal;
-    vpi_get_value(_progname, &value);
-    std::string progname=value.value.str;
-
-    // FIXME: Better error handling than exit(...) here. Exceptions!
+    VPI_BEGIN();
+    VPI_UNPACKS(device);
+    VPI_UNPACKS(progname);
+    VPI_END();
+    
     AvrDevice* dev=AvrFactory::instance().makeDevice(device.c_str());
     devices.push_back(dev);
     
     dev->Load(progname.c_str());
-    
-    value.format = vpiIntVal;
-    value.value.integer = devices.size()-1;
-    vpi_put_value(handle, &value, 0, vpiNoDelay);
+
+    VPI_RETURN_INT(devices.size()-1);
 }
 
 /*!
@@ -90,17 +150,12 @@ static PLI_INT32 avr_create_tf(char *xx) {
   $avr_reset(handle)
 */
 static PLI_INT32 avr_reset_tf(char *xx) {
-    s_vpi_value value;
-    vpiHandle ch = vpi_handle(vpiSysTfCall, 0);
-    vpiHandle argv = vpi_iterate(vpiArgument, ch);
-    vpiHandle handle=vpi_scan(argv);
+    VPI_BEGIN();
+    VPI_UNPACKI(handle);
+    VPI_END();
     
-    value.format = vpiIntVal;
-    vpi_get_value(handle, &value);
-    int h = value.value.integer;
-    if (!checkHandle(h)) return 0;
-    
-    devices[h]->Reset();
+    AVR_HCHECK();
+    devices[handle]->Reset();
     return 0;
 }
 
@@ -111,20 +166,16 @@ static PLI_INT32 avr_reset_tf(char *xx) {
   $avr_destroy(handle)
 */
 static PLI_INT32 avr_destroy_tf(char *xx) {
-    s_vpi_value value;
-    vpiHandle ch = vpi_handle(vpiSysTfCall, 0);
-    vpiHandle argv = vpi_iterate(vpiArgument, ch);
-    vpiHandle handle=vpi_scan(argv);
+    VPI_BEGIN();
+    VPI_UNPACKI(handle);
+    VPI_END();
     
-    value.format = vpiIntVal;
-    vpi_get_value(handle, &value);
-    int h = value.value.integer;
-    if (!checkHandle(h)) return 0;
-    
-    /* We leak a bit of memory for the pointer in the vector,
+    AVR_HCHECK();
+
+    /* We may leak a bity of memory for the pointer in the vector,
        but... what the hell! */
-    delete devices[h];
-    devices[h]=0;
+    delete devices[handle];
+    devices[handle]=0;
     return 0;
 }
 
@@ -135,53 +186,34 @@ static PLI_INT32 avr_destroy_tf(char *xx) {
   $avr_tick(handle)
 */
 static PLI_INT32 avr_tick_tf(char *xx) {
-    s_vpi_value value;
-    vpiHandle ch = vpi_handle(vpiSysTfCall, 0);
-    vpiHandle argv = vpi_iterate(vpiArgument, ch);
-    vpiHandle handle=vpi_scan(argv);
+    VPI_BEGIN();
+    VPI_UNPACKI(handle);
+    VPI_END();
+
+    AVR_HCHECK();
     
-    value.format = vpiIntVal;
-    vpi_get_value(handle, &value);
-    int h = value.value.integer;
-    if (!checkHandle(h)) return 0;
-    
-    /* Lets do a HARDWARE step in the AVR core.
-       uC stepping in opcode units does not seem to make any sense from this
-       HDL view. But it looks like avrdevice does have no interest in this
-       value at all? */
     bool no_hw=false;
-    devices[h]->Step(no_hw); 
+    devices[handle]->Step(no_hw); 
     return 0;
 }
 
 /*!
   This function reads an AVR pin value.
   Usage from verilog:
-  $avr_pin_get(handle, name, value)
+  $avr_pin_get(handle, name) -> value
 */
 static PLI_INT32 avr_get_pin_tf(char *xx) {
-    s_vpi_value value;
-    vpiHandle ch = vpi_handle(vpiSysTfCall, 0);
-    vpiHandle argv = vpi_iterate(vpiArgument, ch);
-    vpiHandle handle=vpi_scan(argv);
-    vpiHandle _name=vpi_scan(argv);
-    vpiHandle _value=vpi_scan(argv);
-    value.format = vpiIntVal;
-    vpi_get_value(handle, &value);
-    int h = value.value.integer;
-    if (!checkHandle(h)) return 0;
+    VPI_BEGIN();
+    VPI_UNPACKI(handle);
+    VPI_UNPACKS(name);
+    VPI_END();
 
-    value.format = vpiStringVal;
-    vpi_get_value(_name, &value);
-    std::string name=value.value.str;
-
-    Pin *pin=devices[h]->GetPin(name.c_str());
+    AVR_HCHECK();
+    
+    Pin *pin=devices[handle]->GetPin(name.c_str());
     int ret(pin->outState);
 
-    value.format = vpiIntVal;
-    value.value.integer = ret;
-    vpi_put_value(_value, &value, 0, vpiNoDelay);
-    return 0;
+    VPI_RETURN_INT(ret);
 }
 
 /*!
@@ -190,96 +222,121 @@ static PLI_INT32 avr_get_pin_tf(char *xx) {
   $avr_pin_set(handle, name, val)
 */
 static PLI_INT32 avr_set_pin_tf(char *xx) {
-    s_vpi_value value;
-    vpiHandle ch = vpi_handle(vpiSysTfCall, 0);
-    vpiHandle argv = vpi_iterate(vpiArgument, ch);
-    vpiHandle handle=vpi_scan(argv);
-    vpiHandle _name=vpi_scan(argv);
-    vpiHandle _value=vpi_scan(argv);
-    value.format = vpiIntVal;
-    vpi_get_value(handle, &value);
-    int h = value.value.integer;
-    if (!checkHandle(h)) return 0;
+    VPI_BEGIN();
+    VPI_UNPACKI(handle);
+    VPI_UNPACKS(name);
+    VPI_UNPACKI(val);
+    VPI_END();
+    
+    AVR_HCHECK();
+    
+    Pin *pin=devices[handle]->GetPin(name.c_str());
 
-    value.format = vpiStringVal;
-    vpi_get_value(_name, &value);
-    std::string name=value.value.str;
-
-    Pin *pin=devices[h]->GetPin(name.c_str());
-
-    value.format = vpiIntVal;
-    vpi_get_value(_value, &value);
-    int val=value.value.integer;
     /* FIXME: Simply exports AVR pin states to verilog. This
-       a breach of abstractions. */
+       may be considered a breach of abstractions.
+       */
     pin->SetInState(Pin::T_Pinstate(val));
     return 0;
 }
 
+/*!
+  This function reads the value of the program counter
+  in the AVR.
+  Usage from verilog:
+  $avr_get_pc(handle) -> pc_value
+*/
+static PLI_INT32 avr_get_pc_tf(char *xx) {
+    VPI_BEGIN();
+    VPI_UNPACKI(handle);
+    VPI_END();
+
+    AVR_HCHECK();
+
+    VPI_RETURN_INT(devices[handle]->PC);
+}
+
+/*!
+  This function reads the value of a RAM-readable
+  location in the AVR (0..31 are the regs, followed by the IO-space etc).
+  Usage from verilog:
+  $avr_get_rw(handle, adr) -> val
+  where
+  adr is the adress to read
+  and val is the returned value at that address
+*/
+static PLI_INT32 avr_get_rw_tf(char *xx) {
+    VPI_BEGIN();
+    VPI_UNPACKI(handle);
+    VPI_UNPACKI(address);
+    VPI_END();
+
+    AVR_HCHECK();
+
+    VPI_RETURN_INT(*(devices[handle]->rw[address]));
+}
+
+/*!
+  Counterpart to avr_get_rw_tf. It sets the value of a RAM-readable
+  location in the AVR (0..31 are the regs, followed by the IO-space etc).
+  Usage from verilog:
+  $avr_set_rw(handle, adr, val)
+  where
+  adr is the adress to read
+  and val is the value to set at that address
+*/
+static PLI_INT32 avr_set_rw_tf(char *xx) {
+    VPI_BEGIN();
+    VPI_UNPACKI(handle);
+    VPI_UNPACKI(address);
+    VPI_UNPACKI(val);
+    VPI_END();
+
+    AVR_HCHECK();
+
+    *(devices[handle]->rw[address])=val;
+    return 0;
+}
+
+/*!
+  Enable or disable tracing for all AVR core.
+  TODO: Implement tracing per core?
+  
+  Usage from Verilog:
+
+  $avr_trace(tracename)
+
+  where
+  tracename is the output file name for tracing. If it is the empty string,
+  tracing will be disabled again and the file will be closed.
+*/
+
+static PLI_INT32 avr_trace_tf(char *xx) {
+    VPI_BEGIN();
+    VPI_UNPACKS(tracename);
+    VPI_END();
+    
+    if (tracename.length()) {
+	traceOut.open(tracename.c_str());
+	for (size_t i=0; i < devices.size(); i++)
+	    devices[i]->trace_on=1;
+    } else {
+	traceOut.close();
+	for (size_t i=0; i < devices.size(); i++)
+	    devices[i]->trace_on=0;
+    }
+}
+
 static void register_tasks() {
-    {
-	s_vpi_systf_data tf_data;
-      
-	tf_data.type      = vpiSysTask;
-	tf_data.tfname    = "$avr_create";
-	tf_data.calltf    = avr_create_tf;
-	tf_data.compiletf = 0;
-	tf_data.sizetf    = 0;
-	vpi_register_systf(&tf_data);
-    }
-    {
-	s_vpi_systf_data tf_data;
-      
-	tf_data.type      = vpiSysTask;
-	tf_data.tfname    = "$avr_reset";
-	tf_data.calltf    = avr_reset_tf;
-	tf_data.compiletf = 0;
-	tf_data.sizetf    = 0;
-	vpi_register_systf(&tf_data);
-    }
-    {
-	s_vpi_systf_data tf_data;
-      
-	tf_data.type      = vpiSysTask;
-	tf_data.tfname    = "$avr_destroy";
-	tf_data.calltf    = avr_destroy_tf;
-	tf_data.compiletf = 0;
-	tf_data.sizetf    = 0;
-	vpi_register_systf(&tf_data);
-    }
-
-    {
-	s_vpi_systf_data tf_data;
-      
-	tf_data.type      = vpiSysTask;
-	tf_data.tfname    = "$avr_tick";
-	tf_data.calltf    = avr_tick_tf;
-	tf_data.compiletf = 0;
-	tf_data.sizetf    = 0;
-	vpi_register_systf(&tf_data);
-    }
-
-    {
-	s_vpi_systf_data tf_data;
-      
-	tf_data.type      = vpiSysTask;
-	tf_data.tfname    = "$avr_get_pin";
-	tf_data.calltf    = avr_get_pin_tf;
-	tf_data.compiletf = 0;
-	tf_data.sizetf    = 0;
-	vpi_register_systf(&tf_data);
-    }
-
-    {
-	s_vpi_systf_data tf_data;
-      
-	tf_data.type      = vpiSysTask;
-	tf_data.tfname    = "$avr_set_pin";
-	tf_data.calltf    = avr_set_pin_tf;
-	tf_data.compiletf = 0;
-	tf_data.sizetf    = 0;
-	vpi_register_systf(&tf_data);
-    }
+    VPI_REGISTER_FUNC(avr_create);
+    VPI_REGISTER_TASK(avr_reset);
+    VPI_REGISTER_TASK(avr_destroy);
+    VPI_REGISTER_TASK(avr_tick);
+    VPI_REGISTER_FUNC(avr_get_pin);
+    VPI_REGISTER_TASK(avr_set_pin);
+    VPI_REGISTER_FUNC(avr_get_pc);
+    VPI_REGISTER_FUNC(avr_get_rw);
+    VPI_REGISTER_TASK(avr_set_rw);
+    VPI_REGISTER_TASK(avr_trace);
 }
 
 /* This is a table of register functions. This table is the external symbol
