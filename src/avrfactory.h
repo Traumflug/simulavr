@@ -31,6 +31,11 @@
 
 class AvrDevice;
 
+//! Produces AVR devices
+/*! Factory for producing AVR devices according to a configuration string.
+  This decouples the instantiation of concrete AVR devices from the code
+  using them. It is helpful to remove all direct references to particular
+  AVR devices in the code which uses them, such as in main.cpp. */
 class AvrFactory {
  public:
     typedef AvrDevice*(*AvrDeviceCreator)();
@@ -43,6 +48,8 @@ class AvrFactory {
 
     //! Singleton class access. 
     static AvrFactory& instance();
+    /*! Gives a list of all supported devices, which can be supplied
+      to makeDevice() as is. */
     static std::string supportedDevices();
 
     //! Register a creation static method with the factory
@@ -52,6 +59,8 @@ class AvrFactory {
     AvrFactory();
 };
 
+/*! Macro to be used to register an AVR device with the AvrFactory.
+  For a usage example, see atmega128.cpp. */
 #define AVR_REGISTER(name, class) 		\
     struct AVRFactoryEntryMaker_ ## name {	\
 	public:					\

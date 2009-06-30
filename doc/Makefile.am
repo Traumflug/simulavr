@@ -11,3 +11,6 @@ TEX_FORMATS = pdf
 endif
 
 all-am: $(TEX_FORMATS) info
+
+doxydoc:	simulavrxx.doxy
+	doxygen simulavrxx.doxy
