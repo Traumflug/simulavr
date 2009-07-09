@@ -43,12 +43,21 @@ fi
 
 if test -z "${bfd_a_location}"; then
   AC_MSG_ERROR([
-    Could not locate libbfd.so or bfd.h.
+    Could not locate libbfd.so/libbfd.a and/or bfd.h.
     Please use the --with-bfd=<path to your libbfd library>
  ])
 fi
 
+<<<<<<< HEAD:m4/AX_AVR_ENVIRON.m4
 AVR_LIBBFD_LIB=${bfd_a_location}/libbfd.so
+=======
+AVR_LIBBFD_LIBPATH=${bfd_a_location}
+if test -f "${bfd_a_location}/libbfd.so"; then
+  AVR_LIBBFD_LIB=${bfd_a_location}/libbfd.so
+else
+  AVR_LIBBFD_LIB=${bfd_a_location}/libbfd.a
+fi
+>>>>>>> 316d3df... Rewrites a former, but deactivated, patch for using libbfd.so instead of libbfd.a, if found:m4/AX_AVR_ENVIRON.m4
 AVR_LIBBFD_INC=${bfd_h_location}
 
 ######### LIBIBERTY
@@ -61,7 +70,20 @@ else
   AVR_LIBIBERTY_SEARCH_STEP(/usr)
 fi
 
-AVR_LIBIBERTY_LIB=${libiberty_a_location}/libiberty.a
+if test -z "${libiberty_a_location}";
+then
+  AC_MSG_ERROR([
+    Could not locate libiberty.so/libiberty.a
+    Please use the --with-libiberty=<path to your libiberty library>
+ ])
+fi
+
+AVR_LIBIBERTY_LIBPATH=${libiberty_a_location}
+if test -f "${libiberty_a_location}/libiberty.so"; then
+  AVR_LIBIBERTY_LIB=${libiberty_a_location}/libiberty.so
+else
+  AVR_LIBIBERTY_LIB=${libiberty_a_location}/libiberty.a
+fi
 
 ## BEGIN CYGWIN HACKS
 ## It appears that this is not needed on Fedora 10 but is needed on Cygwin
@@ -78,14 +100,6 @@ fi
 ## END OF CYGWIN HACKS
 
 
-if test -z "${libiberty_a_location}";
-then
-  AC_MSG_ERROR([
-    Could not locate libiberty.a
-    Please use the --with-libiberty=<path to your libiberty library>
- ])
-fi
-
 ## Now substitute with all that we found
 AC_SUBST([AVR_AS])
 AC_SUBST([AVR_LD])
@@ -94,6 +108,8 @@ AC_SUBST([AVR_GXX])
 AC_SUBST([AVR_NM])
 AC_SUBST([NATIVE_NM])
 AC_SUBST([AVR_LIBBFD_LIB])
+AC_SUBST([AVR_LIBBFD_LIBPATH])
 AC_SUBST([AVR_LIBBFD_INC])
 AC_SUBST([AVR_LIBIBERTY_LIB])
+AC_SUBST([AVR_LIBIBERTY_LIBPATH])
 ])

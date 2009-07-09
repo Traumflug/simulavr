@@ -24,11 +24,11 @@ if USE_TCL
 TCL_WRAP_SRC = simulavr_wrap.cxx
 TCL_LIB      = @AVR_TCL_LIB@
 TCL_INCLUDE  = @AVR_TCL_INCLUDE@
-lib_LTLIBRARIES	+= libsimulavr.la
+lib_LTLIBRARIES += libsimulavr.la
 endif
 
 if USE_VERILOG
-lib_LTLIBRARIES	+= libavrvpi.la
+lib_LTLIBRARIES += libavrvpi.la
 endif
 
 noinst_LTLIBRARIES=libsim.la
@@ -55,9 +55,9 @@ libsim_la_SOURCES = \
 libsim_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 
 nodist_libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
-
 libsimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz -lbfd $(AVR_LIBIBERTY_LIB)
+libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz \
+  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty
 
 pkginclude_HEADERS = \
   adcpin.h application.h at4433.h at8515.h atmega48.h atmega128.h avrdevice.h \
@@ -74,35 +74,26 @@ pkginclude_HEADERS = \
   spisrc.h spisink.h specialmem.h systemclock.h systemclocktypes.h \
   trace.h traceval.h types.h ui.h xcode_to_keynumber.dat
 
-simulavr_SOURCES = main.cpp $(COMMON_SRC)
+simulavr_SOURCES = main.cpp
+simulavr_LDADD = $(libsim_la_OBJECTS) -lz \
+  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty
 
-simulavr_LDADD = libsimulavr.la -lbfd \
-   -lz $(TCL_LIB) $(AVR_LIBIBERTY_LIB)
+if USE_VERILOG
+libavrvpi_la_SOURCES = vpi.cpp
+libavrvpi_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
+libavrvpi_la_LIBADD= $(libsim_la_OBJECTS) -lz \
+  -L$(AVR_LIBIBERTY_LIBPATH) -liberty -L$(AVR_LIBBFD_LIBPATH) -lbfd
+
+avr.vpi: libavrvpi.la
+	cp .libs/libavrvpi.so avr.vpi
+endif
 
 TCLHEADER = avrdevice.h at8515.h atmega128.h at4433.h gdb.h hardware.h \
     keyboard.h lcd.h net.h pin.h keyboard.h rwmem.h scope.h serialrx.h \
     serialtx.h systemclock.h systemclocktypes.h trace.h ui.h
 
-if USE_VERILOG
-libavrvpi_la_SOURCES =	   \
-	$(libsim_la_SOURCES) \
-	vpi.cpp
-
-libavrvpi_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-libavrvpi_la_LIBADD=			\
-	-L$(AVR_LIBIBERTY_INC)/../lib -lbfd $(AVR_LIBIBERTY_LIB) -lz	
-
-all-local:	avr.vpi
-
-avr.vpi:	libavrvpi.la
-	cp .libs/libavrvpi.so avr.vpi
-endif
-
 simulavr_wrap.cxx: simulavr.i $(TCLHEADER)
 	@SWIG@ -o $@ $(srcdir)/simulavr.i
-
-#simulavr_wrap.o: simulavr_wrap.cxx
-#	$(CXX) -I$(SRCDIR) -I$(TCL_INCLUDE) -c $<
 
 simulavr_wrap.lo: simulavr_wrap.cxx
 	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TCL_INCLUDE) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT $@ -MD -MP -MF .deps/simulavr_wrap.Tpo -c -o $@ $<
@@ -114,19 +105,19 @@ $(srcdir)/keyboard.cpp : $(srcdir)/keytrans.h
 @MAINT@ $(srcdir)/keytrans.h: $(builddir)/kbdgentables \
 @MAINT@     $(srcdir)/keynumber_to_scancode.dat \
 @MAINT@     $(srcdir)/xcode_to_keynumber.dat
-@MAINT@		$(builddir)/kbdgentables $(srcdir)
+@MAINT@	$(builddir)/kbdgentables $(srcdir)
 
 # Python bindings
 _pysimulavr.so: pysimulavr_wrap.cpp simulavr $(libsim_la_OBJECTS) $(libsim_la_DEPENDENCIES)
 	$(CXXLINK) -I$(srcdir) $(PYTHON_CPPFLAGS) -fPIC -shared $< \
-	    $(libsim_la_OBJECTS) $(libsim_la_LIBADD) $(LIBS) \
-	    -lbfd $(LIBIBERTY) -lc -lm -lncurses \
+	    $(libsim_la_OBJECTS) -lc -lm -lncurses \
+	    -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty \
 	    -o $@ $(NonPortableDarwin_GXX_Flags)
 	    
 pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
 	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_CPPFLAGS) -o $@ $?
 
-EXTRA_DIST = simulavr.i pysimulavr.i vpi.cpp
+EXTRA_DIST = simulavr.i pysimulavr.i
 
 MAINTAINERCLEANFILES = keytrans.h
 
@@ -136,4 +127,5 @@ CLEANFILES = simulavr_wrap.cxx \
 $(FAB_CPP) $(FAB_HEADER): fab/* fab/atmel-xml/*
 	cd fab ; ./avr-fab.py	
 
-all-am: $(LIBPYSIMULAVR)
+all-local: $(LIBPYSIMULAVR) avr.vpi
+
