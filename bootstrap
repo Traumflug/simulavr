@@ -100,7 +100,7 @@ case ${mode} in
     test "$verbose" = "-v" && test -n "$files" && echo "$files" ;
     for i in $files; do if test -f $i; then
       rm -f $i config.sub config.guess depcomp install-sh mdate-sh missing \
-	  mkinstalldirs texinfo.tex compile
+        mkinstalldirs texinfo.tex compile ltmain.sh src/config.h.in
       test "$verbose" = "-v" && echo "$i"    
     fi; done
     

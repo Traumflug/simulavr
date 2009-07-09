@@ -15,4 +15,8 @@ stamp-h1
 .libs
 *.la
 simulavr_wrap.cxx
+pysimulavr_wrap.cpp
+_pysimulavr.so
+pysimulavr.py
+pysimulavr.pyc
 

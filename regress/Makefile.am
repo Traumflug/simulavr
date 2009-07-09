@@ -18,7 +18,7 @@ clean-local:
 	rm -f $(srcdir)/test_*/*.py[co]
 
 regression:
-if COND_HAS_PYTHON
+if PYTHON_USE
 	@PYTHON@ ./regress.py 2> regress.err | tee regress.out
 else
 	@echo "  Configure could not find python on your system so regression"

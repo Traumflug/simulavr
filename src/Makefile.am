@@ -9,16 +9,12 @@ PYTHON_CPPFLAGS=@PYTHON_CPPFLAGS@
 
 AM_CXXFLAGS=-I$(AVR_LIBBFD_INC)
 
-if USE_SWIG
-if USE_PYTHON
-LIBPYSIMULAVR=_pysimulavr.so
-endif
-endif
-
 bin_PROGRAMS    = simulavr
 @MAINT@ noinst_PROGRAMS = kbdgentables
 
 lib_LTLIBRARIES = 
+
+if USE_SWIG
 
 if USE_TCL
 TCL_WRAP_SRC = simulavr_wrap.cxx
@@ -27,11 +23,29 @@ TCL_INCLUDE  = @AVR_TCL_INCLUDE@
 lib_LTLIBRARIES += libsimulavr.la
 endif
 
+if PYTHON_USE
+PYTHON_MODUL_LIB=_pysimulavr.so
+lib_LTLIBRARIES += lib_pysimulavr.la
+lib_pysimulavr_la_SOURCES=pysimulavr_wrap.cpp
+lib_pysimulavr_la_CPPFLAGS=$(PYTHON_CPPFLAGS)
+lib_pysimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
+lib_pysimulavr_la_LIBADD= $(libsim_la_OBJECTS) \
+  -L$(AVR_LIBIBERTY_LIBPATH) -liberty -L$(AVR_LIBBFD_LIBPATH) -lbfd
+
+pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
+	$(SWIG) $(SWIG_PYTHON_OPT) -o $@ $?
+
+$(PYTHON_MODUL_LIB): lib_pysimulavr.la
+	cp .libs/lib_pysimulavr.so $(PYTHON_MODUL_LIB)
+endif
+
+endif
+
 if USE_VERILOG
 lib_LTLIBRARIES += libavrvpi.la
 endif
 
-noinst_LTLIBRARIES=libsim.la
+lib_LTLIBRARIES += libsim.la
 
 if USE_FAB
 FAB_CPP=avr_ATtiny2313.cpp avr_ATtiny15.cpp avr_ATmega8.cpp
@@ -79,13 +93,14 @@ simulavr_LDADD = $(libsim_la_OBJECTS) -lz \
   -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty
 
 if USE_VERILOG
+VPI_LIB=avr.vpi
 libavrvpi_la_SOURCES = vpi.cpp
 libavrvpi_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 libavrvpi_la_LIBADD= $(libsim_la_OBJECTS) -lz \
   -L$(AVR_LIBIBERTY_LIBPATH) -liberty -L$(AVR_LIBBFD_LIBPATH) -lbfd
 
-avr.vpi: libavrvpi.la
-	cp .libs/libavrvpi.so avr.vpi
+$(VPI_LIB): libavrvpi.la
+	cp .libs/libavrvpi.so $(VPI_LIB)
 endif
 
 TCLHEADER = avrdevice.h at8515.h atmega128.h at4433.h gdb.h hardware.h \
@@ -107,25 +122,15 @@ $(srcdir)/keyboard.cpp : $(srcdir)/keytrans.h
 @MAINT@     $(srcdir)/xcode_to_keynumber.dat
 @MAINT@	$(builddir)/kbdgentables $(srcdir)
 
-# Python bindings
-_pysimulavr.so: pysimulavr_wrap.cpp simulavr $(libsim_la_OBJECTS) $(libsim_la_DEPENDENCIES)
-	$(CXXLINK) -I$(srcdir) $(PYTHON_CPPFLAGS) -fPIC -shared $< \
-	    $(libsim_la_OBJECTS) -lc -lm -lncurses \
-	    -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty \
-	    -o $@ $(NonPortableDarwin_GXX_Flags)
-	    
-pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
-	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_CPPFLAGS) -o $@ $?
-
 EXTRA_DIST = simulavr.i pysimulavr.i
 
 MAINTAINERCLEANFILES = keytrans.h
 
 CLEANFILES = simulavr_wrap.cxx \
-   _pysimulavr.so pysimulavr.py pysimulavr_wrap.cpp avr.vpi
+   _pysimulavr.so pysimulavr.py avr.vpi
 
 $(FAB_CPP) $(FAB_HEADER): fab/* fab/atmel-xml/*
 	cd fab ; ./avr-fab.py	
 
-all-local: $(LIBPYSIMULAVR) avr.vpi
+all-local: $(VPI_LIB) $(PYTHON_MODUL_LIB)
 
