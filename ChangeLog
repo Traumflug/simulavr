@@ -1,3 +1,10 @@
+2009-07-10	Michael Hennebry <hennebry@cableone.net>
+
+	* src/Makefile.am, src/avrfactory.cpp: Add initial support for atmega88
+	and atmega168.
+	* src/atmega168.h, src/atmega668base.cpp, src/atmega668base.h,
+	src/atmega88.h: New files.
+
 2009-05-27	Onno Kortmann <onno@gmx.net>
 
 	* src/avrdevice.cpp: Remove superfluous logic.
