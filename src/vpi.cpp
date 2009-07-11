@@ -27,6 +27,7 @@
 #include "avrdevice.h"
 #include "avrfactory.h"
 #include "rwmem.h"
+#include "pin.h"
 #include "trace.h"
 
 
@@ -134,6 +135,8 @@ static PLI_INT32 avr_create_tf(char *xx) {
     VPI_UNPACKS(device);
     VPI_UNPACKS(progname);
     VPI_END();
+
+    pin_memleak_verilog_workaround=true;
     
     AvrDevice* dev=AvrFactory::instance().makeDevice(device.c_str());
     devices.push_back(dev);

@@ -34,6 +34,9 @@
 #include <sstream>
 using namespace std;
 
+bool pin_memleak_verilog_workaround=false;
+
+
 // This is the value used to set the analogValue
 // when the pin output is TRISTATE. Originally, the
 // value was simply (INT_MAX/2), but when I was debugging
@@ -95,7 +98,9 @@ void Pin::SetInState ( const Pin &p) {
 
 Pin::Pin(T_Pinstate ps) { 
     pinOfPort=0; 
-    connectedTo=new MirrorNet(this); 
+    connectedTo=new MirrorNet(this);
+    myNet=true;
+    
     outState=ps;
 
     switch (ps) {
@@ -120,16 +125,25 @@ Pin::Pin(T_Pinstate ps) {
 
 Pin::Pin() { 
     pinOfPort=0; 
-    connectedTo= new MirrorNet(this); 
+    connectedTo= new MirrorNet(this);
+    myNet=true;
+    
     outState=TRISTATE;
     analogValue=TRISTATE_ANALOG_VALUE;
     //ui=0;
+}
+
+Pin::~Pin() {
+    if (myNet && pin_memleak_verilog_workaround)
+        delete connectedTo;
 }
 
 Pin::Pin( unsigned char *parentPin, unsigned char _mask) { 
     pinOfPort=parentPin;
     mask=_mask;
     connectedTo=new MirrorNet(this);
+    myNet=true;
+    
     outState=TRISTATE;
     analogValue=INT_MAX;
 }
@@ -146,6 +160,7 @@ void Pin::RegisterNet(Net *n) {
     }
 
     connectedTo=n;
+    myNet=false;
 }
 
 Pin::operator char() const { 

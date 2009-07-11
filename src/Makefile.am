@@ -120,7 +120,7 @@ _pysimulavr.so: pysimulavr_wrap.cpp simulavr $(libsim_la_OBJECTS) $(libsim_la_DE
 	    $(libsim_la_OBJECTS) $(libsim_la_LIBADD) $(LIBS) \
 	    -lbfd $(LIBIBERTY) -lc -lm -lncurses \
 	    -o $@ $(NonPortableDarwin_GXX_Flags)
-
+	    
 pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
 	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_CPPFLAGS) -o $@ $?
 
