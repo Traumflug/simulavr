@@ -1,0 +1,15 @@
+[size] 1000 600
+[pos] -1 -1
+*-15.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] test.
+[treeopen] test.sl.
+@28
+test.CLK
+test.MISO
+test.MOSI
+test.SCK
+test.nCS
+@22
+test.sl.adr[15:0]
+test.sl.inbyte[7:0]
+test.sl.outbyte[7:0]
