@@ -1,4 +1,8 @@
-AVR_PROGRAMS=	toggle.elf loop.elf left-unit.elf right-unit.elf spi.elf
+AVR_PROGRAMS=	toggle.elf loop.elf \
+		left-unit.elf right-unit.elf \
+		spi.elf \
+		spi-waveforms.elf
+
 AVRS=	../../src/verilog/
 
 all:		$(AVR_PROGRAMS) \
@@ -13,6 +17,11 @@ all:		$(AVR_PROGRAMS) \
 spi.o:		spi.c
 	avr-gcc -mmcu=atmega8 -c -Os $^ -o $@
 spi.elf:	spi.o
+	avr-gcc -mmcu=atmega8 $^ -o $@
+
+spi-waveforms.o:		spi-waveforms.c
+	avr-gcc -mmcu=atmega8 -c -Os $^ -o $@
+spi-waveforms.elf:	spi-waveforms.o
 	avr-gcc -mmcu=atmega8 $^ -o $@
 
 %.o:	%.s
