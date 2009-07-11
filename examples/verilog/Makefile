@@ -30,7 +30,7 @@ right-unit.elf:	right-unit.o singlepincomm.o
 %.vvp:		%.v
 	iverilog $^ -s test -v -I. $(AVRS)/avr.v $(AVRS)/avr_ATtiny15.v $(AVRS)/avr_ATtiny2313.v $(AVRS)/avr_ATmega8.v -o $@ 
 
-%.run:		%.vvp
+%.run:		%.vvp $(AVR_PROGRAMS)
 	vvp -M../../src -mavr $^
 
 %.view:		%.vcd %.sav
