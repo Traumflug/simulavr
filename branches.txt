@@ -1,0 +1,21 @@
+Branch names in git
+-----------------------------------------------------------------
+This specifies the naming scheme used for the branch names in the
+simulavrxx repository.
+
+master: Development branch containing the most current version of the
+	development version of simulavr.
+
+stable: Branch which may hold any future stable release of simulavr.
+
+towards-stable: Branch which may become stable in the future. Experimental
+		should not go in here.
+
+cvs-upstream: Loosely synchronized copy of the upstream CVS. Will be
+	      synchronized from time to time with git-cvsimport. See the
+	      cvs-git-update.sh script.
+
+test-*: Test branches which may be generated/deleted/rebased at will. Use them
+	only if you know what their purpose is.
+
+<developer>-*: Test branches or random stuff by certain developers.
