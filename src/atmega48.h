@@ -35,6 +35,9 @@
 #include "hwmegax8timer.h"
 #include "hwmegax8timerirq.h"
 
+/*!
+ \todo FIXME: Why are some devices here not a pointer to a constructed
+ device??? This is incosistent! */
 class AvrDevice_atmega48:public AvrDevice {
  public:
     Pin aref;
@@ -45,7 +48,7 @@ class AvrDevice_atmega48:public AvrDevice {
     HWPort portd;
     HWPrescaler prescaler;
     HWMega48ExtIrq* extirq;
-    HWAdmux admux;
+    HWAdmux admux; 
     HWAd* ad;
     HWSpi* spi;
     HWUsart* usart0;

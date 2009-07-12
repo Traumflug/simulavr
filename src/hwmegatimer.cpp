@@ -210,9 +210,14 @@ void HWMegaTimer0::TimerCompareAfterCount() {
 
 }
 
-
-
-HWMegaTimer0::HWMegaTimer0(AvrDevice *_c, HWPrescaler *p, HWMegaTimer0123Irq *s, PinAtPort oc): Hardware(_c), core(_c), pin_oc(oc){
+HWMegaTimer0::HWMegaTimer0(AvrDevice *_c, HWPrescaler *p, HWMegaTimer0123Irq *s, PinAtPort oc):
+    Hardware(_c), core(_c), pin_oc(oc),
+    tccr_reg(core, "TIMER0.TCCR",
+             this, &HWMegaTimer0::GetTccr, &HWMegaTimer0::SetTccr),
+    tcnt_reg(core, "TIMER0.TCNT",
+             this, &HWMegaTimer0::GetTcnt, &HWMegaTimer0::SetTcnt),
+    ocr_reg(core, "TIMER0.OCR",
+            this, &HWMegaTimer0::GetOcr, &HWMegaTimer0::SetOcr) {
 	//_c->AddToCycleList(this);
 	prescaler=p;
 	timer01irq= s;
@@ -499,9 +504,14 @@ void HWMegaTimer2::TimerCompareAfterCount() {
 
 }
 
-
-
-HWMegaTimer2::HWMegaTimer2(AvrDevice *_c, HWPrescaler *p, HWMegaTimer0123Irq *s, PinAtPort pi, PinAtPort oc): Hardware(_c), core(_c), pin_t0(pi), pin_oc(oc){
+HWMegaTimer2::HWMegaTimer2(AvrDevice *_c, HWPrescaler *p, HWMegaTimer0123Irq *s, PinAtPort pi, PinAtPort oc) :
+    Hardware(_c), core(_c), pin_t0(pi), pin_oc(oc),
+    tccr_reg(core, "TIMER2.TCCR",
+             this, &HWMegaTimer2::GetTccr, &HWMegaTimer2::SetTccr),
+    tcnt_reg(core, "TIMER2.TCNT",
+             this, &HWMegaTimer2::GetTcnt, &HWMegaTimer2::SetTcnt),
+    ocr_reg(core, "TIMER2.OCR",
+            this, &HWMegaTimer2::GetOcr, &HWMegaTimer2::SetOcr) {
 	//_c->AddToCycleList(this);
 	prescaler=p;
 	timer01irq= s;
@@ -633,7 +643,33 @@ unsigned int HWMegaTimer2::CpuCycle(){
 
 HWMegaTimer1::HWMegaTimer1
 (AvrDevice *_c, HWPrescaler *p, HWMegaTimer0123Irq *s, bool isT1, PinAtPort t1, PinAtPort oca, PinAtPort ocb, PinAtPort occ) :
-Hardware(_c), core(_c), isTimer1(isT1), pin_t1(t1), pin_oc1a(oca), pin_oc1b(ocb), pin_oc1c(occ) { 
+    Hardware(_c), core(_c), isTimer1(isT1), pin_t1(t1), pin_oc1a(oca), pin_oc1b(ocb), pin_oc1c(occ),
+    tccra_reg(core, "TIMER1.TCCRA",
+              this, &HWMegaTimer1::GetTccr1a, &HWMegaTimer1::SetTccr1a),
+    tccrb_reg(core, "TIMER1.TCCRB",
+              this, &HWMegaTimer1::GetTccr1b, &HWMegaTimer1::SetTccr1b),
+    tccrc_reg(core, "TIMER1.TCCRC",
+              this, &HWMegaTimer1::GetTccr1c, &HWMegaTimer1::SetTccr1c),
+    tcnth_reg(core, "TIMER1.TCNTH",
+              this, &HWMegaTimer1::GetTcnt1h, &HWMegaTimer1::SetTcnt1h),
+    tcntl_reg(core, "TIMER1.TCNTL",
+              this, &HWMegaTimer1::GetTcnt1l, &HWMegaTimer1::SetTcnt1l),
+    ocrah_reg(core, "TIMER1.OCRAH",
+              this, &HWMegaTimer1::GetOcr1ah, &HWMegaTimer1::SetOcr1ah),
+    ocral_reg(core, "TIMER1.OCRAL",
+              this, &HWMegaTimer1::GetOcr1al, &HWMegaTimer1::SetOcr1al),
+    ocrbh_reg(core, "TIMER1.OCRBH",
+              this, &HWMegaTimer1::GetOcr1bh, &HWMegaTimer1::SetOcr1bh),
+    ocrbl_reg(core, "TIMER1.OCRBL",
+              this, &HWMegaTimer1::GetOcr1bl, &HWMegaTimer1::SetOcr1bl),
+    ocrch_reg(core, "TIMER1.OCRCH",
+              this, &HWMegaTimer1::GetOcr1ch, &HWMegaTimer1::SetOcr1ch),
+    ocrcl_reg(core, "TIMER1.OCRCL",
+              this, &HWMegaTimer1::GetOcr1cl, &HWMegaTimer1::SetOcr1cl),
+    icrh_reg(core, "TIMER1.TICRH",
+             this, &HWMegaTimer1::GetIcr1h, &HWMegaTimer1::SetIcrh),
+    icrl_reg(core, "TIMER1.TICRL",
+             this, &HWMegaTimer1::GetIcr1l, &HWMegaTimer1::SetIcrl) { 
 	//_c->AddToCycleList(this);
 	cntDir=1;
 	prescaler=p, 
@@ -1205,58 +1241,3 @@ void HWMegaTimer1::CheckForMode() {
 
 	} //end of switch timerMode
 }
-
-
-unsigned char RWTccraM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TccraM",val);timer1->SetTccr1a(val); return val; }
-unsigned char RWTccrbM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TccrbM",val);timer1->SetTccr1b(val); return val; }
-unsigned char RWTccrcM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TccrcM",val);timer1->SetTccr1c(val); return val; }
-unsigned char RWTcnthM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TcnthM",val);timer1->SetTcnt1h(val); return val; }
-unsigned char RWTcntlM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TcntlM",val);timer1->SetTcnt1l(val); return val; }
-unsigned char RWOcrahM::operator=(unsigned char val) { if (core->trace_on) trioaccess("OcrahM",val);timer1->SetOcr1ah(val); return val; }
-unsigned char RWOcralM::operator=(unsigned char val) { if (core->trace_on) trioaccess("OcralM",val);timer1->SetOcr1al(val); return val; }
-unsigned char RWOcrbhM::operator=(unsigned char val) { if (core->trace_on) trioaccess("OcrbhM",val);timer1->SetOcr1bh(val); return val; }
-unsigned char RWOcrblM::operator=(unsigned char val) { if (core->trace_on) trioaccess("OcrblM",val);timer1->SetOcr1bl(val); return val; }
-unsigned char RWOcrchM::operator=(unsigned char val) { if (core->trace_on) trioaccess("OcrchM",val);timer1->SetOcr1ch(val); return val; }
-unsigned char RWOcrclM::operator=(unsigned char val) { if (core->trace_on) trioaccess("OcrclM",val);timer1->SetOcr1cl(val); return val; }
-unsigned char RWIcrhM::operator=(unsigned char val) { if (core->trace_on) trioaccess("IcrhM",val);timer1->SetIcrh(val);  return val; }
-unsigned char RWIcrlM::operator=(unsigned char val) { if (core->trace_on) trioaccess("IcrlM",val);timer1->SetIcrl(val);  return val; }
-unsigned char RWEtimskM::operator=(unsigned char val) { if (core->trace_on) trioaccess("EtimskM",val);hwTimer01Irq->SetTimsk(val);  return val; }
-unsigned char RWEtifrM::operator=(unsigned char val) { if (core->trace_on) trioaccess("EtifrM",val);hwTimer01Irq->SetTifr(val);  return val; }
-unsigned char RWTimskM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TimskM",val);hwTimer01Irq->SetTimsk(val);  return val; }
-unsigned char RWTifrM::operator=(unsigned char val) { if (core->trace_on) trioaccess("TifrM",val);hwTimer01Irq->SetTifr(val);  return val; }
-unsigned char RWTcnt0::operator=(unsigned char val) { if (core->trace_on) trioaccess("Tcnt0",val);timer0->SetTcnt(val);  return val; }
-unsigned char RWOcr0::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ocr0",val);timer0->SetOcr(val);  return val; }
-unsigned char RWTccr0::operator=(unsigned char val) { if (core->trace_on) trioaccess("Tccr0",val);timer0->SetTccr(val);  return val; }
-unsigned char RWTccr2::operator=(unsigned char val) { if (core->trace_on) trioaccess("Tccr2",val);timer0->SetTccr(val);  return val; }
-unsigned char RWTcnt2::operator=(unsigned char val) { if (core->trace_on) trioaccess("Tcnt2",val);timer0->SetTcnt(val);  return val; }
-unsigned char RWOcr2::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ocr2",val);timer0->SetOcr(val);  return val; }
-
-
-
-RWTccr0::operator unsigned char() const { return timer0->GetTccr();}
-RWTcnt0::operator unsigned char() const { return timer0->GetTcnt();}
-RWOcr0::operator unsigned char() const { return timer0->GetOcr();}
-
-RWTccr2::operator unsigned char() const { return timer0->GetTccr();}
-RWTcnt2::operator unsigned char() const { return timer0->GetTcnt();}
-RWOcr2::operator unsigned char() const { return timer0->GetOcr();}
-
-
-RWTccraM::operator unsigned char() const { return timer1->GetTccr1a();}
-RWTccrbM::operator unsigned char() const { return timer1->GetTccr1b();}
-RWTccrcM::operator unsigned char() const { return timer1->GetTccr1c();}
-RWTcnthM::operator unsigned char() const { return timer1->GetTcnt1h();}
-RWTcntlM::operator unsigned char() const { return timer1->GetTcnt1l();}
-RWOcrahM::operator unsigned char() const { return timer1->GetOcr1ah();}
-RWOcralM::operator unsigned char() const { return timer1->GetOcr1al();}
-RWOcrbhM::operator unsigned char() const { return timer1->GetOcr1bh();}
-RWOcrblM::operator unsigned char() const { return timer1->GetOcr1bl();}
-RWOcrchM::operator unsigned char() const { return timer1->GetOcr1ch();}
-RWOcrclM::operator unsigned char() const { return timer1->GetOcr1cl();}
-RWIcrhM::operator unsigned char() const {  return timer1->GetIcr1h();}
-RWIcrlM::operator unsigned char() const {  return timer1->GetIcr1l();}
-
-RWTimskM::operator unsigned char() const { return hwTimer01Irq->GetTimsk(); }
-RWTifrM::operator unsigned char() const { return hwTimer01Irq->GetTifr(); } 
-RWEtimskM::operator unsigned char() const { return hwTimer01Irq->GetTimsk(); }
-RWEtifrM::operator unsigned char() const { return hwTimer01Irq->GetTifr(); } 

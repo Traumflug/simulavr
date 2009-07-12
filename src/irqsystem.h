@@ -28,7 +28,6 @@
 
 #include <map>
 
-#include "hwsreg.h"
 #include "hardware.h"
 #include "funktor.h"
 #include "printable.h"

@@ -27,9 +27,9 @@
 #define HWACOMP
 
 #include "hardware.h"
-#include "avrdevice.h"
-#include "pinatport.h"
 #include "rwmem.h"
+#include "irqsystem.h"
+#include "pinatport.h"
 #include "pinnotify.h"
 
 class HWAcomp: public Hardware, public HasPinNotifyFunction {
@@ -50,17 +50,8 @@ class HWAcomp: public Hardware, public HasPinNotifyFunction {
         //bool IsIrqFlagSet(unsigned int vec);
         void ClearIrqFlag(unsigned int vec);
         void PinStateHasChanged(Pin *);
+	IOReg<HWAcomp> acsr_reg;
 };
-
-class RWAcsr: public RWMemoryMembers {
-    protected:
-        HWAcomp* acomp;
-    public:
-        RWAcsr(AvrDevice *c, HWAcomp *a):RWMemoryMembers(c), acomp(a) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
 
 #endif
 

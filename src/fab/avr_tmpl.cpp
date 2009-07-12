@@ -37,6 +37,7 @@
 \#include "hwspi.h"
 \#include "ioregs.h"
 \#include "hwuart.h"
+\#include "hwsreg.h"
 
 AVR_REGISTER($(part), AVR_$(part));
 
@@ -53,21 +54,21 @@ AVR_$part::AVR_$(part)() : AvrDevice($io_size,
 #if $iram_size>0
     stack = new HWStack(this, Sram, $stack.ceil);
 #else
-    stack = new HWStack(this, new ThreeLevelStack(), 0x06);
+    stack = new HWStack(this, new ThreeLevelStack(this), 0x06);
 #endif
 
     wado			= new HWWado(this);
-    rw[$io["WDTCR"].addr]	= new RWWdtcr(this, wado);
+    rw[$io["WDTCR"].addr]	= & wado->wdtcr_reg;
     
     prescaler	= new HWPrescaler(this);
     mcucr	= new HWMcucr(this); //FIXME! MCUCR reg!
-    rw[$io["SREG"].addr]	= new RWSreg(this, status);
+    rw[$io["SREG"].addr]= new RWSreg(this, status);
 
 #if "SPL" in $io
-    rw[$io["SPL"].addr]= new RWSpl(this, stack);
+    rw[$io["SPL"].addr]= & stack->spl_reg;
 #endif
 #if "SPH" in $io
-    rw[$io["SPH"].addr]= new RWSph(this, stack);
+    rw[$io["SPH"].addr]= & stack->sph_reg;
 #endif    
     
 

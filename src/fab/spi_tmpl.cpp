@@ -25,8 +25,8 @@
 		  PinAtPort(port$pkg_portlet["'SS"],$pkg_portbit["'SS"]),
 		  $irq_bysrc["SPI, STC"].addr, true);
 
-    rw[$io["SPCR"].addr]=new RWSpcr(this, spi);
-    rw[$io["SPSR"].addr]=new RWSpsr(this, spi);
-    rw[$io["SPDR"].addr]=new RWSpdr(this, spi);
+    rw[$io["SPCR"].addr]=& spi->spcr_reg;
+    rw[$io["SPSR"].addr]=& spi->spsr_reg;
+    rw[$io["SPDR"].addr]=& spi->spdr_reg;
 #endif						
 }

@@ -26,7 +26,10 @@
 #ifndef HWMEGATIMER0123IRQ
 #define HWMEGATIMER0123IRQ
 
+#include "rwmem.h"
 #include "hardware.h"
+
+
 class HWIrqSystem;
 
 class HWMegaTimer0123Irq: public Hardware {
@@ -95,6 +98,12 @@ class HWMegaTimer0123Irq: public Hardware {
         void CheckForNewClearIrq(unsigned char);
         void CheckForNewSetIrqE(unsigned char);
         void CheckForNewClearIrqE(unsigned char);
+
+        IOReg<HWMegaTimer0123Irq>
+            timsk_reg,
+            tifr_reg,
+            etimsk_reg,
+            etifr_reg;
 };
 
 #endif

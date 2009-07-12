@@ -27,7 +27,7 @@
 #define LCD
 
 
-#include <iostream>
+#include <fstream>
 #include <string>
 
 #include "systemclocktypes.h"
@@ -72,7 +72,7 @@ class Lcd : public SimulationMember {
         void LcdWriteData(unsigned char data);
         unsigned int  LcdWriteCommand(unsigned char command);
 
-	std::ofstream debugOut;
+        std::ofstream debugOut;
         void SendCursorPosition();
 
         unsigned char lastPortValue;

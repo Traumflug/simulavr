@@ -27,15 +27,15 @@
 #endif
 ##    
 #if ("PORT"+$Letter) in $io
-    rw[$io["PORT"+$Letter].addr]=new RWPort(this, port$letter);
+    rw[$io["PORT"+$Letter].addr]=& port$letter->port_reg;
 #endif
 ##    
 ## some ports are output only (e.g. mega103/portc)
 ## some other ports are input only (e.g. mega103/portf)
 #if ("PIN"+$Letter) in $io
-    rw[$io["PIN"+$Letter].addr]=new RWPin (this, port$letter);
+    rw[$io["PIN"+$Letter].addr]=& port$letter->pin_reg;
     #if ("PORT"+$Letter) in $io
-    rw[$io["DDR"+$Letter].addr]=new RWDdr (this, port$letter);
+    rw[$io["DDR"+$Letter].addr]=& port$letter->ddr_reg;
     #else
     // ^^ input-only port
     #endif

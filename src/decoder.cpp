@@ -27,7 +27,7 @@
 #include "hwstack.h"
 #include "flash.h"
 #include "hwwado.h"
-
+#include "hwsreg.h"
 
 
 void avr_core_stack_push( AvrDevice *core, int cnt, long val);

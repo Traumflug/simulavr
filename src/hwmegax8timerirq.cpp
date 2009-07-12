@@ -43,9 +43,13 @@ HWMegaX8TimerIrq::HWMegaX8TimerIrq(	AvrDevice*		core,
     timsk(0),
     vectorOvf(ovfVect),
     vectorCompA(compAVect),
-    vectorCompB(compBVect)
-{
-}
+    vectorCompB(compBVect),
+    timsk_reg(core, "TIMER.TIMSK", this,
+              &HWMegaX8TimerIrq::GetTimsk,
+              &HWMegaX8TimerIrq::SetTimsk),
+    tifr_reg(core, "TIMER.TIFR", this,
+             &HWMegaX8TimerIrq::GetTifr,
+             &HWMegaX8TimerIrq::SetTifr) {}
 
 void HWMegaX8TimerIrq::AddFlagToTifr(unsigned char val){
     tifr|=val;

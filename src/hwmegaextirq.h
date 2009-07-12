@@ -72,56 +72,11 @@ class HWMegaExtIrq: public Hardware, public HasPinNotifyFunction {
         void CheckForNewClearIrq(unsigned char);
         void PinStateHasChanged(Pin*);
         void Reset();
+
+        IOReg<HWMegaExtIrq>
+            eimsk_reg,
+            eifr_reg,
+            eicra_reg,
+            eicrb_reg;
 };
-
-
-
-class RWEicra: public RWMemoryMembers {
-    protected:
-        HWMegaExtIrq *megaextirq;
-
-    public:
-        RWEicra(AvrDevice *c, HWMegaExtIrq *_irq): RWMemoryMembers(c), megaextirq(_irq) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-
-
-class RWEicrb: public RWMemoryMembers {
-    protected:
-        HWMegaExtIrq *megaextirq;
-
-    public:
-        RWEicrb(AvrDevice *c, HWMegaExtIrq *_irq): RWMemoryMembers(c), megaextirq(_irq) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-
-
-class RWEimsk: public RWMemoryMembers {
-    protected:
-        HWMegaExtIrq *megaextirq;
-
-    public:
-        RWEimsk(AvrDevice *c, HWMegaExtIrq *_irq): RWMemoryMembers(c), megaextirq(_irq) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-
-
-class RWEifr: public RWMemoryMembers {
-    protected:
-        HWMegaExtIrq *megaextirq;
-
-    public:
-        RWEifr(AvrDevice *c, HWMegaExtIrq *_irq): RWMemoryMembers(c), megaextirq(_irq) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-
-
 #endif

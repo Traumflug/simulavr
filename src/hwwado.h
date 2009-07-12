@@ -48,19 +48,9 @@ class HWWado: public Hardware {
 		unsigned char GetWdtcr() { return wdtcr; }
 		void Wdr(); //reset the wado counter
 		void Reset();
+
+        IOReg<HWWado> wdtcr_reg;
 };
-
-
-
-class RWWdtcr: public RWMemoryMembers {
-    protected:
-        HWWado* wado;
-    public:
-        RWWdtcr(AvrDevice *c, HWWado* w): RWMemoryMembers(c), wado(w) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
 
 
 #endif

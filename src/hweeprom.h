@@ -70,6 +70,11 @@ class HWEeprom: public Hardware, public Memory {
             WRITE_ENABLED
         } T_State;
 
+	IOReg<HWEeprom>
+	    eearh_reg,
+	    eearl_reg,
+	    eedr_reg,
+	    eecr_reg;
 };
 
 class HWIrqSystem;
@@ -86,40 +91,5 @@ class HWMegaEeprom: public HWEeprom {
     virtual unsigned int CpuCycle();
     //bool IsIrqFlagSet(unsigned int vector);
     void ClearIrqFlag(unsigned int vector);
-};
-
-class RWEearh: public RWMemoryMembers {
-    protected:
-        HWEeprom *ee;
-    public:
-        RWEearh(AvrDevice *c, HWEeprom *e): RWMemoryMembers(c), ee(e){};
-        virtual unsigned char operator=(unsigned char) ;
-        virtual operator unsigned char() const;
-};
-
-class RWEearl: public RWMemoryMembers {
-    protected:
-        HWEeprom *ee;
-    public:
-        RWEearl(AvrDevice *c, HWEeprom *e): RWMemoryMembers(c), ee(e){}
-        virtual unsigned char operator=(unsigned char) ;
-        virtual operator unsigned char() const;
-};
-
-class RWEedr: public RWMemoryMembers {
-    protected:
-        HWEeprom *ee;
-    public:
-        RWEedr(AvrDevice *c, HWEeprom *e): RWMemoryMembers(c), ee(e){}
-        virtual unsigned char operator=(unsigned char) ;
-        virtual operator unsigned char() const;
-};
-class RWEecr: public RWMemoryMembers {
-    protected:
-        HWEeprom *ee;
-    public:
-        RWEecr(AvrDevice *c, HWEeprom *e): RWMemoryMembers(c), ee(e){}
-        virtual unsigned char operator=(unsigned char) ;
-        virtual operator unsigned char() const;
 };
 #endif

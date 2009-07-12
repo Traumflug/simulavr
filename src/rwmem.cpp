@@ -29,173 +29,90 @@
  * io-data space, internal and external sram
  */
 
-#include <iostream>
-#include "trace.h"
+#include "avrerror.h"
+#include "traceval.h"
+#include "helper.h"
 #include "rwmem.h"
-#include "helper.h" //HexShort...
-#include "avrdevice.h" //we need that only for all "core" references here
-//allways they are only here for tracing because access to not own variables/registers inside the AvrDevice
-//is needed. This is not intentional and must be redesigned ! TODO XXX
 
 using namespace std;
 
-#include "memory.h"
-
-void RWMemoryMembers::operator=(const RWMemoryMembers &mm) {
-    *this=(char)mm;
-}
-
-unsigned char RWMemoryWithOwnMemory::operator=(unsigned char val) {
-    value=val;
-    return val;
-}
-
-RWMemoryWithOwnMemory::operator unsigned char() const {
-    return value;
-}
-
-unsigned char IRam::operator=(unsigned char val) {
-    value=val;
-    if (core->trace_on==1) traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress)<<"]="<<HexChar(val)<<dec<<" ";
-    return val;
-}
-IRam::operator unsigned char() const {
-    if (core->trace_on==1) traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress)<<"]-->"<<HexChar(value)<<dec<<"--> ";
-    return value;
-}
-
-unsigned char ERam::operator=(unsigned char val) {
-    value=val;
-    if (core->trace_on==1) traceOut << "ERAM[0x"<<hex<<myAddress<<"]=0x"<<hex<<(unsigned int)val<<dec<<" ";
-    return val;
-}
-
-unsigned char NotAvailableIo::operator=(unsigned char val) {
-    if (core->trace_on==1)
-      traceOut << "NOT AVAILABLE RAM[0x"<<hex<<myAddress<<"]=0x"<<hex<<(unsigned int)val<<dec<<" ";
-    if (global_message_on_bad_access)
-      cerr << "NOT AVAILABLE RAM[0x"<<hex<<myAddress<<"]=0x"<<hex<<(unsigned int)val<<dec<<" ";
-    return val;
-}
-
-NotAvailableIo::operator unsigned char() const {
-    if (core->trace_on==1)
-      traceOut << "NOT AVAILABLE RAM[0x"<<hex<<myAddress<<"] accessed ERROR!"<<dec;
-    if (global_message_on_bad_access)
-      cerr << "NOT AVAILABLE RAM[0x"<<hex<<myAddress<<"] accessed ERROR!"<<dec;
-    return 0;
-}
-
-
-
-RWMemoryMembers &MemoryOffsets::operator[](unsigned int externOffset) const{
-    return *rwHandler[myOffset+externOffset];
-}
-
-
-
-
-unsigned char CPURegister::operator=(unsigned char val) {
-    value=val;
-    if (core->trace_on==1) {
-        traceOut << "R" << dec<< myNumber << "=" << HexChar(val) << " ";
-
-        switch (myNumber) {
-            case 26:
-            case 27:
-                traceOut << "X=" << HexShort(((*(core->R))[27]<<8) + (*(core->R))[26]) << " " ;
-                break;
-            case 28:
-            case 29:
-                traceOut << "Y=" << HexShort(((*(core->R))[29]<<8) + (*(core->R))[28]) << " " ;
-                break;
-            case 30:
-            case 31:
-                traceOut << "Z=" << HexShort(((*(core->R))[31]<<8) + (*(core->R))[30]) << " " ;
-                break;
-        } //end of switch
+RWMemoryMember::RWMemoryMember(
+    AvrDevice *_core,
+    const std::string &tracename,
+    const int index)
+    : core(_core) {
+    if (tracename.size()) {
+        tv=new TraceValue(8, tracename, index);
+        if (!core) {
+            avr_error(("core not initialized for RWMemoryMember '"+
+                       tracename+"'.").c_str());
+        }
+        if (!core->dump_manager) {
+            avr_error(("core->dump_manager not initialized for RWMemoryMember '"+
+                       tracename+"'.").c_str());
+        }
+        core->dump_manager->regTrace(tv);
+    } else {
+        tv=0;
     }
+}
 
+RWMemoryMember::operator unsigned char() const {
+    if (tv)
+	tv->read();
+    return get();
+}
+
+unsigned char RWMemoryMember::operator=(unsigned char val) {
+    set(val);
+    if (tv)
+	tv->write(val);
     return val;
 }
 
-CPURegister::operator unsigned char() const {
-    return value;
+unsigned char RWMemoryMember::operator=(const RWMemoryMember &mm) {
+    if (mm.tv)
+	mm.tv->read();
+    unsigned char v=mm.get();
+    set(v);
+    if (tv)
+	tv->write(v);
+    return v;
 }
 
-unsigned char RWReserved::operator=(unsigned char val) { 
-    if (core->trace_on)
-      traceOut << "ASSIGNMENT TO RESERVED ADDRESS [0x" << hex << myAddress
-               << "] = 0x" << (int) val << dec << endl;
-    if (global_message_on_bad_access)
-      cerr << "ASSIGNMENT TO RESERVED ADDRESS [0x" << hex << myAddress
-           << "] = 0x" << (int) val << dec << endl;
-    return val;
+
+RWMemoryMember::~RWMemoryMember() {
+    if (tv)
+	delete tv;
 }
 
-RWReserved::operator unsigned char() const {
-    if (core->trace_on)
-      traceOut << "READ FROM RESERVED ADDRESS [0x" << hex << myAddress
-               << dec << "]" << endl;
-    if (global_message_on_bad_access)
-      cerr << "READ FROM RESERVED ADDRESS [0x" << hex << myAddress
-           << dec << "]" << endl;
-    return 0;
+RAM::RAM(AvrDevice *core,
+         const std::string &name,
+         const size_t number) : RWMemoryMember(core, name, number) {}
+
+unsigned char RAM::get() const { return value; }
+void RAM::set(unsigned char v) { value=v; }
+
+    
+InvalidMem::InvalidMem(
+    AvrDevice *core,
+    const std::string &name,
+    const size_t number) : RWMemoryMember(core, name, number) {}
+
+RWMemoryMember& MemoryOffsets::operator[](unsigned int externOffset) const {
+    return *(rwHandler[myOffset+externOffset]);
 }
 
-//---------------------------------------------------------
-
-RWWriteToPipe::RWWriteToPipe(AvrDevice *c, const char *name)
-   : RWMemoryMembers(c),
-     os((!strcmp(name, "-"))?std::cout:ofs),
-     pipeName(name)
-{
-  if( pipeName != "-" )
-    ofs.open(name);
-}
-unsigned char RWWriteToPipe::operator=(unsigned char val) { os << val; os.flush(); return val; } 
-RWWriteToPipe::operator unsigned char() const { return 0; } 
-
-RWReadFromPipe::RWReadFromPipe(AvrDevice *c, const char *name)
-   : RWMemoryMembers(c),
-     is((!strcmp(name,"-"))?std::cin:ifs),
-     pipeName(name) 
-{
-  if( pipeName != "-")
-    ifs.open(name);
-}
-unsigned char RWReadFromPipe::operator=(unsigned char val) { return 0; } 
-RWReadFromPipe::operator unsigned char() const{ 
-    char val;
-    is.get(val);
-    return val; 
-} 
-
-// Exit the simulator magic address support
-unsigned char RWExit::operator=(unsigned char c)
-{
-  cerr << "Exiting at simulated program request" << endl;
-  exit((int) c); 
+unsigned char InvalidMem::get() const {
+    cerr << "Invalid read access to " << tv->name() << "." << endl;
 }
 
-RWExit::operator unsigned char() const 
-{
-  cerr << "Exiting at simulated program request" << endl;
-  exit(0);
-  return 0;
+
+void InvalidMem::set(unsigned char c) {
+    cerr << "Invalid write access to " << tv->name()
+         << ", trying to set value [0x"
+         << hex << int(c) << dec << "], PC=0x"
+         << hex << 2*core->PC << dec << endl;
 }
 
-// Abort the simulator magic address support
-unsigned char RWAbort::operator=(unsigned char c)
-{
-  cerr << "Aborting at simulated program request" << endl;
-  abort();
-}
-
-RWAbort::operator unsigned char() const 
-{
-  cerr << "Aborting at simulated program request" << endl;
-  abort();
-  return 0;
-}
 

@@ -36,8 +36,15 @@ HWMegaExtIrq::HWMegaExtIrq(AvrDevice *core, HWIrqSystem *i,
         PinAtPort p4, PinAtPort p5, PinAtPort p6, PinAtPort p7,
         unsigned int iv0, unsigned int iv1, unsigned int iv2, unsigned int iv3,
         unsigned int iv4, unsigned int iv5, unsigned int iv6, unsigned int iv7):
-Hardware(core), irqSystem(i)
-{
+    Hardware(core), irqSystem(i),
+    eimsk_reg(core, "EXTIRQ.EIMSK",
+              this, &HWMegaExtIrq::GetEimsk, &HWMegaExtIrq::SetEimsk),
+    eifr_reg(core, "EXTIRQ.EIFR",
+             this, &HWMegaExtIrq::GetEifr, &HWMegaExtIrq::SetEifr),
+    eicra_reg(core, "EXTIRQ.EICRA",
+              this, &HWMegaExtIrq::GetEicra, &HWMegaExtIrq::SetEicra),
+    eicrb_reg(core, "EXTIRQ.EICRB",
+              this, &HWMegaExtIrq::GetEicrb, &HWMegaExtIrq::SetEicrb) {
     pinI.push_back(p0);
     pinI.push_back(p1);
     pinI.push_back(p2);
@@ -207,12 +214,3 @@ void HWMegaExtIrq::PinStateHasChanged(Pin *p) {
     //return 0;
 }		
 
-
-unsigned char RWEicra::operator=(unsigned char val) { if (core->trace_on) trioaccess("Eicra",val); megaextirq->SetEicra(val); return val; }
-unsigned char RWEicrb::operator=(unsigned char val) { if (core->trace_on) trioaccess("Eicrb",val); megaextirq->SetEicrb(val); return val; }
-unsigned char RWEimsk::operator=(unsigned char val) { if (core->trace_on) trioaccess("Eimsk",val); megaextirq->SetEimsk(val); return val; }
-unsigned char RWEifr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Eifr",val); megaextirq->SetEifr(val); return val; }
-RWEicra::operator unsigned char() const { return megaextirq->GetEicra(); }
-RWEicrb::operator unsigned char() const { return megaextirq->GetEicrb(); }
-RWEimsk::operator unsigned char() const { return megaextirq->GetEimsk(); }
-RWEifr::operator unsigned char() const { return megaextirq->GetEifr(); }

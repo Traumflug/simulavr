@@ -98,98 +98,13 @@ class HWMegaX8Timer0: public Hardware {
 		unsigned char GetTcnt() { return tcnt; }
 		unsigned char GetOcra() { return ocra; }
 		unsigned char GetOcrb() { return ocrb; }
-};
 
-// TIMSK
-class RWTimskMx8: public RWMemoryMembers {
-    protected:
-        HWMegaX8TimerIrq *hwTimerIrq;
-
-    public:
-        RWTimskMx8(AvrDevice *c, HWMegaX8TimerIrq *s):RWMemoryMembers(c), hwTimerIrq(s) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-// TIFR
-class RWTifrMx8: public RWMemoryMembers {
-    protected:
-        HWMegaX8TimerIrq *hwTimerIrq;
-    public:
-        RWTifrMx8(AvrDevice *c, HWMegaX8TimerIrq *s):RWMemoryMembers(c), hwTimerIrq(s) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-// ETIMSK
-class RWEtimskMx8: public RWMemoryMembers {
-    protected:
-        HWMegaX8TimerIrq *hwTimerIrq;
-
-    public:
-        RWEtimskMx8(AvrDevice *c, HWMegaX8TimerIrq *s):RWMemoryMembers(c), hwTimerIrq(s) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-// ETIFR
-class RWEtifrMx8: public RWMemoryMembers {
-    protected:
-        HWMegaX8TimerIrq *hwTimerIrq;
-    public:
-        RWEtifrMx8(AvrDevice *c, HWMegaX8TimerIrq *s):RWMemoryMembers(c), hwTimerIrq(s) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-// TCNT
-class RWTcnt0x8: public RWMemoryMembers {
-    protected:
-        HWMegaX8Timer0 *timer;
-    public:
-        RWTcnt0x8(AvrDevice *c, HWMegaX8Timer0 *t0): RWMemoryMembers(c), timer(t0) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-// OCR
-class RWOcra0x8: public RWMemoryMembers {
-    protected:
-        HWMegaX8Timer0 *timer;
-    public:
-        RWOcra0x8(AvrDevice *c, HWMegaX8Timer0 *t0): RWMemoryMembers(c), timer(t0) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-// OCR
-class RWOcrb0x8: public RWMemoryMembers {
-    protected:
-        HWMegaX8Timer0 *timer;
-    public:
-        RWOcrb0x8(AvrDevice *c, HWMegaX8Timer0 *t): RWMemoryMembers(c), timer(t) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-// TCCRA
-class RWTccra0x8: public RWMemoryMembers {
-    protected:
-        HWMegaX8Timer0 *timer;
-    public:
-        RWTccra0x8(AvrDevice *c, HWMegaX8Timer0 *t) : RWMemoryMembers(c), timer(t) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-// TCCRB
-class RWTccrb0x8: public RWMemoryMembers {
-    protected:
-        HWMegaX8Timer0 *timer;
-    public:
-        RWTccrb0x8(AvrDevice *c, HWMegaX8Timer0 *t) : RWMemoryMembers(c), timer(t) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
+        IOReg<HWMegaX8Timer0>
+            tcnt_reg,
+            ocra_reg,
+            ocrb_reg,
+            tccra_reg,
+            tccrb_reg;
 };
 
 #endif

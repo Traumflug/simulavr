@@ -26,7 +26,8 @@
 #include "hwuart.h"
 #include "avrdevice.h"
 #include "irqsystem.h"
-
+#include "traceval.h"
+#include "helper.h"
 
 //usr & ucsra
 #define RXC 0x80
@@ -526,13 +527,42 @@ unsigned int HWUart::CpuCycleTx() {
     return 0;
 }
 
-HWUart::HWUart( AvrDevice *core, HWIrqSystem *s, PinAtPort tx, PinAtPort rx, unsigned int vrx, unsigned int vudre, unsigned int vtx):
-    Hardware(core), irqSystem(s), pinTx(tx), pinRx(rx), vectorRx(vrx), vectorUdre(vudre), vectorTx(vtx) {
-        core->AddToCycleList(this);
-        Reset();
-    }
+HWUart::HWUart( AvrDevice *core, HWIrqSystem *s, PinAtPort tx, PinAtPort rx, unsigned int vrx, unsigned int vudre, unsigned int vtx, int n):
+    Hardware(core), irqSystem(s), pinTx(tx), pinRx(rx), vectorRx(vrx), vectorUdre(vudre), vectorTx(vtx),
+    udr_reg(core, "UART"+int2str(n)+".UDR",
+            this, &HWUart::GetUdr, &HWUart::SetUdr),
+    usr_reg(core, "UART"+int2str(n)+".USR",
+            this, &HWUart::GetUsr, &HWUart::SetUsr),
+    ucr_reg(core, "UART"+int2str(n)+".UCR",
+            this, &HWUart::GetUcr, &HWUart::SetUcr),
+    ucsra_reg(core, "UART"+int2str(n)+".UCSRA",
+              this, &HWUart::GetUsr, &HWUart::SetUsr),
+    ucsrb_reg(core, "UART"+int2str(n)+".UCSRB",
+              this, &HWUart::GetUcr, &HWUart::SetUcr),
+    ubrr_reg(core, "UART"+int2str(n)+".UBRR",
+             this, &HWUart::GetUbrr, &HWUart::SetUbrr),
+    ubrrhi_reg(core, "UART"+int2str(n)+".UBRRHI",
+               this, &HWUart::GetUbrrhi, &HWUart::SetUbrrhi) {
+    core->AddToCycleList(this);
 
-HWUsart::HWUsart( AvrDevice *core, HWIrqSystem *s, PinAtPort tx, PinAtPort rx, PinAtPort xck, unsigned int vrx, unsigned int vudre, unsigned int vtx): HWUart( core, s, tx, rx, vrx, vudre, vtx), pinXck(xck) {
+    set_trace_group_s("UART"+int2str(n));
+    trace_direct(core, "UDR_write", &udrWrite);
+    trace_direct(core, "UDR_read", &udrRead);
+    trace_direct(core, "sUSR", &usr);
+    trace_direct(core, "sUCR", &ucr);
+    trace_direct(core, "sUBR", &ubrr);
+
+    Reset();
+}
+
+HWUsart::HWUsart( AvrDevice *core, HWIrqSystem *s,
+		  PinAtPort tx, PinAtPort rx,
+		  PinAtPort xck,
+		  unsigned int vrx, unsigned int vudre, unsigned int vtx,
+                  int n):
+    HWUart( core, s, tx, rx, vrx, vudre, vtx, n), pinXck(xck),
+    ucsrc_reg(core, "UART"+int2str(n)+".UCSRC",
+              this, &HWUsart::GetUcsrc, &HWUsart::SetUcsrc) {
     Reset();
 }
 
@@ -587,26 +617,4 @@ void HWUart::CheckForNewClearIrq(unsigned char val) {
     if (val & UDRE) { irqSystem->ClearIrqFlag(vectorUdre); }
     if (val & TXC) { irqSystem->ClearIrqFlag(vectorTx); }
 }
-
-
-unsigned char RWUdr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Udr",val);uart->SetUdr(val);  return val; } 
-unsigned char RWUsr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Usr",val);uart->SetUsr(val);  return val; } 
-unsigned char RWUcr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ucr",val);uart->SetUcr(val);  return val; } 
-unsigned char RWUbrr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ubrr",val);uart->SetUbrr(val); return val; } 
-unsigned char RWUbrrhi::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ubrrhi",val);uart->SetUbrrhi(val); return val; } 
-
-
-RWUdr::operator unsigned char() const { return uart->GetUdr(); } 
-RWUsr::operator unsigned char() const { return uart->GetUsr(); } 
-RWUcr::operator unsigned char() const { return uart->GetUcr(); } 
-RWUbrr::operator unsigned char() const { return uart->GetUbrr(); } 
-RWUbrrhi::operator unsigned char() const { return uart->GetUbrrhi(); } 
-
-unsigned char RWUcsra::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ucsra",val);uart->SetUsr(val);  return val; }
-unsigned char RWUcsrb::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ucsrb",val);uart->SetUcr(val);  return val; }
-unsigned char RWUcsrc::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ucsrc",val);uart->SetUcsrc(val);  return val; }
-
-RWUcsra::operator unsigned char() const { return uart->GetUsr(); } 
-RWUcsrb::operator unsigned char() const { return uart->GetUcr(); } 
-RWUcsrc::operator unsigned char() const { return uart->GetUcsrc(); } 
 

@@ -50,7 +50,9 @@ libsim_la_SOURCES = \
   ioregs.cpp irqsystem.cpp keyboard.cpp lcd.cpp memory.cpp \
   mysocket.cpp net.cpp pin.cpp pinatport.cpp pinmon.cpp printable.cpp \
   rwmem.cpp scope.cpp serialrx.cpp serialtx.cpp spisrc.cpp spisink.cpp \
-  string2.cpp systemclock.cpp trace.cpp ui.cpp 
+  specialmem.cpp string2.cpp systemclock.cpp trace.cpp traceval.cpp ui.cpp 
+
+libsim_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 
 nodist_libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
 
@@ -69,8 +71,8 @@ pkginclude_HEADERS = \
   irqsystem.h keyboard.h keynumber_to_scancode.dat lcd.h \
   memory.h mysocket.h net.h pin.h pinatport.h pinnotify.h pinmon.h \
   printable.h rwmem.h scope.h serialrx.h serialtx.h simulationmember.h \
-  spisrc.h spisink.h systemclock.h systemclocktypes.h trace.h types.h \
-  ui.h xcode_to_keynumber.dat
+  spisrc.h spisink.h specialmem.h systemclock.h systemclocktypes.h \
+  trace.h traceval.h types.h ui.h xcode_to_keynumber.dat
 
 simulavr_SOURCES = main.cpp $(COMMON_SRC)
 

@@ -29,6 +29,7 @@
 #include "flash.h"
 #include "avrdevice.h"
 #include "trace.h"
+#include "traceval.h"
 #include "irqsystem.h"
 
 //configuration
@@ -169,9 +170,20 @@ HWSpi::HWSpi(AvrDevice *_c,
 	     bool mm) : 
     Hardware(_c), core(_c), irq(_irq),
     MOSI(mosi), MISO(miso), SCK(sck), SS(ss),
-    irq_vector(ivec), mega_mode(mm)  {
+    irq_vector(ivec), mega_mode(mm),
+    spdr_reg(core, "SPI.SPDR", this, &HWSpi::GetSPDR, &HWSpi::SetSPDR),
+    spsr_reg(core, "SPI.SPSR", this, &HWSpi::GetSPSR, &HWSpi::SetSPSR),
+    spcr_reg(core, "SPI.SPCR", this, &HWSpi::GetSPCR, &HWSpi::SetSPCR)
+{
     bitcnt=8;
     finished=false;
+
+    set_trace_group_s("SPI");
+    trace_direct(core, "shift_in", &shift_in);
+    trace_direct(core, "data_read", &data_read);
+    trace_direct(core, "data_write", &data_write);
+    trace_direct(core, "sSPSR", &spsr);
+    trace_direct(core, "sSPCR", &spcr);
     Reset();
 }
 
@@ -334,11 +346,3 @@ unsigned int HWSpi::CpuCycle() {
     }
     return 0;
 }
-
-unsigned char RWSpdr::operator=(unsigned char val) { if (core->trace_on) trioaccess("SPDR",val);spi->SetSPDR(val);  return val; } 
-unsigned char RWSpsr::operator=(unsigned char val) { if (core->trace_on) trioaccess("SPSR",val);spi->SetSPSR(val);  return val; } 
-unsigned char RWSpcr::operator=(unsigned char val) { if (core->trace_on) trioaccess("SPCR",val);spi->SetSPCR(val);  return val; } 
-
-RWSpdr::operator unsigned char() const { return spi->GetSPDR(); } 
-RWSpsr::operator unsigned char() const { return spi->GetSPSR(); }
-RWSpcr::operator unsigned char() const { return spi->GetSPCR(); }

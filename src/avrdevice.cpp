@@ -29,9 +29,11 @@
 
 #include "avrdevice.h"
 #include "trace.h"
+#include "traceval.h"
 #include "helper.h"
 #include "global.h"     //only 2 defines here... please move that sometimes womewhere TODO XXX
 #include "irqsystem.h"  //GetNewPc
+#include "systemclock.h"
 
 #include "avrdevice_impl.h"
 
@@ -185,9 +187,15 @@ Pin *AvrDevice::GetPin(const char *name) {
    return ret;
 }
 
-AvrDevice::~AvrDevice() {}
+AvrDevice::~AvrDevice() { delete dump_manager; }
 AvrDevice::AvrDevice(unsigned int _ioSpaceSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int flashSize):
    ioSpaceSize(_ioSpaceSize) {
+      dump_manager=new DumpManager(this);
+
+      set_trace_group_s("CORE");
+      trace_direct(this, "PC", &PC);
+
+
       unsigned int currentOffset=0;
       const unsigned int RegisterSpaceSize=32;
       const unsigned int totalIoSpace= 0x10000;
@@ -195,7 +203,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize, unsigned int IRamSize, unsigned 
       data= new Data; //only the symbol container
 
       //memory space for all RW-Memory addresses	
-      rw=(RWMemoryMembers**)malloc(sizeof(RWMemoryMembers*) * totalIoSpace);
+      rw=(RWMemoryMember**)malloc(sizeof(RWMemoryMember*) * totalIoSpace);
       if (rw==0) { cerr << "Not enough memory for RWMemoryMembers in AvrDevice::AvrDevice" << endl; exit(0); }
 
       //the status register is generic to all devices
@@ -220,8 +228,8 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize, unsigned int IRamSize, unsigned 
 
       //create all registers
       for (unsigned int ii=0; ii<RegisterSpaceSize; ii++ ) {
-         rw[currentOffset]=new CPURegister(this, currentOffset);
-         currentOffset++;
+          rw[currentOffset]=new RAM(this, "CORE.r", ii);
+          currentOffset++;
       }      
 
     /* Create invalid registers in I/O space which will fail on access (to
@@ -230,27 +238,29 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize, unsigned int IRamSize, unsigned 
        a register will at least notify the user that there is an unimplemented
        feature. */
     for (unsigned int ii=0; ii<ioSpaceSize; ii++ ) {
-	rw[currentOffset]=new NotAvailableIo(this, currentOffset);
-	currentOffset++;
+        rw[currentOffset]=new InvalidMem(this, "CORE.INVIO", ii);
+        currentOffset++;
     }
 
-      //create the internal ram handlers	
-      for (unsigned int ii=0; ii<IRamSize; ii++ ) {
-         rw[currentOffset]=new IRam(this, currentOffset);
-         currentOffset++;
-      }
+    // create the internal ram handlers	
+    for (unsigned int ii=0; ii<IRamSize; ii++ ) {
+        rw[currentOffset]=new RAM(this, "CORE.IRAM", ii);
+        currentOffset++;
+    }
 
-      //create the external ram handlers, TODO: make the configuration from mcucr available here
-      for (unsigned int ii=0; ii<ERamSize; ii++ ) {
-         rw[currentOffset]=new ERam(this, currentOffset);
-         currentOffset++;
-      }
+    //create the external ram handlers, TODO: make the configuration from mcucr available here
+    for (unsigned int ii=0; ii<ERamSize; ii++ ) {
+        rw[currentOffset]=new RAM(this, "CORE.ERAM", ii);
+        currentOffset++;
+    }
 
-      //fill the rest of the adress space with error handlers
-      for ( ; currentOffset<totalIoSpace;  ) {
-         rw[currentOffset]=new NotAvailableIo(this, currentOffset);
-         currentOffset++;
-      }
+    //fill the rest of the adress space with error handlers
+    unsigned int ii=0;
+    for ( ; currentOffset<totalIoSpace;  ) {
+        rw[currentOffset]=new InvalidMem(this, "CORE.INVX", ii);
+        currentOffset++;
+        ii++;
+    }
 
 }
 
@@ -293,12 +303,15 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                *nextStepIn_ns=clockFreq;
             }
             untilCoreStepFinished= !((cpuCycles>0) || (hwWait>0));
+	    dump_manager->cycle();
             return bpFlag;
          }
 
          if (EP.end()!=find(EP.begin(), EP.end(), PC)) {
             if (global_verbose_on) cout << "Simulation finished!" << endl;
-            exit(0);
+	    SystemClock::Instance().stop();
+	    dump_manager->cycle();
+            return bpFlag;
          }
 
 
@@ -375,6 +388,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
 
    //if (untilCoreStepFinished == false) { //we wait not until end so reply the finish state
    untilCoreStepFinished= !((cpuCycles>0) || (hwWait>0));
+   dump_manager->cycle();
    return bpFlag;
    //}
    //} while ( untilCoreStepFinished && ((cpuCycles>0) || (hwWait>0)));
@@ -413,7 +427,7 @@ void AvrDevice::DeleteAllBreakpoints() {
    BP.erase(BP.begin(), BP.end());
 }
 
-void AvrDevice::ReplaceIoRegister(unsigned int offset, RWMemoryMembers *newMember){
+void AvrDevice::ReplaceIoRegister(unsigned int offset, RWMemoryMember *newMember){
     if (offset >= ioSpaceSize+ioreg->getOffset()) {
 	cerr << "Could not replace register in non existing IoRegisterSpace" << endl;
 	exit(0);

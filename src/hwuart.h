@@ -104,7 +104,7 @@ class HWUart: public Hardware {
 
 
     public:
-        HWUart(AvrDevice *core, HWIrqSystem *, PinAtPort tx, PinAtPort rx, unsigned int vrx, unsigned int vudre, unsigned int vtx); // { irqSystem= s;}
+        HWUart(AvrDevice *core, HWIrqSystem *, PinAtPort tx, PinAtPort rx, unsigned int vrx, unsigned int vudre, unsigned int vtx, int n=0); // { irqSystem= s;}
         virtual unsigned int CpuCycle();
 
         void Reset();
@@ -126,6 +126,14 @@ class HWUart: public Hardware {
         void CheckForNewSetIrq(unsigned char);
         void CheckForNewClearIrq(unsigned char);
 
+        IOReg<HWUart>
+            udr_reg,
+            usr_reg,
+            ucr_reg,
+            ucsra_reg,
+            ucsrb_reg,
+            ubrr_reg,
+            ubrrhi_reg;
     protected:
         void SetFrameLengthFromRegister();
 };
@@ -135,85 +143,15 @@ class HWUsart: public HWUart {
         PinAtPort pinXck;
 
     public:
-        HWUsart(AvrDevice *core, HWIrqSystem *, PinAtPort tx, PinAtPort rx, PinAtPort xck, unsigned int vrx, unsigned int vudre, unsigned int vtx);
+        HWUsart(AvrDevice *core, HWIrqSystem *,
+		PinAtPort tx, PinAtPort rx, PinAtPort xck,
+		unsigned int vrx, unsigned int vudre, unsigned int vtx, int n=0);
 
         void SetUcsrc(unsigned char val);
 
         unsigned char GetUcsrc();
-};
 
-class RWUdr: public RWMemoryMembers {
-    protected:
-        HWUart* uart;
-    public:
-        RWUdr(AvrDevice *c,  HWUart* u): RWMemoryMembers(c), uart(u) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-class RWUsr: public RWMemoryMembers {
-    protected:
-        HWUart* uart;
-    public:
-        RWUsr(AvrDevice *c,  HWUart* u): RWMemoryMembers(c), uart(u) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-class RWUcr: public RWMemoryMembers {
-    protected:
-        HWUart* uart;
-    public:
-        RWUcr(AvrDevice *c,  HWUart* u): RWMemoryMembers(c), uart(u) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-/* config registers for usart */
-
-class RWUcsra: public RWMemoryMembers {
-    protected:
-        HWUsart* uart;
-    public:
-        RWUcsra(AvrDevice *c, HWUsart *u) : RWMemoryMembers(c), uart(u) { }
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWUcsrb: public RWMemoryMembers {
-    protected:
-        HWUsart* uart;
-    public:
-        RWUcsrb(AvrDevice *c, HWUsart *u) : RWMemoryMembers(c), uart(u) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWUcsrc: public RWMemoryMembers {
-    protected:
-        HWUsart* uart;
-    public:
-        RWUcsrc(AvrDevice *c, HWUsart *u) : RWMemoryMembers(c), uart(u) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-/* baudrate registers general */
-
-class RWUbrr: public RWMemoryMembers {
-    protected:
-        HWUart* uart;
-    public:
-        RWUbrr(AvrDevice *c,  HWUart* u): RWMemoryMembers(c), uart(u) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWUbrrhi: public RWMemoryMembers {
-    protected:
-        HWUart* uart;
-    public:
-        RWUbrrhi(AvrDevice *c,  HWUart* u): RWMemoryMembers(c), uart(u) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
+        IOReg<HWUsart> ucsrc_reg;
 };
 
 #endif

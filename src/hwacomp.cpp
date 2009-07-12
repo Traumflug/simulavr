@@ -38,7 +38,10 @@
 
 
 HWAcomp::HWAcomp(AvrDevice *core, HWIrqSystem *irqsys, PinAtPort ain0, PinAtPort ain1, unsigned int _irqVec):
-Hardware(core), irqSystem(irqsys), pinAin0(ain0), pinAin1(ain1), irqVec(_irqVec) {
+    Hardware(core), irqSystem(irqsys),
+    pinAin0(ain0), pinAin1(ain1),
+    acsr_reg(core, "ACOMP.ACSR", this, &HWAcomp::GetAcsr, &HWAcomp::SetAcsr),
+    irqVec(_irqVec) {
     ain0.GetPin().RegisterCallback(this);
     ain1.GetPin().RegisterCallback(this);
     Reset();
@@ -108,6 +111,3 @@ void HWAcomp::ClearIrqFlag(unsigned int vector){
     }
 }
 
-
-unsigned char RWAcsr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Acsr",val); acomp->SetAcsr(val);  return val; } 
-RWAcsr::operator unsigned char() const { return acomp->GetAcsr(); } 

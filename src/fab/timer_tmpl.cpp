@@ -52,16 +52,16 @@
 			       PinAtPort(port$pkg_portlet["OC1B"],$pkg_portbit["OC1B"]),
 			       PinAtPort(port$pkg_portlet["ICP"],$pkg_portbit["ICP"]));
 
-    rw[$io["TIMSK"].addr]= new RWTimsk(this, timer01irq);
-    rw[$io["TIFR"].addr]= new RWTifr(this, timer01irq);
-    rw[$io["TCCR1A"].addr]= new RWTccra(this, timer1);
-    rw[$io["TCCR1B"].addr]= new RWTccrb(this, timer1);
-    rw[$io["TCNT1H"].addr]= new RWTcnth(this, timer1);
-    rw[$io["TCNT1L"].addr]= new RWTcntl(this, timer1);
-    rw[$io["OCR1AH"].addr]= new RWOcrah(this, timer1);
-    rw[$io["OCR1AL"].addr]= new RWOcral(this, timer1);
+    rw[$io["TIMSK"].addr]= & timer01irq->timsk_reg;
+    rw[$io["TIFR"].addr]= & timer01irq->tifr_reg;
+    rw[$io["TCCR1A"].addr]= & timer1->tccr1a_reg;
+    rw[$io["TCCR1B"].addr]= & timer1->tccr1b_reg;
+    rw[$io["TCNT1H"].addr]= & timer1->tcnt1h_reg;
+    rw[$io["TCNT1L"].addr]= & timer1->tcnt1l_reg;
+    rw[$io["OCR1AH"].addr]= & timer1->ocr1ah_reg;
+    rw[$io["OCR1AL"].addr]= & timer1->ocr1al_reg;
 
-    rw[$io["ICR1H"].addr]= new RWIcrh(this, timer1);
-    rw[$io["ICR1L"].addr]= new RWIcrl(this, timer1);
+    rw[$io["ICR1H"].addr]= & timer1->icr1h_reg;
+    rw[$io["ICR1L"].addr]= & timer1->icr1l_reg;
 #endif						
 }

@@ -44,6 +44,8 @@ class SystemClock
         SystemClockOffset currentTime;
 	std::vector<SimulationMember*> asyncMembers;
     public:
+	SystemClockOffset getCurrentTime() const { return currentTime; }
+	
         //SystemClock();
 
         void Add(SimulationMember *dev);
@@ -56,6 +58,8 @@ class SystemClock
         static SystemClock& Instance();
         void Rescedule( SimulationMember *sm, SystemClockOffset newTime);
         void SetTraceModeForAllMembers(int trace_on);
+
+	void stop();
 };
 
 #endif

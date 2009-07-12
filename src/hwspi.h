@@ -118,36 +118,10 @@ class HWSpi: public Hardware {
     unsigned char GetSPCR();
 
     void ClearIrqFlag(unsigned int);
+
+    IOReg<HWSpi> spdr_reg,
+        spsr_reg,
+        spcr_reg;
 };
-
-
-
-class RWSpdr: public RWMemoryMembers {
- protected:
-    HWSpi* spi;
- public:
-    RWSpdr(AvrDevice *c, HWSpi *s): RWMemoryMembers(c), spi(s) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWSpsr: public RWMemoryMembers {
- protected:
-    HWSpi* spi;
- public:
-    RWSpsr(AvrDevice *c, HWSpi *s): RWMemoryMembers(c), spi(s) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWSpcr: public RWMemoryMembers {
- protected:
-    HWSpi* spi;
- public:
-    RWSpcr(AvrDevice *c, HWSpi *s): RWMemoryMembers(c), spi(s) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
 
 #endif

@@ -54,6 +54,7 @@ class HWAdmux: public Hardware {
         //unsigned int CpuCycle(); //not used!
         void Reset();
         int GetMuxOutput(); //give the analog from the selcted pin
+	IOReg<HWAdmux> admux_reg;
 };
 
 class HWAd: public Hardware {
@@ -94,48 +95,10 @@ class HWAd: public Hardware {
         void SetAdcsr(unsigned char);
         //bool IsIrqFlagSet(unsigned int vec);
         void ClearIrqFlag(unsigned int vec);
-
+	IOReg<HWAd>
+	    adch_reg,
+	    adcl_reg,
+	    adcsr_reg;
 };
-
-class RWAdmux: public RWMemoryMembers {
-    protected:
-        HWAdmux *admux;
-
-    public:
-        RWAdmux(AvrDevice *c, HWAdmux *a): RWMemoryMembers(c), admux(a) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWAdch: public RWMemoryMembers {
-    protected:
-        HWAd *ad;
-
-    public:
-        RWAdch(AvrDevice *c,  HWAd *a): RWMemoryMembers(c), ad(a) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWAdcl: public RWMemoryMembers {
-    protected:
-        HWAd *ad;
-
-    public:
-        RWAdcl(AvrDevice *c,  HWAd *a): RWMemoryMembers(c), ad(a) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWAdcsr: public RWMemoryMembers {
-    protected:
-        HWAd *ad;
-
-    public:
-        RWAdcsr(AvrDevice *c,  HWAd *a):RWMemoryMembers(c), ad(a) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
 #endif
 

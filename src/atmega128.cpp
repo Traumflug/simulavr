@@ -35,6 +35,8 @@
 #include "hweeprom.h"
 #include "hwmegatimer0123irq.h"
 #include "hwwado.h"
+#include "hwsreg.h"
+
 #include "avrfactory.h"
 
 AVR_REGISTER(atmega128, AvrDevice_atmega128);
@@ -86,10 +88,10 @@ aref()
 
     usart0=new HWUsart(this, irqSystem,
            PinAtPort(porte,1), PinAtPort(porte,0), PinAtPort(porte, 2),
-           18, 19, 20);
+		       18, 19, 20, 0);
     usart1=new HWUsart(this, irqSystem,
            PinAtPort(portd,3), PinAtPort(portd,2), PinAtPort(portd, 5),
-           30, 31, 32);
+		       30, 31, 32, 1);
 
 	timer0123irq= new HWMegaTimer0123Irq(this, irqSystem,
 			15 , /*tpComp*/
@@ -123,160 +125,155 @@ aref()
            PinAtPort (porte, 5));
 
 
-	for (int ii=0x9e; ii<=0xff; ii++) { rw[ii]=new RWReserved(this, ii); }
-	rw[0x9d]= new RWUcsrc(this, usart1); //RWucsrc;
-	rw[0x9c]= new RWUdr(this, usart1); //RWUdr;
-	rw[0x9b]= new RWUcsra(this, usart1); //RWUcsra;
-	rw[0x9a]= new RWUcsrb(this, usart1); //RWUcsrb;
-	rw[0x99]= new RWUbrr(this, usart1); //RWUbbrl;
-	rw[0x98]= new RWUbrrhi(this, usart1); //RWUbbrh;
-	rw[0x97]= new RWReserved(this, 0x97);
-	rw[0x96]= new RWReserved(this, 0x96);
-    rw[0x95]= new RWUcsrc(this, usart0); //RWucsrc;
-	rw[0x94]= new RWReserved(this, 0x94);
-	rw[0x93]= new RWReserved(this, 0x93);
-	rw[0x92]= new RWReserved(this, 0x92);
-	rw[0x91]= new RWReserved(this, 0x91);
-	rw[0x90]= new RWUbrrhi(this, usart0); //RWUbrrh;
-	rw[0x8f]= new RWReserved(this, 0x8f); //RWReserved;
-	rw[0x8e]= new RWReserved(this, 0x8e); //RWReserved;
-	rw[0x8d]= new RWReserved(this, 0x8d); //RWReserved;
+	rw[0x9d]= & usart1->ucsrc_reg;
+	rw[0x9c]= & usart1->udr_reg;
+	rw[0x9b]= & usart1->ucsra_reg;
+	rw[0x9a]= & usart1->ucsrb_reg;
+	rw[0x99]= & usart1->ubrr_reg;
+	rw[0x98]= & usart1->ubrrhi_reg;
+	
+	
+    rw[0x95]= & usart0->ucsrc_reg;
+	
+	
+	
+	
+	rw[0x90]= & usart0->ubrrhi_reg;
+	
+	
+	
 	// timer 3
-	rw[0x8c]= new RWTccrcM(this, timer3);
-	rw[0x8b]= new RWTccraM(this, timer3);
-	rw[0x8a]= new RWTccrbM(this, timer3);
-	rw[0x89]= new RWTcnthM(this, timer3);
-	rw[0x88]= new RWTcntlM(this, timer3);
-	rw[0x87]= new RWOcrahM(this, timer3);
-	rw[0x86]= new RWOcralM(this, timer3);
-	rw[0x85]= new RWOcrbhM(this, timer3);
-	rw[0x84]= new RWOcrblM(this, timer3);
-	rw[0x83]= new RWOcrchM(this, timer3);
-	rw[0x82]= new RWOcrclM(this, timer3);
-	rw[0x81]= new RWIcrhM(this, timer3);
-	rw[0x80]= new RWIcrlM(this, timer3);
+	rw[0x8c]= & timer3->tccrc_reg;
+	rw[0x8b]= & timer3->tccra_reg;
+	rw[0x8a]= & timer3->tccrb_reg;
+	rw[0x89]= & timer3->tcnth_reg;
+	rw[0x88]= & timer3->tcntl_reg;
+	rw[0x87]= & timer3->ocrah_reg;
+	rw[0x86]= & timer3->ocral_reg;
+	rw[0x85]= & timer3->ocrbh_reg;
+	rw[0x84]= & timer3->ocrbl_reg;
+	rw[0x83]= & timer3->ocrch_reg;
+	rw[0x82]= & timer3->ocrcl_reg;
+	rw[0x81]= & timer3->icrh_reg;
+	rw[0x80]= & timer3->icrl_reg;
 
-	rw[0x7f]= new RWReserved(this, 0x7f); 
-	rw[0x7e]= new RWReserved(this, 0x7e); 
-	rw[0x7d]= new RWEtimskM(this, timer0123irq);
-	rw[0x7c]= new RWEtifrM(this, timer0123irq);
-	rw[0x7b]= new RWReserved(this, 0x7b); 
-	rw[0x7a]= new RWTccrcM(this, timer1);
-	rw[0x79]= new RWOcrchM(this, timer1);
-	rw[0x78]= new RWOcrclM(this, timer1);
-	rw[0x77]= new RWReserved(this, 0x77); 
-	rw[0x76]= new RWReserved(this, 0x76);
-	rw[0x75]= new RWReserved(this, 0x75); 
-	rw[0x74]= new RWReserved(this, 0x74); //RWTwcr;
-	rw[0x73]= new RWReserved(this, 0x73); //RWWtdr;
-	rw[0x72]= new RWReserved(this, 0x72); //RWTwar;
-	rw[0x71]= new RWReserved(this, 0x71); //RWTwsr;
-	rw[0x70]= new RWReserved(this, 0x70); //RWTwbr;
-	rw[0x6f]= new RWReserved(this, 0x6f); //RWOsccal;
-	rw[0x6e]= new RWReserved(this, 0x6e);
-	rw[0x6d]= new RWReserved(this, 0x6d); //RWXmcra;
-	rw[0x6c]= new RWReserved(this, 0x6c); //RWXmcrb;
-	rw[0x6b]= new RWReserved(this, 0x6b);
-	rw[0x6a]= new RWEicra(this,  extirq); //RWEicra;
+	
+	
+	rw[0x7d]= & timer0123irq->etimsk_reg;
+	rw[0x7c]= & timer0123irq->etifr_reg;
+	
+	rw[0x7a]= & timer1->tccrc_reg;
+	rw[0x79]= & timer1->ocrch_reg;
+	rw[0x78]= & timer1->ocrcl_reg;
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	rw[0x6a]= & extirq->eicra_reg;
 
-	rw[0x69]= new RWReserved(this, 0x69);
-	rw[0x68]= new RWReserved(this, 0x68); //RWSpmcsr;
-	rw[0x67]= new RWReserved(this, 0x67);
-	rw[0x66]= new RWReserved(this, 0x66);
+	
+	
+	
+	
 
-	rw[0x65]= new RWPort(this, portg);
-	rw[0x64]= new RWDdr(this, portg);
-	rw[0x63]= new RWPin(this, portg);
+	rw[0x65]= & portg->port_reg;
+	rw[0x64]= & portg->ddr_reg;
+	rw[0x63]= & portg->pin_reg;
 
-	rw[0x62]= new RWPort(this, portf);
-	rw[0x61]= new RWDdr(this, portf);
+	rw[0x62]= & portf->port_reg;
+	rw[0x61]= & portf->ddr_reg;
 
-	rw[0x60]= new RWReserved(this, 0x60);
-	rw[0x5f]= new RWSreg(this , status);
-	rw[0x5e]= new RWSph(this , stack);
-	rw[0x5d]= new RWSpl(this , stack);
-	rw[0x5c]= new RWReserved(this, 0x5c); //RWXdiv(this, );
-	rw[0x5b]= new RWRampz(this, rampz);
+	
+	rw[0x5f]= new RWSreg(this, status);
+	rw[0x5e]= & stack->sph_reg;
+	rw[0x5d]= & stack->spl_reg;
+	
+	rw[0x5b]= & rampz->rampz_reg;
 
-	rw[0x5a]= new RWEicrb(this,  extirq); //RWEicrb();
-	rw[0x59]= new RWEimsk(this,  extirq); //RWEimsk();
-	rw[0x58]= new RWEifr(this,  extirq); //RWEifr();
+	rw[0x5a]= & extirq->eicrb_reg;
+	rw[0x59]= & extirq->eimsk_reg;
+	rw[0x58]= & extirq->eifr_reg;
 
-	rw[0x57]= new RWTimskM(this, timer0123irq);
-	rw[0x56]= new RWTifrM(this, timer0123irq);
-	rw[0x55]= new RWReserved(this, 0x55); //RWMcucr(this, );
-	rw[0x54]= new RWReserved(this, 0x54); //RWMcucsr(this, );
+	rw[0x57]= & timer0123irq->timsk_reg;
+	rw[0x56]= & timer0123irq->tifr_reg;
+	
+	
 	//Timer0
-	rw[0x53]= new RWTccr0(this, timer0);
-	rw[0x52]= new RWTcnt0(this, timer0);
-	rw[0x51]= new RWOcr0(this, timer0);
+	rw[0x53]= & timer0->tccr_reg;
+	rw[0x52]= & timer0->tcnt_reg;
+	rw[0x51]= & timer0->ocr_reg;
 
-	rw[0x50]= new RWReserved(this, 0x50); //RWAssr(this, );
+	
 	//Timer1
-	rw[0x4f]= new RWTccraM(this, timer1);
-	rw[0x4e]= new RWTccrbM(this, timer1);
-	rw[0x4d]= new RWTcnthM(this, timer1);
-	rw[0x4c]= new RWTcntlM(this, timer1);
-	rw[0x4b]= new RWOcrahM(this, timer1);
-	rw[0x4a]= new RWOcralM(this, timer1);
-	rw[0x49]= new RWOcrbhM(this, timer1);
-	rw[0x48]= new RWOcrblM(this, timer1);
-	rw[0x47]= new RWIcrhM(this, timer1);
-	rw[0x46]= new RWIcrlM(this, timer1);
+	rw[0x4f]= & timer1->tccra_reg; 
+	rw[0x4e]= & timer1->tccrb_reg;
+	rw[0x4d]= & timer1->tcnth_reg;
+	rw[0x4c]= & timer1->tcntl_reg;
+	rw[0x4b]= & timer1->ocrah_reg;
+	rw[0x4a]= & timer1->ocral_reg;
+	rw[0x49]= & timer1->ocrbh_reg;
+	rw[0x48]= & timer1->ocrbl_reg;
+	rw[0x47]= & timer1->icrh_reg;
+	rw[0x46]= & timer1->icrl_reg;
 
 	//Timer 2
-	rw[0x45]= new RWTccr2(this, timer2);
-	rw[0x44]= new RWTcnt2(this, timer2);
-	rw[0x43]= new RWOcr2(this, timer2);
+	rw[0x45]= & timer2->tccr_reg;
+	rw[0x44]= & timer2->tcnt_reg;
+	rw[0x43]= & timer2->ocr_reg;
 
-	//on chip debug
-	rw[0x42]= new RWReserved(this, 0x42); //RWOcdr(this, );
+	//0x42: on chip debug
 
 
-	rw[0x41]= new RWReserved(this, 0x41); //RWWdtcr(this, );
-	rw[0x40]= new RWReserved(this, 0x40); //RWSfior(this, );
+	rw[0x3f]= & eeprom->eearh_reg;
+	rw[0x3e]= & eeprom->eearl_reg;
+	rw[0x3d]= & eeprom->eedr_reg;
+	rw[0x3c]= & eeprom->eecr_reg;
 
-	rw[0x3f]= new RWEearh(this, eeprom);
-	rw[0x3e]= new RWEearl(this, eeprom);
-	rw[0x3d]= new RWEedr(this, eeprom);
-	rw[0x3c]= new RWEecr(this, eeprom);
+	rw[0x3b]= & porta->port_reg;
+	rw[0x3a]= & porta->ddr_reg;
+	rw[0x39]= & porta->pin_reg;
 
-	rw[0x3b]= new RWPort(this, porta);
-	rw[0x3a]= new RWDdr(this, porta);
-	rw[0x39]= new RWPin(this, porta);
+	rw[0x38]= & portb->port_reg;
+	rw[0x37]= & portb->ddr_reg;
+	rw[0x36]= & portb->pin_reg;
 
-	rw[0x38]= new RWPort(this, portb);
-	rw[0x37]= new RWDdr(this, portb);
-	rw[0x36]= new RWPin(this, portb);
+	rw[0x35]= & portc->port_reg;
+	rw[0x34]= & portc->ddr_reg;
+	rw[0x33]= & portc->pin_reg;
 
-	rw[0x35]= new RWPort(this, portc);
-	rw[0x34]= new RWDdr(this, portc);
-	rw[0x33]= new RWPin(this, portc);
+	rw[0x32]= & portd->port_reg;
+	rw[0x31]= & portd->ddr_reg;
+	rw[0x30]= & portd->pin_reg;
 
-	rw[0x32]= new RWPort(this, portd);
-	rw[0x31]= new RWDdr(this, portd);
-	rw[0x30]= new RWPin(this, portd);
+	rw[0x2f]= & spi->spdr_reg;
+	rw[0x2e]= & spi->spcr_reg;
+	rw[0x2d]= & spi->spsr_reg;
 
-	rw[0x2f]= new RWSpdr(this, spi); //RWSpdr();
-	rw[0x2e]= new RWSpcr(this, spi); //RWSpcr();
-	rw[0x2d]= new RWSpsr(this, spi); //RWSpsr();
+	rw[0x2c]= & usart0->udr_reg;
+	rw[0x2b]= & usart0->ucsra_reg;
+	rw[0x2a]= & usart0->ucsrb_reg;
+	rw[0x29]= & usart0->ubrr_reg;
 
-	rw[0x2c]= new RWUdr(this, usart0); //RWUdr0(this, );
-	rw[0x2b]= new RWUcsra(this, usart0); //RWUcsra();
-	rw[0x2a]= new RWUcsrb(this, usart0); //RWUcsrb();
-	rw[0x29]= new RWUbrr(this, usart0); //RWUbrrl();
-	rw[0x28]= new RWReserved(this, 0x28); //RWAcsr(this, );
-	rw[0x27]= new RWAdmux(this, admux);
-	rw[0x26]= new RWAdcsr(this, ad);
+	rw[0x27]= & admux->admux_reg;
+    
+	rw[0x26]= & ad->adcsr_reg;
+	rw[0x25]= & ad->adch_reg;
+	rw[0x24]= & ad->adcl_reg;
 
-	rw[0x25]= new RWAdch(this, ad);
-	rw[0x24]= new RWAdcl(this, ad);
+	rw[0x23]= & porte->port_reg;
+	rw[0x22]= & porte->ddr_reg;
+	rw[0x21]= & porte->pin_reg;
 
-	rw[0x23]= new RWPort(this, porte);
-	rw[0x22]= new RWDdr(this, porte);
-	rw[0x21]= new RWPin(this, porte);
-
-	rw[0x20]= new RWPin(this, portf);
+	rw[0x20]= & portf->pin_reg;
 
 	Reset();
 }

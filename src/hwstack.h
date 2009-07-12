@@ -38,69 +38,39 @@
   not accessible in any memory space on the devices which have this, for
   example the ATTiny15L or the good old AT90S1200. */
 class ThreeLevelStack : public MemoryOffsets {
- public:
-    ThreeLevelStack() : MemoryOffsets(0, 0) {
-		rwHandler=(RWMemoryMembers**)malloc(sizeof(RWMemoryMembers*) * 6);
-		for (size_t i=0; i < 6; i++) {
-		    rwHandler[i]=new RWMemoryWithOwnMemory(0);
-		}
-    }
-    ~ThreeLevelStack() {
-	free(rwHandler);
-    }
+  public:
+    ThreeLevelStack(AvrDevice *core);
+    ~ThreeLevelStack();
 };
 
 
 class HWStack: public Hardware {
-	protected:
-        AvrDevice *core;
-		MemoryOffsets *mem;
-		unsigned int stackPointer;
-        unsigned int stackCeil;
+  protected:
+    AvrDevice *core;
+    MemoryOffsets *mem;
+    unsigned int stackPointer;
+    unsigned int stackCeil;
 	std::multimap<unsigned int , Funktor* > breakPointList; //later the second parameter should be a function Pointer!
 
-	public:
-        /*!Ceil gives the maximum value (+1) for the stack pointer, in smaller devices
+  public:
+    /*!Ceil gives the maximum value (+1) for the stack pointer, in smaller devices
 	  there are not all 16 bits available!
 	  Ceil does not need to be a power of two.
-	  */
+    */
 	HWStack(AvrDevice *core, MemoryOffsets *sr, unsigned int ceil);
-		void Push(unsigned char val);
-		unsigned char Pop();
+    void Push(unsigned char val);
+    unsigned char Pop();
 
-		void SetSpl(unsigned char);
-		void SetSph(unsigned char);
-		unsigned char GetSpl();
-		unsigned char GetSph();
-		void Reset();
-        ~HWStack() {}
-        unsigned int GetStackPointer() const { return stackPointer; }
-        void SetBreakPoint(unsigned int stackPointer, Funktor *);
-        void CheckBreakPoints();
-};
-
-class RWSph: public RWMemoryMembers {
-	protected: 
-		HWStack *hwstack;
-	public:
-		RWSph(AvrDevice *c, HWStack *stack): RWMemoryMembers(c), hwstack(stack){}
-		virtual unsigned char operator=(unsigned char) ;
-		virtual operator unsigned char() const;
-};
-
-class RWSphFake: public RWSph {
-	public:
-		RWSphFake(AvrDevice *c, HWStack *stack): RWSph(c, stack){}
-		virtual unsigned char operator=(unsigned char) ;
-		virtual operator unsigned char() const;
-};
-
-class RWSpl: public RWMemoryMembers {
-	protected:
-		HWStack *hwstack;
-	public:
-		RWSpl(AvrDevice *c, HWStack *stack): RWMemoryMembers(c), hwstack(stack){} 
-		virtual unsigned char operator=(unsigned char) ;
-		virtual operator unsigned char() const;
+    void SetSpl(unsigned char);
+    void SetSph(unsigned char);
+    unsigned char GetSpl();
+    unsigned char GetSph();
+    void Reset();
+    ~HWStack() {}
+    unsigned int GetStackPointer() const { return stackPointer; }
+    void SetBreakPoint(unsigned int stackPointer, Funktor *);
+    void CheckBreakPoints();
+    IOReg<HWStack> sph_reg;
+    IOReg<HWStack> spl_reg;
 };
 #endif

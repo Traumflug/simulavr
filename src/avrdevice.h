@@ -43,8 +43,9 @@ class HWSreg;
 class Data;
 class HWIrqSystem;
 class MemoryOffsets;
-class RWMemoryMembers;
+class RWMemoryMember;
 class Hardware;
+class DumpManager;
 
 class AvrDevice: public SimulationMember {
     protected:
@@ -74,7 +75,7 @@ class AvrDevice: public SimulationMember {
         MemoryOffsets *Sram;
         MemoryOffsets *R;
         MemoryOffsets *ioreg;
-        RWMemoryMembers **rw;
+        RWMemoryMember **rw;
 
         HWStack *stack;
         HWSreg *status;
@@ -83,6 +84,8 @@ class AvrDevice: public SimulationMember {
 	std::vector<Hardware *> hwResetList; 
 	std::vector<Hardware *> hwCycleList; 
 
+	DumpManager *dump_manager;
+	
 	/*! Adds to the list of parts to reset. If already in that list, does
 	  nothing. */
         void AddToResetList(Hardware *hw);
@@ -96,7 +99,7 @@ class AvrDevice: public SimulationMember {
         void RemoveFromCycleList(Hardware *hw);
 	
         void Load(const char* n);
-        void ReplaceIoRegister(unsigned int offset, RWMemoryMembers *);
+        void ReplaceIoRegister(unsigned int offset, RWMemoryMember *);
         void RegisterTerminationSymbol(const char *symbol);
 
         Pin *GetPin(const char *name);

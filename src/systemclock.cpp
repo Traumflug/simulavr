@@ -134,7 +134,9 @@ void OnBreak(int s)
     breakMessage=1;
 }
 
-
+void SystemClock::stop() {
+    breakMessage=true;
+}
 
 void SystemClock::Endless() {
     int steps=0;

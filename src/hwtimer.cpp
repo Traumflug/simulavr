@@ -41,7 +41,12 @@ void HWTimer0::TimerCompareAfterCount() {
 	}
 }
 
-HWTimer0::HWTimer0(AvrDevice *c, HWPrescaler *p, HWTimer01Irq *s, PinAtPort pi): Hardware(c),core(c),pin_t0(pi){
+HWTimer0::HWTimer0(AvrDevice *c, HWPrescaler *p, HWTimer01Irq *s, PinAtPort pi):
+    Hardware(c),core(c),pin_t0(pi),
+    tccr_reg(core, "TIMER0.TCCR",
+             this, &HWTimer0::GetTccr, &HWTimer0::SetTccr),
+    tcnt_reg(core, "TIMER0.TCNT",
+             this, &HWTimer0::GetTcnt, &HWTimer0::SetTccr) {
 	//core->AddToCycleList(this);
 	prescaler=p;
 	timer01irq= s;
@@ -120,7 +125,27 @@ unsigned int HWTimer0::CpuCycle(){
 
 HWTimer1::HWTimer1(AvrDevice *c, HWPrescaler *p, HWTimer01Irq *s, PinAtPort t1, PinAtPort oca, PinAtPort ocb,
 		   PinAtPort icp):
-    Hardware(c), core(c), pin_t1(t1), pin_oc1a(oca), pin_oc1b(ocb), pin_icp(icp) { 
+    Hardware(c), core(c), pin_t1(t1), pin_oc1a(oca), pin_oc1b(ocb), pin_icp(icp),
+    tccr1a_reg(core, "TIMER1.TCCR1A",
+               this, &HWTimer1::GetTccr1a, &HWTimer1::SetTccr1a),
+    tccr1b_reg(core, "TIMER1.TCCR1B",
+               this, &HWTimer1::GetTccr1b, &HWTimer1::SetTccr1b),
+    tcnt1h_reg(core, "TIMER1.TCNT1H",
+               this, &HWTimer1::GetTcnt1h, &HWTimer1::SetTcnt1h),
+    tcnt1l_reg(core, "TIMER1.TCNT1L",
+               this, &HWTimer1::GetTcnt1l, &HWTimer1::SetTcnt1l),
+    ocr1ah_reg(core, "TIMER1.OCR1AH",
+               this, &HWTimer1::GetOcr1ah, &HWTimer1::SetOcr1ah),
+    ocr1al_reg(core, "TIMER1.OCR1AL",
+               this, &HWTimer1::GetOcr1al, &HWTimer1::SetOcr1al),
+    ocr1bh_reg(core, "TIMER1.OCR1BH",
+               this, &HWTimer1::GetOcr1bh, &HWTimer1::SetOcr1bh),
+    ocr1bl_reg(core, "TIMER1.OCR1BL",
+               this, &HWTimer1::GetOcr1bl, &HWTimer1::SetOcr1bl),
+    icr1h_reg(core, "TIMER1.ICR1H",
+              this, &HWTimer1::GetIcr1h, 0),
+    icr1l_reg(core, "TIMER1.ICR1L",
+              this, &HWTimer1::GetIcr1l, 0) { 
     //c->AddToCycleList(this);
     cntDir=1; //start with upcounting
 	prescaler=p, 
@@ -353,7 +378,6 @@ unsigned int HWTimer1::CpuCycle(){
 
 void HWTimer1::SetTccr1b(unsigned char val) {
     tccr1b=val;
-
     if (tccr1b & 0x07) {
 	core->AddToCycleList(this);
     } else {
@@ -436,38 +460,3 @@ void HWTimer1::SetTccr1a(unsigned char val) {
 	}
 
 }
-
-
-unsigned char RWTimsk::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Timsk",val);hwTimer01Irq->SetTimsk(val);  return val; }
-unsigned char RWTifr::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Tifr",val);hwTimer01Irq->SetTifr(val);  return val; }
-
-unsigned char RWTccr::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Tccr",val);timer0->SetTccr(val);  return val; } 
-unsigned char RWTcnt::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Tcnt",val);timer0->SetTcnt(val);  return val; }
-
-unsigned char RWTccra::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Tccra",val);timer1->SetTccr1a(val); return val; }
-unsigned char RWTccrb::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Tccrb",val);timer1->SetTccr1b(val); return val; }
-unsigned char RWTcnth::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Tcnth",val);timer1->SetTcnt1h(val); return val; }
-unsigned char RWTcntl::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Tcntl",val);timer1->SetTcnt1l(val); return val; }
-unsigned char RWOcrah::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Ocrah",val);timer1->SetOcr1ah(val); return val; }
-unsigned char RWOcral::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Ocral",val);timer1->SetOcr1al(val); return val; }
-unsigned char RWOcrbh::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Ocrbh",val);timer1->SetOcr1bh(val); return val; }
-unsigned char RWOcrbl::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Ocrbl",val);timer1->SetOcr1bl(val); return val; }
-
-unsigned char RWIcrh::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Icrh",val);cerr << "Write To Read Only Register ICR1H";  return val; }
-unsigned char RWIcrl::operator=(unsigned char val) { if (core->trace_on) trioaccess( "Icrl",val);cerr << "Write To Read Only Register ICR1L";  return val; }
-
-RWTccra::operator unsigned char() const { return timer1->GetTccr1a();}
-RWTccrb::operator unsigned char() const { return timer1->GetTccr1b();}
-RWTcnth::operator unsigned char() const { return timer1->GetTcnt1h();}
-RWTcntl::operator unsigned char() const { return timer1->GetTcnt1l();}
-RWOcrah::operator unsigned char() const { return timer1->GetOcr1ah();}
-RWOcral::operator unsigned char() const { return timer1->GetOcr1al();}
-RWOcrbh::operator unsigned char() const { return timer1->GetOcr1bh();}
-RWOcrbl::operator unsigned char() const { return timer1->GetOcr1bl();}
-RWIcrh::operator unsigned char() const {  return timer1->GetIcr1h();}
-RWIcrl::operator unsigned char() const {  return timer1->GetIcr1l();}
-
-RWTimsk::operator unsigned char() const { return hwTimer01Irq->GetTimsk(); }
-RWTifr::operator unsigned char() const { return hwTimer01Irq->GetTifr(); } 
-RWTccr::operator unsigned char() const { return timer0->GetTccr();}
-RWTcnt::operator unsigned char() const { return timer0->GetTcnt();}

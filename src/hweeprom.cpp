@@ -32,7 +32,16 @@
 
 using namespace std;
 
-HWEeprom::HWEeprom(AvrDevice *_core, unsigned int size): Hardware(_core),Memory(size),core(_core) {
+HWEeprom::HWEeprom(AvrDevice *_core, unsigned int size):
+    Hardware(_core),Memory(size),core(_core),
+    eearh_reg(core, "EEPROM.EEARH",
+              this, &HWEeprom::GetEearh, &HWEeprom::SetEearh),
+    eearl_reg(core, "EEPROM.EEARL",
+              this, &HWEeprom::GetEearl, &HWEeprom::SetEearl),
+    eedr_reg(core, "EEPROM.EEDR",
+             this, &HWEeprom::GetEedr, &HWEeprom::SetEedr),
+    eecr_reg(core, "EEPROM.EECR",
+             this, &HWEeprom::GetEecr, &HWEeprom::SetEecr) {
     //core->AddToCycleList(this);
     Reset();
 }
@@ -270,13 +279,3 @@ unsigned int HWMegaEeprom::CpuCycle() {
 
 
 }
-
-
-unsigned char RWEearl::operator=(unsigned char val) { ee->SetEearl(val); return val;} 
-unsigned char RWEearh::operator=(unsigned char val) { ee->SetEearh(val); return val;} 
-unsigned char RWEedr::operator=(unsigned char val) { ee->SetEedr(val); return val;} 
-unsigned char RWEecr::operator=(unsigned char val) { ee->SetEecr(val); return val;} 
-RWEearl::operator unsigned char() const { return ee->GetEearl();  } 
-RWEearh::operator unsigned char() const { return ee->GetEearh();  } 
-RWEedr::operator unsigned char() const { return ee->GetEedr();  } 
-RWEecr::operator unsigned char() const { return ee->GetEecr();  } 

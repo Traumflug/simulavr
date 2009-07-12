@@ -30,7 +30,12 @@
 using namespace std;
 
 HWTimer01Irq::HWTimer01Irq(AvrDevice *core, HWIrqSystem *is, unsigned int v1, unsigned int v2,unsigned int v3,unsigned int v4,unsigned int v5    ):
-Hardware(core), irqSystem(is), vectorCapt(v1), vectorCompa(v2), vectorCompb(v3), vectorOvf1(v4), vectorOvf0(v5) {
+    Hardware(core), irqSystem(is), vectorCapt(v1), vectorCompa(v2),
+    vectorCompb(v3), vectorOvf1(v4), vectorOvf0(v5),
+    timsk_reg(core, "TIMER.TIMSK", this, &HWTimer01Irq::GetTimsk,
+    &HWTimer01Irq::SetTimsk),
+    tifr_reg(core, "TIMER.TIFR", this, &HWTimer01Irq::GetTifr,
+             &HWTimer01Irq::SetTifr) {
 
     TOIE1=1<<7;
     OCIE1A=1<<6;

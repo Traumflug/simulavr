@@ -47,7 +47,9 @@ HWAdmux::HWAdmux(
    Pin*  _ad6,
    Pin*  _ad7
 ) : 
-Hardware(c), core(c) {
+    Hardware(c), core(c),
+    admux_reg(core, "AD.ADMUX", this, &HWAdmux::GetAdmux, &HWAdmux::SetAdmux)
+{
     ad[0]=_ad0;
     ad[1]=_ad1;
     ad[2]=_ad2;
@@ -83,9 +85,6 @@ int HWAdmux::GetMuxOutput() {
     return p->GetAnalog();
 }
 
-unsigned char RWAdmux::operator=(unsigned char val) { if (core->trace_on) trioaccess("Admux",val); admux->SetAdmux(val);  return val; } 
-RWAdmux::operator unsigned char() const { return admux->GetAdmux(); } 
-
 //---------------------------------------------------------------------------------
 #define ADEN 0x80
 #define ADSC 0x40
@@ -98,7 +97,11 @@ RWAdmux::operator unsigned char() const { return admux->GetAdmux(); }
 #define ADLAR (1<<5)
  
 HWAd::HWAd( AvrDevice *c, HWAdmux *a, HWIrqSystem *i, Pin& _aref, unsigned int iv) :
-Hardware(c), core(c), admux(a), irqSystem(i), aref(_aref), irqVec(iv) {
+    Hardware(c), core(c), admux(a), irqSystem(i), aref(_aref), irqVec(iv),
+    adch_reg (core, "AD.ADCH",  this, &HWAd::GetAdch, 0),
+    adcl_reg (core, "AD.ADCL",  this, &HWAd::GetAdcl, 0),
+    adcsr_reg(core, "AD.ADCSR", this, &HWAd::GetAdcsr, &HWAd::SetAdcsr)
+{
     core->AddToCycleList(this);
 //    irqSystem->RegisterIrqPartner(this, iv);
 
@@ -267,13 +270,4 @@ unsigned int HWAd::CpuCycle() {
 
     return 0;
 }
-
-
-
-unsigned char RWAdch::operator=(unsigned char val) { if (core->trace_on) trioaccess("Write to adch not supported!",val);  return val; } 
-unsigned char RWAdcl::operator=(unsigned char val) { if (core->trace_on) trioaccess("Write to adcl not supported!",val);  return val; } 
-unsigned char RWAdcsr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Adcsr",val); ad->SetAdcsr(val);  return val; } 
-RWAdcsr::operator unsigned char() const { return ad->GetAdcsr(); } 
-RWAdcl::operator unsigned char() const { return ad->GetAdcl(); } 
-RWAdch::operator unsigned char() const { return ad->GetAdch(); } 
 

@@ -62,7 +62,7 @@ HWMegaTimer0123Irq::HWMegaTimer0123Irq(AvrDevice *core, HWIrqSystem *is,
         unsigned int t3compc,
         unsigned int t3capt, 
         unsigned int t3ovf): 
-Hardware(core), irqSystem(is), 
+    Hardware(core), irqSystem(is), 
     vectorTimer0Comp( t0Comp),
     vectorTimer0Ovf( t0Ovf),
     vectorTimer1CompA( t1compa),
@@ -76,10 +76,19 @@ Hardware(core), irqSystem(is),
     vectorTimer3CompB(t3compb),
     vectorTimer3CompC(t3compc),
     vectorTimer3Capt(t3capt),
-vectorTimer3Ovf(t3ovf)
-
-
-{	
+    vectorTimer3Ovf(t3ovf),
+    timsk_reg(core, "TIMER.TIMSK", this,
+              &HWMegaTimer0123Irq::GetTimsk,
+              &HWMegaTimer0123Irq::SetTimsk),
+    tifr_reg(core, "TIMER.TIFR", this,
+             &HWMegaTimer0123Irq::GetTifr,
+             &HWMegaTimer0123Irq::SetTifr),
+    etimsk_reg(core, "TIMER.ETIMSK", this,
+              &HWMegaTimer0123Irq::GetEtimsk,
+              &HWMegaTimer0123Irq::SetEtimsk),
+    etifr_reg(core, "TIMER.ETIFR", this,
+             &HWMegaTimer0123Irq::GetEtifr,
+             &HWMegaTimer0123Irq::SetEtifr) {	
     tifr=0;
     timsk=0;
     etimsk=0;

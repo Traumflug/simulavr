@@ -28,7 +28,6 @@
 
 #include <iostream>
 #include "rwmem.h"
-#include "hwsreg.h"
 #include "types.h"
 
 #include "avrdevice.h"
@@ -68,8 +67,8 @@ class avr_op_ADC:public DecodedInstruction {
      * Num Clocks : 1
      */
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &R2;
+        RWMemoryMember &R1;
+        RWMemoryMember &R2;
         HWSreg *status;
 
     public:
@@ -90,8 +89,8 @@ class avr_op_ADD:public DecodedInstruction {
      * Num Clocks : 1
      */
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &R2;
+        RWMemoryMember &R1;
+        RWMemoryMember &R2;
         HWSreg *status;
 
     public:
@@ -116,8 +115,8 @@ class avr_op_ADIW:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
         unsigned char K;
         HWSreg *status;
 
@@ -140,8 +139,8 @@ class avr_op_AND:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &R2;
+        RWMemoryMember &R1;
+        RWMemoryMember &R2;
         HWSreg *status;
 
     public:
@@ -164,7 +163,7 @@ class avr_op_ANDI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         HWSreg *status;
         unsigned char K;
 
@@ -187,7 +186,7 @@ class avr_op_ASR:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         HWSreg *status;
 
     public:
@@ -231,7 +230,7 @@ class avr_op_BLD:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         unsigned char Kadd;
         unsigned char Kremove;
         HWSreg *status;
@@ -333,7 +332,7 @@ class avr_op_BST:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         HWSreg *status;
         unsigned char K;
 
@@ -378,7 +377,7 @@ class avr_op_CBI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &ioreg;
+        RWMemoryMember &ioreg;
         HWSreg *status;
         unsigned char K;
 
@@ -401,7 +400,7 @@ class avr_op_COM:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         HWSreg *status;
 
     public:
@@ -423,8 +422,8 @@ class avr_op_CP:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &R2;
+        RWMemoryMember &R1;
+        RWMemoryMember &R2;
         HWSreg *status;
 
     public:
@@ -446,8 +445,8 @@ class avr_op_CPC:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &R2;
+        RWMemoryMember &R1;
+        RWMemoryMember &R2;
         HWSreg *status;
 
     public:
@@ -469,7 +468,7 @@ class avr_op_CPI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         HWSreg *status;
         unsigned char K;
 
@@ -493,8 +492,8 @@ class avr_op_CPSE:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &R2;
+        RWMemoryMember &R1;
+        RWMemoryMember &R2;
         HWSreg *status;
 
     public:
@@ -516,7 +515,7 @@ class avr_op_DEC:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         HWSreg *status;
 
     public:
@@ -539,9 +538,9 @@ class avr_op_EICALL:public DecodedInstruction
 #define EIND 0x10 //TODO
 
     protected:
-        RWMemoryMembers &RL;
-        RWMemoryMembers &RH;
-        RWMemoryMembers &eind;
+        RWMemoryMember &RL;
+        RWMemoryMember &RH;
+        RWMemoryMember &eind;
 
     public:
         avr_op_EICALL (word opcode, AvrDevice *c);
@@ -562,9 +561,9 @@ class avr_op_EIJMP:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &RL;
-        RWMemoryMembers &RH;
-        RWMemoryMembers &eind;
+        RWMemoryMember &RL;
+        RWMemoryMember &RH;
+        RWMemoryMember &eind;
 
     public:
         avr_op_EIJMP (word opcode, AvrDevice *c);
@@ -585,9 +584,9 @@ class avr_op_ELPM_Z:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &ZL;
-        RWMemoryMembers &ZH;
+        RWMemoryMember &R1;
+        RWMemoryMember &ZL;
+        RWMemoryMember &ZH;
 
     public:
         avr_op_ELPM_Z (word opcode, AvrDevice *c);
@@ -608,9 +607,9 @@ class avr_op_ELPM_Z_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &ZL;
-        RWMemoryMembers &ZH;
+        RWMemoryMember &R1;
+        RWMemoryMember &ZL;
+        RWMemoryMember &ZH;
 
     public:
         avr_op_ELPM_Z_incr (word opcode, AvrDevice *c);
@@ -632,9 +631,9 @@ class avr_op_ELPM:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R0;
-        RWMemoryMembers &ZL;
-        RWMemoryMembers &ZH;
+        RWMemoryMember &R0;
+        RWMemoryMember &ZL;
+        RWMemoryMember &ZH;
 
     public:
         avr_op_ELPM (word opcode, AvrDevice *c);
@@ -655,8 +654,8 @@ class avr_op_EOR:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &R2;
+        RWMemoryMember &R1;
+        RWMemoryMember &R2;
         HWSreg *status;
 
     public:
@@ -681,8 +680,8 @@ class avr_op_ESPM:public DecodedInstruction
     //TODO
     //avr_error( "This opcode is not implemented yet: 0x%04x", opcode );
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &R2;
+        RWMemoryMember &R1;
+        RWMemoryMember &R2;
         HWSreg *status;
         unsigned char K;
 
@@ -710,10 +709,10 @@ class avr_op_FMUL:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R0;
-        RWMemoryMembers &R1;
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rr;
+        RWMemoryMember &R0;
+        RWMemoryMember &R1;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rr;
         HWSreg *status;
         unsigned char K;
 
@@ -736,10 +735,10 @@ class avr_op_FMULS:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R0;
-        RWMemoryMembers &R1;
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rr;
+        RWMemoryMember &R0;
+        RWMemoryMember &R1;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rr;
         HWSreg *status;
 
     public:
@@ -761,10 +760,10 @@ class avr_op_FMULSU:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R0;
-        RWMemoryMembers &R1;
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rr;
+        RWMemoryMember &R0;
+        RWMemoryMember &R1;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rr;
         HWSreg *status;
 
     public:
@@ -786,8 +785,8 @@ class avr_op_ICALL:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
         unsigned char pc_bytes;
 
     public:
@@ -811,8 +810,8 @@ class avr_op_IJMP:public DecodedInstruction
     /* Z is R31:R30 */
     /* Z is R31:R30 */
     protected:
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_IJMP (word opcode, AvrDevice *c);
@@ -833,8 +832,8 @@ class avr_op_IN:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &ioreg;
+        RWMemoryMember &R1;
+        RWMemoryMember &ioreg;
 
     public:
         avr_op_IN (word opcode, AvrDevice *c);
@@ -855,7 +854,7 @@ class avr_op_INC:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         HWSreg *status;
 
     public:
@@ -898,9 +897,9 @@ class avr_op_LDD_Y:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
-        RWMemoryMembers &Rd;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
+        RWMemoryMember &Rd;
         unsigned char K;
 
     public:
@@ -922,9 +921,9 @@ class avr_op_LDD_Z:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
         unsigned char K;
 
     public:
@@ -946,7 +945,7 @@ class avr_op_LDI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         unsigned char K;
 
     public:
@@ -970,7 +969,7 @@ class avr_op_LDS:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
 
     public:
         avr_op_LDS (word opcode, AvrDevice *c);
@@ -991,9 +990,9 @@ class avr_op_LD_X:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
-        RWMemoryMembers &Rd;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
+        RWMemoryMember &Rd;
         HWSreg *status;
         unsigned char K;
 
@@ -1016,9 +1015,9 @@ class avr_op_LD_X_decr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
         HWSreg *status;
         unsigned char K;
 
@@ -1041,9 +1040,9 @@ class avr_op_LD_X_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
         HWSreg *status;
         unsigned char K;
 
@@ -1067,9 +1066,9 @@ class avr_op_LD_Y_decr:public DecodedInstruction
 
 
     protected:
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_LD_Y_decr (word opcode, AvrDevice *c);
@@ -1090,9 +1089,9 @@ class avr_op_LD_Y_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_LD_Y_incr (word opcode, AvrDevice *c);
@@ -1113,9 +1112,9 @@ class avr_op_LD_Z_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_LD_Z_incr (word opcode, AvrDevice *c);
@@ -1138,9 +1137,9 @@ class avr_op_LD_Z_decr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_LD_Z_decr (word opcode, AvrDevice *c);
@@ -1161,9 +1160,9 @@ class avr_op_LPM_Z:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_LPM_Z (word opcode, AvrDevice *c);
@@ -1189,9 +1188,9 @@ class avr_op_LPM:public DecodedInstruction
 
     /* Z is R31:R30 */
     protected:
-        RWMemoryMembers &R0;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &R0;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_LPM (word opcode, AvrDevice *c);
@@ -1212,9 +1211,9 @@ class avr_op_LPM_Z_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_LPM_Z_incr (word opcode, AvrDevice *c);
@@ -1235,7 +1234,7 @@ class avr_op_LSR:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rd;
+        RWMemoryMember &Rd;
         HWSreg *status;
 
     public:
@@ -1256,8 +1255,8 @@ class avr_op_MOV:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &R2;
+        RWMemoryMember &R1;
+        RWMemoryMember &R2;
 
     public:
         avr_op_MOV (word opcode, AvrDevice *c);
@@ -1278,10 +1277,10 @@ class avr_op_MOVW:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rdl;
-        RWMemoryMembers &Rdh;
-        RWMemoryMembers &Rsl;
-        RWMemoryMembers &Rsh;
+        RWMemoryMember &Rdl;
+        RWMemoryMember &Rdh;
+        RWMemoryMember &Rsl;
+        RWMemoryMember &Rsh;
         HWSreg *status;
         unsigned char K;
 
@@ -1306,10 +1305,10 @@ class avr_op_MUL:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R0;
-        RWMemoryMembers &R1;
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rr;
+        RWMemoryMember &R0;
+        RWMemoryMember &R1;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rr;
         HWSreg *status;
         unsigned char K;
 
@@ -1332,10 +1331,10 @@ class avr_op_MULS:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rr;
-        RWMemoryMembers &R0;
-        RWMemoryMembers &R1;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rr;
+        RWMemoryMember &R0;
+        RWMemoryMember &R1;
         HWSreg *status;
         unsigned char K;
 
@@ -1361,10 +1360,10 @@ class avr_op_MULSU:public DecodedInstruction
 
 
     protected:
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rr;
-        RWMemoryMembers &R0;
-        RWMemoryMembers &R1;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rr;
+        RWMemoryMember &R0;
+        RWMemoryMember &R1;
         HWSreg *status;
 
     public:
@@ -1386,7 +1385,7 @@ class avr_op_NEG:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rd;
+        RWMemoryMember &Rd;
         HWSreg *status;
 
     public:
@@ -1427,8 +1426,8 @@ class avr_op_OR:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rd;
-        RWMemoryMembers &Rr;
+        RWMemoryMember &Rd;
+        RWMemoryMember &Rr;
         HWSreg *status;
         unsigned char K;
 
@@ -1451,7 +1450,7 @@ class avr_op_ORI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         HWSreg *status;
         unsigned char K;
 
@@ -1474,8 +1473,8 @@ class avr_op_OUT:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &ioreg;
-        RWMemoryMembers &R1;
+        RWMemoryMember &ioreg;
+        RWMemoryMember &R1;
 
     public:
         avr_op_OUT (word opcode, AvrDevice *c);
@@ -1496,7 +1495,7 @@ class avr_op_POP:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
 
     public:
         avr_op_POP (word opcode, AvrDevice *c);
@@ -1517,7 +1516,7 @@ class avr_op_PUSH:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
 
     public:
         avr_op_PUSH (word opcode, AvrDevice *c);
@@ -1619,7 +1618,7 @@ class avr_op_ROR:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         HWSreg *status;
 
     public:
@@ -1641,8 +1640,8 @@ class avr_op_SBC:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &R2;
+        RWMemoryMember &R1;
+        RWMemoryMember &R2;
         HWSreg *status;
 
     public:
@@ -1664,7 +1663,7 @@ class avr_op_SBCI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         HWSreg *status;
         unsigned char K;
 
@@ -1687,7 +1686,7 @@ class avr_op_SBI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &ioreg;
+        RWMemoryMember &ioreg;
         unsigned char K;
 
     public:
@@ -1709,7 +1708,7 @@ class avr_op_SBIC:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &ioreg;
+        RWMemoryMember &ioreg;
         unsigned char K;
 
     public:
@@ -1731,7 +1730,7 @@ class avr_op_SBIS:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &ioreg;
+        RWMemoryMember &ioreg;
         unsigned char K;
 
     public:
@@ -1753,8 +1752,8 @@ class avr_op_SBIW:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
         HWSreg *status;
         unsigned char K;
 
@@ -1777,7 +1776,7 @@ class avr_op_SBRC:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         unsigned char K;
 
     public:
@@ -1799,7 +1798,7 @@ class avr_op_SBRS:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         unsigned char K;
 
     public:
@@ -1842,8 +1841,8 @@ class avr_op_SPM:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R0;
-        RWMemoryMembers &R1;
+        RWMemoryMember &R0;
+        RWMemoryMember &R1;
 
     public:
         avr_op_SPM (word opcode, AvrDevice *c);
@@ -1864,9 +1863,9 @@ class avr_op_STD_Y:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &R1;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
         unsigned char K;
 
     public:
@@ -1888,9 +1887,9 @@ class avr_op_STD_Z:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &R1;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
         unsigned char K;
 
     public:
@@ -1912,7 +1911,7 @@ class avr_op_STS:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
 
     public:
         avr_op_STS (word opcode, AvrDevice *c);
@@ -1933,9 +1932,9 @@ class avr_op_ST_X:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &R1;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_ST_X (word opcode, AvrDevice *c);
@@ -1956,9 +1955,9 @@ class avr_op_ST_X_decr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &R1;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_ST_X_decr (word opcode, AvrDevice *c);
@@ -1979,9 +1978,9 @@ class avr_op_ST_X_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &R1;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_ST_X_incr (word opcode, AvrDevice *c);
@@ -2002,9 +2001,9 @@ class avr_op_ST_Y_decr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &R1;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_ST_Y_decr (word opcode, AvrDevice *c);
@@ -2025,9 +2024,9 @@ class avr_op_ST_Y_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &R1;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_ST_Y_incr (word opcode, AvrDevice *c);
@@ -2048,9 +2047,9 @@ class avr_op_ST_Z_decr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &R1;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_ST_Z_decr (word opcode, AvrDevice *c);
@@ -2071,9 +2070,9 @@ class avr_op_ST_Z_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &Rl;
-        RWMemoryMembers &Rh;
+        RWMemoryMember &R1;
+        RWMemoryMember &Rl;
+        RWMemoryMember &Rh;
 
     public:
         avr_op_ST_Z_incr (word opcode, AvrDevice *c);
@@ -2094,8 +2093,8 @@ class avr_op_SUB:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
-        RWMemoryMembers &R2;
+        RWMemoryMember &R1;
+        RWMemoryMember &R2;
         HWSreg *status;
 
     public:
@@ -2117,7 +2116,7 @@ class avr_op_SUBI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
         HWSreg *status;
         unsigned char K;
 
@@ -2140,7 +2139,7 @@ class avr_op_SWAP:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMembers &R1;
+        RWMemoryMember &R1;
 
     public:
         avr_op_SWAP (word opcode, AvrDevice *c);

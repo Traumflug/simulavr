@@ -27,6 +27,7 @@
 #define HWTIMER01IRQ
 
 #include "hardware.h"
+#include "rwmem.h"
 
 class HWIrqSystem;
 
@@ -69,6 +70,10 @@ class HWTimer01Irq: public Hardware {
 	unsigned char OCF1B;
 	unsigned char ICF1;
 	unsigned char TOV0;
+
+    IOReg<HWTimer01Irq>
+        timsk_reg,
+        tifr_reg;
 };
 
 #endif

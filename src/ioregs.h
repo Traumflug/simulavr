@@ -33,22 +33,13 @@ class HWRampz: public Hardware {
         unsigned char rampz;
 
     public:
-        HWRampz(AvrDevice *core):Hardware(core) { Reset(); }
+        HWRampz(AvrDevice *core);
         void Reset(){rampz=0;}
         unsigned char GetRampz() { return rampz; }
         void SetRampz(unsigned char val) { rampz=val; }
+
+        IOReg<HWRampz> rampz_reg;
 };
-
-
-class RWRampz: public RWMemoryMembers {
-    protected:
-        HWRampz* ad;
-    public:
-        RWRampz(AvrDevice *c, HWRampz *a): RWMemoryMembers(c), ad(a) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
 //----------------------------------------------------------------
 
 class HWMcucr: public Hardware {
@@ -56,21 +47,11 @@ class HWMcucr: public Hardware {
         unsigned char mcucr;
 
     public:
-        HWMcucr(AvrDevice *core ): Hardware(core) {
-            mcucr=0;
-        }
+        HWMcucr(AvrDevice *core );
         unsigned char GetMcucr() { return mcucr; }
         void SetMcucr( unsigned char val) { mcucr=val; }
         virtual unsigned int CpuCycle();
-};
 
-class RWMcucr: public RWMemoryMembers {
-    protected:
-        HWMcucr *hwMcucr;
-        HWExtIrq *hwExtIrq;
-    public:
-        RWMcucr(AvrDevice *c, HWMcucr *m, HWExtIrq *e) : RWMemoryMembers(c), hwMcucr(m), hwExtIrq(e) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
+        IOReg<HWMcucr> mcucr_reg;
 };
 #endif

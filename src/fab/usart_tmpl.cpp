@@ -37,9 +37,9 @@
 #endif    
 
 
-    rw[$io["UDR"].addr]= new RWUdr(this, usart);
-    rw[$io["UCSRA"].addr]= new RWUsr(this, usart);
-    rw[$io["UCSRB"].addr]= new RWUcr(this, usart);
-    rw[$io["UBRRL"].addr]= new RWUbrr(this, usart);
+    rw[$io["UDR"].addr]= & usart->udr_reg;
+    rw[$io["UCSRA"].addr]= & usart->usr_reg;
+    rw[$io["UCSRB"].addr]= & usart->ucr_reg;
+    rw[$io["UBRRL"].addr]= & usart->ubrr_reg;
 #endif						
 }

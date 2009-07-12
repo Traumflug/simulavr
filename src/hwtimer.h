@@ -88,6 +88,8 @@ class HWTimer0: public Hardware {
 		void SetTcnt(unsigned char val) { tcnt=val; }
 		unsigned char GetTccr() { return tccr; }
 		unsigned char GetTcnt() { return tcnt; }
+
+        IOReg<HWTimer0> tccr_reg, tcnt_reg;
 };
 
 
@@ -189,131 +191,19 @@ class HWTimer1 : public Hardware {
 		void SetOcr1al(unsigned char val) { ocr1a=val+(ocr1ahtemp<<8);}
 		void SetOcr1bh(unsigned char val) { ocr1bhtemp=val;}
 		void SetOcr1bl(unsigned char val) { ocr1b=val+(ocr1bhtemp<<8);}
+
+        IOReg<HWTimer1>
+            tccr1a_reg,
+            tccr1b_reg,
+            tcnt1h_reg,
+            tcnt1l_reg,
+            ocr1ah_reg,
+            ocr1al_reg,
+            ocr1bh_reg,
+            ocr1bl_reg,
+            icr1h_reg,
+            icr1l_reg;
 };
 
-
-class RWTimsk: public RWMemoryMembers {
-    protected:
-        HWTimer01Irq *hwTimer01Irq;
-
-    public:
-        RWTimsk(AvrDevice *c, HWTimer01Irq *s): RWMemoryMembers(c), hwTimer01Irq(s) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWTifr: public RWMemoryMembers {
-    protected:
-        HWTimer01Irq *hwTimer01Irq;
-    public:
-        RWTifr(AvrDevice *c, HWTimer01Irq *s): RWMemoryMembers(c), hwTimer01Irq(s) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-
-//Timer 0
-
-class RWTccr: public RWMemoryMembers {
-    protected:
-        HWTimer0 *timer0;
-    public:
-        RWTccr(AvrDevice *c, HWTimer0 *t0): RWMemoryMembers(c), timer0(t0) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWTcnt: public RWMemoryMembers {
-    protected:
-        HWTimer0 *timer0;
-    public:
-        RWTcnt(AvrDevice *c, HWTimer0 *t0): RWMemoryMembers(c), timer0(t0) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-//Timer 1 for at90sxxxx
-
-class RWTccra: public RWMemoryMembers {
-    protected:
-        HWTimer1 *timer1;
-    public:
-        RWTccra(AvrDevice *c, HWTimer1 *t1): RWMemoryMembers(c), timer1(t1) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWTccrb: public RWMemoryMembers {
-    protected:
-        HWTimer1 *timer1;
-    public:
-        RWTccrb(AvrDevice *c, HWTimer1 *t1): RWMemoryMembers(c), timer1(t1) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-class RWTcnth: public RWMemoryMembers {
-    protected:
-        HWTimer1 *timer1;
-    public:
-        RWTcnth(AvrDevice *c, HWTimer1 *t1): RWMemoryMembers(c), timer1(t1) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-class RWTcntl: public RWMemoryMembers {
-    protected:
-        HWTimer1 *timer1;
-    public:
-        RWTcntl(AvrDevice *c, HWTimer1 *t1): RWMemoryMembers(c), timer1(t1) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-class RWOcrah: public RWMemoryMembers {
-    protected:
-        HWTimer1 *timer1;
-    public:
-        RWOcrah(AvrDevice *c, HWTimer1 *t1): RWMemoryMembers(c), timer1(t1) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-class RWOcral: public RWMemoryMembers {
-    protected:
-        HWTimer1 *timer1;
-    public:
-        RWOcral(AvrDevice *c, HWTimer1 *t1) : RWMemoryMembers(c), timer1(t1){}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-class RWOcrbh: public RWMemoryMembers {
-    protected:
-        HWTimer1 *timer1;
-    public:
-        RWOcrbh(AvrDevice *c, HWTimer1 *t1): RWMemoryMembers(c), timer1(t1) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-class RWOcrbl: public RWMemoryMembers {
-    protected:
-        HWTimer1 *timer1;
-    public:
-        RWOcrbl(AvrDevice *c, HWTimer1 *t1): RWMemoryMembers(c), timer1(t1) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-class RWIcrh: public RWMemoryMembers {
-    protected:
-        HWTimer1 *timer1;
-    public:
-        RWIcrh(AvrDevice *c, HWTimer1 *t1): RWMemoryMembers(c), timer1(t1) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-class RWIcrl: public RWMemoryMembers {
-    protected:
-        HWTimer1 *timer1;
-    public:
-        RWIcrl(AvrDevice *c, HWTimer1 *t1): RWMemoryMembers(c), timer1(t1) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
 
 #endif

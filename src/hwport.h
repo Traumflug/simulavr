@@ -74,34 +74,11 @@ class HWPort: public Hardware {
         unsigned char GetPin() { /*CalcPin(); */ return pin; } 
 
         friend class PinAtPort;
-};
 
-
-class RWPort : public RWMemoryMembers {
-    protected:
-        HWPort* hwport;
-    public:
-        RWPort(AvrDevice *c,  HWPort *port): RWMemoryMembers(c), hwport(port) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWPin : public RWMemoryMembers {
-    protected:
-        HWPort* hwport;
-    public:
-        RWPin(AvrDevice *c,  HWPort *port) : RWMemoryMembers(c), hwport(port){}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWDdr : public RWMemoryMembers {
-    protected:
-        HWPort* hwport;
-    public:
-        RWDdr(AvrDevice *c,  HWPort *port): RWMemoryMembers(c), hwport(port) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
+        IOReg<HWPort>
+            port_reg,
+            pin_reg,
+            ddr_reg;
 };
 
 #endif

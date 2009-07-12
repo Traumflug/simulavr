@@ -88,11 +88,16 @@ class HWPcir : public HWPcifrApi , public HWPcirMaskApi , public Hardware {
 
 	public: // HWPcirMaskApi
 		void			setPcifrMask(unsigned char val) throw();
-		unsigned char	getPcifrMask() const throw();
+		unsigned char	getPcifrMask() throw();
 
 		void			setPcicrMask(unsigned char val) throw();
-		unsigned char	getPcicrMask() const throw();
-		
+		unsigned char	getPcicrMask() throw();
+
+        
+        IOReg<HWPcir>
+            pcicr_reg,
+            pcifr_reg;
+        
 	private:	// Hardware
         void Reset();
         void ClearIrqFlag(unsigned int vector);
@@ -108,16 +113,20 @@ class HWPcmsk : public HWPcmskApi , public HWPcmskPinApi {
 
 	public:
 		// constructor
-		HWPcmsk(	HWPcifrApi&	pcifrApi,
-					unsigned	pcifrBit
-					) throw();
+		HWPcmsk(
+            AvrDevice *core,
+            HWPcifrApi&	pcifrApi,
+            unsigned	pcifrBit
+            ) throw();
 
 	public: // HWPcmskApi
 		void			setPcmskMask(unsigned char val) throw();
-		unsigned char	getPcmskMask() const throw();
+		unsigned char	getPcmskMask() throw();
 
 	public: // HWPcmskPinApi
 		void			pinChanged(unsigned bit) throw();
+
+        IOReg<HWPcmsk> pcmsk_reg;
 	};
 
 // This class monitors a single pin for changes
@@ -137,38 +146,10 @@ class PinChange : public HasPinNotifyFunction {
 					HWPcmskPinApi&	pcmskPinApi,
 					unsigned		pcmskBit
 					) throw();
-
+        
+        
 	private:	// HasPinNotifyFunction
         void PinStateHasChanged(Pin*);
-	};
-
-class RWPcicr : public RWMemoryMembers {
-	private:
-		HWPcirMaskApi&	_pcirMaskApi;
-	public:
-		RWPcicr(AvrDevice *c,  HWPcirMaskApi& pcirMaskApi): RWMemoryMembers(c), _pcirMaskApi(pcirMaskApi) {}
-		virtual unsigned char operator=(unsigned char);
-		virtual operator unsigned char() const;
-	};
-
-class RWPcifr : public RWMemoryMembers {
-	private:
-		HWPcirMaskApi&	_pcirMaskApi;
-
-	public:
-		RWPcifr(AvrDevice *c, HWPcirMaskApi& pcirMaskApi ): RWMemoryMembers(c), _pcirMaskApi(pcirMaskApi) {}
-		virtual unsigned char operator=(unsigned char);
-		virtual operator unsigned char() const;
-	};
-
-class RWPcmsk : public RWMemoryMembers {
-	private:
-		HWPcmskApi&	_pcmskApi;
-
-	public:
-		RWPcmsk(AvrDevice *c, HWPcmskApi& pcmskApi ): RWMemoryMembers(c), _pcmskApi(pcmskApi) {}
-		virtual unsigned char operator=(unsigned char);
-		virtual operator unsigned char() const;
 	};
 
 #endif

@@ -67,27 +67,10 @@ class HWExtIrq: public Hardware, public HasPinNotifyFunction {
 
         void PinStateHasChanged(Pin *);
         void Reset();
-};
 
-
-class RWGimsk: public RWMemoryMembers {
-    protected:
-        HWExtIrq *hwExtIrq;
-        HWPort *port;
-    public:
-        RWGimsk(AvrDevice *c, HWExtIrq *s, HWPort *p): RWMemoryMembers(c), hwExtIrq(s), port(p) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-class RWGifr: public RWMemoryMembers {
-    protected:
-        HWExtIrq *hwExtIrq;
-        HWPort *port;
-    public:
-        RWGifr(AvrDevice *c, HWExtIrq *s, HWPort *p): RWMemoryMembers(c), hwExtIrq(s), port(p) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
+        IOReg<HWExtIrq>
+            gimsk_reg,
+            gifr_reg;
 };
 
 #endif

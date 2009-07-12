@@ -23,8 +23,8 @@
 	eeprom = new HWEeprom(this, irqSystem, $eeprom_size);
 #endif    
 #if "EEAR" in $io
-	rw[$io["EEAR"].addr]= new RWEearl(this, eeprom);
-	rw[$io["EEDR"].addr]= new RWEedr(this, eeprom);
-	rw[$io["EECR"].addr]= new RWEecr(this, eeprom);
+	rw[$io["EEAR"].addr]= & eeprom->eearl_reg;
+	rw[$io["EEDR"].addr]= & eeprom->eedr_reg;
+	rw[$io["EECR"].addr]= & eeprom->eecr_reg;
 #endif
 }

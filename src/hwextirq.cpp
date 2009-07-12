@@ -36,7 +36,12 @@ using namespace std;
 #define    INT1         7
 #define    INT0         6
 HWExtIrq::HWExtIrq(AvrDevice *core, HWIrqSystem *i, PinAtPort p0, PinAtPort p1, unsigned int iv0, unsigned int iv1):
-Hardware(core), irqSystem(i), pinI0(p0), pinI1(p1), vectorInt0(iv0), vectorInt1(iv1){
+    Hardware(core), irqSystem(i), pinI0(p0), pinI1(p1), vectorInt0(iv0), vectorInt1(iv1),
+    gimsk_reg(core, "EXTIRQ.GIMSK",
+              this, &HWExtIrq::GetGimsk, &HWExtIrq::SetGimsk),
+    gifr_reg(core, "EXTIRQ.GIFR",
+             this, &HWExtIrq::GetGifr, &HWExtIrq::SetGifr)
+{
     //irqSystem->RegisterIrqPartner(this, iv0);
     //irqSystem->RegisterIrqPartner(this, iv1);
 #ifdef NEW
@@ -174,9 +179,3 @@ void HWExtIrq::PinStateHasChanged(Pin *p) {
     //return 0;
 }		
 
-
-RWGimsk::operator unsigned char() const { return hwExtIrq->GetGimsk(); }
-RWGifr::operator unsigned char() const { return hwExtIrq->GetGifr(); }
-
-unsigned char RWGimsk::operator=(unsigned char val) { if (core->trace_on) trioaccess("Gimsk",val);hwExtIrq->SetGimsk(val);  return val; }
-unsigned char RWGifr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Gifr",val);hwExtIrq->SetGifr(val);  return val; }

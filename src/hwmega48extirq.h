@@ -67,56 +67,13 @@ class HWMega48ExtIrq: public Hardware, public HasPinNotifyFunction {
         void CheckForNewClearIrq(unsigned char);
         void PinStateHasChanged(Pin*);
         void Reset();
+
+        IOReg<HWMega48ExtIrq>
+            eicra_reg,
+            eicrb_reg,
+            eimsk_reg,
+            eifr_reg;
 };
-
-
-
-class RWEicra48: public RWMemoryMembers {
-    protected:
-        HWMega48ExtIrq *megaextirq;
-
-    public:
-        RWEicra48(AvrDevice *c, HWMega48ExtIrq *_irq): RWMemoryMembers(c), megaextirq(_irq) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-
-
-class RWEicrb48: public RWMemoryMembers {
-    protected:
-        HWMega48ExtIrq *megaextirq;
-
-    public:
-        RWEicrb48(AvrDevice *c, HWMega48ExtIrq *_irq): RWMemoryMembers(c), megaextirq(_irq) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-
-
-class RWEimsk48: public RWMemoryMembers {
-    protected:
-        HWMega48ExtIrq *megaextirq;
-
-    public:
-        RWEimsk48(AvrDevice *c, HWMega48ExtIrq *_irq): RWMemoryMembers(c), megaextirq(_irq) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
-
-
-class RWEifr48: public RWMemoryMembers {
-    protected:
-        HWMega48ExtIrq *megaextirq;
-
-    public:
-        RWEifr48(AvrDevice *c, HWMega48ExtIrq *_irq): RWMemoryMembers(c), megaextirq(_irq) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
-};
-
 
 
 #endif

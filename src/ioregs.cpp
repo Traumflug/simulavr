@@ -27,10 +27,16 @@
 #include "trace.h"
 unsigned int HWMcucr::CpuCycle(){return 0;}
 
-unsigned char RWRampz::operator=(unsigned char val) { if (core->trace_on) trioaccess("Rampz",val);ad->SetRampz(val); return val; } 
-RWRampz::operator unsigned char() const { return ad->GetRampz(); } 
+HWRampz::HWRampz(AvrDevice *core):
+    Hardware(core),
+    rampz_reg(core, "RAMPZ.RAMPZ",
+              this, &HWRampz::GetRampz, &HWRampz::SetRampz) {
+    Reset();
+}
 
-
-unsigned char RWMcucr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Mcucr",val);hwMcucr->SetMcucr(val); hwExtIrq->SetMcucrCopy(val); return val; } 
-
-RWMcucr::operator unsigned char() const { return hwMcucr->GetMcucr(); } 
+HWMcucr::HWMcucr(AvrDevice *core ) :
+    Hardware(core),
+    mcucr_reg(core, "MCUCR.MCUCR",
+              this, &HWMcucr::GetMcucr, &HWMcucr::SetMcucr) {
+    mcucr=0;
+}

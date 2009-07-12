@@ -27,8 +27,11 @@ HWPcir::HWPcir(	AvrDevice*		avr,
 		_vector4(vector4),
 		_vector5(vector5),
 		_vector6(vector6),
-		_vector7(vector7)
-		{
+		_vector7(vector7),
+        pcicr_reg(avr, "PINCHANGE.PCICR", this, &HWPcir::getPcicrMask,
+                  &HWPcir::setPcicrMask),
+        pcifr_reg(avr, "PINCHANGE.PCIFR", this, &HWPcir::getPcifrMask,
+                  &HWPcir::setPcifrMask) {
 	}
 
 bool	HWPcir::getPcifr(unsigned pcifrBit) throw(){
@@ -113,7 +116,7 @@ void	HWPcir::setPcifrMask(unsigned char val) throw(){
 	_pcifr ^= val;
 	}
 
-unsigned char	HWPcir::getPcifrMask() const throw(){
+unsigned char	HWPcir::getPcifrMask() throw(){
 	return _pcifr;
 	}
 
@@ -143,7 +146,7 @@ void	HWPcir::setPcicrMask(unsigned char val) throw(){
 	_pcicr	= val;
 	}
 
-unsigned char	HWPcir::getPcicrMask() const throw(){
+unsigned char	HWPcir::getPcicrMask() throw(){
 	return _pcicr;
 	}
 
@@ -197,12 +200,16 @@ void HWPcir::ClearIrqFlag(unsigned int vector){
         cerr << "HWPcir: Attempt to clear non-existent irq vector";
 	}
 
-HWPcmsk::HWPcmsk(	HWPcifrApi&	pcifrApi,
-					unsigned	pcifrBit
-					) throw():
+HWPcmsk::HWPcmsk(
+    AvrDevice *core,
+    HWPcifrApi&	pcifrApi,
+    unsigned	pcifrBit) throw():
 		_pcifrApi(pcifrApi),
 		_pcmsk(0),
-		_pcifrBit(pcifrBit)
+		_pcifrBit(pcifrBit),
+        pcmsk_reg(core, "PINCHANGE.PCMSK",
+                  this, &HWPcmsk::getPcmskMask,
+                  &HWPcmsk::setPcmskMask)
 		{
 	}
 
@@ -210,7 +217,7 @@ void	HWPcmsk::setPcmskMask(unsigned char val) throw(){
 	_pcmsk	= val;
 	}
 
-unsigned char	HWPcmsk::getPcmskMask() const throw(){
+unsigned char	HWPcmsk::getPcmskMask() throw(){
 	return _pcmsk;
 	}
 
@@ -241,35 +248,5 @@ void PinChange::PinStateHasChanged(Pin* pin){
 	_prevState	= currentState;
 
 	_pcmskPinApi.pinChanged(_pcmskBit);
-	}
-
-unsigned char RWPcicr::operator=(unsigned char val){
-	if (core->trace_on) trioaccess("PCICR",val);
-	_pcirMaskApi.setPcicrMask(val);
-	return val;
-	}
-
-RWPcicr::operator unsigned char() const{
-	return _pcirMaskApi.getPcicrMask();
-	}
-
-unsigned char RWPcifr::operator=(unsigned char val){
-	if (core->trace_on) trioaccess("PCIFR",val);
-	_pcirMaskApi.setPcifrMask(val);
-	return val;
-	}
-
-RWPcifr::operator unsigned char() const{
-	return _pcirMaskApi.getPcifrMask();
-	}
-
-unsigned char RWPcmsk::operator=(unsigned char val){
-	if (core->trace_on) trioaccess("PCMSK",val);
-	_pcmskApi.setPcmskMask(val);
-	return val;
-	}
-
-RWPcmsk::operator unsigned char() const{
-	return _pcmskApi.getPcmskMask();
 	}
 

@@ -31,7 +31,14 @@ using namespace std;
 #include "trace.h"
 
 
-HWPort::HWPort(AvrDevice *core, const string &name):Hardware(core),myName(name) {
+HWPort::HWPort(AvrDevice *core, const string &name):
+    Hardware(core), myName(name),
+    port_reg(core, "PORT"+name+".PORT",
+             this, &HWPort::GetPort, &HWPort::SetPort),
+    pin_reg(core, "PORT"+name+".PIN",
+            this, &HWPort::GetPin, 0),
+    ddr_reg(core, "PORT"+name+".DDR",
+            this, &HWPort::GetDdr, &HWPort::SetDdr) {
     Reset();
     for (int tt=0; tt<8; tt++) { 
         string dummy=name+(char)('0'+tt);
@@ -130,30 +137,3 @@ string HWPort::GetPortString() {
     dummy[tt]=0;
     return string(dummy);
 }
-
-
-unsigned char RWPort::operator=(unsigned char val) {
-  if (core->trace_on)
-    trioaccess("Port",val);
-  hwport->SetPort(val);
-  return val;
-} 
-
-unsigned char RWPin::operator=(unsigned char val) { 
-    if (core->trace_on) {
-        trioaccess("Pin",val);
-        traceOut << "Not allowed to write to Pin (" << hwport->GetName()
-                 << ")! Read-Only!" << endl; 
-    }
-    
-    cerr << "Not allowed to write to Pin (" << hwport->GetName()
-         << ")! Read-Only!" << endl; 
-    return 0;
-}
-
-unsigned char RWDdr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Ddr",val);hwport->SetDdr(val); return val; } 
-
-
-RWPort::operator unsigned char() const { return  hwport->GetPort(); } 
-RWDdr::operator unsigned char() const { return  hwport->GetDdr(); } 
-RWPin::operator unsigned char() const { return  hwport->GetPin(); } 

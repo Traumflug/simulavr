@@ -214,8 +214,17 @@ void HWMegaX8Timer0::TimerCompareAfterCount() {
 
 
 HWMegaX8Timer0::HWMegaX8Timer0(AvrDevice *_c, HWPrescaler *p, HWMegaX8TimerIrq *s, PinAtPort oca, PinAtPort ocb):
-	Hardware(_c), core(_c), pin_oca(oca), pin_ocb(ocb)
-	{
+	Hardware(_c), core(_c), pin_oca(oca), pin_ocb(ocb),
+    tcnt_reg(core, "TIMER0.TCNT",
+             this, &HWMegaX8Timer0::GetTcnt, &HWMegaX8Timer0::SetTcnt),
+    ocra_reg(core, "TIMER0.OCRA",
+             this, &HWMegaX8Timer0::GetOcra, &HWMegaX8Timer0::SetOcra),
+    ocrb_reg(core, "TIMER0.OCRB",
+             this, &HWMegaX8Timer0::GetOcrb, &HWMegaX8Timer0::SetOcrb),
+    tccra_reg(core, "TIMER0.TCCRA",
+              this, &HWMegaX8Timer0::GetTccra, &HWMegaX8Timer0::SetTccra),
+    tccrb_reg(core, "TIMER0.TCCRB",
+              this, &HWMegaX8Timer0::GetTccrb, &HWMegaX8Timer0::SetTccrb) {
 	//_c->AddToCycleList(this);
 	prescaler=p;
 	timerIrq= s;
@@ -379,27 +388,3 @@ unsigned int HWMegaX8Timer0::CpuCycle(){
 
 	return 0;
 }
-
-unsigned char RWEtimskMx8::operator=(unsigned char val) { if (core->trace_on) trioaccess("ETIMSK",val);hwTimerIrq->SetTimsk(val);  return val; }
-unsigned char RWEtifrMx8::operator=(unsigned char val) { if (core->trace_on) trioaccess("ETIFR",val);hwTimerIrq->SetTifr(val);  return val; }
-unsigned char RWTimskMx8::operator=(unsigned char val) { if (core->trace_on) trioaccess("TIMSK",val);hwTimerIrq->SetTimsk(val);  return val; }
-unsigned char RWTifrMx8::operator=(unsigned char val) { if (core->trace_on) trioaccess("TIFR",val);hwTimerIrq->SetTifr(val);  return val; }
-unsigned char RWTcnt0x8::operator=(unsigned char val) { if (core->trace_on) trioaccess("TCNT",val);timer->SetTcnt(val);  return val; }
-unsigned char RWOcra0x8::operator=(unsigned char val) { if (core->trace_on) trioaccess("OCRA",val);timer->SetOcra(val);  return val; }
-unsigned char RWOcrb0x8::operator=(unsigned char val) { if (core->trace_on) trioaccess("OCRB",val);timer->SetOcrb(val);  return val; }
-unsigned char RWTccra0x8::operator=(unsigned char val) { if (core->trace_on) trioaccess("TCCRA",val);timer->SetTccra(val);  return val; }
-unsigned char RWTccrb0x8::operator=(unsigned char val) { if (core->trace_on) trioaccess("TCCRB",val);timer->SetTccrb(val);  return val; }
-
-
-
-RWTccra0x8::operator unsigned char() const { return timer->GetTccra();}
-RWTccrb0x8::operator unsigned char() const { return timer->GetTccrb();}
-RWTcnt0x8::operator unsigned char() const { return timer->GetTcnt();}
-RWOcra0x8::operator unsigned char() const { return timer->GetOcra();}
-RWOcrb0x8::operator unsigned char() const { return timer->GetOcrb();}
-
-RWTimskMx8::operator unsigned char() const { return hwTimerIrq->GetTimsk(); }
-RWTifrMx8::operator unsigned char() const { return hwTimerIrq->GetTifr(); } 
-RWEtimskMx8::operator unsigned char() const { return hwTimerIrq->GetTimsk(); }
-RWEtifrMx8::operator unsigned char() const { return hwTimerIrq->GetTifr(); } 
-

@@ -46,8 +46,11 @@ using namespace std;
 #include "lcd.h"
 #include "keyboard.h"
 #include "trace.h"
+#include "traceval.h"
 #include "scope.h"
 #include "string2.h"
+#include "helper.h"
+#include "specialmem.h"
 
 const char *SplitOffsetFile(
   const char    *arg,
@@ -111,6 +114,11 @@ const char Usage[] =
 "                      stops simulation if PC runs on <label> or <address>\n"
 "-B --breakpoint <label> or <address>\n"
 "                      same as -T for backward compatibility\n"
+"-c <tracing-option>   Enables a tracer with a set of options. The format for\n"
+"                      <tracing-option> is:\n"
+" 		       <tracer>[:further-options ...]\n"
+"-o <trace-value-file> Specifies a file into which all available trace value names\n"
+"                      will be written.\n"
 "\n";
 
 int main(int argc, char *argv[]) {
@@ -138,6 +146,10 @@ int main(int argc, char *argv[]) {
 
    vector<string> terminationArgs;
 
+   vector<string> tracer_opts;
+   bool tracer_dump_avail=false;
+   string tracer_avail_out;
+   
    while (1) {
       //int this_option_optind = optind ? optind : 1;
       int option_index = 0;
@@ -161,7 +173,7 @@ int main(int argc, char *argv[]) {
          {0, 0, 0, 0}
       };
 
-      c = getopt_long (argc, argv, "a:e:f:d:gGm:Mp:t:uxyzhvniF:R:W:VT:B:", long_options, &option_index);
+      c = getopt_long (argc, argv, "a:e:f:d:gGm:Mp:t:uxyzhvniF:R:W:VT:B:c:o:", long_options, &option_index);
       if (c == -1)
          break;
 
@@ -288,7 +300,13 @@ int main(int argc, char *argv[]) {
                     "simulation starts now!" << endl;
             globalWaitForGdbConnection=false;
             break;
-
+         case 'c':
+	     tracer_opts.push_back(optarg);
+	     break;
+         case 'o':
+	     tracer_dump_avail=true;
+	     tracer_avail_out=optarg;
+	     break;
          default:
             cout << Usage;
             cout << "Supported devices:" << endl;
@@ -296,15 +314,92 @@ int main(int argc, char *argv[]) {
             cout << endl;
             exit(0);
       }
+   }   
+   /* now we create the device */
+   AvrDevice *dev1=AvrFactory::instance().makeDevice(devicename.c_str());
+
+   for (size_t i=0; i < tracer_opts.size(); i++) {
+       vector<string> ls=split(tracer_opts[i], ":");
+       if (ls.size()<1) {
+           cerr << "Invalid tracing option '" << tracer_opts[i] << "'.";
+           exit(0);
+       }
+       Dumper *d;
+       TraceSet ts;
+       cerr << "Enabling tracer: '";
+       if (ls[0]=="warnread") {
+           cerr << "warnread'." << endl;
+           if (ls.size()>1) {
+               cerr << "Invalid number of options for 'warnread'.";
+               exit(0);
+           }
+           ts=dev1->dump_manager->all();
+           d=new WarnUnknown(dev1);
+       } else if (ls[0]=="vcd") {
+           cerr << "vcd'." << endl;
+           if (ls.size()<3 || ls.size()>4) {
+               cerr << "Invalid number of options for 'vcd'.";
+               exit(0);
+           }
+           cerr << "Reading values to trace from '" << ls[1] << "'." << endl;
+
+           ifstream is(ls[1].c_str());
+
+           cerr << "Output VCD file is '" << ls[2] << "'." << endl;
+           ofstream *out=new ofstream(ls[2].c_str());
+           ts=dev1->dump_manager->load(is);
+
+           bool rs=false, ws=false;
+           if (ls.size()==4) { // ReadStrobe/WriteStrobe display specified?
+               if (ls[3]=="rw") {
+                   rs=ws=true;
+               } else if (ls[3]=="r") {
+                   rs=true;
+               } else if (ls[3]=="w") {
+                   ws=true;
+               } else {
+                   cerr << "Invalid read/write strobe specifier '" << ls[3] <<
+           "'.\n";
+                   exit(0);
+               }
+           }
+           d=new DumpVCD(out, "ns", rs, ws);
+       } else {
+           cerr << "Unknown tracer '" << ls[0] <<  "'." << endl;
+           exit(0);
+       }
+       dev1->dump_manager->addDumper(d, ts);
+   }
+   /* We had to wait with dumping the available tracing values
+      until the device has been created! */
+   if (tracer_dump_avail) {
+       cout << "Dumping traceable values to ";
+       if (tracer_avail_out!="-")
+           cout << "'" << tracer_avail_out << "'." << endl;
+       else
+           cout << "stdout." << endl;
+
+       
+       { // scope brackets to ensure that outf will be closed!
+           ostream *outf;
+           if (tracer_avail_out!="-")
+               outf=new ofstream(tracer_avail_out.c_str());
+           else
+               outf=&cout;
+           
+           dev1->dump_manager->save(*outf,
+                                    dev1->dump_manager->all());
+           if (outf!=&cout)
+               
+               delete outf;
+       }
+       exit(0);
    }
 
    if ( !gdbserver_flag && filename == "unknown" ) {
      cerr << "No executable file specified" << endl;
      exit(1);
    }
-
-   /* now we create the device */
-   AvrDevice *dev1=AvrFactory::instance().makeDevice(devicename.c_str());
 
    //if we want to insert some special "pipe" Registers we could do this here:
    if (readFromPipeFileName!="") {
@@ -314,7 +409,7 @@ int main(int argc, char *argv[]) {
               << " and read from file: " << readFromPipeFileName << endl;
       dev1->ReplaceIoRegister(
         readFromPipeOffset,
-        new RWReadFromPipe(dev1, readFromPipeFileName.c_str())
+        new RWReadFromFile(dev1, "FREAD", readFromPipeFileName.c_str())
       );
    }
 
@@ -325,7 +420,7 @@ int main(int argc, char *argv[]) {
                  " and write to file: " << writeToPipeFileName << endl;
       dev1->ReplaceIoRegister(
         writeToPipeOffset,
-        new RWWriteToPipe(dev1, writeToPipeFileName.c_str())
+        new RWWriteToFile(dev1, "FWRITE", writeToPipeFileName.c_str())
       );
    }
 
@@ -333,13 +428,13 @@ int main(int argc, char *argv[]) {
       if (global_verbose_on)
         cout << "Add WriteToAbort-Register at 0x" << hex <<
                  writeToAbort << endl;
-      dev1->ReplaceIoRegister(writeToAbort, new RWAbort(dev1));
+      dev1->ReplaceIoRegister(writeToAbort, new RWAbort(dev1, "ABORT"));
    }
 
    if (writeToExit) {
       if (global_verbose_on)
         cout << "Add WriteToExit-Register at 0x" << hex << writeToExit << endl;
-      dev1->ReplaceIoRegister(writeToExit, new RWExit(dev1));
+      dev1->ReplaceIoRegister(writeToExit, new RWExit(dev1, "EXIT"));
    }
 
    if (filename != "unknown" ) {
@@ -362,6 +457,8 @@ int main(int argc, char *argv[]) {
 
    if (global_trace_on) dev1->trace_on=1;
 
+   dev1->dump_manager->start();
+   
    if (gdbserver_flag==0) {
       SystemClock::Instance().Add(dev1);
       if (maxRunTime == 0) {
@@ -374,6 +471,6 @@ int main(int argc, char *argv[]) {
       GdbServer gdb1(dev1, global_gdbserver_port, global_gdb_debug, globalWaitForGdbConnection);
       SystemClock::Instance().Add(&gdb1);
       SystemClock::Instance().Endless();
-   } 
+   }
 }
 

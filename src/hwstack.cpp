@@ -28,41 +28,23 @@
 
 using namespace std;
 
-unsigned char RWSph::operator=(unsigned char val) {
-  hwstack->SetSph(val);
-  return val;
+ThreeLevelStack::ThreeLevelStack(AvrDevice *core) : MemoryOffsets(0, 0) {
+    rwHandler=(RWMemoryMember**)malloc(sizeof(RWMemoryMember*) * 6);
+    for (size_t i=0; i < 6; i++) {
+        rwHandler[i]=new RAM(core, "STACK.AREA", i);
+    }
 }
 
-RWSph::operator unsigned char() const {
-  return hwstack->GetSph();
-} 
+ThreeLevelStack::~ThreeLevelStack() {
+    free(rwHandler);
+}
 
-unsigned char RWSphFake::operator=(unsigned char val) {
-  string s("ASSIGNMENT TO NON-EXISTENT SPH REGISTER -- FROM GCC?\n");
-
-  if (core->trace_on) traceOut << s;
-  if (global_message_on_bad_access) cerr << s;
-  hwstack->SetSph(val);
-  return val;
-} 
-
-RWSphFake::operator unsigned char() const {
-  string s("READ FROM NON-EXISTENT SPH REGISTER -- FROM GCC?\n");
-
-  if (core->trace_on) traceOut << s;
-  if (global_message_on_bad_access) cerr << s;
-  return hwstack->GetSph();
-} 
-
-unsigned char RWSpl::operator=(unsigned char val) {
-  hwstack->SetSpl(val);
-  return val;
-} 
-RWSpl::operator unsigned char() const {
-  return hwstack->GetSpl();
-} 
-
-HWStack::HWStack(AvrDevice *c, MemoryOffsets *sr, unsigned int ceil):Hardware(c), core(c) {
+HWStack::HWStack(AvrDevice *c, MemoryOffsets *sr, unsigned int ceil):
+    Hardware(c), core(c),
+    sph_reg(core, "STACK.SPH",
+            this, &HWStack::GetSph, &HWStack::SetSph),
+    spl_reg(core, "STACK.SPL",
+            this, &HWStack::GetSpl, &HWStack::SetSpl) {
     stackCeil=ceil;
     mem=sr;
     Reset();
@@ -107,15 +89,23 @@ void HWStack::SetSpl(unsigned char val) {
 }
 
 void HWStack::SetSph(unsigned char val) {
-	stackPointer=stackPointer&0xff00ff;
-	stackPointer+=(val<<8);
-	stackPointer%=stackCeil;
-	if (core->trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
-    CheckBreakPoints();
+    if (stackCeil<=0x100) {
+        cerr << "ASSIGNMENT TO NON-EXISTENT SPH REGISTER -- FROM GCC?\n";
+    } else {
+        stackPointer=stackPointer&0xff00ff;
+        stackPointer+=(val<<8);
+        stackPointer%=stackCeil;
+        if (core->trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
+        CheckBreakPoints();
+    }
 }
 
 unsigned char HWStack::GetSph() {
-	return (stackPointer&0xff00)>>8;
+    if (stackCeil<=100) {
+        cerr << "READ FROM NON-EXISTENT SPH REGISTER -- FROM GCC   ?\n";
+    } else {
+        return (stackPointer&0xff00)>>8;
+    }
 }
 
 unsigned char HWStack::GetSpl() {

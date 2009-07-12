@@ -3,7 +3,8 @@
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
  * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
- * 
+ * Copyright (C) 2009 Onno Kortmann
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -26,185 +27,141 @@
 #ifndef RWMEM
 #define RWMEM
 
-#include "avrdevice.h"
+// FIXME: The following two includes are just because of the cerr stuff in IOReg!
+#include "traceval.h"
 #include <iostream>
-#include <fstream>
-#include <iostream>
+#include <string>
 
-/*
- * All here defined types are used to simulate the 
- * read write address space. This means also registers
- * io-data space, internal and external sram
- */
-
-
-class RWMemoryMembers{
-    protected:
-        AvrDevice *core;
-
-    public:
-        RWMemoryMembers(AvrDevice *c): core(c) {}
-
-        virtual unsigned char operator=(unsigned char val) =0;
-#ifndef SWIG
-        virtual operator unsigned char() const =0 ;
-#endif
-        void operator=(const RWMemoryMembers &mm);
-        virtual ~RWMemoryMembers(){};
-};
-
-/* the following class have one byte own memory and can be used for
- * registers sram and registers 
- */
-class RWMemoryWithOwnMemory: public RWMemoryMembers {
-    protected: 
-        unsigned char value;
-
-    public:
-        RWMemoryWithOwnMemory(AvrDevice *c):RWMemoryMembers(c) {
-            value=0;
-        }
-
-        unsigned char operator=(unsigned char val);
-#ifndef SWIG
-        operator unsigned char() const;
-#endif
-};
-
+class TraceValue;
 class AvrDevice;
 
-class CPURegister: public RWMemoryWithOwnMemory {
-    unsigned int myNumber;
-
-    public:
-    CPURegister(AvrDevice *c, unsigned int number): RWMemoryWithOwnMemory(c), myNumber(number){}
-
-    unsigned char operator=(unsigned char val);
-#ifndef SWIG
-    operator unsigned char() const;
-#endif
-};
-
-
-class IRam: public RWMemoryWithOwnMemory {
-    unsigned int myAddress;
-    public:
-    IRam(AvrDevice *c, unsigned int number):RWMemoryWithOwnMemory(c), myAddress(number) { }
-    unsigned char operator=(unsigned char val); 
-#ifndef SWIG
-    operator unsigned char() const;
-#endif
-};
-
-//TODO this Ram must be connected to the special io register for controlling ext ram!
-class ERam: public RWMemoryWithOwnMemory {
-    unsigned int myAddress;
-    public:
-    ERam(AvrDevice *c, unsigned int number): RWMemoryWithOwnMemory(c), myAddress(number) { }
-    unsigned char operator=(unsigned char val);
-};
-
-class NotAvailableIo: public RWMemoryMembers {
-    unsigned int myAddress;
-    public:
-    NotAvailableIo(AvrDevice* c, unsigned int number):RWMemoryMembers(c), myAddress(number) { }
-
-    unsigned char operator=(unsigned char val); 
-#ifndef SWIG
-    operator unsigned char() const;
-#endif
-};
-
-class RWReserved: public RWMemoryMembers {
-    unsigned int myAddress;
-    public:
-        RWReserved(AvrDevice* c, unsigned int number):RWMemoryMembers(c), myAddress(number) { }
-        virtual unsigned char operator=(unsigned char);
-#ifndef SWIG
-        virtual operator unsigned char() const;
-#endif
-};
-
-class MemoryOffsets {
- private:
-    unsigned int myOffset;
- protected:
-    RWMemoryMembers **rwHandler;
+//!Member of any memory area in an AVR device.
+/* !Allows to be read and written byte-wise.
+   Accesses can be traced if wanted necessary. */
+class RWMemoryMember {
  public:
-    MemoryOffsets(unsigned int offset, RWMemoryMembers **rw):rwHandler(rw){
-	myOffset=offset;
+    /*! Constructs a new memory member cell
+      with the given trace value name. Index is used
+      for memory-like structures which have indices.*/
+    RWMemoryMember(
+        AvrDevice *core,
+        const std::string &tracename="",
+        const int index=-1);
+#ifndef SWIG
+    //! Read access on memory
+    operator unsigned char() const;
+#endif
+    //! Write access on memory
+    unsigned char operator=(unsigned char val);
+    //! Write access on memory
+    unsigned char operator=(const RWMemoryMember &mm);
+    virtual ~RWMemoryMember();
+ protected:
+    /*! This function is the function which will
+      be called by the above access operators and
+      is expected to do the real work when writing a byte. */
+    virtual void set(unsigned char nv)=0;
+    /*! This function as the oppposite to get() is
+      expected to read the real byte. */
+    virtual unsigned char get() const=0;
+
+    /*! If non-null, this is the tracing value
+      bound to this memory member. All read/write
+      operators on the contents of a memory member
+      will inform the tracing value of changes and
+      accesses, if applicable. */
+    mutable TraceValue *tv;
+    AvrDevice *core;
+};
+
+//! One byte in any AVR RAM
+/*! Allows clean read and write accesses and simply
+  has one stored byte. */
+class RAM : public RWMemoryMember {
+ public:
+    RAM(AvrDevice *core,
+        const std::string &tracename,
+        const size_t number);
+ protected:
+    unsigned char get() const;
+    void set(unsigned char);
+ private:
+    unsigned char value;
+};
+
+//! Memory on which access should be avoided! :-)
+/*! All accesses to this type of memory will produce an error. */
+class InvalidMem : public RWMemoryMember {
+ public:
+    InvalidMem(
+        AvrDevice *core,
+        const std::string &tracename,
+        const size_t number);
+ protected:
+    unsigned char get() const;
+    void set(unsigned char);
+};
+
+//! Memory blocks of RWMemoryMembers
+/*! Memory offsets are used to represent a given memory area
+  inside a block of RWMemoryMember objects. Used for RAM blocks and
+  similar things. */
+class MemoryOffsets {
+  private:
+    unsigned int myOffset;
+  protected:
+    RWMemoryMember **rwHandler;
+  public:
+  MemoryOffsets(unsigned int offset, RWMemoryMember **rw):rwHandler(rw){
+        myOffset=offset;
     }
     unsigned getOffset() const { return myOffset; }
 #ifndef SWIG
-        RWMemoryMembers &operator[](unsigned int externOffset) const;
+    RWMemoryMember &operator[](unsigned int externOffset) const;
 #endif
 };
 
-
-//;-------------------------------------------------------
-#include <fstream>
-#include <string.h>
-class RWWriteToPipe: public RWMemoryMembers {
- protected:
-    std::ofstream ofs;
-    std::ostream &os;
-    std::string pipeName;
-
- public:
-    RWWriteToPipe(AvrDevice *c, const char *name);
-    virtual ~RWWriteToPipe() {}
-    virtual unsigned char operator=(unsigned char);
-#ifndef SWIG
-    virtual operator unsigned char() const;
-#endif
-};
-
-//We need a ifstream pointer because all the "virtual operator unsigned char" functions are defined const.
-//if "is" is member not pointer a read from "is" will modify the object which is not "const".
-//To solve this problem we handle only a pointer to a file.... this is not really a const call, I know!
-
-class RWReadFromPipe: public RWMemoryMembers {
- protected:
-    mutable std::istream &is;
-    mutable std::ifstream ifs;
-    std::string pipeName;
-    
- public:
-    RWReadFromPipe(AvrDevice *c, const char *name);
-    virtual ~RWReadFromPipe() {}
-    virtual unsigned char operator=(unsigned char) ;
-#ifndef SWIG
-    virtual operator unsigned char() const;
-#endif
-};
-
-
-// Exit the simulator magic address 
-class RWExit: public RWMemoryMembers {
-
-    public:
-        RWExit(AvrDevice *c)
-          : RWMemoryMembers(c) {}
-
-        virtual ~RWExit() {}
-        virtual unsigned char operator=(unsigned char);
-#ifndef SWIG
-        virtual operator unsigned char() const;
-#endif
-};
-
-// Abort the simulator magic address 
-class RWAbort: public RWMemoryMembers {
-
-    public:
-        RWAbort(AvrDevice *c)
-          : RWMemoryMembers(c) {}
-
-        virtual ~RWAbort() {}
-        virtual unsigned char operator=(unsigned char);
-#ifndef SWIG
-        virtual operator unsigned char() const;
-#endif
-};
+//! IO register to be specialized for a certain class/hardware
+/*! The template parameter class P specifies the class type in which
+  the io register resides. */
+template<class P>
+class IOReg : public RWMemoryMember {
+  public:
+	typedef unsigned char(P::*getter_t)();
+	typedef void (P::*setter_t)(unsigned char);
+	/*!
+	  \param _p: pointer to object this will be part of
+	  \param _g: pointer to get method
+	  \param _s: pointer to set method */
+  IOReg(AvrDevice *core,
+        const std::string &tracename,
+        P *_p,
+        getter_t _g=0, setter_t _s=0) :
+    RWMemoryMember(core, tracename), p(_p), g(_g), s(_s) {
+        // 'undefined state' doesn't really make sense for IO registers 
+        if (tv)
+            tv->set_written();
+    }
+  protected:
+	unsigned char get() const {
+	    if (g)
+            return (p->*g)();
+	    else if (tv)
+            std::cerr << "Reading of '" << tv->name() << "' is not supported."
+            << std::endl;
+        return 0;
+	}
+	void set(unsigned char val) {
+	    if (s)
+            (p->*s)(val);
+	    else if (tv)
+            std::cerr << "Writing of '" << tv->name() << "' (with " << val << ") is not supported." << std::endl;
+	}
+  private:
+	P *p;
+	getter_t g;
+	setter_t s;
+}
+;
 
 #endif

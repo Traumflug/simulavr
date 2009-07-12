@@ -66,8 +66,10 @@ unsigned int HWWado::CpuCycle() {
 	return 0;
 }
 
-HWWado::HWWado(AvrDevice *c): Hardware(c){
-	core=c;
+HWWado::HWWado(AvrDevice *c)
+    : Hardware(c), core(c),
+      wdtcr_reg(core, "WADO.WDTCR",
+                this, &HWWado::GetWdtcr, &HWWado::SetWdtcr) {
 	core->AddToCycleList(this);
 	Reset();
 }
@@ -115,8 +117,3 @@ void HWWado::Wdr() {
 
 	}
 }
-
-
-unsigned char RWWdtcr::operator=(unsigned char val) { if (core->trace_on) trioaccess("Wdtcr",val);wado->SetWdtcr(val);  return val; } 
-
-RWWdtcr::operator unsigned char() const { return wado->GetWdtcr();  } 

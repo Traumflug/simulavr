@@ -31,50 +31,53 @@
 #include "avrdevice.h"
 /* maybe the faster solution... */
 class HWSreg_bool {
-	public:
-		bool	I;
-		bool	T;
-		bool	H;
-		bool	S;
-		bool	V;
-		bool	N;
-		bool	Z;
-		bool	C;
-		operator int();
-		HWSreg_bool(const int i);
-		HWSreg_bool();
+  public:
+    bool	I;
+    bool	T;
+    bool	H;
+    bool	S;
+    bool	V;
+    bool	N;
+    bool	Z;
+    bool	C;
+    operator int();
+    HWSreg_bool(const int i);
+    HWSreg_bool();
 };
 
 /* or is this the faster one ???? */
 class HWSreg_bitarray {
-	public:
-		bool	I:1;
-		bool	T:1;
-		bool	H:1;
-		bool	S:1;
-		bool	V:1;
-		bool	N:1;
-		bool	Z:1;
-		bool	C:1;
-		operator int();
-		HWSreg_bitarray(const int );
-		HWSreg_bitarray();
+  public:
+    bool	I:1;
+    bool	T:1;
+    bool	H:1;
+    bool	S:1;
+    bool	V:1;
+    bool	N:1;
+    bool	Z:1;
+    bool	C:1;
+    operator int();
+    HWSreg_bitarray(const int );
+    HWSreg_bitarray();
 };
 
 
 class HWSreg: public HWSreg_bitarray {
- public:
+  public:
     operator std::string();
     HWSreg operator =(const int );
 };
 
-
-class RWSreg: public RWMemoryMembers {
-    protected:
-        HWSreg *status;
-    public:
-        RWSreg(AvrDevice *c, HWSreg *s) :RWMemoryMembers(c), status(s) {}
-        virtual unsigned char operator=(unsigned char);
-        virtual operator unsigned char() const;
+/*! IO register mapping for the status register.
+  \todo Replace the status register with an ordinary byte somewhere and simple
+  inline access functions sN(), gN() to get/set flags. This should also make
+  accesses faster. */
+class RWSreg: public RWMemoryMember {
+  public:
+  RWSreg(AvrDevice *core, HWSreg *s) :RWMemoryMember(core, "CORE.SREG"), status(s) {}
+  protected:
+    HWSreg *status;
+    unsigned char get() const;
+    void set(unsigned char);
 };
 #endif

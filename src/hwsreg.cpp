@@ -91,14 +91,11 @@ HWSreg HWSreg::operator =(const int i) {
 	return *this;
 }
 
-
-unsigned char RWSreg::operator=(unsigned char val) { 
-    //trioaccess("Sreg",val); 
-    *status=val;
-    if (core->trace_on) traceOut << (string)(*status);
-    return val;
-}
-
-RWSreg::operator unsigned char() const { 
+unsigned char RWSreg::get() const {
     return (*status);
 }
+
+void RWSreg::set(unsigned char val) {
+    *status=val;
+}
+

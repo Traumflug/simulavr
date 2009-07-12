@@ -23,6 +23,8 @@
 #ifndef HWMEGAX8TIMERIRQ
 #define HWMEGAX8TIMERIRQ
 
+#include "rwmem.h"
+
 #include "hardware.h"
 class HWIrqSystem;
 
@@ -59,6 +61,10 @@ class HWMegaX8TimerIrq: public Hardware {
 		void ClearIrqFlag(unsigned int vector);
         void CheckForNewSetIrq(unsigned char);
         void CheckForNewClearIrq(unsigned char);
+
+        IOReg<HWMegaX8TimerIrq>
+            timsk_reg,
+            tifr_reg;
 };
 
 #endif
