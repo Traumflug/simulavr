@@ -24,6 +24,7 @@
  */
 
 #include <iostream>
+#include <sstream>
 #include "helper.h"
 
 
@@ -54,9 +55,38 @@ ostream &operator << (ostream &os, const DecLong &h) {
     return os;
 }
 
+std::string int2str(int i) {
+    stringstream s;
+    s << i;
+    return s.str();
+}
 
+std::string readline(istream &is) {
+    std::string out;
+    char c=0;
+    while (!is.eof() && c!='\n') {
+	is.read(&c, 1);
+	if (is.gcount())
+	    out+=c;
+    }
+    return out;
+}
 
-
-
-
-
+vector<std::string> split(const std::string &inp, std::string splitc) {
+    vector<std::string> out;
+    std::string cur;
+    for (size_t i=0; i < inp.size(); i++) {
+	char c=inp[i];
+	if (splitc.find(c)==splitc.npos)
+	    cur+=c;
+	else {
+	    if (cur.size()) {
+		out.push_back(cur);
+		cur="";
+	    }
+	}
+    }
+    if (cur.size())
+	out.push_back(cur);
+    return out;
+}

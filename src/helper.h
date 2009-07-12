@@ -24,6 +24,7 @@
  */
 
 #include <iostream>
+#include <vector>
 #ifndef HELPER
 #define HELPER
 
@@ -52,5 +53,12 @@ ostream &operator << (ostream &os, const HexChar &h);
 ostream &operator << (ostream &os, const HexShort &h);
 ostream &operator << (ostream &os, const DecLong &h);
 
+//! Convert an int into a string
+std::string int2str(int i);
 
+//! Reads one line from a stream.
+std::string readline(std::istream &is);
+
+//! Splits a string into a vector of strings at delimiters splitc
+std::vector<std::string> split(const std::string &inp, std::string splitc="\t\n\r\b ");
 #endif	
