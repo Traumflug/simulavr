@@ -3,6 +3,8 @@
 #include "irqsystem.h"
 #include "trace.h"
 
+using namespace std;
+
 HWPcir::HWPcir(	AvrDevice*		avr,
 				HWIrqSystem&	irqSystem,
 				unsigned		vector0,

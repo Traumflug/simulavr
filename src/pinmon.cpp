@@ -1,6 +1,8 @@
 #include <iostream>
 #include "pinmon.h"
 
+using namespace std;
+
 PinMonitor::PinMonitor(	AvrDevice&	avr,
 						const char*	pinNameStr, // AVR pin name.  (e.g. "B1","C2", etc.)
 						const char*	pinDescStr,

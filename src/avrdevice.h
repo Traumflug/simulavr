@@ -46,12 +46,10 @@ class MemoryOffsets;
 class RWMemoryMembers;
 class Hardware;
 
-using namespace std;
-
 class AvrDevice: public SimulationMember {
     protected:
         SystemClockOffset clockFreq;
-        map < string, Pin *> allPins; 
+	std::map < std::string, Pin *> allPins; 
         unsigned int ioSpaceSize;
 
         //old static vars for Step()
@@ -62,7 +60,7 @@ class AvrDevice: public SimulationMember {
         
 
     public:
-        string actualFilename;
+	std::string actualFilename;
         Breakpoints BP;
         Exitpoints EP;
         word PC;
@@ -82,8 +80,8 @@ class AvrDevice: public SimulationMember {
         HWSreg *status;
         HWWado *wado;
 
-        vector<Hardware *> hwResetList; 
-        vector<Hardware *> hwCycleList; 
+	std::vector<Hardware *> hwResetList; 
+	std::vector<Hardware *> hwCycleList; 
 
 	/*! Adds to the list of parts to reset. If already in that list, does
 	  nothing. */
@@ -119,13 +117,13 @@ class AvrDevice: public SimulationMember {
         virtual unsigned char GetRampz();
         virtual void SetRampz(unsigned char);
 
-        void RegisterPin(const string &name, Pin *p) {
-            allPins.insert(pair<string, Pin*>(name, p));
+        void RegisterPin(const std::string &name, Pin *p) {
+            allPins.insert(std::pair<std::string, Pin*>(name, p));
         }
 
         void DeleteAllBreakpoints();
 
-        const string &GetFname() { return actualFilename; }
+        const std::string &GetFname() { return actualFilename; }
 };
 
 

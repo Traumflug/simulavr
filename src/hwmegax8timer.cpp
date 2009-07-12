@@ -28,6 +28,7 @@
 #include "hwtimer.h"    //for prescaler
 #include "trace.h"
 
+using namespace std;
 
 const unsigned char HWMegaX8Timer0::topFF; //=0xff;
 const unsigned char HWMegaX8Timer0::top0;

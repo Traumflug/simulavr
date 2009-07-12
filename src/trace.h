@@ -8,9 +8,7 @@
 #include <iostream>
 #include <fstream>
 
-using namespace std;
-
-extern ofstream traceOut;
+extern std::ofstream traceOut;
 
 // Trace enable flag
 extern int global_trace_on;

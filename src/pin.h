@@ -32,8 +32,6 @@
 #include "externaltype.h"
 #include "pinnotify.h"
 
-using namespace std;
-
 class NetInterface;
 class OpenDrain;
 class Net;
@@ -89,7 +87,7 @@ class Pin {
         }T_Pinstate;
 
         T_Pinstate outState;
-        vector<HasPinNotifyFunction*> notifyList;
+	std::vector<HasPinNotifyFunction*> notifyList;
 
     public:
         void SetOutState( T_Pinstate s);
@@ -122,10 +120,10 @@ class Pin {
 class ExtPin : public Pin, public ExternalType {
     protected:
         UserInterface *ui;
-        string extName;
+	std::string extName;
 
     public:
-        void SetNewValueFromUi(const string &);
+        void SetNewValueFromUi(const std::string &);
         ExtPin(T_Pinstate, UserInterface *, const char *_extName, const char *baseWindow); 
         //Pin &operator= (unsigned char);
 
@@ -135,10 +133,10 @@ class ExtPin : public Pin, public ExternalType {
 class ExtAnalogPin : public Pin, public ExternalType {
     protected:
         UserInterface *ui;
-        string extName;
+	std::string extName;
 
     public:
-        void SetNewValueFromUi(const string &);
+        void SetNewValueFromUi(const std::string &);
         ExtAnalogPin(unsigned int startval, UserInterface *, const char *_extName, const char* baseWindow); 
         //Pin &operator= (unsigned char);
 

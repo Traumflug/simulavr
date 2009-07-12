@@ -28,8 +28,6 @@
 #ifndef HELPER
 #define HELPER
 
-using namespace std;
-
 class HexChar {
 	public:
 		unsigned char val;
@@ -49,9 +47,9 @@ class DecLong {
         DecLong(unsigned long v);
 };
 
-ostream &operator << (ostream &os, const HexChar &h);
-ostream &operator << (ostream &os, const HexShort &h);
-ostream &operator << (ostream &os, const DecLong &h);
+std::ostream &operator << (std::ostream &os, const HexChar &h);
+std::ostream &operator << (std::ostream &os, const HexShort &h);
+std::ostream &operator << (std::ostream &os, const DecLong &h);
 
 //! Convert an int into a string
 std::string int2str(int i);

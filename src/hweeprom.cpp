@@ -28,8 +28,9 @@
 #include "avrdevice.h"
 #include "systemclock.h"
 #include "trace.h"
-
 #include "irqsystem.h"
+
+using namespace std;
 
 HWEeprom::HWEeprom(AvrDevice *_core, unsigned int size): Hardware(_core),Memory(size),core(_core) {
     //core->AddToCycleList(this);

@@ -27,7 +27,6 @@
 #define HWIRQSYSTEM
 
 #include <map>
-using namespace std;
 
 #include "hwsreg.h"
 #include "hardware.h"
@@ -71,7 +70,7 @@ class IrqStatisticPerVector {
         IrqStatisticEntry long_StartedFinished;
         IrqStatisticEntry short_StartedFinished;
 
-        friend ostream& operator<<(ostream &os, const IrqStatisticPerVector &ispv) ;
+        friend std::ostream& operator<<(std::ostream &os, const IrqStatisticPerVector &ispv) ;
 
     public:
 
@@ -84,24 +83,24 @@ class IrqStatisticPerVector {
         IrqStatisticPerVector();
 };
 
-ostream& operator<<(ostream &, const IrqStatisticEntry&);
-ostream& operator<<(ostream &, const IrqStatisticPerVector&);
+std::ostream& operator<<(std::ostream &, const IrqStatisticEntry&);
+std::ostream& operator<<(std::ostream &, const IrqStatisticPerVector&);
 
 class IrqStatistic: public Printable {
     protected:
         AvrDevice *core; //only used to get the (file) name of the core device
         
     public:
-        map<unsigned int, IrqStatisticPerVector> entries;
+	std::map<unsigned int, IrqStatisticPerVector> entries;
         IrqStatistic(AvrDevice *);
         void operator()();
 
         virtual ~IrqStatistic() {}
 
-        friend ostream& operator<<(ostream &, const IrqStatistic&);
+        friend std::ostream& operator<<(std::ostream &, const IrqStatistic&);
 };
 
-ostream& operator<<(ostream &, const IrqStatistic&);
+std::ostream& operator<<(std::ostream &, const IrqStatistic&);
 
 
 
@@ -111,7 +110,7 @@ class HWIrqSystem {
         HWSreg *status;
 
         //setup a stack for hardwareIrqPartners
-        map<unsigned int, Hardware *> irqPartnerList;
+	std::map<unsigned int, Hardware *> irqPartnerList;
         AvrDevice *core;
         IrqStatistic irqStatistic;
 

@@ -6,12 +6,9 @@
 #define EXTERNALTYPE
 #include <string>
 
-using namespace std;
-
 class ExternalType {
-    public:
-        virtual void SetNewValueFromUi(const string &)=0;
-
-        virtual ~ExternalType() {}
+ public:
+    virtual void SetNewValueFromUi(const std::string &)=0;
+    virtual ~ExternalType() {}
 };
 #endif

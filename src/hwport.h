@@ -32,11 +32,9 @@
 
 #include <string>
 
-using namespace std;
-
 class HWPort: public Hardware {
     protected:
-        string myName;
+        std::string myName;
 
         unsigned char port;
         unsigned char pin;
@@ -54,7 +52,7 @@ class HWPort: public Hardware {
 
     public:
         void CalcOutputs();  //Calculate the new output value to be transmitted to the environment
-        string GetPortString();
+	std::string GetPortString();
         ~HWPort() {}
 
         //Example:
@@ -63,13 +61,13 @@ class HWPort: public Hardware {
 
 
     public:
-        HWPort(AvrDevice *core, const string &name);
+        HWPort(AvrDevice *core, const std::string &name);
         void Reset();
         void SetPort(unsigned char val) { port=val; CalcOutputs();}
         void SetDdr(unsigned char val) { ddr=val;CalcOutputs();}
         Pin& GetPin(unsigned char pinNo) ;
         void CalcPin();
-        string GetName() { return myName; } 
+	std::string GetName() { return myName; } 
 
         unsigned char GetPort() { return port; }
         unsigned char GetDdr() { return ddr;}

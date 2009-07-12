@@ -33,8 +33,6 @@
 #include <arpa/inet.h>
 
 #include <vector>
-using namespace std;
-
 #include "avrdevice.h"
 #include "types.h"
 #include "simulationmember.h"
@@ -45,7 +43,7 @@ using namespace std;
 class GdbServer: public SimulationMember {
     protected: 
 
-        static vector<GdbServer*> allGdbServers;
+        static std::vector<GdbServer*> allGdbServers;
         AvrDevice *core;
         int port;       //internet port number
         int sock;       //the opened os-net-socket

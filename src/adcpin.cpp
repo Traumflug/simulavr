@@ -1,5 +1,6 @@
 #include <iostream>
 #include "adcpin.h"
+using namespace std;
 
 AdcPin::AdcPin(	const char*		fileName,
 				Net&			pinNet

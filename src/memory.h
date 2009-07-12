@@ -29,8 +29,6 @@
 #include <string>
 #include <map>
 
-using namespace std;
-
 #include "decoder.h"
 
 class Memory {
@@ -39,10 +37,10 @@ class Memory {
 	public:
 
 		unsigned char *myMemory;
-		multimap<unsigned int, string> sym;
-		string GetSymbolAtAddress(unsigned int add);
-		unsigned int GetAddressAtSymbol(const string &s);
-        void AddSymbol( pair<unsigned int, string> p);
+		std::multimap<unsigned int, std::string> sym;
+		std::string GetSymbolAtAddress(unsigned int add);
+		unsigned int GetAddressAtSymbol(const std::string &s);
+		void AddSymbol( std::pair<unsigned int, std::string> p);
 		Memory(int size);
 		unsigned int GetSize();
 		void WriteMem(unsigned char*, unsigned int offset, unsigned int size);

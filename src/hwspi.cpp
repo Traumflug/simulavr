@@ -51,6 +51,7 @@
    FIXME: Make this configurable through the command line interface. */
 #define SPI_VERBOSE	0
 
+using namespace std;
 void HWSpi::spdr_access() {
     if (spsr_read) {
 	// if status is read with SPIF == 1

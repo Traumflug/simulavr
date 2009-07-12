@@ -26,6 +26,7 @@
 #include "hwstack.h"
 #include "trace.h"
 
+using namespace std;
 
 unsigned char RWSph::operator=(unsigned char val) {
   hwstack->SetSph(val);

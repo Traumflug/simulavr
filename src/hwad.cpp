@@ -34,6 +34,7 @@
 #define MUX2 0x04
 #define ADCBG 0x40 //currently not supported
 
+using namespace std;
 
 HWAdmux::HWAdmux(
    AvrDevice* c,
@@ -76,7 +77,7 @@ int HWAdmux::GetMuxOutput() {
     int   pin = admux&(MUX2|MUX1|MUX0);
     Pin*  p = ad[pin];
     if(!p){
-        cerr << "HWAdmux::GetMuxOutput null pin on " << pin << endl;
+	cerr << "HWAdmux::GetMuxOutput null pin on " << pin << endl;
         return 0;
     }
     return p->GetAnalog();

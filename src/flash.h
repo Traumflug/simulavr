@@ -37,7 +37,7 @@ class DecodedInstruction;
 class AvrFlash: public Memory {
     protected:
         AvrDevice *core;
-        vector <DecodedInstruction*> DecodedMem;
+	std::vector <DecodedInstruction*> DecodedMem;
 
     friend int avr_op_CPSE::operator()();
     friend int avr_op_SBIC::operator()();

@@ -144,19 +144,18 @@ class MemoryOffsets {
 //;-------------------------------------------------------
 #include <fstream>
 #include <string.h>
-using namespace std;
 class RWWriteToPipe: public RWMemoryMembers {
-    protected:
-        ofstream ofs;
-        ostream &os;
-        string pipeName;
+ protected:
+    std::ofstream ofs;
+    std::ostream &os;
+    std::string pipeName;
 
-    public:
-        RWWriteToPipe(AvrDevice *c, const char *name);
-        virtual ~RWWriteToPipe() {}
-        virtual unsigned char operator=(unsigned char);
+ public:
+    RWWriteToPipe(AvrDevice *c, const char *name);
+    virtual ~RWWriteToPipe() {}
+    virtual unsigned char operator=(unsigned char);
 #ifndef SWIG
-        virtual operator unsigned char() const;
+    virtual operator unsigned char() const;
 #endif
 };
 
@@ -165,17 +164,17 @@ class RWWriteToPipe: public RWMemoryMembers {
 //To solve this problem we handle only a pointer to a file.... this is not really a const call, I know!
 
 class RWReadFromPipe: public RWMemoryMembers {
-    protected:
-        mutable istream &is;
-        mutable ifstream ifs;
-        string pipeName;
-
-    public:
-        RWReadFromPipe(AvrDevice *c, const char *name);
-        virtual ~RWReadFromPipe() {}
-        virtual unsigned char operator=(unsigned char) ;
+ protected:
+    mutable std::istream &is;
+    mutable std::ifstream ifs;
+    std::string pipeName;
+    
+ public:
+    RWReadFromPipe(AvrDevice *c, const char *name);
+    virtual ~RWReadFromPipe() {}
+    virtual unsigned char operator=(unsigned char) ;
 #ifndef SWIG
-        virtual operator unsigned char() const;
+    virtual operator unsigned char() const;
 #endif
 };
 

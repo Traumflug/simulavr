@@ -35,6 +35,8 @@
 
 #define MONSREG traceOut << (string)(*(core->status))  
 
+using namespace std;
+
 int avr_op_ADC::Trace()  {
     traceOut << "ADC R" << p1 << ", R" << p2 << " ";
     int ret=this->operator()();

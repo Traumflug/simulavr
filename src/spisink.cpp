@@ -1,6 +1,8 @@
 #include <iostream>
 #include "spisink.h"
 
+using namespace std;
+
 enum {
 		SSBIT = 0,
 		SCLKBIT = 1,

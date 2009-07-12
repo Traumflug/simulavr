@@ -26,7 +26,6 @@
 #ifndef HWSREG
 #define HWSREG
 #include <string>
-using namespace std;
 
 #include "rwmem.h"
 #include "avrdevice.h"
@@ -64,9 +63,9 @@ class HWSreg_bitarray {
 
 
 class HWSreg: public HWSreg_bitarray {
-	public:
-		operator string();
-		HWSreg operator =(const int );
+ public:
+    operator std::string();
+    HWSreg operator =(const int );
 };
 
 

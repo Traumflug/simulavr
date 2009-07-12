@@ -2350,7 +2350,7 @@ avr_op_ILLEGAL::avr_op_ILLEGAL
 
 int avr_op_ILLEGAL::operator()() 
 {
-    cerr<< "Simulation terminated! IllegalInstruction executed!" << endl;
+    std::cerr<< "Simulation terminated! IllegalInstruction executed!" << std::endl;
     exit(0);
     return 1;
 }

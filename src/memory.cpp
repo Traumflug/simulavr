@@ -31,6 +31,8 @@
 
 #include "trace.h"
 
+using namespace std;
+
 unsigned int Memory::GetAddressAtSymbol(const string &s) {
     char *dummy;
 

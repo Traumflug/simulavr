@@ -25,7 +25,7 @@
 
 #include "application.h"
 #include "printable.h"
-
+using namespace std;
 
 Application* Application::GetInstance() {
     if (!instance) {

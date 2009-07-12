@@ -27,6 +27,8 @@
 #include "systemclock.h"
 #include "systemclocktypes.h"
 
+using namespace std;
+
 SerialRxBasic::SerialRxBasic(){
     rx.RegisterCallback(this);
     allPins["rx"]= &rx;

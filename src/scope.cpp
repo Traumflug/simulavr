@@ -26,6 +26,7 @@
 #include "scope.h"
 #include "systemclock.h"
 
+using namespace std;
 
 class ScopePin : public Pin {
     protected:

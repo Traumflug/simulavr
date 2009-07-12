@@ -40,9 +40,9 @@
 class Keyboard : public SimulationMember, public ExternalType {
     protected:
         UserInterface *ui;
-        string name;
+	std::string name;
         unsigned char myPortValue;
-        map<string, Pin*> allPins;
+	std::map<std::string, Pin*> allPins;
         Pin clk;
         Pin data;
 
@@ -64,7 +64,7 @@ class Keyboard : public SimulationMember, public ExternalType {
          unsigned char lastPortValue;
 
     public:
-        void SetNewValueFromUi(const string &);
+	 void SetNewValueFromUi(const std::string &);
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
       Keyboard(UserInterface *, const char *name, const char *baseWindow);
         void SetClockFreq(SystemClockOffset f);

@@ -34,7 +34,7 @@
 class SerialRxBasic: public SimulationMember, public HasPinNotifyFunction {
     protected:
         Pin rx;
-        map < string, Pin *> allPins;
+	std::map < std::string, Pin *> allPins;
         unsigned long long baudrate;
 
         void PinStateHasChanged(Pin*);
@@ -75,7 +75,7 @@ class SerialRxBasic: public SimulationMember, public HasPinNotifyFunction {
  
  class SerialRxBuffered: public SerialRxBasic{
  	protected:
- 		vector<unsigned char> buffer;
+                std::vector<unsigned char> buffer;
  		virtual void CharReceived(unsigned char c);
  	public:
  		unsigned char Get();
@@ -89,9 +89,9 @@ class SerialRxBasic: public SimulationMember, public HasPinNotifyFunction {
 class SerialRx: public SerialRxBasic, public ExternalType{
     protected:
         UserInterface *ui;
-        string name;
+	std::string name;
 
-        map < string, Pin *> allPins;
+	std::map < std::string, Pin *> allPins;
 
         unsigned int CpuCycleRx();
         virtual void CharReceived(unsigned char c);
@@ -100,7 +100,7 @@ class SerialRx: public SerialRxBasic, public ExternalType{
         SerialRx(UserInterface *_ui, const char *_name, const char *baseWindow);
         unsigned int CpuCycle();
         virtual ~SerialRx(){};
-        virtual void SetNewValueFromUi(const string &);
+        virtual void SetNewValueFromUi(const std::string &);
  };
 
 #endif

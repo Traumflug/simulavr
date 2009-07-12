@@ -44,11 +44,9 @@
 #include <map>
 #include <sstream>
 
-using namespace std;
-
 class sockbuf 
 #ifndef SWIG
-: public streambuf
+: public std::streambuf
 #endif
 {
     protected:
@@ -67,7 +65,7 @@ class sockbuf
 
 class sockstream
 #ifndef SWIG
-:public ostream 
+:public std::ostream 
 #endif 
 {
 
@@ -75,7 +73,7 @@ class sockstream
         sockbuf buffer; 
 
     public: 
-        sockstream(int *c): ostream(&buffer), buffer(c){}
+        sockstream(int *c): std::ostream(&buffer), buffer(c){}
 };
 
 class Pin;
@@ -91,12 +89,12 @@ class Socket: public sockstream {
     public:
         Socket(int port);
         ~Socket();
-        ssize_t Read( string &a);
-        void Write(const string &s); 
+        ssize_t Read(std::string &a);
+        void Write(const std::string &s); 
         ssize_t Poll();
 
         void Write(const char *in) {
-            string a(in);
+	    std::string a(in);
             Write(a);
         }
 };

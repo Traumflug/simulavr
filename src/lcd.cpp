@@ -28,6 +28,9 @@
 
 #include "lcd.h"
 #include "pinatport.h"
+
+using namespace std;
+
 /*---------------------------------------------------------------------------
  *
  * This module simulates a HD 44780 LCD controller with a 4 Bit interface

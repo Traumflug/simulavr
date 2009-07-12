@@ -26,7 +26,6 @@
 #ifndef HWMEGAEXTIRQ
 #define HWMEGAEXTIRQ
 #include <vector>
-using namespace std;
 #include "hardware.h"
 #include "pinatport.h"
 #include "rwmem.h"
@@ -44,10 +43,10 @@ class HWMegaExtIrq: public Hardware, public HasPinNotifyFunction {
 		bool int_old[8];
 
 		//PinAtPort pinI[8];
-        vector<PinAtPort> pinI;
+		std::vector<PinAtPort> pinI;
 
 		//unsigned int vectorInt[8];
-        vector<unsigned int> vectorInt; 
+		std::vector<unsigned int> vectorInt; 
 
 	public:
 		HWMegaExtIrq(AvrDevice *core, HWIrqSystem *, 

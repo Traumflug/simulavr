@@ -166,11 +166,11 @@ AvrDevice(64, 128, 0, 4*1024) {
 
 AvrDevice_at90s4433::~AvrDevice_at90s4433() {}
 unsigned char AvrDevice_at90s4433::GetRampz() {
-	cerr << "RAMPZ is not a valid register in at90s4433!" ;
+    std::cerr << "RAMPZ is not a valid register in at90s4433!" ;
 	return 0;
 }
 
 void AvrDevice_at90s4433::SetRampz(unsigned char val) {
-	cerr << "Illegal RAMPZ operation in at90s4433 core";
+    std::cerr << "Illegal RAMPZ operation in at90s4433 core";
 }
 

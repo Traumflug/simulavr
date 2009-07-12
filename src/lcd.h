@@ -49,9 +49,9 @@ typedef enum {
 class Lcd : public SimulationMember {
     protected:
         UserInterface *ui;
-        string name;
+	std::string name;
         unsigned char myPortValue;
-        map<string, Pin*> allPins;
+	std::map<std::string, Pin*> allPins;
         Pin d0;
         Pin d1;
         Pin d2;
@@ -72,7 +72,7 @@ class Lcd : public SimulationMember {
         void LcdWriteData(unsigned char data);
         unsigned int  LcdWriteCommand(unsigned char command);
 
-        ofstream debugOut;
+	std::ofstream debugOut;
         void SendCursorPosition();
 
         unsigned char lastPortValue;

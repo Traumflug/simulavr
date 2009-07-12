@@ -1,6 +1,8 @@
 #include <iostream>
 #include "spisrc.h"
 
+using namespace std;
+
 SpiSource::SpiSource(	const char*	fileName,
 						Net&		ssNet,
 						Net&		sclkNet,

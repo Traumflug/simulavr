@@ -27,25 +27,22 @@
 #define PRINTABLE
 
 #include <iostream>
-using namespace std;
 
 
 #include "application.h"
 
 class Printable {
-    protected:
-        ostream &out;
+ protected:
+    std::ostream &out;
 
-    public:
-        Printable(ostream &os):out(os){};
-        virtual void operator()();
-        virtual ~Printable() {}
-        
-        
+ public:
+    Printable(std::ostream &os):out(os){};
+    virtual void operator()();
+    virtual ~Printable() {}
 };
 
 
 //Dummy function!
-ostream &operator<<(ostream &os, const Printable *p);
+std::ostream &operator<<(std::ostream &os, const Printable *p);
 
 #endif

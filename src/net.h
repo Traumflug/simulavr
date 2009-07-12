@@ -27,7 +27,6 @@
 #define NET
 
 #include <vector>
-using namespace std;
 
 //class Pin;
 #include "pin.h"
@@ -53,15 +52,15 @@ class NetInterface {
 
 class Net:
 #ifndef SWIG
-    public vector <Pin *>,
+    public std::vector <Pin *>,
 #endif
     public NetInterface 
 {
-    public:
-        void Add(Pin *p);
-        void Delete(Pin *p);
-        bool CalcNet();
-        ~Net();
+ public:
+    void Add(Pin *p);
+    void Delete(Pin *p);
+    bool CalcNet();
+    ~Net();
 };
 
 class MirrorNet: public NetInterface {

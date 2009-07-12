@@ -31,6 +31,7 @@
 #include "hwtimer.h"    //for prescaler
 #include "trace.h"
 
+using namespace std;
 
 const unsigned short HWMegaTimer1::topFFFF; //=0xffff;
 const unsigned short HWMegaTimer1::topFF; //=0xff;

@@ -57,7 +57,7 @@ class HWStack: public Hardware {
 		MemoryOffsets *mem;
 		unsigned int stackPointer;
         unsigned int stackCeil;
-        multimap<unsigned int , Funktor* > breakPointList; //later the second parameter should be a function Pointer!
+	std::multimap<unsigned int , Funktor* > breakPointList; //later the second parameter should be a function Pointer!
 
 	public:
         /*!Ceil gives the maximum value (+1) for the stack pointer, in smaller devices

@@ -27,6 +27,7 @@
 #include <sstream>
 #include "helper.h"
 
+using namespace std;
 
 HexChar::HexChar(unsigned char x) { val=x; }
 HexShort::HexShort(unsigned short x) { val=x; }

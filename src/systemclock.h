@@ -33,7 +33,7 @@
 
 class SystemClock
 #ifndef SWIG
-: public multimap<SystemClockOffset, SimulationMember *> 
+: public std::multimap<SystemClockOffset, SimulationMember *> 
 #endif
 {
     private:
@@ -42,8 +42,7 @@ class SystemClock
 
     protected:
         SystemClockOffset currentTime;
-        vector<SimulationMember*> asyncMembers;
-
+	std::vector<SimulationMember*> asyncMembers;
     public:
         //SystemClock();
 

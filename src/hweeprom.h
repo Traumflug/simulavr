@@ -46,7 +46,7 @@ class HWEeprom: public Hardware, public Memory {
     public:
         HWEeprom(AvrDevice *core, unsigned int size);
         void WriteMem(unsigned char *, unsigned int offset, unsigned int size);
-        void Load(const string &filename);
+        void Load(const std::string &filename);
         virtual    ~HWEeprom();
         void SetEearl(unsigned char);
         void SetEearh(unsigned char);

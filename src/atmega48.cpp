@@ -192,10 +192,10 @@ admux(	this,
 }
 
 unsigned char AvrDevice_atmega48::GetRampz() {
-	cerr << "Rampz is not a valid Register in ATMega48!" ;
-	return 0;
+    std::cerr << "Rampz is not a valid Register in ATMega48!" ;
+    return 0;
 }
 
 void AvrDevice_atmega48::SetRampz(unsigned char val) {
-    cerr << "Illegal Rampz operation in ATMega48 core";
+    std::cerr << "Illegal Rampz operation in ATMega48 core";
 }

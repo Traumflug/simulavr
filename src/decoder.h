@@ -27,7 +27,6 @@
 #define DECODER
 
 #include <iostream>
-using namespace std;
 #include "rwmem.h"
 #include "hwsreg.h"
 #include "types.h"

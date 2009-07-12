@@ -35,6 +35,8 @@
 
 #include "avrdevice_impl.h"
 
+using namespace std;
+
 void AvrDevice::AddToResetList(Hardware *hw) {
     if (find(hwResetList.begin(), hwResetList.end(), hw)==hwResetList.end())
 	hwResetList.push_back(hw);

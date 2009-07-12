@@ -29,6 +29,8 @@
 #include "hwtimer01irq.h"
 #include "trace.h"
 
+using namespace std;
+
 HWPrescaler::HWPrescaler(AvrDevice *core): Hardware(core) {
 	core->AddToCycleList(this);
 }

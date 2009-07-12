@@ -30,14 +30,12 @@
 #include <algorithm>
 
 
-using namespace std;
-
 #include "types.h" //for dword
 
-class Breakpoints: public vector<dword> {
+class Breakpoints: public std::vector<dword> {
 };
 
-class Exitpoints: public vector<dword> {
+class Exitpoints: public std::vector<dword> {
 };
 
 #endif

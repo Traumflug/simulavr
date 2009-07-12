@@ -27,6 +27,8 @@
 #include "systemclock.h"
 #include "string2.h"
 
+using namespace std;
+
 SerialTxBuffered::SerialTxBuffered()
 {
     allPins["tx"] = &tx;

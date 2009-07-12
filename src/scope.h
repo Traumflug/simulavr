@@ -31,8 +31,6 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 #include "systemclocktypes.h"
 #include "simulationmember.h"
 #include "ui.h"
@@ -42,17 +40,17 @@ using namespace std;
 class Scope : public SimulationMember {
     protected:
         UserInterface *ui;
-        string name;
+	std::string name;
         unsigned char myPortValue;
-        map<string, Pin*> allPins;
+	std::map<std::string, Pin*> allPins;
 
-        vector<Pin*> vecPin;
-        vector<int> lastVal;
+	std::vector<Pin*> vecPin;
+	std::vector<int> lastVal;
         unsigned int noOfChannels;
 
 
     public:
-        Scope(UserInterface *ui, const string &name, unsigned int noOfChannels, const char *baseWindow);
+        Scope(UserInterface *ui, const std::string &name, unsigned int noOfChannels, const char *baseWindow);
         virtual ~Scope();
         Pin *GetPin(unsigned int no); 
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){return 0;} //what we should step here?

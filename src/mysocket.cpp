@@ -5,6 +5,8 @@
 #include <stdlib.h> //use exit()
 #include "mysocket.h"
 
+using namespace std;
+
 
 Socket::Socket(int port):sockstream(&conn) {
     OpenSocket(port);

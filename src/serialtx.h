@@ -33,7 +33,7 @@ class SerialTxBuffered: public SimulationMember {
     protected:
         Pin tx;
 
-        map < string, Pin *> allPins;
+	std::map < std::string, Pin *> allPins;
         unsigned long long baudrate;
 
         enum T_TxState{
@@ -46,7 +46,7 @@ class SerialTxBuffered: public SimulationMember {
 
         T_TxState txState;
 
-        vector<unsigned char> inputBuffer;
+	std::vector<unsigned char> inputBuffer;
         unsigned int data;
         unsigned int bitCnt;
         unsigned int maxBitCnt;
@@ -68,7 +68,7 @@ class SerialTxBuffered: public SimulationMember {
 class SerialTx: public SerialTxBuffered, public ExternalType {
     protected:
         UserInterface *ui;
-        string name;
+	std::string name;
 
         unsigned int CpuCycleTx();
 
@@ -76,7 +76,7 @@ class SerialTx: public SerialTxBuffered, public ExternalType {
         SerialTx(UserInterface *_ui, const char *_name, const char *baseWindow);
         unsigned int CpuCycle();
         virtual ~SerialTx(){};
-        virtual void SetNewValueFromUi(const string &);
+        virtual void SetNewValueFromUi(const std::string &);
  };
 
 #endif

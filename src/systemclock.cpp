@@ -32,6 +32,8 @@
 
 #include "signal.h"
 
+using namespace std;
+
 SystemClock::SystemClock() { 
     static int no=0;
     currentTime=0; 

@@ -27,13 +27,12 @@
 #define APPLICATION
 //#include "printable.h"
 #include <vector>
-using namespace std;
 class Printable;
 
 class Application {
     protected:
         static Application *instance;
-        vector <Printable*> printable;
+	std::vector <Printable*> printable;
         
 
     private:
