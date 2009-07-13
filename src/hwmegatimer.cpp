@@ -30,6 +30,7 @@
 #include "hwmegatimer.h"
 #include "hwtimer.h"    //for prescaler
 #include "trace.h"
+#include "helper.h"
 
 using namespace std;
 
@@ -210,13 +211,15 @@ void HWMegaTimer0::TimerCompareAfterCount() {
 
 }
 
-HWMegaTimer0::HWMegaTimer0(AvrDevice *_c, HWPrescaler *p, HWMegaTimer0123Irq *s, PinAtPort oc):
+HWMegaTimer0::HWMegaTimer0(AvrDevice *_c, HWPrescaler *p,
+                           HWMegaTimer0123Irq *s,
+                           PinAtPort oc, int n):
     Hardware(_c), core(_c), pin_oc(oc),
-    tccr_reg(core, "TIMER0.TCCR",
+    tccr_reg(core, "TIMER"+int2str(n)+".TCCR",
              this, &HWMegaTimer0::GetTccr, &HWMegaTimer0::SetTccr),
-    tcnt_reg(core, "TIMER0.TCNT",
+    tcnt_reg(core, "TIMER"+int2str(n)+".TCNT",
              this, &HWMegaTimer0::GetTcnt, &HWMegaTimer0::SetTcnt),
-    ocr_reg(core, "TIMER0.OCR",
+    ocr_reg(core, "TIMER"+int2str(n)+".OCR",
             this, &HWMegaTimer0::GetOcr, &HWMegaTimer0::SetOcr) {
 	//_c->AddToCycleList(this);
 	prescaler=p;
@@ -504,13 +507,15 @@ void HWMegaTimer2::TimerCompareAfterCount() {
 
 }
 
-HWMegaTimer2::HWMegaTimer2(AvrDevice *_c, HWPrescaler *p, HWMegaTimer0123Irq *s, PinAtPort pi, PinAtPort oc) :
+HWMegaTimer2::HWMegaTimer2(AvrDevice *_c, HWPrescaler *p,
+                           HWMegaTimer0123Irq *s,
+                           PinAtPort pi, PinAtPort oc, int n) :
     Hardware(_c), core(_c), pin_t0(pi), pin_oc(oc),
-    tccr_reg(core, "TIMER2.TCCR",
+    tccr_reg(core, "TIMER"+int2str(n)+".TCCR",
              this, &HWMegaTimer2::GetTccr, &HWMegaTimer2::SetTccr),
-    tcnt_reg(core, "TIMER2.TCNT",
+    tcnt_reg(core, "TIMER"+int2str(n)+".TCNT",
              this, &HWMegaTimer2::GetTcnt, &HWMegaTimer2::SetTcnt),
-    ocr_reg(core, "TIMER2.OCR",
+    ocr_reg(core, "TIMER"+int2str(n)+".OCR",
             this, &HWMegaTimer2::GetOcr, &HWMegaTimer2::SetOcr) {
 	//_c->AddToCycleList(this);
 	prescaler=p;
@@ -642,33 +647,34 @@ unsigned int HWMegaTimer2::CpuCycle(){
 //--------------------------------------------------------------------------------------
 
 HWMegaTimer1::HWMegaTimer1
-(AvrDevice *_c, HWPrescaler *p, HWMegaTimer0123Irq *s, bool isT1, PinAtPort t1, PinAtPort oca, PinAtPort ocb, PinAtPort occ) :
+(AvrDevice *_c, HWPrescaler *p, HWMegaTimer0123Irq *s, bool isT1, PinAtPort
+t1, PinAtPort oca, PinAtPort ocb, PinAtPort occ, int n) :
     Hardware(_c), core(_c), isTimer1(isT1), pin_t1(t1), pin_oc1a(oca), pin_oc1b(ocb), pin_oc1c(occ),
-    tccra_reg(core, "TIMER1.TCCRA",
+    tccra_reg(core, "TIMER"+int2str(n)+".TCCRA",
               this, &HWMegaTimer1::GetTccr1a, &HWMegaTimer1::SetTccr1a),
-    tccrb_reg(core, "TIMER1.TCCRB",
+    tccrb_reg(core, "TIMER"+int2str(n)+".TCCRB",
               this, &HWMegaTimer1::GetTccr1b, &HWMegaTimer1::SetTccr1b),
-    tccrc_reg(core, "TIMER1.TCCRC",
+    tccrc_reg(core, "TIMER"+int2str(n)+".TCCRC",
               this, &HWMegaTimer1::GetTccr1c, &HWMegaTimer1::SetTccr1c),
-    tcnth_reg(core, "TIMER1.TCNTH",
+    tcnth_reg(core, "TIMER"+int2str(n)+".TCNTH",
               this, &HWMegaTimer1::GetTcnt1h, &HWMegaTimer1::SetTcnt1h),
-    tcntl_reg(core, "TIMER1.TCNTL",
+    tcntl_reg(core, "TIMER"+int2str(n)+".TCNTL",
               this, &HWMegaTimer1::GetTcnt1l, &HWMegaTimer1::SetTcnt1l),
-    ocrah_reg(core, "TIMER1.OCRAH",
+    ocrah_reg(core, "TIMER"+int2str(n)+".OCRAH",
               this, &HWMegaTimer1::GetOcr1ah, &HWMegaTimer1::SetOcr1ah),
-    ocral_reg(core, "TIMER1.OCRAL",
+    ocral_reg(core, "TIMER"+int2str(n)+".OCRAL",
               this, &HWMegaTimer1::GetOcr1al, &HWMegaTimer1::SetOcr1al),
-    ocrbh_reg(core, "TIMER1.OCRBH",
+    ocrbh_reg(core, "TIMER"+int2str(n)+".OCRBH",
               this, &HWMegaTimer1::GetOcr1bh, &HWMegaTimer1::SetOcr1bh),
-    ocrbl_reg(core, "TIMER1.OCRBL",
+    ocrbl_reg(core, "TIMER"+int2str(n)+".OCRBL",
               this, &HWMegaTimer1::GetOcr1bl, &HWMegaTimer1::SetOcr1bl),
-    ocrch_reg(core, "TIMER1.OCRCH",
+    ocrch_reg(core, "TIMER"+int2str(n)+".OCRCH",
               this, &HWMegaTimer1::GetOcr1ch, &HWMegaTimer1::SetOcr1ch),
-    ocrcl_reg(core, "TIMER1.OCRCL",
+    ocrcl_reg(core, "TIMER"+int2str(n)+".OCRCL",
               this, &HWMegaTimer1::GetOcr1cl, &HWMegaTimer1::SetOcr1cl),
-    icrh_reg(core, "TIMER1.TICRH",
+    icrh_reg(core, "TIMER"+int2str(n)+".TICRH",
              this, &HWMegaTimer1::GetIcr1h, &HWMegaTimer1::SetIcrh),
-    icrl_reg(core, "TIMER1.TICRL",
+    icrl_reg(core, "TIMER"+int2str(n)+".TICRL",
              this, &HWMegaTimer1::GetIcr1l, &HWMegaTimer1::SetIcrl) { 
 	//_c->AddToCycleList(this);
 	cntDir=1;

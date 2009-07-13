@@ -78,7 +78,9 @@ class HWMegaX8Timer0: public Hardware {
 		void OcrResetPin(unsigned char &ocr, bool &lastOcr, PinAtPort &pinOc, unsigned char ocrMode);
 
 	public:
-		HWMegaX8Timer0(AvrDevice *core, HWPrescaler *p, HWMegaX8TimerIrq *s, PinAtPort oca, PinAtPort ocb);
+		HWMegaX8Timer0(AvrDevice *core, HWPrescaler *p,
+                       HWMegaX8TimerIrq *s, PinAtPort oca,
+                       PinAtPort ocb, int n=0);
 
 		void Reset() {
 			SetTccra(0);

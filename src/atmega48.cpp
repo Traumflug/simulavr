@@ -81,7 +81,8 @@ admux(	this,
 
 	
 	timerIrq0	= new HWMegaX8TimerIrq( this, irqSystem, 16, 14, 15);
-	timer0		= new HWMegaX8Timer0( this, &prescaler,timerIrq0,PinAtPort(&portd, 6),PinAtPort(&portd, 5));
+	timer0		= new HWMegaX8Timer0( this,
+                                      &prescaler,timerIrq0,PinAtPort(&portd, 6),PinAtPort(&portd, 5), 0);
 
 	ad	= new HWAd( this, &admux, irqSystem, aref, 21);
 	spi	= new HWSpi(	this,

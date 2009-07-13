@@ -75,7 +75,9 @@ class HWTimer0: public Hardware {
 		void TimerCompareAfterCount();
 
 	public:
-		HWTimer0(AvrDevice *core, HWPrescaler *p, HWTimer01Irq *s, PinAtPort pi);
+		HWTimer0(AvrDevice *core, HWPrescaler *p,
+                 HWTimer01Irq *s, PinAtPort pi,
+                 int n=0);
 
 		void Reset() {
 			SetTccr(0);
@@ -155,7 +157,9 @@ class HWTimer1 : public Hardware {
 		void TimerCompareAfterCount();
 
 	public:
-		HWTimer1(AvrDevice *core, HWPrescaler *p, HWTimer01Irq *s, PinAtPort t1, PinAtPort oca, PinAtPort ocb, PinAtPort pin_icp);
+		HWTimer1(AvrDevice *core, HWPrescaler *p, HWTimer01Irq *s,
+                 PinAtPort t1, PinAtPort oca, PinAtPort ocb,
+                 PinAtPort pin_icp, int n=0);
 		void Reset()
 		{
 

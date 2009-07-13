@@ -27,6 +27,7 @@
 #include "hwmegax8timer.h"
 #include "hwtimer.h"    //for prescaler
 #include "trace.h"
+#include "helper.h"
 
 using namespace std;
 
@@ -213,17 +214,19 @@ void HWMegaX8Timer0::TimerCompareAfterCount() {
 
 
 
-HWMegaX8Timer0::HWMegaX8Timer0(AvrDevice *_c, HWPrescaler *p, HWMegaX8TimerIrq *s, PinAtPort oca, PinAtPort ocb):
+HWMegaX8Timer0::HWMegaX8Timer0(AvrDevice *_c, HWPrescaler *p,
+                               HWMegaX8TimerIrq *s, PinAtPort oca,
+                               PinAtPort ocb, int n):
 	Hardware(_c), core(_c), pin_oca(oca), pin_ocb(ocb),
-    tcnt_reg(core, "TIMER0.TCNT",
+    tcnt_reg(core, "TIMER"+int2str(n)+".TCNT",
              this, &HWMegaX8Timer0::GetTcnt, &HWMegaX8Timer0::SetTcnt),
-    ocra_reg(core, "TIMER0.OCRA",
+    ocra_reg(core, "TIMER"+int2str(n)+".OCRA",
              this, &HWMegaX8Timer0::GetOcra, &HWMegaX8Timer0::SetOcra),
-    ocrb_reg(core, "TIMER0.OCRB",
+    ocrb_reg(core, "TIMER"+int2str(n)+".OCRB",
              this, &HWMegaX8Timer0::GetOcrb, &HWMegaX8Timer0::SetOcrb),
-    tccra_reg(core, "TIMER0.TCCRA",
+    tccra_reg(core, "TIMER"+int2str(n)+".TCCRA",
               this, &HWMegaX8Timer0::GetTccra, &HWMegaX8Timer0::SetTccra),
-    tccrb_reg(core, "TIMER0.TCCRB",
+    tccrb_reg(core, "TIMER"+int2str(n)+".TCCRB",
               this, &HWMegaX8Timer0::GetTccrb, &HWMegaX8Timer0::SetTccrb) {
 	//_c->AddToCycleList(this);
 	prescaler=p;

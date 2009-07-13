@@ -110,19 +110,21 @@ aref()
 			29  /*t3ovf*/
 			);
 
-	timer0=new HWMegaTimer0(this, prescaler0, timer0123irq, PinAtPort(portb, 4));
+	timer0=new HWMegaTimer0(this, prescaler0, timer0123irq, PinAtPort(portb,
+                                                                      4), 0);
 
 	timer1= new HWMegaTimer1(this, prescaler123, timer0123irq, 1, //is timer1
             PinAtPort(portd, 6), PinAtPort(portb, 5), PinAtPort (portb, 6),
-            PinAtPort (portb , 7));
+                             PinAtPort (portb , 7), 1);
 
     timer2=new HWMegaTimer2(this, prescaler123, timer0123irq,
-            PinAtPort(portd, 7), PinAtPort(portb, 7));
+                            PinAtPort(portd, 7), PinAtPort(portb, 7), 2);
 
     timer3=new HWMegaTimer1(this, prescaler123, timer0123irq,
-           0, //is not timer1
-           PinAtPort(porte, 6), PinAtPort(porte, 3), PinAtPort (porte, 4),
-           PinAtPort (porte, 5));
+                            0, //is not timer1
+                            PinAtPort(porte, 6), PinAtPort(porte, 3),
+                            PinAtPort (porte, 4),
+                            PinAtPort (porte, 5), 3);
 
 
 	rw[0x9d]= & usart1->ucsrc_reg;

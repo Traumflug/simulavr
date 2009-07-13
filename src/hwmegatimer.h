@@ -77,7 +77,8 @@ class HWMegaTimer0: public Hardware {
 		void OcrResetPin(unsigned char &ocr, bool &lastOcr, PinAtPort &pinOc, unsigned char ocrMode);
 
 	public:
-		HWMegaTimer0(AvrDevice *core, HWPrescaler *p, HWMegaTimer0123Irq *s, PinAtPort oc);
+		HWMegaTimer0(AvrDevice *core, HWPrescaler *p, HWMegaTimer0123Irq *s,
+                     PinAtPort oc, int n=0);
 
 		void Reset() {
 			SetTccr(0);
@@ -141,7 +142,8 @@ class HWMegaTimer2: public Hardware {
 		void OcrResetPin(unsigned char &ocr, bool &lastOcr, PinAtPort &pinOc, unsigned char ocrMode);
 
 	public:
-		HWMegaTimer2(AvrDevice *core, HWPrescaler *p, HWMegaTimer0123Irq *s, PinAtPort pi, PinAtPort oc);
+		HWMegaTimer2(AvrDevice *core, HWPrescaler *p, HWMegaTimer0123Irq *s,
+                     PinAtPort pi, PinAtPort oc, int n=0);
 
 		void Reset() {
 			SetTccr(0);
@@ -234,7 +236,10 @@ class HWMegaTimer1 : public Hardware {
 		void OcrResetPin(unsigned short &ocr, bool &lastOcr, PinAtPort &pinOc, unsigned char ocrMode);
 
 	public:
-		HWMegaTimer1(AvrDevice *core, HWPrescaler *p, HWMegaTimer0123Irq *s, bool isTimer1, PinAtPort t1, PinAtPort oca, PinAtPort ocb, PinAtPort occ);
+		HWMegaTimer1(AvrDevice *core, HWPrescaler *p, HWMegaTimer0123Irq *s,
+                     bool isTimer1, PinAtPort t1,
+                     PinAtPort oca, PinAtPort ocb,
+                     PinAtPort occ, int n=0);
 		void Reset();
 		virtual unsigned int CpuCycle();
 		unsigned char GetTccr1a() { return tccr1a;}

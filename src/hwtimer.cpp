@@ -28,6 +28,7 @@
 #include "hwtimer.h"
 #include "hwtimer01irq.h"
 #include "trace.h"
+#include "helper.h"
 
 using namespace std;
 
@@ -41,11 +42,12 @@ void HWTimer0::TimerCompareAfterCount() {
 	}
 }
 
-HWTimer0::HWTimer0(AvrDevice *c, HWPrescaler *p, HWTimer01Irq *s, PinAtPort pi):
+HWTimer0::HWTimer0(AvrDevice *c, HWPrescaler *p, HWTimer01Irq *s,
+                   PinAtPort pi, int n):
     Hardware(c),core(c),pin_t0(pi),
-    tccr_reg(core, "TIMER0.TCCR",
+    tccr_reg(core, "TIMER"+int2str(n)+".TCCR",
              this, &HWTimer0::GetTccr, &HWTimer0::SetTccr),
-    tcnt_reg(core, "TIMER0.TCNT",
+    tcnt_reg(core, "TIMER"+int2str(n)+".TCNT",
              this, &HWTimer0::GetTcnt, &HWTimer0::SetTccr) {
 	//core->AddToCycleList(this);
 	prescaler=p;
@@ -123,28 +125,29 @@ unsigned int HWTimer0::CpuCycle(){
 }
 
 
-HWTimer1::HWTimer1(AvrDevice *c, HWPrescaler *p, HWTimer01Irq *s, PinAtPort t1, PinAtPort oca, PinAtPort ocb,
-		   PinAtPort icp):
+HWTimer1::HWTimer1(AvrDevice *c, HWPrescaler *p, HWTimer01Irq *s,
+                   PinAtPort t1, PinAtPort oca, PinAtPort ocb,
+                   PinAtPort icp, int n):
     Hardware(c), core(c), pin_t1(t1), pin_oc1a(oca), pin_oc1b(ocb), pin_icp(icp),
-    tccr1a_reg(core, "TIMER1.TCCR1A",
+    tccr1a_reg(core, "TIMER"+int2str(n)+".TCCR1A",
                this, &HWTimer1::GetTccr1a, &HWTimer1::SetTccr1a),
-    tccr1b_reg(core, "TIMER1.TCCR1B",
+    tccr1b_reg(core, "TIMER"+int2str(n)+".TCCR1B",
                this, &HWTimer1::GetTccr1b, &HWTimer1::SetTccr1b),
-    tcnt1h_reg(core, "TIMER1.TCNT1H",
+    tcnt1h_reg(core, "TIMER"+int2str(n)+".TCNT1H",
                this, &HWTimer1::GetTcnt1h, &HWTimer1::SetTcnt1h),
-    tcnt1l_reg(core, "TIMER1.TCNT1L",
+    tcnt1l_reg(core, "TIMER"+int2str(n)+".TCNT1L",
                this, &HWTimer1::GetTcnt1l, &HWTimer1::SetTcnt1l),
-    ocr1ah_reg(core, "TIMER1.OCR1AH",
+    ocr1ah_reg(core, "TIMER"+int2str(n)+".OCR1AH",
                this, &HWTimer1::GetOcr1ah, &HWTimer1::SetOcr1ah),
-    ocr1al_reg(core, "TIMER1.OCR1AL",
+    ocr1al_reg(core, "TIMER"+int2str(n)+".OCR1AL",
                this, &HWTimer1::GetOcr1al, &HWTimer1::SetOcr1al),
-    ocr1bh_reg(core, "TIMER1.OCR1BH",
+    ocr1bh_reg(core, "TIMER"+int2str(n)+".OCR1BH",
                this, &HWTimer1::GetOcr1bh, &HWTimer1::SetOcr1bh),
-    ocr1bl_reg(core, "TIMER1.OCR1BL",
+    ocr1bl_reg(core, "TIMER"+int2str(n)+".OCR1BL",
                this, &HWTimer1::GetOcr1bl, &HWTimer1::SetOcr1bl),
-    icr1h_reg(core, "TIMER1.ICR1H",
+    icr1h_reg(core, "TIMER"+int2str(n)+".ICR1H",
               this, &HWTimer1::GetIcr1h, 0),
-    icr1l_reg(core, "TIMER1.ICR1L",
+    icr1l_reg(core, "TIMER"+int2str(n)+".ICR1L",
               this, &HWTimer1::GetIcr1l, 0) { 
     //c->AddToCycleList(this);
     cntDir=1; //start with upcounting
