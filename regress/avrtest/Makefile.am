@@ -44,3 +44,7 @@ run_exit: test_exit
 	../../src/simulavr --device $(AVR_MODEL) -f test_exit \
 	    -W 0x52,- -e 0x4F
 	@echo "*** Did it voluntarily exit? ***"
+  
+# run target run_sim together with other tests on "make check"
+check-local: run_sim
+
