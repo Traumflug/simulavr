@@ -118,7 +118,7 @@ AC_CONFIG_FILES([\
   examples/Makefile examples/anacomp/Makefile examples/atmega48/Makefile \
   examples/atmega128_timer/Makefile examples/atmel_key/Makefile \
   examples/feedback/Makefile examples/simple_ex1/Makefile \
-  examples/spi/Makefile examples/stdiodemo/Makefile \
+  examples/spi/Makefile examples/stdiodemo/Makefile examples/python/Makefile \
 ])
 
 ## Certain files should only be generated if Tcl is available and enabled

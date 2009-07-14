@@ -1,0 +1,12 @@
+README
+------
+
+This is a little sample project to demonstrate usage of pysimulavr. It's written
+as a unittest. You can start it by::
+
+  > make do_example
+  
+So you can see, how easy it's to write unittests for simulavr or also for your
+avr code. But you can use pysimulavr also for other things, look at example.py
+how to use pysimulavr.
+
