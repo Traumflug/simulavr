@@ -25,6 +25,7 @@ endif
 
 if PYTHON_USE
 PYTHON_MODUL_LIB=_pysimulavr.so
+PYTHON_MODUL_INTERFACE=$(srcdir)/python/pysimulavr.i
 lib_LTLIBRARIES += lib_pysimulavr.la
 lib_pysimulavr_la_SOURCES=pysimulavr_wrap.cpp
 lib_pysimulavr_la_CPPFLAGS=$(PYTHON_CPPFLAGS)
@@ -32,7 +33,7 @@ lib_pysimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 lib_pysimulavr_la_LIBADD= $(libsim_la_OBJECTS) \
   -L$(AVR_LIBIBERTY_LIBPATH) -liberty -L$(AVR_LIBBFD_LIBPATH) -lbfd
 
-pysimulavr_wrap.cpp: $(srcdir)/pysimulavr.i
+pysimulavr_wrap.cpp: $(PYTHON_MODUL_INTERFACE)
 	$(SWIG) $(SWIG_PYTHON_OPT) -o $@ $?
 
 $(PYTHON_MODUL_LIB): lib_pysimulavr.la

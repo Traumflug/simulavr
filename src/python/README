@@ -1,0 +1,16 @@
+README for pysimulavr python module
+-----------------------------------
+
+This module will be build, if the following prerequisites are available:
+
+- SWIG is available (see configure.ac in root directory for the proper version)
+- Python is available, at least in a proper version (see configure.ac)
+- configure was run with the option --enable-python
+
+Status
+======
+
+This module is in development. This means, that some modules, which would be available
+by libsim are not included in python interface. So, if you need an special interface
+or you've found a bug, please send it to simulavr mailinglist or write a bug report
+on http://savannah.nongnu.org/simulavr.
