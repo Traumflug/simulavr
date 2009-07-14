@@ -30,8 +30,8 @@ lib_LTLIBRARIES += lib_pysimulavr.la
 lib_pysimulavr_la_SOURCES=pysimulavr_wrap.cpp
 lib_pysimulavr_la_CPPFLAGS=$(PYTHON_CPPFLAGS)
 lib_pysimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-lib_pysimulavr_la_LIBADD= $(libsim_la_OBJECTS) \
-  -L$(AVR_LIBIBERTY_LIBPATH) -liberty -L$(AVR_LIBBFD_LIBPATH) -lbfd
+lib_pysimulavr_la_LIBADD= libsim.la \
+  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty
 
 pysimulavr_wrap.cpp: $(PYTHON_MODUL_INTERFACE)
 	$(SWIG) $(SWIG_PYTHON_OPT) -o $@ $?
@@ -98,7 +98,7 @@ VPI_LIB=avr.vpi
 libavrvpi_la_SOURCES = vpi.cpp
 libavrvpi_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 libavrvpi_la_LIBADD= $(libsim_la_OBJECTS) -lz \
-  -L$(AVR_LIBIBERTY_LIBPATH) -liberty -L$(AVR_LIBBFD_LIBPATH) -lbfd
+  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty
 
 $(VPI_LIB): libavrvpi.la
 	cp .libs/libavrvpi.so $(VPI_LIB)
