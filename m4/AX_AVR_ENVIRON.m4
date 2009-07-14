@@ -48,16 +48,12 @@ if test -z "${bfd_a_location}"; then
  ])
 fi
 
-<<<<<<< HEAD:m4/AX_AVR_ENVIRON.m4
-AVR_LIBBFD_LIB=${bfd_a_location}/libbfd.so
-=======
 AVR_LIBBFD_LIBPATH=${bfd_a_location}
 if test -f "${bfd_a_location}/libbfd.so"; then
   AVR_LIBBFD_LIB=${bfd_a_location}/libbfd.so
 else
   AVR_LIBBFD_LIB=${bfd_a_location}/libbfd.a
 fi
->>>>>>> 316d3df... Rewrites a former, but deactivated, patch for using libbfd.so instead of libbfd.a, if found:m4/AX_AVR_ENVIRON.m4
 AVR_LIBBFD_INC=${bfd_h_location}
 
 ######### LIBIBERTY
