@@ -32,26 +32,31 @@ from registers import Reg
 class RJMP_TestFail(base_test.TestFail): pass
 
 class base_RJMP(base_test.opcode_test):
-	"""Generic test case for testing RJMP opcode.
+  """Generic test case for testing RJMP opcode.
 
-	The derived class must provide the reg member and the fail method.
+  The derived class must provide the reg member and the fail method.
 
-	RJMP - Relative Jump [PC <- PC + k + 1]
-	opcode is '1100 kkkk kkkk kkkk'  -2K <= k < 2K
-	"""
-	def setup(self):
-		self.setup_regs[Reg.PC] = 0xff * 2
-		return 0xC000 | (self.k & 0x0fff)
+  RJMP - Relative Jump [PC <- PC + k + 1]
+  opcode is '1100 kkkk kkkk kkkk'  -2K <= k < 2K
+  """
+  def setup(self):
+    self.setup_regs[Reg.PC] = 0xff * 2
+    return 0xC000 | (self.k & 0x0fff)
 
-	def analyze_results(self):
-		self.is_pc_checked = 1
-		
-		expect = self.setup_regs[Reg.PC]/2 + self.k + 1
+  def analyze_results(self):
+    self.is_pc_checked = 1
+    
+    if (self.k & 0x800) == 0x800:
+      # jump target is negative!
+      expect = self.setup_regs[Reg.PC]/2 - (0x1000 - self.k) + 1
+    else:
+      # jump target is positive
+      expect = self.setup_regs[Reg.PC]/2 + self.k + 1
 
-		got = self.anal_regs[Reg.PC] / 2
-		
-		if expect != got:
-			self.fail('RJMP failed: expect=%x, got=%x' % (expect, got))
+    got = self.anal_regs[Reg.PC] / 2
+    
+    if expect != got:
+      self.fail('RJMP failed: expect=%x, got=%x' % (expect, got))
 
 #
 # Template code for test case.
@@ -61,9 +66,9 @@ template = """
 class RJMP_%03x_TestFail(RJMP_TestFail): pass
 
 class test_RJMP_%03x(base_RJMP):
-	k = 0x%x
-	def fail(self,s):
-		raise RJMP_%03x_TestFail, s
+  k = 0x%x
+  def fail(self,s):
+    raise RJMP_%03x_TestFail, s
 """
 
 #
@@ -75,5 +80,5 @@ class test_RJMP_%03x(base_RJMP):
 #
 code = ''
 for k in (-100,100):
-	code += template % ((k & 0xfff), (k & 0xfff), k, (k & 0xfff))
+  code += template % ((k & 0xfff), (k & 0xfff), (k & 0xfff), (k & 0xfff))
 exec code
