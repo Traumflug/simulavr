@@ -1,4 +1,20 @@
-html
+# files to ignore by git
+
+# files created by configure
 config.texi
+
+# files created by make
+html
 simulavr.info
 simulavr.pdf
+*.aux
+*.cp
+*.cps
+*.fn
+*.ky
+*.log
+*.pg
+*.toc
+*.tp
+*.vr
+

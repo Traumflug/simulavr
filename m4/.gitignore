@@ -1,0 +1,9 @@
+# files to ignore by git
+
+# files created by bootstrap script
+libtool.m4
+ltoptions.m4
+ltsugar.m4
+ltversion.m4
+lt~obsolete.m4
+

@@ -1,5 +1,8 @@
 # files to ignore by git
 
 # files created by configure
-gui.tcl
-simulavr.tcl
+checkdebug.tcl
+
+# files created by make
+stdiodemo.elf
+

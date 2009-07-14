@@ -1,5 +1,8 @@
 # files to ignore by git
 
 # files created by configure
-gui.tcl
-simulavr.tcl
+simfeedback.tcl
+
+# files created by make
+feedback
+

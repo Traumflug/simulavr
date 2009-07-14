@@ -1,11 +1,18 @@
-Makefile
-config.h
+# files to ignore by git
 devices.cfg
 kbdgentables
+avr_AT*.cpp
+avr_AT*.h
+
+# files created by configure
+Makefile
+config.h
+
+# files created by make
 simulavr
 stamp-h1
 .deps
 .libs
-avr_AT*.cpp
-avr_AT*.h
 *.la
+simulavr_wrap.cxx
+
