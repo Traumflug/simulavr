@@ -17,12 +17,18 @@ AM_CONDITIONAL([USE_SWIG],[test "x$SWIG" != 'x'])
 AM_CONDITIONAL([USE_PYTHON],[test "x$PYTHON" != 'x'])
 AC_WAR_PYTHON
 
+# support for doxygen documenation system, not enabled by default
+DX_DOXYGEN_FEATURE(OFF)
+DX_PDF_FEATURE(OFF)
+DX_PS_FEATURE(OFF)
+DX_INIT_DOXYGEN([Simulavr], [simulavrxx.doxy], )
+
 ## Check about the AVR cross compilation environment
 AX_AVR_ENVIRONMENT
 
 AC_CHECK_HEADER([vpi_user.h],
-	        [AC_DEFINE(HAVE_VERILOG, [1], Icarus verilog interface)
-		 WE_HAVE_VERILOG="yes"],	
+     [AC_DEFINE(HAVE_VERILOG, [1], Icarus verilog interface)
+     WE_HAVE_VERILOG="yes"],  
                 [])
 AM_CONDITIONAL([USE_VERILOG], [test "$WE_HAVE_VERILOG"])
 

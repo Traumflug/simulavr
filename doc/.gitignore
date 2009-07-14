@@ -4,7 +4,7 @@
 config.texi
 
 # files created by make
-html
+doxygen-doc
 simulavr.info
 simulavr.pdf
 *.aux
