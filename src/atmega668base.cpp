@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,179 +21,171 @@
  ****************************************************************************
  */
 #include "atmega668base.h"
-#include "hardware.h"
 
 #include "irqsystem.h"
-#include "hwport.h"
 #include "hwstack.h"
-#include "hwspi.h"
 #include "hweeprom.h"
 #include "hwwado.h"
-#include "hwmega48extirq.h"
+#include "hwsreg.h"
+#include "avrerror.h"
+#include "avrfactory.h"
 
-AvrDevice_atmega668base::~AvrDevice_atmega668base() {}
-AvrDevice_atmega668base::AvrDevice_atmega668base(
-    unsigned ram_bytes, unsigned flash_bytes, unsigned ee_bytes ):
-AvrDevice(	224,	// I/O space above General Purpose Registers
-			ram_bytes,	// RAM size
-			0,	// External RAM size
-			flash_bytes //4*1024	// Flash Size
-			),
-aref(),
-adc6(),
-adc7(),
-portb(this,"B"),
-portc(this,"C"),
-portd(this,"D"),
-prescaler(this),
-admux(	this,
-		&portc.GetPin(0),
-		&portc.GetPin(1),
-		&portc.GetPin(2),
-		&portc.GetPin(3),
-		&portc.GetPin(4),
-		&portc.GetPin(5),
-		&adc6,
-		&adc7
-		)
+AVR_REGISTER(atmega48, AvrDevice_atmega48);
+AVR_REGISTER(atmega88, AvrDevice_atmega88);
+AVR_REGISTER(atmega168, AvrDevice_atmega168);
+AVR_REGISTER(atmega328, AvrDevice_atmega328);
+
+AvrDevice_atmega668base::~AvrDevice_atmega668base() {
+    delete rw[0x5f]; // RWSreg
+    delete usart0;
+    delete wado;
+    delete spi;
+    delete ad;
+    delete timer0;
+    delete timerIrq0;
+    delete extirq;
+    delete stack;
+    delete eeprom;
+    delete irqSystem;
+}
+
+AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
+                                                 unsigned flash_bytes,
+                                                 unsigned ee_bytes ):
+    AvrDevice(224,          // I/O space above General Purpose Registers
+              ram_bytes,    // RAM size
+              0,            // External RAM size
+              flash_bytes), // Flash Size
+    aref(),
+    adc6(),
+    adc7(),
+    portb(this, "B"),
+    portc(this, "C"),
+    portd(this, "D"),
+    prescaler(this),
+    admux(this,
+          &portc.GetPin(0),
+          &portc.GetPin(1),
+          &portc.GetPin(2),
+          &portc.GetPin(3),
+          &portc.GetPin(4),
+          &portc.GetPin(5),
+          &adc6,
+          &adc7)
 { 
-	irqSystem	= new HWIrqSystem(this,(flash_bytes> 8U*1024U)?4:2);
+    irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2);
 
-    eeprom = new HWMegaEeprom( this, irqSystem, ee_bytes, 23); 
-	stack = new HWStack(this, Sram, 0xffff);
+    eeprom = new HWMegaEeprom(this, irqSystem, ee_bytes, 23); 
+    stack = new HWStack(this, Sram, 0x10000);
 
-	RegisterPin("AREF", &aref);
-	RegisterPin("ADC6", &adc6);
-	RegisterPin("ADC7", &adc7);
+    RegisterPin("AREF", &aref);
+    RegisterPin("ADC6", &adc6);
+    RegisterPin("ADC7", &adc7);
 
-	extirq	= new HWMega48ExtIrq(	this,
-								irqSystem, 
-								PinAtPort(&portd, 0),
-								PinAtPort(&portd, 1),
-								1,
-								2
-								);
+    extirq = new HWMega48ExtIrq(this,
+                                irqSystem, 
+                                PinAtPort(&portd, 0),
+                                PinAtPort(&portd, 1),
+                                1,
+                                2);
 
-	
-	timerIrq0	= new HWMegaX8TimerIrq( this, irqSystem, 16, 14, 15);
-	timer0		= new HWMegaX8Timer0( this, &prescaler,timerIrq0,PinAtPort(&portd, 6),PinAtPort(&portd, 5));
+    timerIrq0 = new HWMegaX8TimerIrq(this, irqSystem, 16, 14, 15);
+    timer0 = new HWMegaX8Timer0(this, 
+                                &prescaler,
+                                timerIrq0,
+                                PinAtPort(&portd, 6),
+                                PinAtPort(&portd, 5),
+                                0);
 
-	ad	= new HWAd( this, &admux, irqSystem, aref, 21);
-	spi	= new HWMegaSpi(	this,
-							irqSystem,
-							PinAtPort(&portb, 3),	// MOSI
-							PinAtPort(&portb, 4),	// MISO
-							PinAtPort(&portb, 5),	// SCK
-							PinAtPort(&portb, 2),	// /SS
-							/*irqvec*/ 17
-							);
+    ad = new HWAd(this, &admux, irqSystem, aref, 21);
+    spi = new HWSpi(this,
+                    irqSystem,
+                    PinAtPort(&portb, 3),   // MOSI
+                    PinAtPort(&portb, 4),   // MISO
+                    PinAtPort(&portb, 5),   // SCK
+                    PinAtPort(&portb, 2),   // /SS
+                    17,                     // irqvec
+                    true);
     
-	wado= new HWWado(this);
+    wado = new HWWado(this);
 
-    usart0=new HWUsart(	this,
-						irqSystem,
-						PinAtPort(&portd,1),	// TXD
-						PinAtPort(&portd,0),	// RXD
-						PinAtPort(&portd, 4),	// XCK
-						19,	// (18) RX complete vector
-						20,	// (19) UDRE vector
-						21	// (20) TX complete vector
-						);
+    usart0 = new HWUsart(this,
+                         irqSystem,
+                         PinAtPort(&portd,1),    // TXD
+                         PinAtPort(&portd,0),    // RXD
+                         PinAtPort(&portd, 4),   // XCK
+                         19,   // (18) RX complete vector
+                         20,   // (19) UDRE vector
+                         21);  // (20) TX complete vector
 
-	for (int ii=0xE7; ii<=0xff; ii++) { rw[ii]=new RWReserved(this, ii); }
+    rw[0xE6]= & usart0->udr_reg;
 
-	rw[0xE6]= new RWUdr(this, usart0);
-	rw[0xE4]= new RWUbrr(this, usart0);
+    rw[0xE4]= & usart0->ubrr_reg;
 
-	for (int ii=0xE2; ii<=0xE3; ii++) { rw[ii]=new RWReserved(this, ii); }
+    rw[0xE1]= & usart0->ucsrb_reg;
+    rw[0xE0]= & usart0->ucsra_reg;
 
-	rw[0xE1]= new RWUcsrb(this, usart0);
-	rw[0xE0]= new RWUcsra(this, usart0);
+    rw[0xC5]= & usart0->ubrrhi_reg;
 
-	for (int ii=0xC6; ii<=0xDF; ii++) { rw[ii]=new RWReserved(this, ii); }
+    rw[0xC2]= & usart0->ucsrc_reg;
 
-	rw[0xC5]= new RWUbrrhi(this, usart0);
+    rw[0x7C]= & admux.admux_reg;
 
-	for (int ii=0xC3; ii<=0xC4; ii++) { rw[ii]=new RWReserved(this, ii); }
+    rw[0x7A]= & ad->adcsr_reg;
+    rw[0x79]= & ad->adch_reg;
+    rw[0x78]= & ad->adcl_reg;
 
-	rw[0xC2]= new RWUcsrc(this, usart0);
+    rw[0x6E]= & timerIrq0->timsk_reg;
 
-	for (int ii=0x7D; ii<=0xC1; ii++) { rw[ii]=new RWReserved(this, ii); }
+    rw[0x69]= & extirq->eicra_reg;
 
-	rw[0x7C]= new RWAdmux(this,&admux);
-	rw[0x7B]= new RWReserved(this, 0x7B);
-	rw[0x7A]= new RWAdcsr(this,ad);
-	rw[0x79]= new RWAdch(this,ad);
-	rw[0x78]= new RWAdcl(this,ad);
+    rw[0x5f]= new RWSreg(this, status);
+    rw[0x5e]= & stack->sph_reg;
+    rw[0x5d]= & stack->spl_reg;
 
-	for (int ii=0x6F; ii<=0x77; ii++) { rw[ii]=new RWReserved(this, ii); }
+    rw[0x4E]= & spi->spdr_reg;
+    rw[0x4D]= & spi->spsr_reg;
+    rw[0x4C]= & spi->spcr_reg;
 
-	rw[0x6E]= new RWTimskMx8(this, timerIrq0);
+    rw[0x48]= & timer0->ocrb_reg;
+    rw[0x47]= & timer0->ocra_reg;
+    rw[0x46]= & timer0->tcnt_reg;
+    rw[0x45]= & timer0->tccrb_reg;
+    rw[0x44]= & timer0->tccra_reg;
 
-	for (int ii=0x6A; ii<=0x6D; ii++) { rw[ii]=new RWReserved(this, ii); }
+    rw[0x42]= & eeprom->eearh_reg;
+    rw[0x41]= & eeprom->eearl_reg;
+    rw[0x40]= & eeprom->eedr_reg;
+    rw[0x3F]= & eeprom->eecr_reg;
 
-	rw[0x69]= new RWEicra48(this,  extirq); //RWEicra;
+    rw[0x3D]= & extirq->eimsk_reg;
 
-	for (int ii=0x60; ii<=0x68; ii++) { rw[ii]=new RWReserved(this, ii); }
+    rw[0x3C]= & extirq->eifr_reg;
 
-	rw[0x5f]= new RWSreg(this , status);
-	rw[0x5e]= new RWSph(this , stack);
-	rw[0x5d]= new RWSpl(this , stack);
+    rw[0x35]= & timerIrq0->tifr_reg;
 
-	for (int ii=0x58; ii<=0x5C; ii++) { rw[ii]=new RWReserved(this, ii); }
+    rw[0x2B]= & portd.port_reg;
+    rw[0x2A]= & portd.ddr_reg;
+    rw[0x29]= & portd.pin_reg;
+    
+    rw[0x28]= & portc.port_reg;
+    rw[0x27]= & portc.ddr_reg;
+    rw[0x26]= & portc.pin_reg;
+    
+    rw[0x25]= & portb.port_reg;
+    rw[0x24]= & portb.ddr_reg;
+    rw[0x23]= & portb.pin_reg;
 
-	for (int ii=0x4F; ii<=0x55; ii++) { rw[ii]=new RWReserved(this, ii); }
-
-	rw[0x4E]= new RWSpdr(this, spi);
-	rw[0x4D]= new RWSpsr(this, spi);
-	rw[0x4C]= new RWSpcr(this, spi);
-
-	for (int ii=0x49; ii<=0x4B; ii++) { rw[ii]=new RWReserved(this, ii); }
-
-	rw[0x48]= new RWOcrb0x8(this, timer0);
-	rw[0x47]= new RWOcra0x8(this, timer0);
-	rw[0x46]= new RWTcnt0x8(this, timer0);
-	rw[0x45]= new RWTccrb0x8(this, timer0);
-	rw[0x44]= new RWTccra0x8(this, timer0);
-
-	for (int ii=0x43; ii<=0x43; ii++) { rw[ii]=new RWReserved(this, ii); }
-
-	rw[0x42]= new RWEearh(this, eeprom);
-	rw[0x41]= new RWEearl(this, eeprom);
-	rw[0x40]= new RWEedr(this, eeprom);
-	rw[0x3F]= new RWEecr(this, eeprom);
-	rw[0x3E]= new RWReserved(this, 0x3E);
-	rw[0x3D]= new RWEimsk48(this,  extirq);
-	rw[0x3C]= new RWEifr48(this,  extirq);
-
-	for (int ii=0x36; ii<=0x3B; ii++) { rw[ii]=new RWReserved(this, ii); }
-
-	rw[0x35]= new RWTifrMx8(this, timerIrq0);
-
-	for (int ii=0x2C; ii<=0x34; ii++) { rw[ii]=new RWReserved(this, ii); }
-
-	rw[0x2B]= new RWPort(this, &portd);
-	rw[0x2A]= new RWDdr(this, &portd);
-	rw[0x29]= new RWPin(this, &portd);
-	rw[0x28]= new RWPort(this, &portc);
-	rw[0x27]= new RWDdr(this, &portc);
-	rw[0x26]= new RWPin(this, &portc);
-	rw[0x25]= new RWPort(this, &portb);
-	rw[0x24]= new RWDdr(this, &portb);
-	rw[0x23]= new RWPin(this, &portb);
-
-	for (int ii=0x20; ii<=0x22; ii++) { rw[ii]=new RWReserved(this, ii); }
-
-	Reset();
+    Reset();
 }
 
 unsigned char AvrDevice_atmega668base::GetRampz() {
-	cerr << "Rampz is not a valid Register in ATMega668!" ;
-	return 0;
+    avr_warning("Rampz is not a valid Register in ATMega668!");
+    return 0;
 }
 
 void AvrDevice_atmega668base::SetRampz(unsigned char val) {
-    cerr << "Illegal Rampz operation in ATMega668 core";
+    avr_warning("Illegal Rampz operation in ATMega668 core");
 }
 
 
