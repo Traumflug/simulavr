@@ -30,6 +30,7 @@
 #include "simulationmember.h"
 #include "mysocket.h"
 #include "pin.h"
+#include "externaltype.h"
 
 class UserInterface: public SimulationMember, public Socket, public ExternalType {
     protected:

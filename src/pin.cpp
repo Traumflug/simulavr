@@ -23,19 +23,12 @@
  *  $Id$
  */
 
-#include <stdlib.h> // use atoi
 #include <limits.h> // for INT_MAX
 
 #include "pin.h"
 #include "net.h"
-#include "ui.h"
-#include "hardware.h"
-
-#include <sstream>
-using namespace std;
 
 bool pin_memleak_verilog_workaround=false;
-
 
 // This is the value used to set the analogValue
 // when the pin output is TRISTATE. Originally, the
@@ -76,6 +69,7 @@ int Pin::GetAnalog() const {
 void Pin::RegisterCallback(HasPinNotifyFunction *h) {
     notifyList.push_back(h);
 }
+
 void Pin::SetInState ( const Pin &p) { 
     analogValue=p.analogValue;
 
@@ -87,8 +81,8 @@ void Pin::SetInState ( const Pin &p) {
         }
     }
 
-    vector<HasPinNotifyFunction*>::iterator ii;
-    vector<HasPinNotifyFunction*>::iterator ee;
+    std::vector<HasPinNotifyFunction*>::iterator ii;
+    std::vector<HasPinNotifyFunction*>::iterator ee;
 
     ee=notifyList.end();
     for (ii=notifyList.begin(); ii!=ee; ii++) {
@@ -209,7 +203,6 @@ Pin::operator bool() const {
     return false;
 }
 
-
 Pin& Pin::operator= (char c) {
     switch (c) {
         case 'S': outState=SHORTED; analogValue=0; break;
@@ -226,7 +219,6 @@ Pin& Pin::operator= (char c) {
 
     return *this;
 }
-
 
 Pin OpenDrain::operator+= (const Pin& p) {
     *pin= *this+p;
@@ -255,8 +247,6 @@ Pin OpenDrain::GetPin() {
     if (res==0) return Pin(TRISTATE);
     else return Pin(LOW); 
 }
-
-
 
 Pin OpenDrain::operator +(const Pin &p) {
     Pin dummy; 
@@ -320,53 +310,8 @@ Pin Pin::operator+ (const Pin& p) {
     return Pin(TRISTATE);	//never used
 }
 
-
-
 OpenDrain::operator bool() const
 { 
     return 0;
-}
-
-
-ExtPin::ExtPin ( T_Pinstate ps, UserInterface *_ui, const char *_extName, const char *baseWindow) : Pin(ps), ui(_ui), extName(_extName) {
-    ostringstream os;
-    outState=ps;
-    os << "create Net "<< _extName << " "<<baseWindow << " " << endl;
-    ui->Write(os.str());
-
-    ui->AddExternalType(extName, this);
-}
-
-void ExtPin::SetInState(const Pin &p) {
-    ui->SendUiNewState(extName, p);
-}
-
-void ExtPin::SetNewValueFromUi(const string& s) {
-    Pin tmp;
-    tmp= s[0];
-    //outState= tmp.GetOutState();
-    outState= tmp.outState;
-
-    connectedTo->CalcNet();
-}
-
-//----------------------
-void ExtAnalogPin::SetNewValueFromUi(const string& s) {
-    outState= ANALOG;
-    analogValue=atol(s.c_str());
-    connectedTo->CalcNet();
-}
-
-
-ExtAnalogPin::ExtAnalogPin ( unsigned int value, UserInterface *_ui, const char *_extName, const char* baseWindow) : Pin(Pin::TRISTATE), ui(_ui), extName(_extName) {
-    ostringstream os;
-    os << "create AnalogNet "<< _extName << " "<<baseWindow <<" " << endl;
-    ui->Write(os.str());
-
-    ui->AddExternalType(extName, this);
-}
-
-void ExtAnalogPin::SetInState(const Pin &p) {
-    ui->SendUiNewState(extName, p);
 }
 

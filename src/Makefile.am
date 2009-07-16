@@ -8,7 +8,7 @@ SWIG=@SWIG@
 PYTHON_CPPFLAGS=@PYTHON_CPPFLAGS@
 
 AM_CXXFLAGS=-I$(AVR_LIBBFD_INC)
-CXXFLAGS=-g -O2 -Icmd
+CXXFLAGS=-g -O2 -Icmd -Iui
 
 bin_PROGRAMS    = simulavr
 @MAINT@ noinst_PROGRAMS = kbdgentables
@@ -63,10 +63,10 @@ libsim_la_SOURCES = \
   hwmegaextirq.cpp hwmegatimer0123irq.cpp hwmegatimer.cpp hwmegax8timer.cpp \
   hwmegax8timerirq.cpp hwpinchange.cpp hwport.cpp hwspi.cpp hwsreg.cpp \
   hwstack.cpp hwtimer01irq.cpp hwtimer.cpp hwuart.cpp hwwado.cpp \
-  ioregs.cpp irqsystem.cpp keyboard.cpp lcd.cpp memory.cpp \
-  mysocket.cpp net.cpp pin.cpp pinatport.cpp pinmon.cpp printable.cpp \
-  rwmem.cpp scope.cpp serialrx.cpp serialtx.cpp spisrc.cpp spisink.cpp \
-  specialmem.cpp string2.cpp systemclock.cpp trace.cpp traceval.cpp ui.cpp 
+  ioregs.cpp irqsystem.cpp ui/keyboard.cpp ui/lcd.cpp memory.cpp \
+  ui/mysocket.cpp net.cpp pin.cpp ui/extpin.cpp pinatport.cpp pinmon.cpp printable.cpp \
+  rwmem.cpp ui/scope.cpp ui/serialrx.cpp ui/serialtx.cpp spisrc.cpp spisink.cpp \
+  specialmem.cpp string2.cpp systemclock.cpp trace.cpp traceval.cpp ui/ui.cpp 
 
 libsim_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 
@@ -84,11 +84,11 @@ pkginclude_HEADERS = \
   hwmegaextirq.h hwmegatimer0123irq.h hwmegatimer.h hwmegax8timer.h \
   hwmegax8timerirq.h hwpinchange.h hwport.h hwspi.h hwsreg.h hwstack.h \
   hwtimer01irq.h hwtimer.h hwuart.h hwwado.h ioregs.h \
-  irqsystem.h keyboard.h keynumber_to_scancode.dat lcd.h \
-  memory.h mysocket.h net.h pin.h pinatport.h pinnotify.h pinmon.h \
-  printable.h rwmem.h scope.h serialrx.h serialtx.h simulationmember.h \
+  irqsystem.h ui/keyboard.h ui/keynumber_to_scancode.dat ui/lcd.h \
+  memory.h ui/mysocket.h net.h pin.h ui/extpin.h pinatport.h pinnotify.h pinmon.h \
+  printable.h rwmem.h ui/scope.h ui/serialrx.h ui/serialtx.h simulationmember.h \
   spisrc.h spisink.h specialmem.h systemclock.h systemclocktypes.h \
-  trace.h traceval.h types.h ui.h xcode_to_keynumber.dat
+  trace.h traceval.h types.h ui/ui.h ui/xcode_to_keynumber.dat
 
 simulavr_SOURCES = cmd/main.cpp
 simulavr_LDADD = $(libsim_la_OBJECTS) -lz \
@@ -106,8 +106,9 @@ $(VPI_LIB): libavrvpi.la
 endif
 
 TCLHEADER = avrdevice.h at8515.h atmega128.h at4433.h cmd/gdb.h hardware.h \
-    keyboard.h lcd.h net.h pin.h keyboard.h rwmem.h scope.h serialrx.h \
-    serialtx.h systemclock.h systemclocktypes.h trace.h ui.h
+    ui/keyboard.h ui/lcd.h net.h pin.h ui/extpin.h ui/keyboard.h rwmem.h \
+    ui/scope.h ui/serialrx.h ui/serialtx.h systemclock.h systemclocktypes.h \
+    trace.h ui/ui.h
 
 simulavr_wrap.cxx: simulavr.i $(TCLHEADER)
 	@SWIG@ -o $@ $(srcdir)/simulavr.i
@@ -115,18 +116,18 @@ simulavr_wrap.cxx: simulavr.i $(TCLHEADER)
 simulavr_wrap.lo: simulavr_wrap.cxx
 	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TCL_INCLUDE) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT $@ -MD -MP -MF .deps/simulavr_wrap.Tpo -c -o $@ $<
 
-$(srcdir)/keyboard.cpp : $(srcdir)/keytrans.h 
+$(srcdir)/ui/keyboard.cpp: $(srcdir)/ui/keytrans.h 
 
-@MAINT@ kbdgentables_SOURCES = kbdgentables.cpp
+@MAINT@ kbdgentables_SOURCES = ui/kbdgentables.cpp
 
-@MAINT@ $(srcdir)/keytrans.h: $(builddir)/kbdgentables \
-@MAINT@     $(srcdir)/keynumber_to_scancode.dat \
-@MAINT@     $(srcdir)/xcode_to_keynumber.dat
-@MAINT@	$(builddir)/kbdgentables $(srcdir)
+@MAINT@ $(srcdir)/ui/keytrans.h: $(builddir)/kbdgentables \
+@MAINT@     $(srcdir)/ui/keynumber_to_scancode.dat \
+@MAINT@     $(srcdir)/ui/xcode_to_keynumber.dat
+@MAINT@	$(builddir)/kbdgentables $(srcdir)/ui
 
 EXTRA_DIST = simulavr.i pysimulavr.i
 
-MAINTAINERCLEANFILES = keytrans.h
+MAINTAINERCLEANFILES = ui/keytrans.h
 
 CLEANFILES = simulavr_wrap.cxx _pysimulavr.so pysimulavr.py avr.vpi \
              pysimulavr_wrap.cpp

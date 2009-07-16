@@ -5,6 +5,7 @@
   #include "avrdevice.h"
   #include "systemclock.h"
   #include "hardware.h"
+  #include "externaltype.h"
   #include "pin.h"
   #include "net.h"
   #include "trace.h"

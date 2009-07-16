@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,18 +25,13 @@
 
 #ifndef PIN
 #define PIN
-#include <string>
 #include <vector>
 
-
-#include "externaltype.h"
 #include "pinnotify.h"
 
 class NetInterface;
-class OpenDrain;
 class Net;
-class UserInterface;
-class Hardware;
+class OpenDrain;
 
 
 /*! This constant is used to prevent memory leaks for pins when using
@@ -57,6 +52,7 @@ class Hardware;
 extern bool pin_memleak_verilog_workaround;
 
 class Pin {
+    
     protected:
         unsigned char *pinOfPort; //points to HWPort::pin or 0L
         unsigned char mask;
@@ -64,17 +60,18 @@ class Pin {
 
         NetInterface *connectedTo;
 
-	/*! iff mynet is true, the NetInterface connectedTo belongs to this
-	  PIN and must be memory-managed by this PIN! */
-	bool myNet;
+        /*! iff mynet is true, the NetInterface connectedTo belongs to this
+          PIN and must be memory-managed by this PIN! */
+        bool myNet;
+        
     public:
 
         Pin(const OpenDrain &od);
 
-	/*! Possible PIN states.
-	  \warning Please do not change the order of these values without
-	  thinking twice, as for example the simulavrxx VPI interface depends
-	  on this/exports this to verilog. */
+        /*! Possible PIN states.
+          \warning Please do not change the order of these values without
+          thinking twice, as for example the simulavrxx VPI interface depends
+          on this/exports this to verilog. */
         typedef enum {
             LOW,
             HIGH,
@@ -87,12 +84,12 @@ class Pin {
         }T_Pinstate;
 
         T_Pinstate outState;
-	std::vector<HasPinNotifyFunction*> notifyList;
+        std::vector<HasPinNotifyFunction*> notifyList;
 
     public:
         void SetOutState( T_Pinstate s);
         virtual void SetInState ( const Pin &p);
-	
+    
         Pin(T_Pinstate ps);
         Pin();
         Pin( unsigned char *parentPin, unsigned char mask); 
@@ -114,33 +111,6 @@ class Pin {
         friend class HWPort;
         friend class Net;
 
-};
-
-
-class ExtPin : public Pin, public ExternalType {
-    protected:
-        UserInterface *ui;
-	std::string extName;
-
-    public:
-        void SetNewValueFromUi(const std::string &);
-        ExtPin(T_Pinstate, UserInterface *, const char *_extName, const char *baseWindow); 
-        //Pin &operator= (unsigned char);
-
-        void SetInState(const Pin& p);
-};
-
-class ExtAnalogPin : public Pin, public ExternalType {
-    protected:
-        UserInterface *ui;
-	std::string extName;
-
-    public:
-        void SetNewValueFromUi(const std::string &);
-        ExtAnalogPin(unsigned int startval, UserInterface *, const char *_extName, const char* baseWindow); 
-        //Pin &operator= (unsigned char);
-
-        void SetInState(const Pin& p);
 };
 
 class OpenDrain: public Pin {
