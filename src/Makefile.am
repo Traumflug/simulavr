@@ -8,6 +8,7 @@ SWIG=@SWIG@
 PYTHON_CPPFLAGS=@PYTHON_CPPFLAGS@
 
 AM_CXXFLAGS=-I$(AVR_LIBBFD_INC)
+CXXFLAGS=-g -O2 -Icmd
 
 bin_PROGRAMS    = simulavr
 @MAINT@ noinst_PROGRAMS = kbdgentables
@@ -57,7 +58,7 @@ libsim_la_SOURCES = \
   adcpin.cpp application.cpp at4433.cpp at8515.cpp atmega668base.cpp atmega128.cpp \
   $(FAB_CPP) \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
-  decoder_trace.cpp flash.cpp gdbserver.cpp hardware.cpp helper.cpp \
+  decoder_trace.cpp flash.cpp hardware.cpp helper.cpp cmd/gdbserver.cpp \
   hwacomp.cpp hwad.cpp hweeprom.cpp hwextirq.cpp hwmega48extirq.cpp \
   hwmegaextirq.cpp hwmegatimer0123irq.cpp hwmegatimer.cpp hwmegax8timer.cpp \
   hwmegax8timerirq.cpp hwpinchange.cpp hwport.cpp hwspi.cpp hwsreg.cpp \
@@ -89,7 +90,7 @@ pkginclude_HEADERS = \
   spisrc.h spisink.h specialmem.h systemclock.h systemclocktypes.h \
   trace.h traceval.h types.h ui.h xcode_to_keynumber.dat
 
-simulavr_SOURCES = main.cpp
+simulavr_SOURCES = cmd/main.cpp
 simulavr_LDADD = $(libsim_la_OBJECTS) -lz \
   -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty
 
@@ -104,7 +105,7 @@ $(VPI_LIB): libavrvpi.la
 	cp .libs/libavrvpi.so $(VPI_LIB)
 endif
 
-TCLHEADER = avrdevice.h at8515.h atmega128.h at4433.h gdb.h hardware.h \
+TCLHEADER = avrdevice.h at8515.h atmega128.h at4433.h cmd/gdb.h hardware.h \
     keyboard.h lcd.h net.h pin.h keyboard.h rwmem.h scope.h serialrx.h \
     serialtx.h systemclock.h systemclocktypes.h trace.h ui.h
 
@@ -127,11 +128,11 @@ EXTRA_DIST = simulavr.i pysimulavr.i
 
 MAINTAINERCLEANFILES = keytrans.h
 
-CLEANFILES = simulavr_wrap.cxx \
-   _pysimulavr.so pysimulavr.py avr.vpi
+CLEANFILES = simulavr_wrap.cxx _pysimulavr.so pysimulavr.py avr.vpi \
+             pysimulavr_wrap.cpp
 
 $(FAB_CPP) $(FAB_HEADER): fab/* fab/atmel-xml/*
-	cd fab ; ./avr-fab.py	
+	cd fab; ./avr-fab.py
 
 all-local: $(VPI_LIB) $(PYTHON_MODUL_LIB)
 

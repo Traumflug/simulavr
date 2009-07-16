@@ -8,7 +8,6 @@
   #include "pin.h"
   #include "net.h"
   #include "trace.h"
-  #include "gdb.h"
   #include "rwmem.h"
   #include "avrfactory.h"
   #include "memory.h"
@@ -66,7 +65,6 @@ namespace std {
 }
 
 %include "net.h"
-%include "gdb.h"
 %include "rwmem.h"
 %include "avrfactory.h"
 %include "memory.h"
