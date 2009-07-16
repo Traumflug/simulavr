@@ -24,28 +24,34 @@
  */
 
 #include <string.h> //strcpy()
-#include "memory.h"
-
 #include <sstream>
 #include <iostream>
 
-#include "trace.h"
+#include "memory.h"
+#include "avrerror.h"
 
 using namespace std;
 
 unsigned int Memory::GetAddressAtSymbol(const string &s) {
+  
+    // feature: use a number instead of a symbol
     char *dummy;
-
-    char *copy=(char*) malloc(s.length());
+    char *copy = avr_new(char, s.length() + 1);
+    unsigned int retval = 0;
+    unsigned int convlen = 0;
+    
     strcpy(copy, s.c_str());
-
-    multimap<unsigned int, string>::iterator ii;
-    unsigned int retval=0;
-    retval=strtoul(copy, &dummy, 16);
-
-    if (retval !=0 && ((unsigned int)s.length() == (unsigned int)(dummy-copy))) {
+    retval = strtoul(copy, &dummy, 16);
+    convlen = (unsigned int)(dummy - copy);
+    avr_free(copy);
+    
+    if ((retval != 0) && ((unsigned int)s.length() == convlen)) {
+        // number found, return this
         return retval;
     }
+
+    // isn't a number, try to find symbol ...
+    multimap<unsigned int, string>::iterator ii;
 
     for (ii=sym.begin(); ii!=sym.end(); ii++) {
         if (ii->second == s) {
@@ -53,11 +59,9 @@ unsigned int Memory::GetAddressAtSymbol(const string &s) {
         }
     }
 
-    cerr << "Symbol " << s << " not found!" << endl;
-    exit(0);
+    avr_error("symbol '%s' not found!", s.c_str());
 
-    return 0;
-    
+    return 0; // to avoid warnings, avr_error aborts the program
 }
 
 string Memory::GetSymbolAtAddress(unsigned int add){
@@ -95,31 +99,13 @@ string Memory::GetSymbolAtAddress(unsigned int add){
     }
 
     return os.str();
-
-    return "";
 }
 
-
-Memory::Memory(int _size): size(_size){
-    myMemory=(unsigned char*)malloc(size);
-    if (myMemory==0) {
-        cerr << "could not get memory for Memory::Memory" << endl;
-        exit(0);
-    }
-}
-
-//only 1 byte for malloc, not used anyway, we hold only the symbols here
-Data::Data() : Memory(1) {
-}
-
-unsigned int Memory::GetSize() {
-    return size;
+Memory::Memory(int _size): size(_size) {
+    myMemory = avr_new(unsigned char, size);
 }
 
 void Memory::WriteMem(unsigned char*, unsigned int offset, unsigned int size){
-
+    avr_warning("method not implemented (WriteMem)");
 };
 
-void Memory::AddSymbol( pair<unsigned int, string> p) {
-    sym.insert(p);
-}

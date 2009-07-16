@@ -50,8 +50,6 @@ AvrFlash::AvrFlash(AvrDevice *c, int _size):Memory(_size), core(c), DecodedMem(s
     Decode();
 }
 
-unsigned int AvrFlash::GetSize() { return size; }
-
 void AvrFlash::WriteMem( unsigned char *src, unsigned int offset, unsigned int secSize) {
     for (unsigned tt=0; tt<secSize; tt+=2) { 
         if (tt+offset<size) {

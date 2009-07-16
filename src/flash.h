@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,24 +34,39 @@
 
 class DecodedInstruction;
 
+//! Hold AVR flash content and symbol informations.
 class AvrFlash: public Memory {
+  
     protected:
-        AvrDevice *core;
-	std::vector <DecodedInstruction*> DecodedMem;
+        AvrDevice *core; /*!< ptr to connected device core */
+        std::vector <DecodedInstruction*> DecodedMem; /*!< list of decoded ops */
 
-    friend int avr_op_CPSE::operator()();
-    friend int avr_op_SBIC::operator()();
-    friend int avr_op_SBIS::operator()();
-    friend int avr_op_SBRC::operator()();
-    friend int avr_op_SBRS::operator()();
-    friend int AvrDevice::Step(bool &, SystemClockOffset *);
-    
+        friend int avr_op_CPSE::operator()();
+        friend int avr_op_SBIC::operator()();
+        friend int avr_op_SBIS::operator()();
+        friend int avr_op_SBRC::operator()();
+        friend int avr_op_SBRS::operator()();
+        friend int AvrDevice::Step(bool &, SystemClockOffset *);
 
     public:
-        void Decode();                          //Decode comple memory
-        void Decode(int addr );                 //Decode only instruction at addr
-        void WriteMem(unsigned char*, unsigned int, unsigned int);
+      
+        /*! Creates the AVR Flash block.
+          @param c pointer to connected device
+          @param size the memory block size */
         AvrFlash(AvrDevice *c, int size);
-        unsigned int GetSize();
+        
+        void Decode(); /*!< Decode complete memory block */
+        
+        /*! Decode only operation at address
+          @param addr address, where operation have to be decoded */
+        void Decode(int addr);
+        
+        /*! Write memory data to memory block.
+          @param src binary c-string with data to write in
+          @param offset data offset in memory block, beginning from start of THIS memory block!
+          @param secSize count of available data (bytes) in src */
+        void WriteMem(unsigned char* src, unsigned int offset, unsigned int secSize);
+        
 };
+
 #endif

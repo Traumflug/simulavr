@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,26 +30,74 @@
 #include <map>
 
 #include "decoder.h"
+#include "avrmalloc.h"
 
+//! Hold a memory block and symbol informations.
+/*!  Memory class to hold memory content and symbol informations to map symbols
+  to addresses and vice versa. */
 class Memory {
-	protected:
-        unsigned int size;
-	public:
+    protected:
+      
+        unsigned int size; /*!< allocated size of memory block */
+        
+    public:
 
-		unsigned char *myMemory;
-		std::multimap<unsigned int, std::string> sym;
-		std::string GetSymbolAtAddress(unsigned int add);
-		unsigned int GetAddressAtSymbol(const std::string &s);
-		void AddSymbol( std::pair<unsigned int, std::string> p);
-		Memory(int size);
-		unsigned int GetSize();
-		void WriteMem(unsigned char*, unsigned int offset, unsigned int size);
+        unsigned char *myMemory; /*!< THE memory block content itself */
+        
+        /*! address to symbol map */
+        std::multimap<unsigned int, std::string> sym;
+        
+        /*! Creates the memory block
+          
+          @param size the memory block size */
+        Memory(int size);
+        
+        /*! Destructor, frees myMemory */
+        ~Memory() { avr_free(myMemory); }
+        
+        /*! Return string with symbols found at address
+        
+          Seeks for symbols, which are registered for the given address. If the
+          address isn't equal to a symbol address, but before the next one, then
+          a offset to symbol address will be added. Returns a empty string, if
+          nothing is found. (in case of no given symbols!)
+          @param add the given address
+          @return a string with all found symbols, concatenated by ',' */
+        std::string GetSymbolAtAddress(unsigned int add);
+        
+        /*! Returns the address for a symbol
+        
+          If the given string is a hex string, the hex value will be converted
+          and returned. If the symbol isn't found, program aborts.
+          @param s the symbol string or hex string
+          @return address for symbol or value of hex string
+          
+          \todo if the symbol isn't found, it aborts with a message. Maybe it
+          should raise a exeption to handle this on the caller side? */
+        unsigned int GetAddressAtSymbol(const std::string &s);
+        
+        /*! Add the (address, symbol) pair
+        
+          @param p a std::pair with address and symbol string */
+        void AddSymbol( std::pair<unsigned int, std::string> p) { sym.insert(p); }
+        
+        /*! Returns the size of memory block */
+        unsigned int GetSize() { return size; }
+        
+        /*! Write memory data to memory 
+        
+          \todo Should it be a virtual method? (isn't implemented in Memory!) */
+        void WriteMem(unsigned char*, unsigned int offset, unsigned int size);
 };
 
-//the data class holds only all symbols from rw data space but NOT the content of the rw memory itself
-//this should be changed some days later
+//! Hold data memory block and symbol informations.
+/*! Data class is a derived class from Memory, at the moment it's only used for
+  hold symbols informations about data. NO memory space is allocated! myMemory
+  will be initialized to NULL! */
 class Data : public Memory {
     public:
-    Data();
+        /*! Creates the data memory block */
+        Data(): Memory(0) { }
 };
+
 #endif

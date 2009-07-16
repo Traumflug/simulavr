@@ -25,7 +25,6 @@
  */
 
 /**
-   \file avrmalloc.c
    \brief Memory Management Functions.
 
    This module provides facilities for managing memory.
