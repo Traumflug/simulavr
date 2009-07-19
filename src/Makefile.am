@@ -60,7 +60,8 @@ libsim_la_SOURCES = \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp hardware.cpp helper.cpp cmd/gdbserver.cpp \
   hwacomp.cpp hwad.cpp hweeprom.cpp hwextirq.cpp hwmega48extirq.cpp \
-  hwmegaextirq.cpp hwtimer/hwmegatimer0123irq.cpp hwtimer/hwmegatimer.cpp hwtimer/hwmegax8timer.cpp \
+  hwmegaextirq.cpp hwtimer/hwmegatimer0123irq.cpp hwtimer/hwmegatimer.cpp \
+  hwtimer/hwmegax8timer.cpp hwtimer/timerprescaler.cpp \
   hwtimer/hwmegax8timerirq.cpp hwpinchange.cpp hwport.cpp hwspi.cpp hwsreg.cpp \
   hwstack.cpp hwtimer/hwtimer01irq.cpp hwtimer/hwtimer.cpp hwuart.cpp hwwado.cpp \
   ioregs.cpp irqsystem.cpp ui/keyboard.cpp ui/lcd.cpp memory.cpp \
@@ -81,7 +82,8 @@ pkginclude_HEADERS = \
   avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h breakpoint.h \
   config_deprecated.h decoder.h externaltype.h flash.h \
   funktor.h hwacomp.h hwad.h hweeprom.h hwextirq.h hwmega48extirq.h \
-  hwmegaextirq.h hwtimer/hwmegatimer0123irq.h hwtimer/hwmegatimer.h hwtimer/hwmegax8timer.h \
+  hwmegaextirq.h hwtimer/hwmegatimer0123irq.h hwtimer/hwmegatimer.h \
+  hwtimer/hwmegax8timer.h hwtimer/timerprescaler.h \
   hwtimer/hwmegax8timerirq.h hwpinchange.h hwport.h hwspi.h hwsreg.h hwstack.h \
   hwtimer/hwtimer01irq.h hwtimer/hwtimer.h hwuart.h hwwado.h ioregs.h \
   irqsystem.h ui/keyboard.h ui/keynumber_to_scancode.dat ui/lcd.h \

@@ -25,11 +25,13 @@
 
 #include "avrdevice.h"
 #include "hardware.h"
+#include "rwmem.h"
 #include "hwmega48extirq.h"
 #include "hwuart.h"
 #include "hwad.h"
 #include "hwport.h"
 #include "hwspi.h"
+#include "timerprescaler.h"
 #include "hwtimer.h"
 #include "hwmegax8timer.h"
 #include "hwmegax8timerirq.h"
@@ -41,20 +43,21 @@
 class AvrDevice_atmega668base: public AvrDevice {
     
     protected:
-        Pin                 aref;       //!< analog reference pin
-        Pin                 adc6;       //!< adc channel 6 input pin
-        Pin                 adc7;       //!< adc channel 7 input pin
-        HWPort              portb;      //!< port B
-        HWPort              portc;      //!< port C
-        HWPort              portd;      //!< port D
-        HWPrescaler         prescaler;  //!< prescaler unit for timer 0
-        HWMega48ExtIrq*     extirq;     //!< external interrupt unit
-        HWAdmux             admux;      //!< adc multiplexer unit
-        HWAd*               ad;         //!< adc unit
-        HWSpi*              spi;        //!< spi unit
-        HWUsart*            usart0;     //!< usart 0 unit
-        HWMegaX8TimerIrq*   timerIrq0;  //!< timer interrupt unit for timer 0
-        HWMegaX8Timer0*     timer0;     //!< timer 0 unit
+        Pin                 aref;        //!< analog reference pin
+        Pin                 adc6;        //!< adc channel 6 input pin
+        Pin                 adc7;        //!< adc channel 7 input pin
+        HWPort              portb;       //!< port B
+        HWPort              portc;       //!< port C
+        HWPort              portd;       //!< port D
+        IOSpecialReg        gtccr_reg;   //!< GTCCR IO register
+        HWPrescaler         prescaler01; //!< prescaler unit for timer 0
+        HWMega48ExtIrq*     extirq;      //!< external interrupt unit
+        HWAdmux             admux;       //!< adc multiplexer unit
+        HWAd*               ad;          //!< adc unit
+        HWSpi*              spi;         //!< spi unit
+        HWUsart*            usart0;      //!< usart 0 unit
+        HWMegaX8TimerIrq*   timerIrq0;   //!< timer interrupt unit for timer 0
+        HWMegaX8Timer0*     timer0;      //!< timer 0 unit
         
     public:
         

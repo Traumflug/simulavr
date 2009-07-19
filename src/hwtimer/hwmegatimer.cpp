@@ -28,7 +28,7 @@
 #include "hwmegatimer0123irq.h"
 #include <iostream>
 #include "hwmegatimer.h"
-#include "hwtimer.h"    //for prescaler
+#include "timerprescaler.h"
 #include "trace.h"
 #include "helper.h"
 

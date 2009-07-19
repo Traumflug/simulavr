@@ -30,22 +30,6 @@
 #include "pinatport.h"
 #include "rwmem.h"
 
-class HWPrescaler: public Hardware {
-	protected:
-		unsigned int preScaleValue; //original has 10 Bit
-
-	public:
-		HWPrescaler(AvrDevice *core);
-		virtual unsigned int CpuCycle() {
-			preScaleValue++;
-			if (preScaleValue>1023) preScaleValue=0;
-			return 0;
-		}
-
-		unsigned int GetValue() { return preScaleValue; }
-		void Reset(){preScaleValue=0;}
-};
-
 class HWIrqSystem;
 class HWTimer01Irq;
 

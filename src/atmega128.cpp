@@ -31,7 +31,7 @@
 #include "hwstack.h"
 #include "hwspi.h"
 #include "hwmegatimer.h"
-#include "hwtimer.h"    //prescaler
+#include "timerprescaler.h"
 #include "hweeprom.h"
 #include "hwmegatimer0123irq.h"
 #include "hwwado.h"
@@ -80,9 +80,9 @@ aref()
             PinAtPort(portd, 3), PinAtPort(porte, 4), PinAtPort(porte, 5),
             PinAtPort(porte, 6),PinAtPort(porte, 7),
             1,2,3,4,5,6,7,8);
-
-	prescaler123=new HWPrescaler(this);
-	prescaler0=new HWPrescaler(this);
+  sfior_reg = new IOSpecialReg(this, "SFIOR");
+	prescaler123=new HWPrescaler(this, "123", sfior_reg, 0, 7);
+	prescaler0=new HWPrescaler(this, "0", sfior_reg, 1, 7);
 
 	wado = new HWWado(this);
 
@@ -234,7 +234,7 @@ aref()
 
 	//0x42: on chip debug
 
-
+	rw[0x40]= sfior_reg;
 	rw[0x3f]= & eeprom->eearh_reg;
 	rw[0x3e]= & eeprom->eearl_reg;
 	rw[0x3d]= & eeprom->eedr_reg;

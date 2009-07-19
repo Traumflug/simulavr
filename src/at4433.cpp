@@ -33,6 +33,7 @@
 #include "pinatport.h"
 #include "hwuart.h"
 #include "hwtimer.h"
+#include "timerprescaler.h"
 #include "hwacomp.h"
 #include "hwwado.h"
 #include "hwextirq.h"
@@ -70,7 +71,7 @@ AvrDevice(64, 128, 0, 4*1024) {
 	acomp= new HWAcomp(this, irqSystem, PinAtPort(portd, 6), PinAtPort(portd, 7), 13);
 	timer01irq= new HWTimer01Irq( this, irqSystem, 3,4,0,5,6); //overflow B not available
 	wado= new HWWado(this);
-	prescaler = new HWPrescaler(this);
+	prescaler = new HWPrescaler(this, "01");
 	timer0= new HWTimer0(this, prescaler, timer01irq, PinAtPort(portd, 4), 0);
 	timer1= new HWTimer1(this, prescaler, timer01irq, PinAtPort(portd, 5),
                          PinAtPort(portb, 1), PinAtPort(portx, 0),

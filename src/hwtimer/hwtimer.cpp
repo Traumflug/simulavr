@@ -25,16 +25,13 @@
 
 #include "hardware.h"
 #include "avrdevice.h"
+#include "timerprescaler.h"
 #include "hwtimer.h"
 #include "hwtimer01irq.h"
 #include "trace.h"
 #include "helper.h"
 
 using namespace std;
-
-HWPrescaler::HWPrescaler(AvrDevice *core): Hardware(core) {
-	core->AddToCycleList(this);
-}
 
 void HWTimer0::TimerCompareAfterCount() {
 	if ((tcnt==1) ) { //overflow occured! when leaving 0

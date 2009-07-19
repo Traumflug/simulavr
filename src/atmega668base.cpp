@@ -62,7 +62,8 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     portb(this, "B"),
     portc(this, "C"),
     portd(this, "D"),
-    prescaler(this),
+    gtccr_reg(this, "GTCCR"),
+    prescaler01(this, "01", &gtccr_reg, 0, 7),
     admux(this,
           &portc.GetPin(0),
           &portc.GetPin(1),
@@ -91,7 +92,7 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
 
     timerIrq0 = new HWMegaX8TimerIrq(this, irqSystem, 16, 14, 15);
     timer0 = new HWMegaX8Timer0(this, 
-                                &prescaler,
+                                &prescaler01,
                                 timerIrq0,
                                 PinAtPort(&portd, 6),
                                 PinAtPort(&portd, 5),
@@ -152,7 +153,7 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x46]= & timer0->tcnt_reg;
     rw[0x45]= & timer0->tccrb_reg;
     rw[0x44]= & timer0->tccra_reg;
-
+    rw[0x43]= & gtccr_reg;
     rw[0x42]= & eeprom->eearh_reg;
     rw[0x41]= & eeprom->eearl_reg;
     rw[0x40]= & eeprom->eedr_reg;

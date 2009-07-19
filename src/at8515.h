@@ -31,6 +31,7 @@
 #include "hwspi.h"
 #include "hwuart.h"
 #include "hwacomp.h"
+#include "timerprescaler.h"
 #include "hwtimer.h"
 #include "hwextirq.h"
 
