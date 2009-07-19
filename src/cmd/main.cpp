@@ -472,5 +472,8 @@ int main(int argc, char *argv[]) {
       SystemClock::Instance().Add(&gdb1);
       SystemClock::Instance().Endless();
    }
+   
+   // delete device
+   delete dev1;
 }
 

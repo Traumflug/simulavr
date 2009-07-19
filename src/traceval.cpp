@@ -31,7 +31,7 @@
 #include "systemclock.h"
 
 using namespace std;
-//-----------------------------------------------------------------------------
+
 TraceValue::TraceValue(size_t bits,
                        const std::string &__name,
                        const int __index,
@@ -43,8 +43,7 @@ TraceValue::TraceValue(size_t bits,
     v(0xaffeaffe),
     f(0),
     _written(false),
-    _enabled(false)
-{}
+    _enabled(false) {}
 
 size_t TraceValue::bits() const { return b; }
 
@@ -122,7 +121,6 @@ void TraceValue::dump(Dumper &d) {
     f=0;
 }
 
-//-----------------------------------------------------------------------------
 WarnUnknown::WarnUnknown(AvrDevice *_core) : core(_core) {}
 
 void WarnUnknown::markReadUnknown(const TraceValue *t) {
@@ -133,17 +131,25 @@ void WarnUnknown::markReadUnknown(const TraceValue *t) {
 bool WarnUnknown::enabled(const TraceValue *t) const {
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void DumpVCD::valout(const TraceValue *v) {
-    *os << 'b';
+    osbuffer << 'b';
     if (v->written()) {
         unsigned val=v->value();
         for (int i=v->bits()-1; i>=0; i--) 
-            *os << ((val&(1<<i)) ? '1' : '0');
+            osbuffer << ((val&(1<<i)) ? '1' : '0');
     } else {
         for (int i=0; i < v->bits(); i++)
-            *os << 'x';
+            osbuffer << 'x';
     }
+}
+
+void DumpVCD::flushbuffer(void) {
+    if(changesWritten) {
+        *os << osbuffer.str();
+        changesWritten = false;
+    }
+    osbuffer.str("");
 }
 
 DumpVCD::DumpVCD(ostream *_os,
@@ -152,7 +158,9 @@ DumpVCD::DumpVCD(ostream *_os,
                  const bool wstrobes) :
     os(_os),
     tscale(_tscale),
-    rs(rstrobes), ws(wstrobes) {}
+    rs(rstrobes),
+    ws(wstrobes),
+    changesWritten(false) {}
 
 void DumpVCD::setActiveSignals(const TraceSet &act) {
     tv=act;
@@ -183,7 +191,7 @@ void DumpVCD::start() {
         int ld;
         for (ld=s.size()-1; ld>0; ld--)
             if (s[ld]=='.') break;
-	
+    
         *os << "$scope module " << s.substr(0, ld) << " $end\n";
         *os << "$var wire " << (*i)->bits() << ' ' << n*(1+rs+ws) << ' ' << s.substr(ld+1, s.size()-1) << " $end\n";
         if (rs)
@@ -193,44 +201,64 @@ void DumpVCD::start() {
         *os << "$upscope $end\n";
         n++;
     }
-    *os << "$enddefinitions $end\n"
-        << "#0\n$dumpvars\n";
+    *os << "$enddefinitions $end\n";
 
     // mark initial state
+    changesWritten = true;
+    osbuffer << "#0\n$dumpvars\n";
     n=0;
     for (iter i=tv.begin();
          i!=tv.end(); i++) {
         valout(*i);
-        *os << ' ' << n*(1+rs+ws) << '\n';
+        osbuffer << ' ' << n*(1+rs+ws) << '\n';
         // reset RS, WS
         if (rs) {
-            *os << "0" << n*(1+rs+ws)+1 << "\n";
+            osbuffer << "0" << n*(1+rs+ws)+1 << "\n";
         }
         if (ws) {
             if (rs)
-                *os << "0" << n*(1+rs+ws)+2 << "\n";
+                osbuffer << "0" << n*(1+rs+ws)+2 << "\n";
             else
-                *os << "0" << n*(1+rs+ws)+1 << "\n";
+                osbuffer << "0" << n*(1+rs+ws)+1 << "\n";
         }
         n++;
     }
-    *os << "$end\n";
+    osbuffer << "$end\n";
+    flushbuffer();
 }
 
 void DumpVCD::cycle() {
+    // flush the buffer
+    flushbuffer();
+    
+    // write new time marker to buffer
     SystemClockOffset clock=SystemClock::Instance().getCurrentTime();
-    *os << "#" << clock << '\n';
+    osbuffer << "#" << clock << '\n';
 
     // reset RS, WS states
     for (size_t i=0; i<marked.size(); i++)
-        *os << "0" << marked[i] << "\n";
+        osbuffer << "0" << marked[i] << "\n";
+    if(marked.size())
+        changesWritten = true;
     marked.clear();
+}
+
+void DumpVCD::stop() {
+    // flush the buffer
+    flushbuffer();
+    
+    // write a last time marker to report end of dump
+    SystemClockOffset clock=SystemClock::Instance().getCurrentTime();
+    *os << "#" << clock << '\n';
+    
+    os->flush(); // flush stream
 }
 
 void DumpVCD::markRead(const TraceValue *t) {
     if (rs) {
         // mark read cycle
-        *os << "1" << id2num[t]*(1+rs+ws)+1 << "\n";
+        osbuffer << "1" << id2num[t]*(1+rs+ws)+1 << "\n";
+        changesWritten = true;
         // mark to disable @ next cycle
         marked.push_back(id2num[t]*(1+rs+ws)+1);
     }
@@ -238,14 +266,16 @@ void DumpVCD::markRead(const TraceValue *t) {
 
 void DumpVCD::markWrite(const TraceValue *t) {
     if (ws) {
-        *os << "1" << id2num[t]*(1+rs+ws)+1+rs << "\n";
+        osbuffer << "1" << id2num[t]*(1+rs+ws)+1+rs << "\n";
+        changesWritten = true;
         marked.push_back(id2num[t]*(1+rs+ws)+1+rs);
     }
 }
 
 void DumpVCD::markChange(const TraceValue *t) {
     valout(t);
-    *os << " " << id2num[t]*(1+rs+ws) << "\n";
+    osbuffer << " " << id2num[t]*(1+rs+ws) << "\n";
+    changesWritten = true;
 }
 
 bool DumpVCD::enabled(const TraceValue *t) const {
@@ -253,8 +283,6 @@ bool DumpVCD::enabled(const TraceValue *t) const {
 }
 
 DumpVCD::~DumpVCD() { delete os; }
-//-----------------------------------------------------------------------------
-// dump manager
 
 DumpManager::DumpManager(AvrDevice *_core) : core(_core) {}
 
@@ -309,7 +337,6 @@ void DumpManager::addDumper(Dumper *dump, const TraceSet &vals) {
 
 const TraceSet& DumpManager::all() const { return _all; }
 
-
 void DumpManager::start() {
     for (size_t i=0; i< dumps.size(); i++)
         dumps[i]->start();
@@ -332,8 +359,10 @@ void DumpManager::cycle() {
 }
 
 DumpManager::~DumpManager() {
-    for (size_t i=0; i<dumps.size(); i++)
+    for(size_t i = 0; i < dumps.size(); i++) {
+        dumps[i]->stop(); // inform dumper to stop output
         delete dumps[i];
+    }
 }
 
 void DumpManager::save(ostream &os, const TraceSet &s) const {
@@ -399,10 +428,9 @@ std::vector<TraceValue*> DumpManager::load(istream &is) {
     return res;
 }
 
-//-----------------------------------------------------------------------------
+//FIXME
 static std::string trgrp="FIXME.UNDEFINED";
 
-//FIXME
 void trace_direct(AvrDevice *c, const std::string &name, bool *val) {
     c->dump_manager->regTrace(new TraceValue(1, trgrp+"."+name, -1, val));
 }
@@ -418,5 +446,4 @@ void trace_direct(AvrDevice *c, const std::string &name, uint32_t *val) {
 }
 
 void set_trace_group_s(const std::string &grp) { trgrp=grp; }
-
 
