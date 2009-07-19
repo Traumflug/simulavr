@@ -50,7 +50,9 @@ class AvrDevice_atmega668base: public AvrDevice {
         HWPort              portc;       //!< port C
         HWPort              portd;       //!< port D
         IOSpecialReg        gtccr_reg;   //!< GTCCR IO register
-        HWPrescaler         prescaler01; //!< prescaler unit for timer 0
+        IOSpecialReg        assr_reg;    //!< ASSR IO register
+        HWPrescaler         prescaler01; //!< prescaler unit for timer 0 and 1
+        HWPrescalerAsync    prescaler2;  //!< prescaler unit for timer 2
         HWMega48ExtIrq*     extirq;      //!< external interrupt unit
         HWAdmux             admux;       //!< adc multiplexer unit
         HWAd*               ad;          //!< adc unit

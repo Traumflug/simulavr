@@ -119,13 +119,13 @@ IOSpecialReg::IOSpecialReg(AvrDevice *core, const std::string &name):
 unsigned char IOSpecialReg::get() const {
     unsigned char val = value;
     for(size_t i = 0; i < clients.size(); i++)
-        val = clients[i]->get_from_client(val);
+        val = clients[i]->get_from_client(this, val);
     return val;
 }
 
 void IOSpecialReg::set(unsigned char val) {
     for(size_t i = 0; i < clients.size(); i++)
-        val = clients[i]->set_from_reg(val);
+        val = clients[i]->set_from_reg(this, val);
     value = val;
 }
 

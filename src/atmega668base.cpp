@@ -62,8 +62,10 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     portb(this, "B"),
     portc(this, "C"),
     portd(this, "D"),
+    assr_reg(this, "ASSR"),
     gtccr_reg(this, "GTCCR"),
     prescaler01(this, "01", &gtccr_reg, 0, 7),
+    prescaler2(this, "2", PinAtPort(&portb, 6), &assr_reg, 5, &gtccr_reg, 1, 7),
     admux(this,
           &portc.GetPin(0),
           &portc.GetPin(1),
@@ -130,6 +132,8 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
 
     rw[0xC2]= & usart0->ucsrc_reg;
 
+    rw[0xb6]= & assr_reg;
+    
     rw[0x7C]= & admux.admux_reg;
 
     rw[0x7A]= & ad->adcsr_reg;

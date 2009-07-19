@@ -203,14 +203,15 @@ class IOSpecialRegClient {
         friend class IOSpecialReg;
         
         //! Informs your class, that a write access to IO register is happen
+        //! @param reg caller register instance
         //! @param nv the value, which is written to IO register (but maybe changed by other clients)
         //! @return nv, if nothing is changed or your changed value
-        virtual unsigned char set_from_reg(unsigned char nv)=0;
+        virtual unsigned char set_from_reg(const IOSpecialReg* reg, unsigned char nv)=0;
         
         //! Informs your class, that a read access from IO register happens
         //! @param v the internal saved register value (but maybe changed by other clients)
         //! @return v, if nothing is changed or your changed value
-        virtual unsigned char get_from_client(unsigned char v)=0;
+        virtual unsigned char get_from_client(const IOSpecialReg* reg, unsigned char v)=0;
 };
 
 //! IO register, which holds configuration for more than one hardware unit

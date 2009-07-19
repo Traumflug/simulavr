@@ -30,6 +30,7 @@
 #include "avrdevice.h"
 #include "hardware.h"
 #include "rwmem.h"
+#include "timerprescaler.h"
 #include "hwmegatimer.h"
 #include "hwmegaextirq.h"
 #include "hwuart.h"
@@ -59,8 +60,9 @@ class AvrDevice_atmega128:public AvrDevice {
     HWAdmux *admux;
     HWAd *ad;
 
+    IOSpecialReg *assr_reg;
     IOSpecialReg *sfior_reg;
-    HWPrescaler *prescaler0;
+    HWPrescalerAsync *prescaler0;
     HWPrescaler *prescaler123;
     HWMegaTimer0 *timer0;
     HWMegaTimer1 *timer1;

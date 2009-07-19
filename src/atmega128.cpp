@@ -31,7 +31,6 @@
 #include "hwstack.h"
 #include "hwspi.h"
 #include "hwmegatimer.h"
-#include "timerprescaler.h"
 #include "hweeprom.h"
 #include "hwmegatimer0123irq.h"
 #include "hwwado.h"
@@ -81,8 +80,9 @@ aref()
             PinAtPort(porte, 6),PinAtPort(porte, 7),
             1,2,3,4,5,6,7,8);
   sfior_reg = new IOSpecialReg(this, "SFIOR");
+  assr_reg = new IOSpecialReg(this, "ASSR");
 	prescaler123=new HWPrescaler(this, "123", sfior_reg, 0, 7);
-	prescaler0=new HWPrescaler(this, "0", sfior_reg, 1, 7);
+	prescaler0=new HWPrescalerAsync(this, "0", PinAtPort(portg, 4), assr_reg, 3, sfior_reg, 1, 7);
 
 	wado = new HWWado(this);
 

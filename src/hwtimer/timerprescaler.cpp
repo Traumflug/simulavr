@@ -65,7 +65,9 @@ HWPrescaler::HWPrescaler(AvrDevice *core,
     ioreg->connectSRegClient(this);
 }
 
-unsigned char HWPrescaler::set_from_reg(unsigned char nv) {
+unsigned char HWPrescaler::set_from_reg(const IOSpecialReg *reg, unsigned char nv) {
+    // check, if this is the right register
+    if(reg != resetRegister) return nv;
     // extract corresponding reset bit
     int reset = (1 << _resetBit) & nv;
     // extract reset sync bit, if available
@@ -85,3 +87,62 @@ unsigned char HWPrescaler::set_from_reg(unsigned char nv) {
     return nv;  // return value unchanged
 }
 
+HWPrescalerAsync::HWPrescalerAsync(AvrDevice *core,
+                                   const std::string &tracename,
+                                   PinAtPort tosc,
+                                   IOSpecialReg *asyreg,
+                                   int clockSelBit,
+                                   IOSpecialReg *ioreg,
+                                   int resetBit):
+    HWPrescaler(core, tracename, ioreg, resetBit),
+    tosc_pin(tosc),
+    clockSelectBit(clockSelBit)
+{
+    asyncRegister = asyreg;
+    pinstate = tosc_pin.GetPin();
+    clockselect = false;
+}
+
+HWPrescalerAsync::HWPrescalerAsync(AvrDevice *core,
+                                   const std::string &tracename,
+                                   PinAtPort tosc,
+                                   IOSpecialReg *asyreg,
+                                   int clockSelBit,
+                                   IOSpecialReg *ioreg,
+                                   int resetBit,
+                                   int resetSyncBit):
+    HWPrescaler(core, tracename, ioreg, resetBit, resetSyncBit),
+    tosc_pin(tosc),
+    clockSelectBit(clockSelBit)
+{
+    asyncRegister = asyreg;
+    pinstate = tosc_pin.GetPin();
+    clockselect = false;
+}
+
+unsigned int HWPrescalerAsync::CpuCycle() {
+    bool e = true;
+    if(clockselect) {
+      bool ps = tosc_pin.GetPin();
+      if(pinstate || !ps) e = false; // count on positive edge!
+      pinstate = ps;
+    }
+    if(e && countEnable) {
+      preScaleValue++;
+      if(preScaleValue > 1023) preScaleValue = 0;
+    }
+    return 0;
+}
+
+unsigned char HWPrescalerAsync::set_from_reg(const IOSpecialReg *reg, unsigned char nv) {
+    unsigned char v = HWPrescaler::set_from_reg(reg, nv);
+    if(reg != asyncRegister) return v;
+    if((1 << clockSelectBit) & v) {
+        clockselect = true;
+        //tosc_pin.SetAlternatePort(true);
+    } else {
+        clockselect = false;
+        //tosc_pin.SetAlternatePort(false);
+    }
+    return v;
+}
