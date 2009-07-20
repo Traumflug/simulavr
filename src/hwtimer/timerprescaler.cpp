@@ -34,6 +34,7 @@ HWPrescaler::HWPrescaler(AvrDevice *core, const std::string &tracename):
 {
     core->AddToCycleList(this);
     trace_direct(core, "PRESCALER" + tracename, &preScaleValue);
+    resetRegister = NULL;
 }
 
 HWPrescaler::HWPrescaler(AvrDevice *core,
@@ -47,6 +48,7 @@ HWPrescaler::HWPrescaler(AvrDevice *core,
 {
     core->AddToCycleList(this);
     trace_direct(core, "PRESCALER" + tracename, &preScaleValue);
+    resetRegister = ioreg;
     ioreg->connectSRegClient(this);
 }
 
@@ -62,6 +64,7 @@ HWPrescaler::HWPrescaler(AvrDevice *core,
 {
     core->AddToCycleList(this);
     trace_direct(core, "PRESCALER" + tracename, &preScaleValue);
+    resetRegister = ioreg;
     ioreg->connectSRegClient(this);
 }
 
@@ -99,6 +102,7 @@ HWPrescalerAsync::HWPrescalerAsync(AvrDevice *core,
     clockSelectBit(clockSelBit)
 {
     asyncRegister = asyreg;
+    asyreg->connectSRegClient(this);
     pinstate = tosc_pin.GetPin();
     clockselect = false;
 }
@@ -116,6 +120,7 @@ HWPrescalerAsync::HWPrescalerAsync(AvrDevice *core,
     clockSelectBit(clockSelBit)
 {
     asyncRegister = asyreg;
+    asyreg->connectSRegClient(this);
     pinstate = tosc_pin.GetPin();
     clockselect = false;
 }
@@ -146,3 +151,4 @@ unsigned char HWPrescalerAsync::set_from_reg(const IOSpecialReg *reg, unsigned c
     }
     return v;
 }
+
