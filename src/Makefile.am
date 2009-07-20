@@ -62,7 +62,8 @@ libsim_la_SOURCES = \
   hwacomp.cpp hwad.cpp hweeprom.cpp hwextirq.cpp hwmega48extirq.cpp \
   hwmegaextirq.cpp hwtimer/hwmegatimer0123irq.cpp hwtimer/hwmegatimer.cpp \
   hwtimer/hwmegax8timer.cpp hwtimer/timerprescaler.cpp hwtimer/prescalermux.cpp \
-  hwtimer/hwmegax8timerirq.cpp hwpinchange.cpp hwport.cpp hwspi.cpp hwsreg.cpp \
+  hwtimer/timerirq.cpp hwtimer/hwmegax8timerirq.cpp hwpinchange.cpp hwport.cpp \
+  hwspi.cpp hwsreg.cpp \
   hwstack.cpp hwtimer/hwtimer01irq.cpp hwtimer/hwtimer.cpp hwuart.cpp hwwado.cpp \
   ioregs.cpp irqsystem.cpp ui/keyboard.cpp ui/lcd.cpp memory.cpp \
   ui/mysocket.cpp net.cpp pin.cpp ui/extpin.cpp pinatport.cpp pinmon.cpp printable.cpp \
@@ -84,7 +85,8 @@ pkginclude_HEADERS = \
   funktor.h hwacomp.h hwad.h hweeprom.h hwextirq.h hwmega48extirq.h \
   hwmegaextirq.h hwtimer/hwmegatimer0123irq.h hwtimer/hwmegatimer.h \
   hwtimer/hwmegax8timer.h hwtimer/timerprescaler.h hwtimer/prescalermux.h \
-  hwtimer/hwmegax8timerirq.h hwpinchange.h hwport.h hwspi.h hwsreg.h hwstack.h \
+  hwtimer/timerirq.h hwtimer/hwmegax8timerirq.h hwpinchange.h hwport.h hwspi.h \
+  hwsreg.h hwstack.h \
   hwtimer/hwtimer01irq.h hwtimer/hwtimer.h hwuart.h hwwado.h ioregs.h \
   irqsystem.h ui/keyboard.h ui/keynumber_to_scancode.dat ui/lcd.h \
   memory.h ui/mysocket.h net.h pin.h ui/extpin.h pinatport.h pinnotify.h pinmon.h \
