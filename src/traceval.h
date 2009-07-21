@@ -140,6 +140,8 @@ class TraceValue {
         void enable();
         
         
+        //! Log a change on this value
+        void change(unsigned val);
         //! Log a write access on this value
         void write(unsigned val);
         //! Log a read access
@@ -153,6 +155,13 @@ class TraceValue {
         /*! Just set the written flag for tracevalues which are automatically
           initialized (IO registers etc.) */
         void set_written();
+        
+        /*! Just set the written flag for tracevalues which are automatically
+          initialized (IO registers etc.)
+          
+          This method sets not only the _written flag, it set's also the saved
+          value for detecting changes. */
+        void set_written(unsigned val);
         
         //! Gives the current set of flag readings
         Atype flags() const;

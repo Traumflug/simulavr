@@ -63,6 +63,13 @@ bool TraceValue::enabled() const { return _enabled; }
 
 void TraceValue::enable() { _enabled=true; }
 
+void TraceValue::change(unsigned val) {
+    // this is mostly the same as write, but dosn't set WRITE flag!
+    if ((v!=val) || !_written)
+        f=f|CHANGE;
+    v=val;
+}
+
 void TraceValue::write(unsigned val) {
     if ((v!=val) || !_written)
         f=f|CHANGE;
@@ -79,6 +86,11 @@ bool TraceValue::written() const { return _written;  }
 
 void TraceValue::set_written() {
     _written=true;
+}
+
+void TraceValue::set_written(unsigned val) {
+    _written=true;
+    v = val;
 }
 
 TraceValue::Atype TraceValue::flags() const { return (Atype)f; }

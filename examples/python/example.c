@@ -22,8 +22,8 @@ int main(void) {
   sei();
 
   tmp = timer2_ticks;
-  while(tmp <= 5) { // toggle about every 10ms
-    if ( tmp != timer2_ticks ) {
+  while(1) {
+    if(tmp != timer2_ticks) { // toggle about every 2ms
       tmp = timer2_ticks;
       if((PINA & 0x01) == 0x01) {
         PORTA &= 0xfe;

@@ -160,6 +160,10 @@ class IOReg: public RWMemoryMember {
                 tv->set_written();
         }
         
+        /*! Reflects a value change from hardware (for example timer count occured)
+          @param val the new register value */
+        void hardwareChange(unsigned char val) { if(tv) tv->change(val); }
+        
     protected:
         unsigned char get() const {
             if (g)
@@ -227,7 +231,14 @@ class IOSpecialReg: public RWMemoryMember {
         void connectSRegClient(IOSpecialRegClient *c) { clients.push_back(c); }
         
         //! Register reset functionality, sets internal register value to 0.
-        void Reset(void) { value = 0; }
+        void Reset(void) { Reset(0); }
+        //! Register reset functionality, sets internal register value to val.
+        //! @param val the reset value
+        void Reset(unsigned char val) { value = 0; if(tv) tv->set_written(val); }
+        
+        /*! Reflects a value change from hardware (for example timer count occured)
+          @param val the new register value */
+        void hardwareChange(unsigned char val) { if(tv) tv->change(val); }
         
     protected:
         std::vector<IOSpecialRegClient*> clients; //!< clients-list with registered clients

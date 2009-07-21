@@ -54,10 +54,14 @@ class IRQLine {
         void fireInterrupt(void);
 };
 
+//! Provices flag and mask register for timer interrupts and connects irq lines to irqsystem
+/*! \todo how to handle bits without assigned vector, same for tracevalues on that bits.
+  clear a ifr is to be done with 1! */
 class TimerIRQRegister: public Hardware, public IOSpecialRegClient {
     
     private:
         HWIrqSystem* irqsystem; //!< pointer to irq system
+        AvrDevice* core; //!< pointer to device
         std::vector<IRQLine*> lines; //!< list with IRQ lines
         std::map<std::string, int> name2line; //!< mapping IRQ line name to index
         std::map<int, int> vector2line; //!< mapping IRQ vector to index
@@ -65,11 +69,11 @@ class TimerIRQRegister: public Hardware, public IOSpecialRegClient {
         unsigned char irqflags; //!< flag register value;
         
     public:
-        IOSpecialReg timsk; //!< the TIMSKx register
-        IOSpecialReg tifr; //!< the TIFRx register
+        IOSpecialReg timsk_reg; //!< the TIMSKx register
+        IOSpecialReg tifr_reg; //!< the TIFRx register
         
         TimerIRQRegister(AvrDevice* core, HWIrqSystem* irqsys, int regidx = -1);
-        void registerLine(int idx, IRQLine irq);
+        void registerLine(int idx, IRQLine* irq);
         IRQLine* getLine(const std::string& name);
         void fireInterrupt(int irqvector);
         
