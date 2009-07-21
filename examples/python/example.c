@@ -13,7 +13,7 @@ int main(void) {
 
   /* Set up our timers and enable interrupts */
   TCNT2 = 0;   /* Timer 2 by CLK/64 */
-  OCR2 = 125;  /* ~2ms on 4MHz */
+  OCR2 = 124;  /* ~2ms on 4MHz */
   TCCR2 = 0x0b;
   TIMSK = _BV(OCIE2);
   DDRA = 0x01;

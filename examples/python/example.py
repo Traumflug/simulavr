@@ -77,36 +77,39 @@ class TestBaseClass(TestCase, SimulavrAdapter):
   def test_05(self):
     "access to data by symbol"
     addr = self.device.data.GetAddressAtSymbol("timer2_ticks")
-    o = 10000
-    self.doRun(o)
+    o = 10000   # duration of interrupt function, about 10us
+    d = 2000000 # timer period 2ms
+    self.doRun(o * 2) # skip initialisation
     self.assertEqual(self.addr2word(addr), 0)
-    self.doRun(2000000 + o)
+    self.doRun(d + o)
     self.assertEqual(self.addr2word(addr), 1)
-    self.doRun((2000000 * 3) + o)
+    self.doRun((d * 3) + o)
     self.assertEqual(self.addr2word(addr), 3)
     
   def test_06(self):
     "write access to data by symbol"
     addr = self.device.data.GetAddressAtSymbol("timer2_ticks")
-    o = 10000
-    self.doRun(o)
+    o = 10000   # duration of interrupt function, about 10us
+    d = 2000000 # timer period 2ms
+    self.doRun(o * 2) # skip initialisation
     self.assertEqual(self.addr2word(addr), 0)
     self.device.setRWMem(addr, 2)
-    self.doRun(1000000 + o)
+    self.doRun(d)
     self.assertEqual(self.addr2word(addr), 2)
-    self.doRun(2000000 + o)
+    self.doRun(d + o)
     self.assertEqual(self.addr2word(addr), 3)
     
   def test_07(self):
     "test toggle output pin"
-    o = 17000
+    o = 10000   # duration of interrupt function, about 10us
+    d = 2000000 # timer period 2ms
     self.assertEqual(self.device.GetPin("A0").toChar(), "t")
-    self.doRun(o)
+    self.doRun(o * 2) # skip initialisation
     # now output should be set to LOW
     self.assertEqual(self.device.GetPin("A0").toChar(), "L")
-    self.doRun(10100000 + o)
+    self.doRun(d + o * 2) # reaction to timer interrupt about 20us after!
     self.assertEqual(self.device.GetPin("A0").toChar(), "H")
-    self.doRun(20100000 + o)
+    self.doRun(d * 2 + o * 2)
     self.assertEqual(self.device.GetPin("A0").toChar(), "L")
     
   def test_08(self):
