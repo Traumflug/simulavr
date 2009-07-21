@@ -43,7 +43,7 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
 AvrDevice(64, 512, 0xfda0, 8192) { 
     eeprom= new HWEeprom(this, 512);
 
-	irqSystem = new HWIrqSystem(this, 2);
+	irqSystem = new HWIrqSystem(this, 2, 13);
 	stack = new HWStack(this, Sram, 0x10000);
 
 

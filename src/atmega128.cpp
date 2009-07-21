@@ -47,7 +47,7 @@ AvrDevice_atmega128::AvrDevice_atmega128():
 AvrDevice(224, 4096, 0xef00, 256*1024),
 aref()
 {
-	irqSystem = new HWIrqSystem(this, 4); //4 bytes per vector
+	irqSystem = new HWIrqSystem(this, 4, 35); //4 bytes per vector, 35 vectors
         eeprom = new HWMegaEeprom( this, irqSystem, 4096, 22); 
 	stack = new HWStack(this, Sram, 0x10000);
 	porta= new HWPort(this, "A");
@@ -79,10 +79,11 @@ aref()
             PinAtPort(portd, 3), PinAtPort(porte, 4), PinAtPort(porte, 5),
             PinAtPort(porte, 6),PinAtPort(porte, 7),
             1,2,3,4,5,6,7,8);
+  
   sfior_reg = new IOSpecialReg(this, "SFIOR");
   assr_reg = new IOSpecialReg(this, "ASSR");
-	prescaler123=new HWPrescaler(this, "123", sfior_reg, 0, 7);
-	prescaler0=new HWPrescalerAsync(this, "0", PinAtPort(portg, 4), assr_reg, 3, sfior_reg, 1, 7);
+  prescaler0=new HWPrescalerAsync(this, "0", PinAtPort(portg, 4), assr_reg, 3, sfior_reg, 1, 7);
+  prescaler123=new HWPrescaler(this, "123", sfior_reg, 0, 7);
 
 	wado = new HWWado(this);
 
@@ -93,39 +94,58 @@ aref()
            PinAtPort(portd,3), PinAtPort(portd,2), PinAtPort(portd, 5),
 		       30, 31, 32, 1);
 
+  timer012irq = new TimerIRQRegister(this, irqSystem);
+  timer012irq->registerLine(0, new IRQLine("TOV0",  16));
+  timer012irq->registerLine(1, new IRQLine("OCF0",  15));
+  timer012irq->registerLine(2, new IRQLine("TOV1",  14));
+  timer012irq->registerLine(3, new IRQLine("OCF1B", 13));
+  timer012irq->registerLine(4, new IRQLine("OCF1A", 12));
+  timer012irq->registerLine(5, new IRQLine("ICF1",  11));
+  timer012irq->registerLine(6, new IRQLine("TOV2",  10));
+  timer012irq->registerLine(7, new IRQLine("OCF2",   9));
+  
+  timer0 = new HWTimer8Bit1OC(this,
+                              new PrescalerMultiplexer(prescaler0),
+                              0,
+                              timer012irq->getLine("TOV0"),
+                              timer012irq->getLine("OCF0"),
+                              PinAtPort(portb, 4));
+  
+  timer2 = new HWTimer8Bit1OC(this,
+                              new PrescalerMultiplexerExt(prescaler123, PinAtPort(portd, 7)),
+                              2,
+                              timer012irq->getLine("TOV2"),
+                              timer012irq->getLine("OCF2"),
+                              PinAtPort(portb, 7));
+  
+  /*
 	timer0123irq= new HWMegaTimer0123Irq(this, irqSystem,
-			15 , /*tpComp*/
-			16 , /*t0Ovf*/
-			12 , /*t1compa*/
-			13 , /*t1compb*/
-			24 , /*t1compc*/
-			11 , /*t1capt */
-			14 , /*t1ovf*/
-			9,   /*t2comp */
-			10, /*t2ovf*/
-			26, /*t3compa*/
-			27, /*t3compb*/
-			28, /*t3compc*/
-			25, /*t3capt */
-			29  /*t3ovf*/
+			15 , //tpComp
+			16 , //t0Ovf
+			12 , //t1compa
+			13 , //t1compb
+			24 , //t1compc
+			11 , //t1capt
+			14 , //t1ovf
+			9,   //t2comp
+			10, //t2ovf
+			26, //t3compa
+			27, //t3compb
+			28, //t3compc
+			25, //t3capt
+			29  //t3ovf
 			);
-
-	timer0=new HWMegaTimer0(this, prescaler0, timer0123irq, PinAtPort(portb,
-                                                                      4), 0);
 
 	timer1= new HWMegaTimer1(this, prescaler123, timer0123irq, 1, //is timer1
             PinAtPort(portd, 6), PinAtPort(portb, 5), PinAtPort (portb, 6),
                              PinAtPort (portb , 7), 1);
-
-    timer2=new HWMegaTimer2(this, prescaler123, timer0123irq,
-                            PinAtPort(portd, 7), PinAtPort(portb, 7), 2);
 
     timer3=new HWMegaTimer1(this, prescaler123, timer0123irq,
                             0, //is not timer1
                             PinAtPort(porte, 6), PinAtPort(porte, 3),
                             PinAtPort (porte, 4),
                             PinAtPort (porte, 5), 3);
-
+*/
 
 	rw[0x9d]= & usart1->ucsrc_reg;
 	rw[0x9c]= & usart1->udr_reg;
@@ -143,7 +163,7 @@ aref()
 	rw[0x90]= & usart0->ubrrhi_reg;
 	
 	
-	
+	/*
 	// timer 3
 	rw[0x8c]= & timer3->tccrc_reg;
 	rw[0x8b]= & timer3->tccra_reg;
@@ -167,7 +187,7 @@ aref()
 	rw[0x7a]= & timer1->tccrc_reg;
 	rw[0x79]= & timer1->ocrch_reg;
 	rw[0x78]= & timer1->ocrcl_reg;
-	
+	*/
 	
 	
 	
@@ -204,17 +224,14 @@ aref()
 	rw[0x5a]= & extirq->eicrb_reg;
 	rw[0x59]= & extirq->eimsk_reg;
 	rw[0x58]= & extirq->eifr_reg;
-
-	rw[0x57]= & timer0123irq->timsk_reg;
-	rw[0x56]= & timer0123irq->tifr_reg;
+	rw[0x57]= & timer012irq->timsk_reg;
+	rw[0x56]= & timer012irq->tifr_reg;
 	
-	
-	//Timer0
 	rw[0x53]= & timer0->tccr_reg;
 	rw[0x52]= & timer0->tcnt_reg;
 	rw[0x51]= & timer0->ocr_reg;
 
-	
+	/*
 	//Timer1
 	rw[0x4f]= & timer1->tccra_reg; 
 	rw[0x4e]= & timer1->tccrb_reg;
@@ -226,6 +243,7 @@ aref()
 	rw[0x48]= & timer1->ocrbl_reg;
 	rw[0x47]= & timer1->icrh_reg;
 	rw[0x46]= & timer1->icrl_reg;
+*/
 
 	//Timer 2
 	rw[0x45]= & timer2->tccr_reg;

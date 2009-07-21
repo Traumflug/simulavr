@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include "funktor.h"
 #include "trace.h"
 #include "systemclock.h"
+#include "helper.h"
 
 #include "application.h"
 
@@ -38,8 +39,6 @@ using namespace std;
 // if HEXOUT is set the statistic output will be written in hex
 // if not defined the output is decimal seperated with tabs for reading it with gnumeric
 //#define HEXOUT
-
-
 
 void IrqStatisticEntry::CalcDiffs() {
     setClear          =flagCleared-flagSet;
@@ -73,8 +72,6 @@ IrqStatisticPerVector::IrqStatisticPerVector() {
     short_SetStarted=longDummy;
     short_SetFinished=longDummy;
     short_StartedFinished=longDummy;
-
-
 }
 
 void IrqStatisticPerVector::CalculateStatistic() {
@@ -111,9 +108,8 @@ void IrqStatisticPerVector::CalculateStatistic() {
     if (actual.startedFinished > long_StartedFinished.startedFinished) {
         long_StartedFinished= actual;
     }
-
-
 }
+
 void IrqStatisticPerVector::CheckComplete() {
     if ((actual.flagSet!=0) &&
             (actual.flagCleared!=0) &&
@@ -138,8 +134,6 @@ ostream &helpHexOut(ostream &os, unsigned long long x) {
 #endif
     return os;
 }
-
-
 
 ostream& operator<<(ostream &os, const IrqStatisticEntry& ise) {
     os << dec<<"\t";
@@ -184,7 +178,20 @@ ostream& operator<<(ostream &os, const IrqStatistic& is) {
     return os;
 }
 
-
+HWIrqSystem::HWIrqSystem(AvrDevice* _core, int bytes, int tblsize):
+    bytesPerVector(bytes),
+    vectorTableSize(tblsize),
+    core(_core),
+    irqTrace(tblsize),
+    irqStatistic(_core)
+{
+    for(int i = 0; i < vectorTableSize; i++) {
+        TraceValue* tv = new TraceValue(1, "IRQ.VECTOR" + int2str(i));
+        tv->set_written(0);
+        core->dump_manager->regTrace(tv);
+        irqTrace[i] = tv;
+    }
+}
 
 //a map is allways sorted, so the priority of the irq vector is known and handled correctly
 unsigned int HWIrqSystem::GetNewPc(unsigned int &actualVector) {
@@ -201,8 +208,7 @@ unsigned int HWIrqSystem::GetNewPc(unsigned int &actualVector) {
         second->ClearIrqFlag(first);
         actualVector=first;
         return first*(bytesPerVector/2);
-    }		
-
+    }       
 
     return newPC;
 }
@@ -232,8 +238,8 @@ void HWIrqSystem::ClearIrqFlag(unsigned int vector) {
     irqStatistic.entries[vector].CheckComplete();
 } 
 
-
 void HWIrqSystem::IrqHandlerStarted(unsigned int vector) {
+    irqTrace[vector]->change(1);
     if (core->trace_on) {
         traceOut << core->GetFname() << " IrqSystem: IrqHandlerStarted Vec: " << vector << endl;
     }
@@ -245,6 +251,7 @@ void HWIrqSystem::IrqHandlerStarted(unsigned int vector) {
 }
 
 void HWIrqSystem::IrqHandlerFinished(unsigned int vector) {
+    irqTrace[vector]->change(0);
     if (core->trace_on) {
         traceOut << core->GetFname() << " IrqSystem: IrqHandler Finished Vec: " << vector << endl;
     }
@@ -254,7 +261,6 @@ void HWIrqSystem::IrqHandlerFinished(unsigned int vector) {
     }
     irqStatistic.entries[vector].CheckComplete();
 }
-
 
 IrqStatistic::IrqStatistic (AvrDevice *c):Printable(cout), core(c) {
     Application::GetInstance()->RegisterPrintable(this);

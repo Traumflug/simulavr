@@ -31,6 +31,8 @@
 #include "hardware.h"
 #include "rwmem.h"
 #include "timerprescaler.h"
+#include "timerirq.h"
+#include "hwtimer.h"
 #include "hwmegatimer.h"
 #include "hwmegaextirq.h"
 #include "hwuart.h"
@@ -64,11 +66,11 @@ class AvrDevice_atmega128:public AvrDevice {
     IOSpecialReg *sfior_reg;
     HWPrescalerAsync *prescaler0;
     HWPrescaler *prescaler123;
-    HWMegaTimer0 *timer0;
-    HWMegaTimer1 *timer1;
-    HWMegaTimer1 *timer3;
-    HWMegaTimer2 *timer2;
-    HWMegaTimer0123Irq *timer0123irq;
+    HWTimer8Bit1OC* timer0;
+    //HWMegaTimer1 *timer1;
+    HWTimer8Bit1OC* timer2;
+    //HWMegaTimer1 *timer3;
+    TimerIRQRegister* timer012irq;
     HWSpi *spi;
     HWUsart *usart0;
     HWUsart *usart1;

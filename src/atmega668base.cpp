@@ -76,7 +76,7 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
           &adc6,
           &adc7)
 { 
-    irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2);
+    irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 26);
 
     eeprom = new HWMegaEeprom(this, irqSystem, ee_bytes, 23); 
     stack = new HWStack(this, Sram, 0x10000);
