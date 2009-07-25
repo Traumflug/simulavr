@@ -133,6 +133,20 @@ void TraceValue::dump(Dumper &d) {
     f=0;
 }
 
+void TraceValueRegister::_tvr_registerTraceValues(TraceValueRegister *r) {
+    // check for duplicate names
+    // register this sub-register
+}
+
+void TraceValueRegister::RegisterTraceValue(TraceValue *t) {
+    // check for duplicate names
+    // register this TraceValue
+}
+
+TraceValue* TraceValueRegister::GetTraceValueByName(const std::string &name) {
+  avr_error("method GetTraceValueByName is unimplemented yet");
+}
+
 WarnUnknown::WarnUnknown(AvrDevice *_core) : core(_core) {}
 
 void WarnUnknown::markReadUnknown(const TraceValue *t) {

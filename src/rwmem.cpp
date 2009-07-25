@@ -31,6 +31,7 @@
 
 #include "avrerror.h"
 #include "traceval.h"
+#include "avrdevice.h"
 #include "helper.h"
 #include "rwmem.h"
 

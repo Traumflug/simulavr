@@ -31,6 +31,7 @@
 #include "pin.h"
 #include "net.h"
 #include "breakpoint.h"
+#include "traceval.h"
 
 #include <string>
 #include <map>
@@ -47,7 +48,7 @@ class RWMemoryMember;
 class Hardware;
 class DumpManager;
 
-class AvrDevice: public SimulationMember {
+class AvrDevice: public SimulationMember, public TraceValueRegister {
     protected:
         SystemClockOffset clockFreq;
 	std::map < std::string, Pin *> allPins; 

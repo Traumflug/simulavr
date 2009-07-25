@@ -189,6 +189,7 @@ Pin *AvrDevice::GetPin(const char *name) {
 
 AvrDevice::~AvrDevice() { delete dump_manager; }
 AvrDevice::AvrDevice(unsigned int _ioSpaceSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int flashSize):
+   TraceValueRegister(),
    ioSpaceSize(_ioSpaceSize) {
       dump_manager=new DumpManager(this);
 

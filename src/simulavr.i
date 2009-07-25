@@ -4,6 +4,7 @@
 
 %{
 #include "systemclocktypes.h"
+#include "traceval.h"
 #include "avrdevice.h"
 #include "avrfactory.h"
 #include "at8515.h"
@@ -27,7 +28,6 @@
 #include "pinmon.h"
 #include "rwmem.h"
 #include "ui/scope.h"
-#include "traceval.h"
     
 SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %}
@@ -37,6 +37,7 @@ SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %include "externaltype.h"
 %include "ui/mysocket.h"
 %include "pinnotify.h"
+%include "traceval.h"
 %include "avrdevice.h"
 %include "avrfactory.h"
 %include "at8515.h"
@@ -59,7 +60,6 @@ SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %include "pinmon.h"
 %include "rwmem.h"
 %include "ui/scope.h"
-%include "traceval.h"
 
 void setVerbose(int value);
 void setMessageOnBadAccess(int value);

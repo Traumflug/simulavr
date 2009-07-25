@@ -25,7 +25,6 @@
 #ifndef traceval_h
 #define traceval_h
 
-#include "avrdevice.h"
 #include <iostream>
 #include <sstream>
 #include <map>
@@ -205,6 +204,43 @@ class TraceValue {
         bool _enabled;
 };
 
+class AvrDevice;
+class TraceValueRegister;
+
+//! Build a register for TraceValue's
+/*! This is used by DumpManager to find TraceValues by name */
+class TraceValueRegister {
+    
+    private:
+        const std::string _tvr_scopeprefix; //!< the prefix scope for a TraceValue name
+        std::map<const std::string, TraceValue*> _tvr_values; //!< the registered TraceValue's
+        std::map<const std::string, TraceValueRegister*> _tvr_registers; //!< the sub-registers
+        
+        //! Registers a TraceValueRegister for this register, build a hierarchy
+        void _tvr_registerTraceValues(TraceValueRegister *r);
+        
+    public:
+        //! Create a TraceValueRegister, with a scope prefix built on parent scope + name
+        TraceValueRegister(TraceValueRegister *parent, const std::string &name):
+            _tvr_scopeprefix(parent->GetTraceValuePrefix() + name + ".")
+        {
+            parent->_tvr_registerTraceValues(this);
+        }
+        //! Create a TraceValueRegister, with a scope prefix built on device name
+        TraceValueRegister(AvrDevice *core, const std::string &name):
+            _tvr_scopeprefix(name + ".") {}
+        //! Create a TraceValueRegister, with a empty scope name, single device application
+        TraceValueRegister():
+            _tvr_scopeprefix("") {}
+        
+        //! Returns the scope prefix
+        const std::string GetTraceValuePrefix(void)  { return _tvr_scopeprefix; }
+        //! Registers a TraceValue for this register
+        void RegisterTraceValue(TraceValue *t);
+        //! Seek for a TraceValue by it's name
+        TraceValue* GetTraceValueByName(const std::string &name);
+};
+
 typedef std::vector<TraceValue*> TraceSet;
 
 /*! Generic interface for a trace value processor */
@@ -313,8 +349,6 @@ class DumpVCD : public Dumper {
         //! writes content of osbuffer to os and empty osbuffer afterwards
         void flushbuffer(void);
 };
-
-class AvrDevice;
 
 /*! Manages all active Dumper instances for a given AvrDevice.
   It also manages all trace values and sets them active as necessary.
