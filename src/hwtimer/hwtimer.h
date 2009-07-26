@@ -31,6 +31,7 @@
 #include "rwmem.h"
 #include "prescalermux.h"
 #include "timerirq.h"
+#include "traceval.h"
 
 class HWIrqSystem;
 class HWTimer01Irq;
@@ -197,57 +198,35 @@ class HWTimer1 : public Hardware {
 
 //////////////////////////////////////////////////////////////////
 
-//! Basic timer unit with 8 Bit counter
-class HWTimer8Bit: public Hardware {
+//! Basic timer unit
+/*! Provides basic timer/counter functionality. Counting clock will be taken
+  from a prescaler unit. It provides further at max 3 compare values. */
+class BasicTimerUnit: public Hardware, public TraceValueRegister {
     
-    protected:
-        AvrDevice *core; //!< pointer to device core
-        PrescalerMultiplexer* premx; //!< prescaler multiplexer
-        IRQLine* timerOverflow; //!< irq line for overflow interrupt
-        unsigned long tcnt; //!< THE timercounter
-                            // more than 8 bit because of better overflow detection
-        unsigned long last_tcnt; //!< timercounter BEFORE counting operation
-                                 // used for detection of OC interrupts, because
-                                 // OC interupt is fired if counter counts to OCR + 1!
+    private:
         int cs; //!< select value for prescaler multiplexer
-        int updown_counting; //!< count direction control flag, true, if up/down counting
-        bool count_down; //!< counter counts down, used for precise pwm modes
-        unsigned long limit_bottom; //!< BOTTOM value for up/down counting
-        unsigned long limit_top; //!< TOP value for up/down/counting
+        TraceValue* counterTrace; //!< TraceValue instance for counter itself
         
-        //! supports the counter operation, handles overflow interrupt
-        void CountTimer();
-        //! supports the different operation modes after count operation
-        virtual void HandleMode() {}
-        //! Register access to set counter
-        void SetTcnt(unsigned char val);
-        //! Register access to read current counter
-        unsigned char GetTcnt();
-        
-    public:
-        //! Create a 8Bit Timer/Counter unit, no output compare units
-        HWTimer8Bit(AvrDevice *core,
-                    PrescalerMultiplexer *p,
-                    int unit,
-                    IRQLine* tovr);
-        //! Perform a reset of this unit
-        void Reset();
-        
-        virtual unsigned int CpuCycle();
-        
-        IOReg<HWTimer8Bit> tcnt_reg; //!< counter register
-};
-
-//! Timer unit with 8 Bit counter and 1 output compare unit
-class HWTimer8Bit1OC: public HWTimer8Bit {
-    
     protected:
         //! types of waveform generation modes
         enum WGMtype {
           WGM_NORMAL = 0,
-          WGM_PCPWM,
-          WGM_CTC,
-          WGM_FASTPWM
+          WGM_PCPWM_8BIT,
+          WGM_PCPWM_9BIT,
+          WGM_PCPWM_10BIT,
+          WGM_CTC_OCRA,
+          WGM_FASTPWM_8BIT,
+          WGM_FASTPWM_9BIT,
+          WGM_FASTPWM_10BIT,
+          WGM_PFCPWM_ICR,
+          WGM_PFCPWM_OCRA,
+          WGM_PCPWM_ICR,
+          WGM_PCPWM_OCRA,
+          WGM_CTC_ICR,
+          WGM_RESERVED,
+          WGM_FASTPWM_ICR,
+          WGM_FASTPWM_OCRA,
+          WGM_tablesize
         };
         //! types of compare match output modes
         enum COMtype {
@@ -256,41 +235,294 @@ class HWTimer8Bit1OC: public HWTimer8Bit {
           COM_CLEAR,
           COM_SET
         };
+        //! event types for timer/counter
+        enum CEtype {
+            EVT_TOP_REACHED = 0,  //!< TOP reached for one count cycle
+            EVT_MAX_REACHED,      //!< an counter overflow occured
+            EVT_BOTTOM_REACHED,   //!< BOTTOM reached for one count cycle
+            EVT_COMPARE_1,        //!< compare[0] value reached for one count cycle
+            EVT_COMPARE_2,        //!< compare[1] value reached for one count cycle
+            EVT_COMPARE_3,        //!< compare[2] value reached for one count cycle
+        };
+        //! indices for OC units
+        enum OCRIDXtype {
+            OCRIDX_A = 0,    //!< index for OCR unit A
+            OCRIDX_B,        //!< index for OCR unit B
+            OCRIDX_C,        //!< index for OCR unit C
+            OCRIDX_maxUnits  //!< amount of possible OC units
+        };
+        typedef void (BasicTimerUnit::*wgmfunc_t)(CEtype);
         
-        IRQLine* timerCompare; //!< irq line for compare interrupt
-        PinAtPort ocr_out; //!< output pin for output compare unit
-        bool ocr_out_state; //!< saved state for ocr output pin
-        unsigned char ocr; //!< output compare register
-        unsigned char ocr_db; //!< output compare register (double buffer)
-        unsigned char tccr; //!< counter control register (only for GetTccr)
+        AvrDevice *core; //!< pointer to device core
+        PrescalerMultiplexer* premx; //!< prescaler multiplexer
+        IRQLine* timerOverflow; //!< irq line for overflow interrupt
+        IRQLine* timerCapture; //!< irq line for capture interrupt
+
+        unsigned long vtcnt; //!< THE timercounter
+        unsigned long vlast_tcnt; //!< timercounter BEFORE count operation
+                                  // used for detection of count events, because
+                                  // most events occur at VALUE + 1, means, that VALUE
+                                  // have to appear for one count clock cycle!
+        unsigned long icapRegister; //!< Input capture register
+        int updown_counting; //!< count direction control flag, true, if up/down counting
+        bool count_down; //!< counter counts down, used for precise pwm modes
+
+        unsigned long limit_bottom; //!< BOTTOM value for up/down counting
+        unsigned long limit_top; //!< TOP value for counting
+        unsigned long limit_max; //!< MAX value for counting
         WGMtype wgm; //!< waveform generation mode
-        COMtype com; //!< compare match output mode
+        wgmfunc_t wgmfunc[WGM_tablesize]; //!< waveform generator mode function table
+        unsigned long compare[OCRIDX_maxUnits]; //!< compare values for output compare events
+        unsigned long compare_dbl[OCRIDX_maxUnits]; //!< double buffer values for compare values
+        bool compareEnable[OCRIDX_maxUnits]; //!< enables compare operation
+        COMtype com[OCRIDX_maxUnits]; //!< compare match output mode
+        IRQLine* timerCompare[OCRIDX_maxUnits]; //!< irq line for compare interrupt
+        PinAtPort* compare_output[OCRIDX_maxUnits]; //!< output pins for compare units
+        bool compare_output_state[OCRIDX_maxUnits]; //!< status compare output pin
         
-        virtual void HandleMode();
-        //! Compare output handling, if compare match occur or on FOCx bit
-        void HandleCompareOutput(COMtype com, bool &ocr_out_state, PinAtPort &ocr_out);
-        //! Register access to counter control register
-        void SetTccr(unsigned char val);
-        //! Register access to read counter control register
-        unsigned char GetTccr();
-        //! Register access to output compare register
-        void SetOcr(unsigned char val);
-        //! Register access to read output compare register
-        unsigned char GetOcr();
+        //! Supports the count operation, emits count events to HandleEvent method
+        void CountTimer(void);
+        //! Supports the input capture function
+        virtual void InputCapture(void) {}
+        //! Receives count events
+        /*! CountTimer method counts internal counter depending on count mode
+          (updown_counting) and generate events, if special count values are reached
+          for at least one counting cycle. It can happen, that more than one event
+          could occur in the same count cycle! */
+        void HandleEvent(CEtype event) { (this->*wgmfunc[wgm])(event); }
+        //! Set clock mode
+        void SetClockMode(int _cs);
+        //! Set the counter itself
+        void SetCounter(unsigned long val);
+        //! Set compare output mode
+        void SetCompareOutputMode(int idx, COMtype mode);
+        //! Set compare output pins in non pwm mode
+        void SetCompareOutput(int idx);
+        //! Set compare output pins in pwm mode
+        void SetPWMCompareOutput(int idx, bool top);
+        
+        //! returns true, if WGM is in one of the PWM modes
+        bool WGMisPWM(void) { return wgm != WGM_NORMAL && wgm != WGM_CTC_OCRA && wgm != WGM_CTC_ICR; }
+        //! WGM noop function
+        void WGMFunc_noop(CEtype event) {}
+        //! WGM function for normal mode (unique for all different timers)
+        void WGMfunc_normal(CEtype event);
+        //! WGM function for ctc mode (unique for all different timers)
+        void WGMfunc_ctc(CEtype event);
+        //! WGM function for fast pwm mode (unique for all different timers)
+        void WGMfunc_fastpwm(CEtype event);
         
     public:
-        //! Create a 8Bit Timer/Counter unit, 1 output compare unit
-        HWTimer8Bit1OC(AvrDevice *core,
+        //! Create a basic Timer/Counter unit
+        BasicTimerUnit(AvrDevice *core,
                        PrescalerMultiplexer *p,
                        int unit,
-                       IRQLine* tovr,
-                       IRQLine* tcomp,
-                       PinAtPort pout);
+                       IRQLine* tov,
+                       IRQLine* tcap,
+                       int countersize = 8);
+        ~BasicTimerUnit();
         //! Perform a reset of this unit
         void Reset();
         
-        IOReg<HWTimer8Bit1OC> tccr_reg; //!< counter control register
-        IOReg<HWTimer8Bit1OC> ocr_reg; //!< output compare register
+        //! Process timer/counter unit operations by CPU cycle
+        virtual unsigned int CpuCycle();
+};
+
+class HWTimer8: public BasicTimerUnit {
+    
+    protected:
+        //! Change WGM mode, set counter limits
+        void ChangeWGM(WGMtype mode);
+        
+        //! Setter method for compare register
+        void SetCompareRegister(int idx, unsigned char val);
+        //! Getter method for compare register
+        unsigned char GetCompareRegister(int idx);
+        
+        //! Register access to set counter register high byte
+        void Set_TCNT(unsigned char val) { SetCounter(val); }
+        //! Register access to read counter register high byte
+        unsigned char Get_TCNT() { return vtcnt & 0xff; }
+
+        //! Register access to set output compare register A
+        void Set_OCRA(unsigned char val) { SetCompareRegister(0, val); }
+        //! Register access to read output compare register A
+        unsigned char Get_OCRA() { return GetCompareRegister(0); }
+        
+        //! Register access to set output compare register B
+        void Set_OCRB(unsigned char val) { SetCompareRegister(1, val); }
+        //! Register access to read output compare register B
+        unsigned char Get_OCRB() { return GetCompareRegister(1); }
+        
+    public:
+        IOReg<HWTimer8> tcnt_reg; //!< counter register
+        IOReg<HWTimer8> ocra_reg; //!< output compare A register
+        IOReg<HWTimer8> ocrb_reg; //!< output compare B register
+        
+        HWTimer8(AvrDevice *core,
+                 PrescalerMultiplexer *p,
+                 int unit,
+                 IRQLine* tov,
+                 IRQLine* tcompA,
+                 PinAtPort* outA,
+                 IRQLine* tcompB,
+                 PinAtPort* outB);
+        //! Perform a reset of this unit
+        void Reset();
+};
+
+class HWTimer16: public BasicTimerUnit {
+    
+    protected:
+        //! the high byte temporary register for read/write access to TCNT and ICR
+        unsigned char accessTempRegister;
+        
+        //! Setter method for compare register
+        void SetCompareRegister(int idx, bool high, unsigned char val);
+        //! Getter method for compare register
+        unsigned char GetCompareRegister(int idx, bool high);
+        //! Setter method for TCNT and ICR register
+        void SetComplexRegister(bool is_icr, bool high, unsigned char val);
+        //! Getter method for TCNT and ICR register
+        unsigned char GetComplexRegister(bool is_icr, bool high);
+        
+        //! Change WGM mode, set counter limits
+        void ChangeWGM(WGMtype mode);
+        
+        //! Register access to set counter register high byte
+        void Set_TCNTH(unsigned char val) { SetComplexRegister(false, true, val); }
+        //! Register access to read counter register high byte
+        unsigned char Get_TCNTH() { return GetComplexRegister(false, true); }
+        //! Register access to set counter register low byte
+        void Set_TCNTL(unsigned char val) { SetComplexRegister(false, false, val); }
+        //! Register access to read counter register low byte
+        unsigned char Get_TCNTL() { return GetComplexRegister(false, false); }
+
+        //! Register access to set output compare register A high byte
+        void Set_OCRAH(unsigned char val) { SetCompareRegister(0, true, val); }
+        //! Register access to read output compare register A high byte
+        unsigned char Get_OCRAH() { return GetCompareRegister(0, true); }
+        //! Register access to set output compare register A low byte
+        void Set_OCRAL(unsigned char val) { SetCompareRegister(0, false, val); }
+        //! Register access to read output compare register A low byte
+        unsigned char Get_OCRAL() { return GetCompareRegister(0, false); }
+        
+        //! Register access to set output compare register B high byte
+        void Set_OCRBH(unsigned char val) { SetCompareRegister(1, true, val); }
+        //! Register access to read output compare register B high byte
+        unsigned char Get_OCRBH() { return GetCompareRegister(1, true); }
+        //! Register access to set output compare register B low byte
+        void Set_OCRBL(unsigned char val) { SetCompareRegister(1, false, val); }
+        //! Register access to read output compare register B low byte
+        unsigned char Get_OCRBL() { return GetCompareRegister(1, false); }
+        
+        //! Register access to set output compare register C high byte
+        void Set_OCRCH(unsigned char val) { SetCompareRegister(2, true, val); }
+        //! Register access to read output compare register C high byte
+        unsigned char Get_OCRCH() { return GetCompareRegister(2, true); }
+        //! Register access to set output compare register C low byte
+        void Set_OCRCL(unsigned char val) { SetCompareRegister(2, false, val); }
+        //! Register access to read output compare register C low byte
+        unsigned char Get_OCRCL() { return GetCompareRegister(2, false); }
+        
+        //! Register access to set input capture register high byte
+        void Set_ICRH(unsigned char val) { SetComplexRegister(true, true, val); }
+        //! Register access to read input capture register high byte
+        unsigned char Get_ICRH() { return GetComplexRegister(true, true); }
+        //! Register access to set input capture register low byte
+        void Set_ICRL(unsigned char val) { SetComplexRegister(true, false, val); }
+        //! Register access to read input capture register low byte
+        unsigned char Get_ICRL() { return GetComplexRegister(true, false); }
+        
+    public:
+        IOReg<HWTimer16> tcnt_h_reg; //!< counter register, high byte
+        IOReg<HWTimer16> tcnt_l_reg; //!< counter register, low byte
+        IOReg<HWTimer16> ocra_h_reg; //!< output compare A register, high byte
+        IOReg<HWTimer16> ocra_l_reg; //!< output compare A register, low byte
+        IOReg<HWTimer16> ocrb_h_reg; //!< output compare B register, high byte
+        IOReg<HWTimer16> ocrb_l_reg; //!< output compare B register, low byte
+        IOReg<HWTimer16> ocrc_h_reg; //!< output compare C register, high byte
+        IOReg<HWTimer16> ocrc_l_reg; //!< output compare C register, low byte
+        IOReg<HWTimer16> icr_h_reg; //!< input capture register, high byte
+        IOReg<HWTimer16> icr_l_reg; //!< input capture register, low byte
+        
+        HWTimer16(AvrDevice *core,
+                  PrescalerMultiplexer *p,
+                  int unit,
+                  IRQLine* tov,
+                  IRQLine* tcompA,
+                  PinAtPort* outA,
+                  IRQLine* tcompB,
+                  PinAtPort* outB,
+                  IRQLine* tcompC,
+                  PinAtPort* outC,
+                  IRQLine* ticap);
+        //! Perform a reset of this unit
+        void Reset(void);
+};
+
+class HWTimer8_1C: public HWTimer8 {
+    
+    protected:
+        unsigned char tccr_val; //!< register value TCCR
+        
+        //! Register access to set control register
+        void Set_TCCR(unsigned char val);
+        //! Register access to read control register
+        unsigned char Get_TCCR() { return tccr_val; }
+        
+    public:
+        IOReg<HWTimer8_1C> tccr_reg; //!< control register
+        
+        HWTimer8_1C(AvrDevice *core,
+                    PrescalerMultiplexer *p,
+                    int unit,
+                    IRQLine* tov,
+                    IRQLine* tcompA,
+                    PinAtPort* outA);
+        //! Perform a reset of this unit
+        void Reset(void);
+};
+
+class HWTimer16_3C: public HWTimer16 {
+    
+    protected:
+        unsigned char tccra_val; //!< register value TCCRA
+        unsigned char tccrb_val; //!< register value TCCRB
+        
+        //! Register access to set control register A
+        void Set_TCCRA(unsigned char val);
+        //! Register access to read control register A
+        unsigned char Get_TCCRA() { return tccra_val; }
+        
+        //! Register access to set control register B
+        void Set_TCCRB(unsigned char val);
+        //! Register access to read control register B
+        unsigned char Get_TCCRB() { return tccrb_val; }
+        
+        //! Register access to set control register C
+        void Set_TCCRC(unsigned char val);
+        //! Register access to read control register C
+        unsigned char Get_TCCRC() { return 0; } // will be read allways 0!
+        
+    public:
+        IOReg<HWTimer16_3C> tccra_reg; //!< control register A
+        IOReg<HWTimer16_3C> tccrb_reg; //!< control register B
+        IOReg<HWTimer16_3C> tccrc_reg; //!< control register C
+        
+        HWTimer16_3C(AvrDevice *core,
+                     PrescalerMultiplexer *p,
+                     int unit,
+                     IRQLine* tov,
+                     IRQLine* tcompA,
+                     PinAtPort* outA,
+                     IRQLine* tcompB,
+                     PinAtPort* outB,
+                     IRQLine* tcompC,
+                     PinAtPort* outC,
+                     IRQLine* ticap);
+        //! Perform a reset of this unit
+        void Reset(void);
 };
 
 #endif

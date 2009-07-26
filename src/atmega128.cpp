@@ -103,91 +103,89 @@ aref()
   timer012irq->registerLine(5, new IRQLine("ICF1",  11));
   timer012irq->registerLine(6, new IRQLine("TOV2",  10));
   timer012irq->registerLine(7, new IRQLine("OCF2",   9));
-  
-  timer0 = new HWTimer8Bit1OC(this,
-                              new PrescalerMultiplexer(prescaler0),
-                              0,
-                              timer012irq->getLine("TOV0"),
-                              timer012irq->getLine("OCF0"),
-                              PinAtPort(portb, 4));
-  
-  timer2 = new HWTimer8Bit1OC(this,
-                              new PrescalerMultiplexerExt(prescaler123, PinAtPort(portd, 7)),
-                              2,
-                              timer012irq->getLine("TOV2"),
-                              timer012irq->getLine("OCF2"),
-                              PinAtPort(portb, 7));
-  
-  /*
-	timer0123irq= new HWMegaTimer0123Irq(this, irqSystem,
-			15 , //tpComp
-			16 , //t0Ovf
-			12 , //t1compa
-			13 , //t1compb
-			24 , //t1compc
-			11 , //t1capt
-			14 , //t1ovf
-			9,   //t2comp
-			10, //t2ovf
-			26, //t3compa
-			27, //t3compb
-			28, //t3compc
-			25, //t3capt
-			29  //t3ovf
-			);
 
-	timer1= new HWMegaTimer1(this, prescaler123, timer0123irq, 1, //is timer1
-            PinAtPort(portd, 6), PinAtPort(portb, 5), PinAtPort (portb, 6),
-                             PinAtPort (portb , 7), 1);
-
-    timer3=new HWMegaTimer1(this, prescaler123, timer0123irq,
-                            0, //is not timer1
-                            PinAtPort(porte, 6), PinAtPort(porte, 3),
-                            PinAtPort (porte, 4),
-                            PinAtPort (porte, 5), 3);
-*/
-
+  timer3irq = new TimerIRQRegister(this, irqSystem, 1);
+  timer3irq->registerLine(0, new IRQLine("OCF1C", 24));
+  timer3irq->registerLine(1, new IRQLine("OCF3C", 28));
+  timer3irq->registerLine(2, new IRQLine("TOV3",  19));
+  timer3irq->registerLine(3, new IRQLine("OCF3B", 27));
+  timer3irq->registerLine(4, new IRQLine("OCF3A", 26));
+  timer3irq->registerLine(5, new IRQLine("ICF3",  25));
+  
+  timer0 = new HWTimer8_1C(this,
+                           new PrescalerMultiplexer(prescaler0),
+                           0,
+                           timer012irq->getLine("TOV0"),
+                           timer012irq->getLine("OCF0"),
+                           new PinAtPort(portb, 4));
+  timer1 = new HWTimer16_3C(this,
+                            new PrescalerMultiplexerExt(prescaler123, PinAtPort(portd, 6)),
+                            1,
+                            timer012irq->getLine("TOV1"),
+                            timer012irq->getLine("OCF1A"),
+                            new PinAtPort(portb, 5),
+                            timer012irq->getLine("OCF1B"),
+                            new PinAtPort(portb, 6),
+                            timer3irq->getLine("OCF1C"),
+                            new PinAtPort(portb, 7),
+                            timer012irq->getLine("ICF1"));
+  timer2 = new HWTimer8_1C(this,
+                           new PrescalerMultiplexerExt(prescaler123, PinAtPort(portd, 7)),
+                           2,
+                           timer012irq->getLine("TOV2"),
+                           timer012irq->getLine("OCF2"),
+                           new PinAtPort(portb, 7));
+  timer3 = new HWTimer16_3C(this,
+                            new PrescalerMultiplexerExt(prescaler123, PinAtPort(porte, 6)),
+                            3,
+                            timer3irq->getLine("TOV3"),
+                            timer3irq->getLine("OCF3A"),
+                            new PinAtPort(porte, 3),
+                            timer3irq->getLine("OCF3B"),
+                            new PinAtPort(porte, 4),
+                            timer3irq->getLine("OCF3C"),
+                            new PinAtPort(porte, 5),
+                            timer3irq->getLine("ICF3"));
+  
 	rw[0x9d]= & usart1->ucsrc_reg;
 	rw[0x9c]= & usart1->udr_reg;
 	rw[0x9b]= & usart1->ucsra_reg;
 	rw[0x9a]= & usart1->ucsrb_reg;
 	rw[0x99]= & usart1->ubrr_reg;
 	rw[0x98]= & usart1->ubrrhi_reg;
-	
-	
-    rw[0x95]= & usart0->ucsrc_reg;
-	
-	
-	
-	
+	//rw[0x97] - reserved
+	//rw[0x96] - reserved
+  rw[0x95]= & usart0->ucsrc_reg;
+	//rw[0x94] - reserved
+	//rw[0x93] - reserved
+	//rw[0x92] - reserved
+	//rw[0x91] - reserved
 	rw[0x90]= & usart0->ubrrhi_reg;
-	
-	
-	/*
-	// timer 3
+	//rw[0x8f] - reserved
+	//rw[0x8e] - reserved
+	//rw[0x8d] - reserved
 	rw[0x8c]= & timer3->tccrc_reg;
 	rw[0x8b]= & timer3->tccra_reg;
 	rw[0x8a]= & timer3->tccrb_reg;
-	rw[0x89]= & timer3->tcnth_reg;
-	rw[0x88]= & timer3->tcntl_reg;
-	rw[0x87]= & timer3->ocrah_reg;
-	rw[0x86]= & timer3->ocral_reg;
-	rw[0x85]= & timer3->ocrbh_reg;
-	rw[0x84]= & timer3->ocrbl_reg;
-	rw[0x83]= & timer3->ocrch_reg;
-	rw[0x82]= & timer3->ocrcl_reg;
-	rw[0x81]= & timer3->icrh_reg;
-	rw[0x80]= & timer3->icrl_reg;
-
-	
-	
-	rw[0x7d]= & timer0123irq->etimsk_reg;
-	rw[0x7c]= & timer0123irq->etifr_reg;
-	
+	rw[0x89]= & timer3->tcnt_h_reg;
+	rw[0x88]= & timer3->tcnt_l_reg;
+	rw[0x87]= & timer3->ocra_h_reg;
+	rw[0x86]= & timer3->ocra_l_reg;
+	rw[0x85]= & timer3->ocrb_h_reg;
+	rw[0x84]= & timer3->ocrb_l_reg;
+	rw[0x83]= & timer3->ocrc_h_reg;
+	rw[0x82]= & timer3->ocrc_l_reg;
+	rw[0x81]= & timer3->icr_h_reg;
+	rw[0x80]= & timer3->icr_l_reg;
+	//rw[0x7f] - reserved
+	//rw[0x7e] - reserved
+	rw[0x7d]= & timer3irq->timsk_reg;
+	rw[0x7c]= & timer3irq->tifr_reg;
+	//rw[0x7b] - reserved
 	rw[0x7a]= & timer1->tccrc_reg;
-	rw[0x79]= & timer1->ocrch_reg;
-	rw[0x78]= & timer1->ocrcl_reg;
-	*/
+	rw[0x79]= & timer1->ocrc_h_reg;
+	rw[0x78]= & timer1->ocrc_l_reg;
+	
 	
 	
 	
@@ -229,26 +227,21 @@ aref()
 	
 	rw[0x53]= & timer0->tccr_reg;
 	rw[0x52]= & timer0->tcnt_reg;
-	rw[0x51]= & timer0->ocr_reg;
-
-	/*
-	//Timer1
+	rw[0x51]= & timer0->ocra_reg;
+  rw[0x50]= assr_reg;
 	rw[0x4f]= & timer1->tccra_reg; 
 	rw[0x4e]= & timer1->tccrb_reg;
-	rw[0x4d]= & timer1->tcnth_reg;
-	rw[0x4c]= & timer1->tcntl_reg;
-	rw[0x4b]= & timer1->ocrah_reg;
-	rw[0x4a]= & timer1->ocral_reg;
-	rw[0x49]= & timer1->ocrbh_reg;
-	rw[0x48]= & timer1->ocrbl_reg;
-	rw[0x47]= & timer1->icrh_reg;
-	rw[0x46]= & timer1->icrl_reg;
-*/
-
-	//Timer 2
+	rw[0x4d]= & timer1->tcnt_h_reg;
+	rw[0x4c]= & timer1->tcnt_l_reg;
+	rw[0x4b]= & timer1->ocra_h_reg;
+	rw[0x4a]= & timer1->ocra_l_reg;
+	rw[0x49]= & timer1->ocrb_h_reg;
+	rw[0x48]= & timer1->ocrb_l_reg;
+	rw[0x47]= & timer1->icr_h_reg;
+	rw[0x46]= & timer1->icr_l_reg;
 	rw[0x45]= & timer2->tccr_reg;
 	rw[0x44]= & timer2->tcnt_reg;
-	rw[0x43]= & timer2->ocr_reg;
+	rw[0x43]= & timer2->ocra_reg;
 
 	//0x42: on chip debug
 

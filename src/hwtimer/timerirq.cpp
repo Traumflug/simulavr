@@ -37,9 +37,9 @@ void IRQLine::fireInterrupt(void) {
     if(irqreg) irqreg->fireInterrupt(irqvector);
 }
 
-static const std::string __hlp2str(const std::string s, int i) {
-    if(i >= 0) return s + int2str(i);
-    return s;
+static const std::string __hlp2str(const std::string p, const std::string s, int i) {
+    if(i >= 0) return p + ".E" + s;
+    return p + "." + s;
 }
 
 TimerIRQRegister::TimerIRQRegister(AvrDevice* c,
@@ -49,8 +49,8 @@ TimerIRQRegister::TimerIRQRegister(AvrDevice* c,
     core(c),
     irqsystem(irqsys),
     lines(8),
-    timsk_reg(core, __hlp2str("TIMER.TIMSK", regidx)),
-    tifr_reg(core, __hlp2str("TIMER.TIFR", regidx))
+    timsk_reg(core, __hlp2str("TIMER", "TIMSK", regidx)),
+    tifr_reg(core, __hlp2str("TIMER", "TIFR", regidx))
 {
     timsk_reg.connectSRegClient(this);
     tifr_reg.connectSRegClient(this);

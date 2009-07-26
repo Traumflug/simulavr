@@ -76,6 +76,7 @@ void PinAtPort::SetAlternatePort(bool val) {
     unsigned char *adr=&port->alternatePort;
     SetVal(adr, val);
     port->CalcOutputs();
+    port->port_reg.hardwareChange(port->alternatePort);
 }
 
 void PinAtPort::SetUseAlternatePort(bool val) {

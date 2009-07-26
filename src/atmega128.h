@@ -66,11 +66,12 @@ class AvrDevice_atmega128:public AvrDevice {
     IOSpecialReg *sfior_reg;
     HWPrescalerAsync *prescaler0;
     HWPrescaler *prescaler123;
-    HWTimer8Bit1OC* timer0;
-    //HWMegaTimer1 *timer1;
-    HWTimer8Bit1OC* timer2;
-    //HWMegaTimer1 *timer3;
+    HWTimer8_1C*  timer0;
+    HWTimer16_3C* timer1;
+    HWTimer8_1C*  timer2;
+    HWTimer16_3C* timer3;
     TimerIRQRegister* timer012irq;
+    TimerIRQRegister* timer3irq;
     HWSpi *spi;
     HWUsart *usart0;
     HWUsart *usart1;
