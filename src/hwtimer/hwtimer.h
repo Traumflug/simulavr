@@ -299,7 +299,7 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
         //! Set compare output pins in non pwm mode
         void SetCompareOutput(int idx);
         //! Set compare output pins in pwm mode
-        void SetPWMCompareOutput(int idx, bool top);
+        void SetPWMCompareOutput(int idx, bool topOrDown);
         
         //! returns true, if WGM is in one of the PWM modes
         bool WGMisPWM(void) { return wgm != WGM_NORMAL && wgm != WGM_CTC_OCRA && wgm != WGM_CTC_ICR; }
@@ -311,6 +311,10 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
         void WGMfunc_ctc(CEtype event);
         //! WGM function for fast pwm mode (unique for all different timers)
         void WGMfunc_fastpwm(CEtype event);
+        //! WGM function for phase correct pwm mode (unique for all different timers)
+        void WGMfunc_pcpwm(CEtype event);
+        //! WGM function for phase and frequency correct pwm mode (unique for all different timers)
+        void WGMfunc_pfcpwm(CEtype event);
         
     public:
         //! Create a basic Timer/Counter unit

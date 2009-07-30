@@ -634,7 +634,7 @@ void BasicTimerUnit::SetCompareOutput(int idx) {
         compare_output[idx]->SetAlternatePort(new_state);
 }
 
-void BasicTimerUnit::SetPWMCompareOutput(int idx, bool top) {
+void BasicTimerUnit::SetPWMCompareOutput(int idx, bool topOrDown) {
     COMtype mode = com[idx];
     bool new_state, old_state = compare_output_state[idx];
     switch(mode) {
@@ -642,7 +642,9 @@ void BasicTimerUnit::SetPWMCompareOutput(int idx, bool top) {
             return;
             
         case COM_TOGGLE:
-            if(wgm == WGM_FASTPWM_OCRA && idx == OCRIDX_A)
+            if((wgm == WGM_FASTPWM_OCRA ||
+                wgm == WGM_PCPWM_OCRA ||
+                wgm == WGM_PFCPWM_OCRA) && idx == OCRIDX_A)
                 // special mode in case of WGM_FASTPWM_OCRA!
                 SetCompareOutput(OCRIDX_A);
             else
@@ -650,14 +652,14 @@ void BasicTimerUnit::SetPWMCompareOutput(int idx, bool top) {
             break;
             
         case COM_CLEAR:
-            if(top)
+            if(topOrDown)
                 new_state = true;
             else
                 new_state = false;
             break;
             
         case COM_SET:
-            if(top)
+            if(topOrDown)
                 new_state = false;
             else
                 new_state = true;
@@ -772,6 +774,8 @@ void BasicTimerUnit::WGMfunc_fastpwm(CEtype event) {
                     else if(wgm == WGM_FASTPWM_OCRA)
                         // set new top value
                         limit_top = compare_dbl[i];
+                    else
+                        compare[OCRIDX_A] = compare_dbl[OCRIDX_A];
                 } else
                     compare[i] = compare_dbl[i];
             }
@@ -795,6 +799,131 @@ void BasicTimerUnit::WGMfunc_fastpwm(CEtype event) {
             if(timerCompare[2]) {
                 timerCompare[2]->fireInterrupt();
                 SetPWMCompareOutput(2, false);
+            }
+            break;
+            
+        default:
+            break;
+    }
+}
+
+void BasicTimerUnit::WGMfunc_pcpwm(CEtype event) {
+    switch(event) {
+        case EVT_TOP_REACHED:
+            // if ICR or OCRA mode, fire this interrupts
+            if(wgm == WGM_PCPWM_OCRA) {
+                if(timerCompare[OCRIDX_A])
+                    timerCompare[OCRIDX_A]->fireInterrupt();
+            } else if(wgm == WGM_PCPWM_ICR) {
+                if(timerCapture)
+                    timerCapture->fireInterrupt();
+            }
+            // update OC registers
+            for(int i; i < OCRIDX_maxUnits; i++) {
+                if(i == OCRIDX_A) {
+                    if(wgm == WGM_PCPWM_8BIT)
+                        // mask to 0xff
+                        compare[i] = compare_dbl[i] & 0xff;
+                    else if(wgm == WGM_PCPWM_9BIT)
+                        // mask to 0x1ff
+                        compare[i] = compare_dbl[i] & 0x1ff;
+                    else if(wgm == WGM_PCPWM_10BIT)
+                        // mask to 0x3ff
+                        compare[i] = compare_dbl[i] & 0x3ff;
+                    else if(wgm == WGM_PCPWM_OCRA) {
+                        // set new top value
+                        limit_top = compare_dbl[i];
+                        // and process output
+                        SetPWMCompareOutput(0, false);
+                    } else
+                        compare[OCRIDX_A] = compare_dbl[OCRIDX_A];
+                      
+                } else
+                    compare[i] = compare_dbl[i];
+            }
+            break;
+          
+        case EVT_BOTTOM_REACHED:
+            // fire overflow interrupt
+            timerOverflow->fireInterrupt();
+            break;
+          
+        case EVT_COMPARE_1:
+            if(timerCompare[0] && wgm != WGM_PCPWM_OCRA) {
+                timerCompare[0]->fireInterrupt();
+                SetPWMCompareOutput(0, count_down);
+            }
+            break;
+            
+        case EVT_COMPARE_2:
+            if(timerCompare[1]) {
+                timerCompare[1]->fireInterrupt();
+                SetPWMCompareOutput(1, count_down);
+            }
+            break;
+            
+        case EVT_COMPARE_3:
+            if(timerCompare[2]) {
+                timerCompare[2]->fireInterrupt();
+                SetPWMCompareOutput(2, count_down);
+            }
+            break;
+            
+        default:
+            break;
+    }
+}
+
+void BasicTimerUnit::WGMfunc_pfcpwm(CEtype event) {
+    switch(event) {
+        case EVT_TOP_REACHED:
+            // if ICR or OCRA mode, fire this interrupts
+            if(wgm == WGM_PFCPWM_OCRA) {
+                if(timerCompare[OCRIDX_A])
+                    timerCompare[OCRIDX_A]->fireInterrupt();
+            } else if(wgm == WGM_PFCPWM_ICR) {
+                if(timerCapture)
+                    timerCapture->fireInterrupt();
+            }
+            // process output from OC A in case of WGM_PFCPWM_OCRA
+            if(wgm == WGM_PFCPWM_OCRA)
+                SetPWMCompareOutput(0, false);
+            break;
+          
+        case EVT_BOTTOM_REACHED:
+            // fire overflow interrupt
+            timerOverflow->fireInterrupt();
+            // update OC registers
+            for(int i; i < OCRIDX_maxUnits; i++) {
+                if(i == OCRIDX_A) {
+                    if(wgm == WGM_PFCPWM_OCRA)
+                        // set new top value
+                        limit_top = compare_dbl[i];
+                    else
+                        compare[OCRIDX_A] = compare_dbl[OCRIDX_A];
+                } else
+                    compare[i] = compare_dbl[i];
+            }
+            break;
+          
+        case EVT_COMPARE_1:
+            if(timerCompare[0] && wgm != WGM_PFCPWM_OCRA) {
+                timerCompare[0]->fireInterrupt();
+                SetPWMCompareOutput(0, count_down);
+            }
+            break;
+            
+        case EVT_COMPARE_2:
+            if(timerCompare[1]) {
+                timerCompare[1]->fireInterrupt();
+                SetPWMCompareOutput(1, count_down);
+            }
+            break;
+            
+        case EVT_COMPARE_3:
+            if(timerCompare[2]) {
+                timerCompare[2]->fireInterrupt();
+                SetPWMCompareOutput(2, count_down);
             }
             break;
             
@@ -859,6 +988,7 @@ HWTimer8::HWTimer8(AvrDevice *core,
     wgmfunc[WGM_NORMAL] = &HWTimer8::WGMfunc_normal;
     wgmfunc[WGM_CTC_OCRA] = &HWTimer8::WGMfunc_ctc;
     wgmfunc[WGM_FASTPWM_8BIT] = &HWTimer8::WGMfunc_fastpwm;
+    wgmfunc[WGM_PCPWM_8BIT] = &HWTimer8::WGMfunc_pcpwm;
     
     // reset unit
     Reset();
@@ -873,14 +1003,23 @@ void HWTimer8::ChangeWGM(WGMtype mode) {
     switch(wgm) {
         case WGM_NORMAL:
             limit_top = limit_max;
+            updown_counting = false;
             break;
             
         case WGM_CTC_OCRA:
             limit_top = compare[0];
+            updown_counting = false;
             break;
             
         case WGM_FASTPWM_8BIT:
             limit_top = limit_max;
+            updown_counting = false;
+            break;
+            
+        case WGM_PCPWM_8BIT:
+            limit_top = limit_max;
+            updown_counting = true;
+            count_down = false;
             break;
     }
 }
@@ -964,6 +1103,13 @@ HWTimer16::HWTimer16(AvrDevice *core,
     wgmfunc[WGM_FASTPWM_10BIT] = &HWTimer16::WGMfunc_fastpwm;
     wgmfunc[WGM_FASTPWM_OCRA] = &HWTimer16::WGMfunc_fastpwm;
     wgmfunc[WGM_FASTPWM_ICR] = &HWTimer16::WGMfunc_fastpwm;
+    wgmfunc[WGM_PCPWM_8BIT] = &HWTimer16::WGMfunc_pcpwm;
+    wgmfunc[WGM_PCPWM_9BIT] = &HWTimer16::WGMfunc_pcpwm;
+    wgmfunc[WGM_PCPWM_10BIT] = &HWTimer16::WGMfunc_pcpwm;
+    wgmfunc[WGM_PCPWM_OCRA] = &HWTimer16::WGMfunc_pcpwm;
+    wgmfunc[WGM_PCPWM_ICR] = &HWTimer16::WGMfunc_pcpwm;
+    wgmfunc[WGM_PFCPWM_OCRA] = &HWTimer16::WGMfunc_pfcpwm;
+    wgmfunc[WGM_PFCPWM_ICR] = &HWTimer16::WGMfunc_pfcpwm;
     
     // reset unit
     Reset();
@@ -1038,221 +1184,77 @@ void HWTimer16::ChangeWGM(WGMtype mode) {
     switch(wgm) {
         case WGM_NORMAL:
             limit_top = limit_max;
+            updown_counting = false;
             break;
             
         case WGM_CTC_OCRA:
             limit_top = compare[0];
+            updown_counting = false;
             break;
             
         case WGM_CTC_ICR:
             limit_top = icapRegister;
+            updown_counting = false;
             break;
             
         case WGM_FASTPWM_8BIT:
             limit_top = 0xff;
+            updown_counting = false;
             break;
             
         case WGM_FASTPWM_9BIT:
             limit_top = 0x1ff;
+            updown_counting = false;
             break;
             
         case WGM_FASTPWM_10BIT:
             limit_top = 0x3ff;
+            updown_counting = false;
             break;
             
         case WGM_FASTPWM_OCRA:
             limit_top = compare[0];
+            updown_counting = false;
             break;
             
         case WGM_FASTPWM_ICR:
             limit_top = icapRegister;
+            updown_counting = false;
+            break;
+            
+        case WGM_PCPWM_8BIT:
+            limit_top = 0xff;
+            updown_counting = true;
+            count_down = false;
+            break;
+            
+        case WGM_PCPWM_9BIT:
+            limit_top = 0x1ff;
+            updown_counting = true;
+            count_down = false;
+            break;
+            
+        case WGM_PCPWM_10BIT:
+            limit_top = 0x3ff;
+            updown_counting = true;
+            count_down = false;
+            break;
+            
+        case WGM_PCPWM_OCRA:
+        case WGM_PFCPWM_OCRA:
+            limit_top = compare[0];
+            updown_counting = true;
+            count_down = false;
+            break;
+            
+        case WGM_PCPWM_ICR:
+        case WGM_PFCPWM_ICR:
+            limit_top = icapRegister;
+            updown_counting = true;
+            count_down = false;
             break;
     }
 }
-
-/*
-HWTimer8Bit::HWTimer8Bit(AvrDevice *core,
-                         PrescalerMultiplexer *p,
-                         int unit,
-                         IRQLine* tovr):
-    Hardware(core),
-    core(core),
-    premx(p),
-    timerOverflow(tovr),
-    tcnt_reg(core, "TIMER" + int2str(unit) + ".TCNT",
-             this, &HWTimer8Bit::GetTcnt, &HWTimer8Bit::SetTcnt)
-{
-    Reset();
-}
-
-void HWTimer8Bit::CountTimer() {
-    last_tcnt = tcnt; // save cycle - 1 counter value
-    if(updown_counting) {
-        // phase correct mode, counter counts up and down
-        if(count_down) {
-            tcnt--;
-            tcnt_reg.hardwareChange(tcnt);
-            if(tcnt == limit_bottom) {
-                count_down = false; // now count up
-                timerOverflow->fireInterrupt(); // overflow on bottom value,
-                                                // set interrupt bit
-            }
-        } else {
-            tcnt++;
-            tcnt_reg.hardwareChange(tcnt);
-            if(tcnt == limit_top) {
-                count_down = true; // now count down
-            }
-        }
-        return;
-    }
-    // simple up counting till 8Bit overflow
-    tcnt++;
-    tcnt_reg.hardwareChange(tcnt);
-    if(tcnt > 0xff) { // overflow?
-        timerOverflow->fireInterrupt();
-        tcnt &= 0xff; // reset overflow
-    }
-}
-
-void HWTimer8Bit::SetTcnt(unsigned char val) {
-    tcnt = val;
-}
-
-unsigned char HWTimer8Bit::GetTcnt() {
-    return tcnt & 0xff;
-}
-
-void HWTimer8Bit::Reset() {
-    tcnt = 0;
-    limit_bottom = 0;
-    limit_top = 0xff;
-    last_tcnt = limit_top;
-    cs = 0;
-    updown_counting = false;
-    count_down = false;
-}
-
-unsigned int HWTimer8Bit::CpuCycle() {
-    if(premx->isClock(cs)) {
-        CountTimer();
-        HandleMode();
-    }
-    return 0;
-}
-
-HWTimer8Bit1OC::HWTimer8Bit1OC(AvrDevice *core,
-                               PrescalerMultiplexer *p,
-                               int unit,
-                               IRQLine* tovr,
-                               IRQLine* tcomp,
-                               PinAtPort pout):
-    HWTimer8Bit(core, p, unit, tovr),
-    timerCompare(tcomp),
-    ocr_out(pout),
-    tccr_reg(core, "TIMER" + int2str(unit) + ".TCCR",
-             this, &HWTimer8Bit1OC::GetTccr, &HWTimer8Bit1OC::SetTccr),
-    ocr_reg(core, "TIMER" + int2str(unit) + ".OCR",
-            this, &HWTimer8Bit1OC::GetOcr, &HWTimer8Bit1OC::SetOcr)
-{
-    Reset();
-}
-
-void HWTimer8Bit1OC::HandleMode(void) {
-    // check compare match
-    if(last_tcnt == ocr_db) {
-        // compare match found
-        timerCompare->fireInterrupt(); // OC interrupt will be raised in every case
-        // handle compare match output pin
-        HandleCompareOutput(com, ocr_out_state, ocr_out);
-        // handle counter reset to bottom in CTC mode
-        if(wgm == WGM_CTC) {
-            tcnt = limit_bottom;
-            tcnt_reg.hardwareChange(tcnt);
-        }
-    }
-    
-    // handle ocr double buffering
-    if(last_tcnt == limit_top && (wgm == WGM_FASTPWM || wgm == WGM_PCPWM))
-        ocr_db = ocr;
-    
-}
-
-void HWTimer8Bit1OC::HandleCompareOutput(COMtype ctrl, bool &out_state, PinAtPort &outpin) {
-    if(ctrl == COM_NOOP) return; // nothing to do
-    switch(ctrl) {
-        case COM_CLEAR:
-            out_state = false;
-            break;
-        case COM_SET:
-            out_state = true;
-            break;
-        case COM_TOGGLE:
-            out_state = !out_state;
-            break;
-    }
-    outpin.SetAlternatePort(out_state);
-}
-
-void HWTimer8Bit1OC::SetTccr(unsigned char val) {
-    tccr = val & 0x7f; // FOCx is allways read as 0!
-    
-    // handle CSx bits
-    cs = val & 0x7; // set select value for prescaler multiplexer
-    if(cs != 0) {
-        core->AddToCycleList(this);
-    } else {
-        core->RemoveFromCycleList(this);
-    }
-    
-    // handle WGMx bits
-    wgm = (WGMtype)(((val & 0x8) >> 2) + ((val & 0x40) >> 6));
-    if(wgm == WGM_PCPWM) // set counter direction mode
-      updown_counting = true;
-    else
-      updown_counting = false;
-    
-    // handle COMx bits
-    com = (COMtype)((val & 0x30) >> 4);
-    if((com == COM_TOGGLE) && (wgm == WGM_PCPWM || wgm == WGM_FASTPWM)) {
-        avr_warning("toggle mode in pwm operation mode is reserved, set it to NOOP");
-        com = COM_NOOP;
-    }
-    if(com == COM_NOOP)
-        ocr_out.SetUseAlternatePortIfDdrSet(false); // normal pin mode
-    else {
-        ocr_out.SetUseAlternatePortIfDdrSet(true); // alternate mode
-        ocr_out.SetAlternatePort(ocr_out_state);
-    }
-    
-    // handle FOCx bit
-    if(val & 0x80)
-        HandleCompareOutput(com, ocr_out_state, ocr_out);
-}
-
-unsigned char HWTimer8Bit1OC::GetTccr() {
-    return tccr;
-}
-
-void HWTimer8Bit1OC::SetOcr(unsigned char val) {
-    ocr = val;
-    if(wgm == WGM_NORMAL || wgm == WGM_CTC) ocr_db = val; // immediate update
-}
-
-unsigned char HWTimer8Bit1OC::GetOcr() {
-    return ocr;
-}
-
-void HWTimer8Bit1OC::Reset() {
-    HWTimer8Bit::Reset();
-    ocr = 0;
-    ocr_db = 0;
-    ocr_out_state = false;
-    tccr = 0;
-    wgm = WGM_NORMAL;
-    com = COM_NOOP;
-}
-*/
 
 HWTimer8_1C::HWTimer8_1C(AvrDevice *core,
                          PrescalerMultiplexer *p,
