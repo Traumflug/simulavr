@@ -33,6 +33,8 @@
 #include "timerirq.h"
 #include "traceval.h"
 
+#if 0
+
 class HWIrqSystem;
 class HWTimer01Irq;
 
@@ -196,11 +198,14 @@ class HWTimer1 : public Hardware {
             icr1l_reg;
 };
 
+#endif
+
 //////////////////////////////////////////////////////////////////
 
 //! Basic timer unit
 /*! Provides basic timer/counter functionality. Counting clock will be taken
-  from a prescaler unit. It provides further at max 3 compare values. */
+  from a prescaler unit. It provides further at max 3 compare values and
+  one input capture unit. */
 class BasicTimerUnit: public Hardware, public TraceValueRegister {
     
     private:
@@ -332,6 +337,7 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
         virtual unsigned int CpuCycle();
 };
 
+//! Extends BasicTimerUnit to provide common support to all types of 8Bit timer units
 class HWTimer8: public BasicTimerUnit {
     
     protected:
@@ -375,6 +381,7 @@ class HWTimer8: public BasicTimerUnit {
         void Reset();
 };
 
+//! Extends BasicTimerUnit to provide common support to all types of 16Bit timer units
 class HWTimer16: public BasicTimerUnit {
     
     protected:
@@ -465,6 +472,44 @@ class HWTimer16: public BasicTimerUnit {
         void Reset(void);
 };
 
+//! Timer unit with 8Bit counter and no output compare unit
+/*! This timer unit is used by following devices: ATMega8.
+  It has only 1 mode: normal counting!
+
+  TCCRx register contains the following configuration bits (x=#timer):
+  
+  +---+---+---+---+---+----+----+----+
+  | - | - | - | - | - |CSx2|CSx1|CSx0|
+  +---+---+---+---+---+----+----+----+ */
+class HWTimer8_0C: public HWTimer8 {
+    
+    protected:
+        unsigned char tccr_val; //!< register value TCCR
+        
+        //! Register access to set control register
+        void Set_TCCR(unsigned char val);
+        //! Register access to read control register
+        unsigned char Get_TCCR() { return tccr_val; }
+        
+    public:
+        IOReg<HWTimer8_0C> tccr_reg; //!< control register
+        
+        HWTimer8_0C(AvrDevice *core,
+                    PrescalerMultiplexer *p,
+                    int unit,
+                    IRQLine* tov);
+        //! Perform a reset of this unit
+        void Reset(void);
+};
+
+//! Timer unit with 8Bit counter and one output compare unit
+/*! This timer unit is used by following devices: ATMega128.
+
+  TCCRx register contains the following configuration bits (x=#timer):
+  
+  +----+-----+-----+-----+-----+----+----+----+
+  |FOCx|WGMx0|COMx1|COMx0|WGMx1|CSx2|CSx1|CSx0|
+  +----+-----+-----+-----+-----+----+----+----+ */
 class HWTimer8_1C: public HWTimer8 {
     
     protected:
@@ -488,6 +533,247 @@ class HWTimer8_1C: public HWTimer8 {
         void Reset(void);
 };
 
+//! Timer unit with 8Bit counter and 2 output compare unit
+/*! This timer unit is used by following devices: ATMega48/88/168/328.
+
+  TCCRxA register contains the following configuration bits (x=#timer):
+  
+  +------+------+------+------+---+---+-----+-----+
+  |COMxA1|COMxA0|COMxB1|COMxB0| - | - |WGMx1|WGMx0|
+  +------+------+------+------+---+---+-----+-----+
+  
+  TCCRxB register contains the following configuration bits (x=#timer):
+  
+  +-----+-----+---+---+-----+----+----+----+
+  |FOCxA|FOCxB| - | - |WGMx2|CSx2|CSx1|CSx0|
+  +-----+-----+---+---+-----+----+----+----+ */
+class HWTimer8_2C: public HWTimer8 {
+    
+    private:
+        int wgm_raw; //!< this is the wgm raw value from register
+        
+        //! Handle special WGM setting, translate wgm raw value to wgm value
+        void Set_WGM(int val);
+    
+    protected:
+        unsigned char tccra_val; //!< register value TCCRA
+        unsigned char tccrb_val; //!< register value TCCRB
+        
+        //! Register access to set control register
+        void Set_TCCRA(unsigned char val);
+        //! Register access to read control register
+        unsigned char Get_TCCRA() { return tccra_val; }
+        
+        //! Register access to set control register
+        void Set_TCCRB(unsigned char val);
+        //! Register access to read control register
+        unsigned char Get_TCCRB() { return tccrb_val; }
+        
+    public:
+        IOReg<HWTimer8_2C> tccra_reg; //!< control register A
+        IOReg<HWTimer8_2C> tccrb_reg; //!< control register B
+        
+        HWTimer8_2C(AvrDevice *core,
+                    PrescalerMultiplexer *p,
+                    int unit,
+                    IRQLine* tov,
+                    IRQLine* tcompA,
+                    PinAtPort* outA,
+                    IRQLine* tcompB,
+                    PinAtPort* outB);
+        //! Perform a reset of this unit
+        void Reset(void);
+};
+
+//! Timer unit with 16Bit counter and one output compare unit
+/*! This timer unit is used by following devices: AT90[L]S4433.
+
+  TCCRxA register contains the following configuration bits (x=#timer):
+  
+  +-----+-----+---+---+---+---+-----+-----+
+  |COMx1|COMx0| - | - | - | - |PWMx1|PWMx0|
+  +-----+-----+---+---+---+---+-----+-----+
+  
+  TCCRxB register contains the following configuration bits (x=#timer):
+  
+  +-----+-----+---+---+----+----+----+----+
+  |ICNCx|ICESx| - | - |CTCx|CSx2|CSx1|CSx0|
+  +-----+-----+---+---+----+----+----+----+ */
+class HWTimer16_1C: public HWTimer16 {
+    
+    private:
+        int wgm_raw; //!< this is the wgm raw value from register
+        
+        //! Handle special WGM setting, translate wgm raw value to wgm value
+        void Set_WGM(int val);
+        
+    protected:
+        unsigned char tccra_val; //!< register value TCCRA
+        unsigned char tccrb_val; //!< register value TCCRB
+        
+        //! Register access to set control register A
+        void Set_TCCRA(unsigned char val);
+        //! Register access to read control register A
+        unsigned char Get_TCCRA() { return tccra_val; }
+        
+        //! Register access to set control register B
+        void Set_TCCRB(unsigned char val);
+        //! Register access to read control register B
+        unsigned char Get_TCCRB() { return tccrb_val; }
+        
+    public:
+        IOReg<HWTimer16_1C> tccra_reg; //!< control register A
+        IOReg<HWTimer16_1C> tccrb_reg; //!< control register B
+        
+        HWTimer16_1C(AvrDevice *core,
+                     PrescalerMultiplexer *p,
+                     int unit,
+                     IRQLine* tov,
+                     IRQLine* tcompA,
+                     PinAtPort* outA,
+                     IRQLine* ticap);
+        //! Perform a reset of this unit
+        void Reset(void);
+};
+
+//! Timer unit with 16Bit counter and 2 output compare units and 2 config registers
+/*! This timer unit is used by following devices: ATMega16, AT90S8515.
+
+  TCCRxA register contains the following configuration bits (x=#timer):
+  
+  +------+------+------+------+-----+-----+-----+-----+
+  |COMxA1|COMxA0|COMxB1|COMxB0|FOCxA|FOCxB|WGMx1|WGMx0|
+  +------+------+------+------+-----+-----+-----+-----+
+  
+  On AT90S8515 FOCx bits are not available, WGMxy bits are named PWMxy!
+  
+  TCCRxB register contains the following configuration bits (x=#timer):
+  
+  +-----+-----+---+-----+-----+----+----+----+
+  |ICNCx|ICESx| - |WGMx3|WGMx2|CSx2|CSx1|CSx0|
+  +-----+-----+---+-----+-----+----+----+----+
+  
+  On AT90S8515 WGMx3 bit is not available, WGMx2 bit is named CTCx! */
+class HWTimer16_2C2: public HWTimer16 {
+    
+    private:
+        int wgm_raw; //!< this is the wgm raw value from register
+        bool at8515_mode; //!< signals, that this timer units is used in AT90S8515
+        
+        //! Handle special WGM setting, translate wgm raw value to wgm value
+        void Set_WGM(int val);
+    
+    protected:
+        unsigned char tccra_val; //!< register value TCCRA
+        unsigned char tccrb_val; //!< register value TCCRB
+        
+        //! Register access to set control register A
+        void Set_TCCRA(unsigned char val);
+        //! Register access to read control register A
+        unsigned char Get_TCCRA() { return tccra_val; }
+        
+        //! Register access to set control register B
+        void Set_TCCRB(unsigned char val);
+        //! Register access to read control register B
+        unsigned char Get_TCCRB() { return tccrb_val; }
+        
+    public:
+        IOReg<HWTimer16_2C2> tccra_reg; //!< control register A
+        IOReg<HWTimer16_2C2> tccrb_reg; //!< control register B
+        
+        HWTimer16_2C2(AvrDevice *core,
+                      PrescalerMultiplexer *p,
+                      int unit,
+                      IRQLine* tov,
+                      IRQLine* tcompA,
+                      PinAtPort* outA,
+                      IRQLine* tcompB,
+                      PinAtPort* outB,
+                      IRQLine* ticap,
+                      bool is_at8515);
+        //! Perform a reset of this unit
+        void Reset(void);
+};
+
+//! Timer unit with 16Bit counter and 2 output compare units, but 3 config registers
+/*! This timer unit is used by following devices: ATMega48/88/168/328.
+
+  TCCRxA register contains the following configuration bits (x=#timer):
+  
+  +------+------+------+------+---+---+-----+-----+
+  |COMxA1|COMxA0|COMxB1|COMxB0| - | - |WGMx1|WGMx0|
+  +------+------+------+------+---+---+-----+-----+
+  
+  TCCRxB register contains the following configuration bits (x=#timer):
+  
+  +----+------+---+-----+-----+----+----+----+
+  |ICNCx|ICESx| - |WGMx3|WGMx2|CSx2|CSx1|CSx0|
+  +----+------+---+-----+-----+----+----+----+
+  
+  TCCRxC register contains the following configuration bits (x=#timer):
+  
+  +-----+-----+---+---+---+---+---+---+ 
+  |FOCxA|FOCxB| - | - | - | - | - | - |
+  +-----+-----+---+---+---+---+---+---+ */
+class HWTimer16_2C3: public HWTimer16 {
+    
+    protected:
+        unsigned char tccra_val; //!< register value TCCRA
+        unsigned char tccrb_val; //!< register value TCCRB
+        
+        //! Register access to set control register A
+        void Set_TCCRA(unsigned char val);
+        //! Register access to read control register A
+        unsigned char Get_TCCRA() { return tccra_val; }
+        
+        //! Register access to set control register B
+        void Set_TCCRB(unsigned char val);
+        //! Register access to read control register B
+        unsigned char Get_TCCRB() { return tccrb_val; }
+        
+        //! Register access to set control register C
+        void Set_TCCRC(unsigned char val);
+        //! Register access to read control register C
+        unsigned char Get_TCCRC() { return 0; } // will be read allways 0!
+        
+    public:
+        IOReg<HWTimer16_2C3> tccra_reg; //!< control register A
+        IOReg<HWTimer16_2C3> tccrb_reg; //!< control register B
+        IOReg<HWTimer16_2C3> tccrc_reg; //!< control register C
+        
+        HWTimer16_2C3(AvrDevice *core,
+                      PrescalerMultiplexer *p,
+                      int unit,
+                      IRQLine* tov,
+                      IRQLine* tcompA,
+                      PinAtPort* outA,
+                      IRQLine* tcompB,
+                      PinAtPort* outB,
+                      IRQLine* ticap);
+        //! Perform a reset of this unit
+        void Reset(void);
+};
+
+//! Timer unit with 16Bit counter and 3 output compare units
+/*! This timer unit is used by following devices: ATMega128.
+
+  TCCRxA register contains the following configuration bits (x=#timer):
+  
+  +------+------+------+------+------+------+-----+-----+
+  |COMxA1|COMxA0|COMxB1|COMxB0|COMxC1|COMxC0|WGMx1|WGMx0|
+  +------+------+------+------+------+------+-----+-----+
+  
+  TCCRxB register contains the following configuration bits (x=#timer):
+  
+  +----+------+---+-----+-----+----+----+----+
+  |ICNCx|ICESx| - |WGMx3|WGMx2|CSx2|CSx1|CSx0|
+  +----+------+---+-----+-----+----+----+----+
+  
+  TCCRxC register contains the following configuration bits (x=#timer):
+  
+  +-----+-----+-----+---+---+---+---+---+ 
+  |FOCxA|FOCxB|FOCxC| - | - | - | - | - |
+  +-----+-----+-----+---+---+---+---+---+ */
 class HWTimer16_3C: public HWTimer16 {
     
     protected:

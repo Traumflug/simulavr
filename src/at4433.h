@@ -26,44 +26,44 @@
 #ifndef AT4433
 #define AT4433
 #include "avrdevice.h"
-class HWPort;
-class HWSpi;
-class HWUart;
 class HWAcomp;
-class HWPrescaler;
-class HWTimer0;
-class HWTimer1;
 class HWMcucr;
-class HWExtIrq;
-class HWTimer01Irq;
-class HWAdmux;
-class HWAd;
 
-class AvrDevice_at90s4433:public AvrDevice {
- private:
-    HWPort *portx; //TODO XXX there is no need for portx in 4433, but we
-    //have not rewritten the timer1 now, so please do this later
-    HWPort *porty; //we need an analog pin (aref) but we would remove
-    //portx later so another port (y) is used
- public:
-    ~AvrDevice_at90s4433();
-    HWPort *portb;
-    HWPort *portc;
-    HWPort *portd;
-    HWAdmux *admux;
-    HWAd *ad;
-    HWSpi *spi;
-    HWUart *uart;
-    HWAcomp *acomp;
-    HWPrescaler *prescaler;
-    HWTimer0 *timer0;
-    HWTimer1 *timer1;
-    HWMcucr *mcucr;
-    HWExtIrq *extirq;
-    HWTimer01Irq *timer01irq;
-    AvrDevice_at90s4433();
-    unsigned char GetRampz();
-    void SetRampz(unsigned char);
+#include "hwuart.h"
+#include "hwad.h"
+#include "hwport.h"
+#include "hwspi.h"
+#include "timerprescaler.h"
+#include "hwtimer.h"
+#include "hwextirq.h"
+
+//! AVRDevice class for AT90S4433
+class AvrDevice_at90s4433: public AvrDevice {
+    
+    private:
+        HWPort *porty; //we need an analog pin (aref)
+        
+    public:
+        HWPort *portb;                  //!< port B
+        HWPort *portc;                  //!< port C
+        HWPort *portd;                  //!< port D
+        HWAdmux *admux;                 //!< adc multiplexer unit
+        HWAd *ad;                       //!< adc unit
+        HWSpi *spi;                     //!< spi unit
+        HWUart *uart;                   //!< uart unit
+        HWAcomp *acomp;
+        HWPrescaler      *prescaler;    //!< prescaler unit for timer
+        TimerIRQRegister *timer01irq;   //!< timer interrupt unit for timer
+        HWTimer8_0C      *timer0;       //!< timer 0 unit
+        HWTimer16_1C     *timer1;       //!< timer 1 unit
+        HWMcucr *mcucr;
+        HWExtIrq *extirq;               //!< external interrupt unit
+        
+        AvrDevice_at90s4433();
+        ~AvrDevice_at90s4433();
+        unsigned char GetRampz();
+        void SetRampz(unsigned char);
 };
+
 #endif
 

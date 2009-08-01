@@ -27,11 +27,13 @@
 #include "avrdevice.h"
 #include "timerprescaler.h"
 #include "hwtimer.h"
-#include "hwtimer01irq.h"
-#include "trace.h"
+//#include "hwtimer01irq.h"
+//#include "trace.h"
 #include "helper.h"
 
 using namespace std;
+
+#if 0
 
 void HWTimer0::TimerCompareAfterCount() {
     if ((tcnt==1) ) { //overflow occured! when leaving 0
@@ -460,6 +462,8 @@ void HWTimer1::SetTccr1a(unsigned char val) {
     }
 
 }
+
+#endif
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -1256,6 +1260,27 @@ void HWTimer16::ChangeWGM(WGMtype mode) {
     }
 }
 
+HWTimer8_0C::HWTimer8_0C(AvrDevice *core,
+                         PrescalerMultiplexer *p,
+                         int unit,
+                         IRQLine* tov):
+    HWTimer8(core, p, unit, tov, NULL, NULL, NULL, NULL),
+    tccr_reg(core, GetTraceValuePrefix() + "TCCR",
+             this, &HWTimer8_0C::Get_TCCR, &HWTimer8_0C::Set_TCCR)
+{
+    ChangeWGM(WGM_NORMAL);
+}
+
+void HWTimer8_0C::Set_TCCR(unsigned char val) {
+    SetClockMode(val & 0x7);
+    tccr_val = val;
+}
+
+void HWTimer8_0C::Reset() {
+    HWTimer8::Reset();
+    tccr_val = 0;
+}
+
 HWTimer8_1C::HWTimer8_1C(AvrDevice *core,
                          PrescalerMultiplexer *p,
                          int unit,
@@ -1289,6 +1314,270 @@ void HWTimer8_1C::Set_TCCR(unsigned char val) {
 void HWTimer8_1C::Reset() {
     HWTimer8::Reset();
     tccr_val = 0;
+}
+
+HWTimer8_2C::HWTimer8_2C(AvrDevice *core,
+                         PrescalerMultiplexer *p,
+                         int unit,
+                         IRQLine* tov,
+                         IRQLine* tcompA,
+                         PinAtPort* outA,
+                         IRQLine* tcompB,
+                         PinAtPort* outB):
+    HWTimer8(core, p, unit, tov, tcompA, outA, tcompB, outB),
+    tccra_reg(core, GetTraceValuePrefix() + "TCCRA",
+             this, &HWTimer8_2C::Get_TCCRA, &HWTimer8_2C::Set_TCCRA),
+    tccrb_reg(core, GetTraceValuePrefix() + "TCCRB",
+             this, &HWTimer8_2C::Get_TCCRB, &HWTimer8_2C::Set_TCCRB) {}
+
+void HWTimer8_2C::Set_WGM(int val) {
+    WGMtype w;
+    if(wgm_raw != val) {
+        // translate WGM modes
+        switch(val & 0x7) {
+            case 0: w = WGM_NORMAL;       break;
+            case 1: w = WGM_PCPWM_8BIT;   break;
+            case 2: w = WGM_CTC_OCRA;     break;
+            case 3: w = WGM_FASTPWM_8BIT; break;
+            case 4: w = WGM_RESERVED;     break;
+            case 5: w = WGM_PCPWM_OCRA;   break;
+            case 6: w = WGM_RESERVED;     break;
+            case 7: w = WGM_FASTPWM_OCRA; break;
+        }
+        ChangeWGM(w);
+        // save new raw value
+        wgm_raw = val;
+    }
+}
+
+void HWTimer8_2C::Set_TCCRA(unsigned char val) {
+    int temp = wgm_raw;
+    temp &= ~0x3;
+    temp += val & 0x3;
+    Set_WGM(temp);
+    SetCompareOutputMode(0, (COMtype)((val >> 6) & 0x3));
+    SetCompareOutputMode(1, (COMtype)((val >> 4) & 0x3));
+    
+    tccra_val = val;
+}
+
+void HWTimer8_2C::Set_TCCRB(unsigned char val) {
+    int temp = wgm_raw;
+    temp &= ~0x4;
+    temp += (val >> 1) & 0x4;
+    Set_WGM(temp);
+    SetClockMode(val & 0x7);
+    if(!WGMisPWM()) {
+        if(val & 0x80)
+            // FOCxA
+            SetCompareOutput(0);
+        if(val & 0x40)
+            // FOCxB
+            SetCompareOutput(1);
+    }
+
+    tccrb_val = val & 0x3f;
+}
+
+void HWTimer8_2C::Reset() {
+    HWTimer8::Reset();
+    tccra_val = 0;
+    tccrb_val = 0;
+    wgm_raw = 0;
+}
+
+HWTimer16_1C::HWTimer16_1C(AvrDevice *core,
+                           PrescalerMultiplexer *p,
+                           int unit,
+                           IRQLine* tov,
+                           IRQLine* tcompA,
+                           PinAtPort* outA,
+                           IRQLine* ticap):
+    HWTimer16(core, p, unit, tov, tcompA, outA, NULL, NULL, NULL, NULL, ticap),
+    tccra_reg(core, GetTraceValuePrefix() + "TCCRA",
+              this, &HWTimer16_1C::Get_TCCRA, &HWTimer16_1C::Set_TCCRA),
+    tccrb_reg(core, GetTraceValuePrefix() + "TCCRB",
+              this, &HWTimer16_1C::Get_TCCRB, &HWTimer16_1C::Set_TCCRB) {}
+
+void HWTimer16_1C::Set_WGM(int val) {
+    WGMtype w;
+    if(wgm_raw != val) {
+        // translate WGM modes
+        switch(val & 0x7) {
+            case 0: w = WGM_NORMAL;      break;
+            case 1: w = WGM_PCPWM_8BIT;  break;
+            case 2: w = WGM_PCPWM_9BIT;  break;
+            case 3: w = WGM_PCPWM_10BIT; break;
+            case 4: w = WGM_CTC_OCRA;    break;
+            case 5: w = WGM_PCPWM_8BIT;  break;
+            case 6: w = WGM_PCPWM_9BIT;  break;
+            case 7: w = WGM_PCPWM_10BIT; break;
+        }
+        ChangeWGM(w);
+        // save new raw value
+        wgm_raw = val;
+    }
+}
+
+void HWTimer16_1C::Set_TCCRA(unsigned char val) {
+    int temp = wgm_raw;
+    temp &= ~0x3;
+    temp += val & 0x3;
+    Set_WGM(temp);
+    SetCompareOutputMode(0, (COMtype)((val >> 6) & 0x3));
+    
+    tccra_val = val;
+}
+
+void HWTimer16_1C::Set_TCCRB(unsigned char val) {
+    int temp = wgm_raw;
+    temp &= ~0x4;
+    temp += (val >> 1) & 0x4;
+    Set_WGM(temp);
+    SetClockMode(val & 0x7);
+
+    tccrb_val = val;
+}
+
+void HWTimer16_1C::Reset() {
+    HWTimer16::Reset();
+    tccra_val = 0;
+    tccrb_val = 0;
+    wgm_raw = 0;
+}
+
+HWTimer16_2C2::HWTimer16_2C2(AvrDevice *core,
+                             PrescalerMultiplexer *p,
+                             int unit,
+                             IRQLine* tov,
+                             IRQLine* tcompA,
+                             PinAtPort* outA,
+                             IRQLine* tcompB,
+                             PinAtPort* outB,
+                             IRQLine* ticap,
+                             bool is_at8515):
+    HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, NULL, NULL, ticap),
+    tccra_reg(core, GetTraceValuePrefix() + "TCCRA",
+              this, &HWTimer16_2C2::Get_TCCRA, &HWTimer16_2C2::Set_TCCRA),
+    tccrb_reg(core, GetTraceValuePrefix() + "TCCRB",
+              this, &HWTimer16_2C2::Get_TCCRB, &HWTimer16_2C2::Set_TCCRB),
+    at8515_mode(is_at8515) {}
+
+void HWTimer16_2C2::Set_WGM(int val) {
+    if(wgm_raw != val) {
+        // translate WGM modes
+        if(at8515_mode) {
+            WGMtype w;
+            switch(val & 0x7) {
+                case 0: w = WGM_NORMAL;      break;
+                case 1: w = WGM_PCPWM_8BIT;  break;
+                case 2: w = WGM_PCPWM_9BIT;  break;
+                case 3: w = WGM_PCPWM_10BIT; break;
+                case 4: w = WGM_CTC_OCRA;    break;
+                case 5: w = WGM_PCPWM_8BIT;  break;
+                case 6: w = WGM_PCPWM_9BIT;  break;
+                case 7: w = WGM_PCPWM_10BIT; break;
+            }
+            ChangeWGM(w);
+        } else
+            ChangeWGM((WGMtype)val);
+        // save new raw value
+        wgm_raw = val;
+    }
+}
+
+void HWTimer16_2C2::Set_TCCRA(unsigned char val) {
+    int temp = wgm_raw;
+    temp &= ~0x3;
+    temp += val & 0x3;
+    Set_WGM(temp);
+    SetCompareOutputMode(0, (COMtype)((val >> 6) & 0x3));
+    SetCompareOutputMode(1, (COMtype)((val >> 4) & 0x3));
+    if(!WGMisPWM() && !at8515_mode) {
+        if(val & 0x08)
+            // FOCxA
+            SetCompareOutput(0);
+        if(val & 0x04)
+            // FOCxB
+            SetCompareOutput(1);
+    }
+    
+    tccra_val = val;
+}
+
+void HWTimer16_2C2::Set_TCCRB(unsigned char val) {
+    int mask = at8515_mode ? 0x4 : 0xc;
+    int temp = wgm_raw;
+    temp &= ~mask;
+    temp += (val >> 1) & mask;
+    Set_WGM(temp);
+    SetClockMode(val & 0x7);
+
+    tccrb_val = val;
+}
+
+void HWTimer16_2C2::Reset() {
+    HWTimer16::Reset();
+    tccra_val = 0;
+    tccrb_val = 0;
+    wgm_raw = 0;
+}
+
+HWTimer16_2C3::HWTimer16_2C3(AvrDevice *core,
+                             PrescalerMultiplexer *p,
+                             int unit,
+                             IRQLine* tov,
+                             IRQLine* tcompA,
+                             PinAtPort* outA,
+                             IRQLine* tcompB,
+                             PinAtPort* outB,
+                             IRQLine* ticap):
+    HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, NULL, NULL, ticap),
+    tccra_reg(core, GetTraceValuePrefix() + "TCCRA",
+              this, &HWTimer16_2C3::Get_TCCRA, &HWTimer16_2C3::Set_TCCRA),
+    tccrb_reg(core, GetTraceValuePrefix() + "TCCRB",
+              this, &HWTimer16_2C3::Get_TCCRB, &HWTimer16_2C3::Set_TCCRB),
+    tccrc_reg(core, GetTraceValuePrefix() + "TCCRC",
+              this, &HWTimer16_2C3::Get_TCCRC, &HWTimer16_2C3::Set_TCCRC) {}
+
+void HWTimer16_2C3::Set_TCCRA(unsigned char val) {
+    int temp = (int)wgm;
+    temp &= ~0x3;
+    temp += val & 0x3;
+    if(wgm != (WGMtype)temp)
+        ChangeWGM((WGMtype)temp);
+    SetCompareOutputMode(0, (COMtype)((val >> 6) & 0x3));
+    SetCompareOutputMode(1, (COMtype)((val >> 4) & 0x3));
+    
+    tccra_val = val;
+}
+
+void HWTimer16_2C3::Set_TCCRB(unsigned char val) {
+    int temp = (int)wgm;
+    temp &= ~0xc;
+    temp += (val >> 1) & 0xc;
+    if(wgm != (WGMtype)temp)
+        ChangeWGM((WGMtype)temp);
+    SetClockMode(val & 0x7);
+
+    tccrb_val = val;
+}
+
+void HWTimer16_2C3::Set_TCCRC(unsigned char val) {
+    if(!WGMisPWM()) {
+        if(val & 0x80)
+            // FOCxA
+            SetCompareOutput(0);
+        if(val & 0x40)
+            // FOCxB
+            SetCompareOutput(1);
+    }
+}
+
+void HWTimer16_2C3::Reset() {
+    HWTimer16::Reset();
+    tccra_val = 0;
+    tccrb_val = 0;
 }
 
 HWTimer16_3C::HWTimer16_3C(AvrDevice *core,

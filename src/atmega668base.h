@@ -33,13 +33,11 @@
 #include "hwspi.h"
 #include "timerprescaler.h"
 #include "hwtimer.h"
-#include "hwmegax8timer.h"
-#include "hwmegax8timerirq.h"
 
 /*! AVRDevice class for ATMega48/88/168/328
-  \todo This device isn't completely implemented. timer1 is missed. There is no
+  \todo This device isn't completely implemented. There is no
   boot loader section support for >= ATMega88, only normal interrupt vector
-  start address supported. (and maybe more ...) */
+  start address supported, incomplete usart registers (and maybe more ...) */
 class AvrDevice_atmega668base: public AvrDevice {
     
     protected:
@@ -58,8 +56,12 @@ class AvrDevice_atmega668base: public AvrDevice {
         HWAd*               ad;          //!< adc unit
         HWSpi*              spi;         //!< spi unit
         HWUsart*            usart0;      //!< usart 0 unit
-        HWMegaX8TimerIrq*   timerIrq0;   //!< timer interrupt unit for timer 0
-        HWMegaX8Timer0*     timer0;      //!< timer 0 unit
+        TimerIRQRegister*   timerIrq0;   //!< timer interrupt unit for timer 0
+        HWTimer8_2C*        timer0;      //!< timer 0 unit
+        TimerIRQRegister*   timerIrq1;   //!< timer interrupt unit for timer 1
+        HWTimer16_2C3*      timer1;      //!< timer 1 unit
+        TimerIRQRegister*   timerIrq2;   //!< timer interrupt unit for timer 2
+        HWTimer8_2C*        timer2;      //!< timer 2 unit
         
     public:
         

@@ -27,38 +27,42 @@
 #define AT8515
 #include "avrdevice.h"
 
-
 #include "hwspi.h"
 #include "hwuart.h"
 #include "hwacomp.h"
 #include "timerprescaler.h"
 #include "hwtimer.h"
 #include "hwextirq.h"
+#include "hwport.h"
 
 #include "ioregs.h" //only for mcucr here
 
-
-class AvrDevice_at90s8515:public AvrDevice {
- private:
-    HWPort *portx; //only used for oc1b (Timer1)
- public:
-    ~AvrDevice_at90s8515();
-    HWPort *porta;
-    HWPort *portb;
-    HWPort *portc;
-    HWPort *portd;
-    HWSpi *spi;
-    HWUart *uart;
-    HWAcomp *acomp;
-    HWPrescaler *prescaler;
-    HWTimer0 *timer0;
-    HWTimer1 *timer1;
-    HWMcucr *mcucr;
-    HWExtIrq *extirq;
-    HWTimer01Irq *timer01irq;
-    AvrDevice_at90s8515();
-    unsigned char GetRampz();
-    void SetRampz(unsigned char);
+//! AVRDevice class for AT90S4433
+class AvrDevice_at90s8515: public AvrDevice {
+    
+    private:
+        HWPort portx; //only used for oc1b (Timer1)
+        
+    public:
+        HWPort *porta;                  //!< port A
+        HWPort *portb;                  //!< port B
+        HWPort *portc;                  //!< port C
+        HWPort *portd;                  //!< port D
+        Pin&   ocr1b;                   //!< output pin for output compare B on timer 1
+        HWSpi *spi;                     //!< spi unit
+        HWUart *uart;                   //!< uart unit
+        HWAcomp *acomp;
+        HWPrescaler *prescaler;         //!< prescaler unit for timer
+        TimerIRQRegister *timer01irq;   //!< timer interrupt unit for timer
+        HWTimer8_0C      *timer0;       //!< timer 0 unit
+        HWTimer16_2C2    *timer1;       //!< timer 1 unit
+        HWMcucr *mcucr;
+        HWExtIrq *extirq;               //!< external interrupt unit
+        
+        AvrDevice_at90s8515();
+        ~AvrDevice_at90s8515();
+        unsigned char GetRampz();
+        void SetRampz(unsigned char);
 };
 #endif
 

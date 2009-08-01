@@ -92,13 +92,49 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
                                 1,
                                 2);
 
-    timerIrq0 = new HWMegaX8TimerIrq(this, irqSystem, 16, 14, 15);
-    timer0 = new HWMegaX8Timer0(this, 
-                                &prescaler01,
-                                timerIrq0,
-                                PinAtPort(&portd, 6),
-                                PinAtPort(&portd, 5),
-                                0);
+    timerIrq0 = new TimerIRQRegister(this, irqSystem, 0);
+    timerIrq0->registerLine(0, new IRQLine("TOV0",  16));
+    timerIrq0->registerLine(1, new IRQLine("OCF0A", 14));
+    timerIrq0->registerLine(2, new IRQLine("OCF0B", 15));
+    
+    timer0 = new HWTimer8_2C(this,
+                             new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 4)),
+                             0,
+                             timerIrq0->getLine("TOV0"),
+                             timerIrq0->getLine("OCF0A"),
+                             new PinAtPort(&portd, 6),
+                             timerIrq0->getLine("OCF0B"),
+                             new PinAtPort(&portd, 5));
+
+    timerIrq1 = new TimerIRQRegister(this, irqSystem, 1);
+    timerIrq1->registerLine(0, new IRQLine("TOV1",  13));
+    timerIrq1->registerLine(1, new IRQLine("OCF1A", 11));
+    timerIrq1->registerLine(2, new IRQLine("OCF1B", 12));
+    timerIrq1->registerLine(5, new IRQLine("ICF1",  10));
+    
+    timer1 = new HWTimer16_2C3(this,
+                               new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)),
+                               1,
+                               timerIrq1->getLine("TOV1"),
+                               timerIrq1->getLine("OCF1A"),
+                               new PinAtPort(&portb, 1),
+                               timerIrq1->getLine("OCF1B"),
+                               new PinAtPort(&portb, 2),
+                               timerIrq1->getLine("ICF1"));
+    
+    timerIrq2 = new TimerIRQRegister(this, irqSystem, 2);
+    timerIrq2->registerLine(0, new IRQLine("TOV2",  9));
+    timerIrq2->registerLine(1, new IRQLine("OCF2A", 7));
+    timerIrq2->registerLine(2, new IRQLine("OCF2B", 8));
+    
+    timer2 = new HWTimer8_2C(this,
+                             new PrescalerMultiplexer(&prescaler2),
+                             2,
+                             timerIrq2->getLine("TOV2"),
+                             timerIrq2->getLine("OCF2A"),
+                             new PinAtPort(&portb, 3),
+                             timerIrq2->getLine("OCF2B"),
+                             new PinAtPort(&portd, 3));
 
     ad = new HWAd(this, &admux, irqSystem, aref, 21);
     spi = new HWSpi(this,
@@ -133,6 +169,25 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0xC2]= & usart0->ucsrc_reg;
 
     rw[0xb6]= & assr_reg;
+    // 0xb5 reserved
+    rw[0xb4]= & timer2->ocrb_reg;
+    rw[0xb3]= & timer2->ocra_reg;
+    rw[0xb2]= & timer2->tcnt_reg;
+    rw[0xb1]= & timer2->tccrb_reg;
+    rw[0xb0]= & timer2->tccra_reg;
+    // 0x8c - 0xaf reserved
+    rw[0x8b]= & timer1->ocrb_h_reg;
+    rw[0x8a]= & timer1->ocrb_l_reg;
+    rw[0x89]= & timer1->ocra_h_reg;
+    rw[0x88]= & timer1->ocra_l_reg;
+    rw[0x87]= & timer1->icr_h_reg;
+    rw[0x86]= & timer1->icr_l_reg;
+    rw[0x85]= & timer1->tcnt_h_reg;
+    rw[0x84]= & timer1->tcnt_l_reg;
+    // 0x83 reserved
+    rw[0x82]= & timer1->tccrc_reg;
+    rw[0x81]= & timer1->tccrb_reg;
+    rw[0x80]= & timer1->tccra_reg;
     
     rw[0x7C]= & admux.admux_reg;
 
