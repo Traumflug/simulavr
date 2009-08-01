@@ -38,8 +38,14 @@ void IRQLine::fireInterrupt(void) {
 }
 
 static const std::string __hlp2str(const std::string p, const std::string s, int i) {
-    if(i >= 0) return p + ".E" + s;
-    return p + "." + s;
+    // if i == -2, then precede name with "E", for example "ETIMSK"
+    if(i == -2)
+        return p + ".E" + s;
+    // if then i < 0, let the name unchanged
+    if(i < 0)
+        return p + "." + s;
+    // in all other cases append i as number
+    return p + "." + s + int2str(i);
 }
 
 TimerIRQRegister::TimerIRQRegister(AvrDevice* c,

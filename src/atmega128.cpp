@@ -104,7 +104,7 @@ aref()
   timer012irq->registerLine(6, new IRQLine("TOV2",  10));
   timer012irq->registerLine(7, new IRQLine("OCF2",   9));
 
-  timer3irq = new TimerIRQRegister(this, irqSystem, 1);
+  timer3irq = new TimerIRQRegister(this, irqSystem, -2);
   timer3irq->registerLine(0, new IRQLine("OCF1C", 24));
   timer3irq->registerLine(1, new IRQLine("OCF3C", 28));
   timer3irq->registerLine(2, new IRQLine("TOV3",  19));
