@@ -29,6 +29,7 @@ namespace std {
 %include "simulationmember.h"
 %include "externaltype.h"
 %include "pinnotify.h"
+%include "traceval.h"
 %include "avrdevice.h"
 
 %extend AvrDevice {

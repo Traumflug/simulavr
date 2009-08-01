@@ -54,11 +54,11 @@ class RWMemoryMember {
 #ifndef SWIG
         //! Read access on memory
         operator unsigned char() const;
-#endif
         //! Write access on memory
         unsigned char operator=(unsigned char val);
         //! Write access on memory
         unsigned char operator=(const RWMemoryMember &mm);
+#endif
         virtual ~RWMemoryMember();
         
     protected:
