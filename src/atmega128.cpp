@@ -114,6 +114,7 @@ AvrDevice_atmega128::AvrDevice_atmega128():
                            timer012irq->getLine("TOV0"),
                            timer012irq->getLine("OCF0"),
                            new PinAtPort(portb, 4));
+    inputCapture1 = new ICaptureSource(PinAtPort(portd, 4));
     timer1 = new HWTimer16_3C(this,
                             new PrescalerMultiplexerExt(prescaler123, PinAtPort(portd, 6)),
                             1,
@@ -124,13 +125,15 @@ AvrDevice_atmega128::AvrDevice_atmega128():
                             new PinAtPort(portb, 6),
                             timer3irq->getLine("OCF1C"),
                             new PinAtPort(portb, 7),
-                            timer012irq->getLine("ICF1"));
+                            timer012irq->getLine("ICF1"),
+                            inputCapture1);
     timer2 = new HWTimer8_1C(this,
                            new PrescalerMultiplexerExt(prescaler123, PinAtPort(portd, 7)),
                            2,
                            timer012irq->getLine("TOV2"),
                            timer012irq->getLine("OCF2"),
                            new PinAtPort(portb, 7));
+    inputCapture3 = new ICaptureSource(PinAtPort(porte, 7));
     timer3 = new HWTimer16_3C(this,
                             new PrescalerMultiplexerExt(prescaler123, PinAtPort(porte, 6)),
                             3,
@@ -141,7 +144,8 @@ AvrDevice_atmega128::AvrDevice_atmega128():
                             new PinAtPort(porte, 4),
                             timer3irq->getLine("OCF3C"),
                             new PinAtPort(porte, 5),
-                            timer3irq->getLine("ICF3"));
+                            timer3irq->getLine("ICF3"),
+                            inputCapture3);
   
     rw[0x9d]= & usart1->ucsrc_reg;
     rw[0x9c]= & usart1->udr_reg;

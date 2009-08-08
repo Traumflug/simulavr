@@ -27,8 +27,6 @@
 #include "avrdevice.h"
 #include "timerprescaler.h"
 #include "hwtimer.h"
-//#include "hwtimer01irq.h"
-//#include "trace.h"
 #include "helper.h"
 
 using namespace std;
@@ -472,13 +470,15 @@ BasicTimerUnit::BasicTimerUnit(AvrDevice *core,
                                int unit,
                                IRQLine* tov,
                                IRQLine* tcap,
+                               ICaptureSource* icapsrc,
                                int countersize):
     Hardware(core),
     TraceValueRegister(core, "TIMER" + int2str(unit)),
     core(core),
     premx(p),
     timerOverflow(tov),
-    timerCapture(tcap)
+    timerCapture(tcap),
+    icapSource(icapsrc)
 {
     // check counter size and set limit_max
     if(countersize != 8 && countersize != 16)
@@ -507,6 +507,11 @@ BasicTimerUnit::BasicTimerUnit(AvrDevice *core,
     // set wgm functions
     for(int i = 0; i < WGM_tablesize; i++)
         wgmfunc[i] = &BasicTimerUnit::WGMFunc_noop;
+    
+    // set saved input capture state and variables for noise canceler
+    captureInputState = false;
+    icapNCcounter = 0;
+    icapNCstate = false;
     
     // reset internal values
     Reset();
@@ -584,6 +589,39 @@ void BasicTimerUnit::CountTimer() {
         
         // trace the counter change
         counterTrace->change(vtcnt);
+    }
+}
+
+void BasicTimerUnit::InputCapture(void) {
+    if(icapSource != NULL && !WGMuseICR()) {
+        // get the current state
+        bool tmp = icapSource->GetSourceState();
+        if(icapNoiseCanceler) {
+            // use noise canceler
+            if(tmp == icapNCstate) {
+                if(icapNCcounter < 4) {
+                    icapNCcounter++;
+                    tmp = captureInputState; // do not trigger event!
+                }
+            } else {
+                // state change, reset counter
+                icapNCcounter = 0;
+                icapNCstate = tmp;
+                tmp = captureInputState; // do not trigger event!
+            }
+        }
+        
+        // detect change
+        if(tmp != captureInputState) {
+            if(tmp == icapRisingEdge) {
+                // right edge seen, capture timer counter
+                icapRegister = vtcnt;
+                // fire capture interrupt
+                if(timerCapture)
+                    timerCapture->fireInterrupt();
+            }
+            captureInputState = tmp;
+        }
     }
 }
 
@@ -951,6 +989,8 @@ void BasicTimerUnit::Reset() {
     updown_counting = false;
     count_down = false;
     wgm = WGM_NORMAL;
+    icapRisingEdge = false;
+    icapNoiseCanceler = false;
 }
 
 unsigned int BasicTimerUnit::CpuCycle() {
@@ -968,7 +1008,7 @@ HWTimer8::HWTimer8(AvrDevice *core,
                    PinAtPort* outA,
                    IRQLine* tcompB,
                    PinAtPort* outB):
-    BasicTimerUnit(core, p, unit, tov, NULL, 8),
+    BasicTimerUnit(core, p, unit, tov, NULL, NULL, 8),
     tcnt_reg(core, GetTraceValuePrefix() + "TCNT",
              this, &HWTimer8::Get_TCNT, &HWTimer8::Set_TCNT),
     ocra_reg(core, GetTraceValuePrefix() + "OCRA",
@@ -1058,8 +1098,9 @@ HWTimer16::HWTimer16(AvrDevice *core,
                      PinAtPort* outB,
                      IRQLine* tcompC,
                      PinAtPort* outC,
-                     IRQLine* ticap):
-    BasicTimerUnit(core, p, unit, tov, ticap, 16),
+                     IRQLine* ticap,
+                     ICaptureSource* icapsrc):
+    BasicTimerUnit(core, p, unit, tov, ticap, icapsrc, 16),
     tcnt_h_reg(core, GetTraceValuePrefix() + "TCNTH",
                this, &HWTimer16::Get_TCNTH, &HWTimer16::Set_TCNTH),
     tcnt_l_reg(core, GetTraceValuePrefix() + "TCNTL",
@@ -1157,13 +1198,19 @@ unsigned char HWTimer16::GetCompareRegister(int idx, bool high) {
 }
 
 void HWTimer16::SetComplexRegister(bool is_icr, bool high, unsigned char val) {
-    if(high)
-        accessTempRegister = val;
-    else {
+    if(high) {
+        if(is_icr && !WGMuseICR())
+            avr_warning("ICRxH isn't writable in a non-ICR WGM mode");
+        else
+            accessTempRegister = val;
+    } else {
         if(is_icr) {
-            icapRegister = (accessTempRegister << 8) + val;
-            if(wgm == WGM_FASTPWM_ICR)
-                limit_top = icapRegister;
+            if(WGMuseICR()) {
+                icapRegister = (accessTempRegister << 8) + val;
+                if(wgm == WGM_FASTPWM_ICR)
+                    limit_top = icapRegister;
+            } else
+                avr_warning("ICRxL isn't writable in a non-ICR WGM mode");
         } else
             SetCounter((accessTempRegister << 8) + val);
     }
@@ -1392,8 +1439,9 @@ HWTimer16_1C::HWTimer16_1C(AvrDevice *core,
                            IRQLine* tov,
                            IRQLine* tcompA,
                            PinAtPort* outA,
-                           IRQLine* ticap):
-    HWTimer16(core, p, unit, tov, tcompA, outA, NULL, NULL, NULL, NULL, ticap),
+                           IRQLine* ticap,
+                           ICaptureSource* icapsrc):
+    HWTimer16(core, p, unit, tov, tcompA, outA, NULL, NULL, NULL, NULL, ticap, icapsrc),
     tccra_reg(core, GetTraceValuePrefix() + "TCCRA",
               this, &HWTimer16_1C::Get_TCCRA, &HWTimer16_1C::Set_TCCRA),
     tccrb_reg(core, GetTraceValuePrefix() + "TCCRB",
@@ -1435,7 +1483,9 @@ void HWTimer16_1C::Set_TCCRB(unsigned char val) {
     temp += (val >> 1) & 0x4;
     Set_WGM(temp);
     SetClockMode(val & 0x7);
-
+    icapNoiseCanceler = (val & 0x80) == 0x80;
+    icapRisingEdge = (val & 0x40) == 0x40;
+    
     tccrb_val = val;
 }
 
@@ -1455,8 +1505,9 @@ HWTimer16_2C2::HWTimer16_2C2(AvrDevice *core,
                              IRQLine* tcompB,
                              PinAtPort* outB,
                              IRQLine* ticap,
+                             ICaptureSource* icapsrc,
                              bool is_at8515):
-    HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, NULL, NULL, ticap),
+    HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, NULL, NULL, ticap, icapsrc),
     tccra_reg(core, GetTraceValuePrefix() + "TCCRA",
               this, &HWTimer16_2C2::Get_TCCRA, &HWTimer16_2C2::Set_TCCRA),
     tccrb_reg(core, GetTraceValuePrefix() + "TCCRB",
@@ -1512,6 +1563,8 @@ void HWTimer16_2C2::Set_TCCRB(unsigned char val) {
     temp += (val >> 1) & mask;
     Set_WGM(temp);
     SetClockMode(val & 0x7);
+    icapNoiseCanceler = (val & 0x80) == 0x80;
+    icapRisingEdge = (val & 0x40) == 0x40;
 
     tccrb_val = val;
 }
@@ -1531,8 +1584,9 @@ HWTimer16_2C3::HWTimer16_2C3(AvrDevice *core,
                              PinAtPort* outA,
                              IRQLine* tcompB,
                              PinAtPort* outB,
-                             IRQLine* ticap):
-    HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, NULL, NULL, ticap),
+                             IRQLine* ticap,
+                             ICaptureSource* icapsrc):
+    HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, NULL, NULL, ticap, icapsrc),
     tccra_reg(core, GetTraceValuePrefix() + "TCCRA",
               this, &HWTimer16_2C3::Get_TCCRA, &HWTimer16_2C3::Set_TCCRA),
     tccrb_reg(core, GetTraceValuePrefix() + "TCCRB",
@@ -1559,6 +1613,8 @@ void HWTimer16_2C3::Set_TCCRB(unsigned char val) {
     if(wgm != (WGMtype)temp)
         ChangeWGM((WGMtype)temp);
     SetClockMode(val & 0x7);
+    icapNoiseCanceler = (val & 0x80) == 0x80;
+    icapRisingEdge = (val & 0x40) == 0x40;
 
     tccrb_val = val;
 }
@@ -1590,8 +1646,9 @@ HWTimer16_3C::HWTimer16_3C(AvrDevice *core,
                            PinAtPort* outB,
                            IRQLine* tcompC,
                            PinAtPort* outC,
-                           IRQLine* ticap):
-    HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, tcompC, outC, ticap),
+                           IRQLine* ticap,
+                           ICaptureSource* icapsrc):
+    HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, tcompC, outC, ticap, icapsrc),
     tccra_reg(core, GetTraceValuePrefix() + "TCCRA",
               this, &HWTimer16_3C::Get_TCCRA, &HWTimer16_3C::Set_TCCRA),
     tccrb_reg(core, GetTraceValuePrefix() + "TCCRB",
@@ -1619,6 +1676,8 @@ void HWTimer16_3C::Set_TCCRB(unsigned char val) {
     if(wgm != (WGMtype)temp)
         ChangeWGM((WGMtype)temp);
     SetClockMode(val & 0x7);
+    icapNoiseCanceler = (val & 0x80) == 0x80;
+    icapRisingEdge = (val & 0x40) == 0x40;
 
     tccrb_val = val;
 }

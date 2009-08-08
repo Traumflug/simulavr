@@ -49,8 +49,9 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
     portc= new HWPort(this, "C");
     portd= new HWPort(this, "D");
 
-    // portx is only internaly used for ocr1b, this pin is not a gpio!
-    // set DDR Bit 0 to output
+    // portx is internaly used for ocr1b and icp, this 2 pins are not gpio!
+    // set DDR Bit 0 to output: ocr1b
+    // set DDT Bit 1 to input: icp
     portx.SetDdr(0x01);
     
     spi= new HWSpi(this, irqSystem, PinAtPort( portb, 5), PinAtPort( portb, 6), PinAtPort( portb, 7), PinAtPort(portb, 4),/*irqvec*/ 8, false);
@@ -72,6 +73,7 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
                              new PrescalerMultiplexerExt(prescaler, PinAtPort(portb, 0)),
                              0,
                              timer01irq->getLine("TOV0"));
+    inputCapture1 = new ICaptureSource(PinAtPort(&portx, 1));
     timer1 = new HWTimer16_2C2(this,
                                new PrescalerMultiplexerExt(prescaler, PinAtPort(portb, 1)),
                                1,
@@ -81,6 +83,7 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
                                timer01irq->getLine("OCF1B"),
                                new PinAtPort(&portx, 0),
                                timer01irq->getLine("ICF1"),
+                               inputCapture1,
                                true);
 
     extirq= new HWExtIrq( this, irqSystem, PinAtPort(portd, 2), PinAtPort(portd, 3), 1,2);

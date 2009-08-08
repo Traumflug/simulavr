@@ -55,6 +55,7 @@ class AvrDevice_at90s4433: public AvrDevice {
         HWPrescaler      *prescaler;    //!< prescaler unit for timer
         TimerIRQRegister *timer01irq;   //!< timer interrupt unit for timer
         HWTimer8_0C      *timer0;       //!< timer 0 unit
+        ICaptureSource   *inputCapture1; //!< input capture source for timer1
         HWTimer16_1C     *timer1;       //!< timer 1 unit
         HWMcucr *mcucr;
         HWExtIrq *extirq;               //!< external interrupt unit

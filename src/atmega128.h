@@ -62,6 +62,8 @@ class AvrDevice_atmega128: public AvrDevice {
         IOSpecialReg *sfior_reg;        //!< SFIOR IO register
         HWPrescalerAsync *prescaler0;   //!< prescaler unit for timer 0
         HWPrescaler *prescaler123;      //!< prescaler unit for timer 1 to 3
+        ICaptureSource *inputCapture1;  //!< input capture source for timer1
+        ICaptureSource *inputCapture3;  //!< input capture source for timer3
         HWTimer8_1C*  timer0;           //!< timer 0 unit
         HWTimer16_3C* timer1;           //!< timer 1 unit
         HWTimer8_1C*  timer2;           //!< timer 2 unit

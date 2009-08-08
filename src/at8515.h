@@ -41,7 +41,7 @@
 class AvrDevice_at90s8515: public AvrDevice {
     
     private:
-        HWPort portx; //only used for oc1b (Timer1)
+        HWPort portx; // only used for oc1b and icp (Timer1)
         
     public:
         HWPort *porta;                  //!< port A
@@ -55,6 +55,7 @@ class AvrDevice_at90s8515: public AvrDevice {
         HWPrescaler *prescaler;         //!< prescaler unit for timer
         TimerIRQRegister *timer01irq;   //!< timer interrupt unit for timer
         HWTimer8_0C      *timer0;       //!< timer 0 unit
+        ICaptureSource   *inputCapture1; //!< input capture source for timer1
         HWTimer16_2C2    *timer1;       //!< timer 1 unit
         HWMcucr *mcucr;
         HWExtIrq *extirq;               //!< external interrupt unit

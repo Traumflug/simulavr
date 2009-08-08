@@ -112,6 +112,7 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     timerIrq1->registerLine(2, new IRQLine("OCF1B", 12));
     timerIrq1->registerLine(5, new IRQLine("ICF1",  10));
     
+    inputCapture1 = new ICaptureSource(PinAtPort(&portb, 0));
     timer1 = new HWTimer16_2C3(this,
                                new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)),
                                1,
@@ -120,7 +121,8 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
                                new PinAtPort(&portb, 1),
                                timerIrq1->getLine("OCF1B"),
                                new PinAtPort(&portb, 2),
-                               timerIrq1->getLine("ICF1"));
+                               timerIrq1->getLine("ICF1"),
+                               inputCapture1);
     
     timerIrq2 = new TimerIRQRegister(this, irqSystem, 2);
     timerIrq2->registerLine(0, new IRQLine("TOV2",  9));

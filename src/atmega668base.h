@@ -58,6 +58,7 @@ class AvrDevice_atmega668base: public AvrDevice {
         HWUsart*            usart0;      //!< usart 0 unit
         TimerIRQRegister*   timerIrq0;   //!< timer interrupt unit for timer 0
         HWTimer8_2C*        timer0;      //!< timer 0 unit
+        ICaptureSource*     inputCapture1; //!< input capture source for timer1
         TimerIRQRegister*   timerIrq1;   //!< timer interrupt unit for timer 1
         HWTimer16_2C3*      timer1;      //!< timer 1 unit
         TimerIRQRegister*   timerIrq2;   //!< timer interrupt unit for timer 2

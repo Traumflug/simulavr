@@ -32,6 +32,7 @@
 #include "prescalermux.h"
 #include "timerirq.h"
 #include "traceval.h"
+#include "icapturesrc.h"
 
 #if 0
 
@@ -211,6 +212,9 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
     private:
         int cs; //!< select value for prescaler multiplexer
         TraceValue* counterTrace; //!< TraceValue instance for counter itself
+        bool captureInputState; //!< saved state for input capture
+        int icapNCcounter; //!< counter for input capture noise canceler
+        bool icapNCstate; //!< state for input capture noise canceler
         
     protected:
         //! types of waveform generation modes
@@ -268,13 +272,17 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
                                   // used for detection of count events, because
                                   // most events occur at VALUE + 1, means, that VALUE
                                   // have to appear for one count clock cycle!
-        unsigned long icapRegister; //!< Input capture register
         int updown_counting; //!< count direction control flag, true, if up/down counting
         bool count_down; //!< counter counts down, used for precise pwm modes
-
         unsigned long limit_bottom; //!< BOTTOM value for up/down counting
         unsigned long limit_top; //!< TOP value for counting
         unsigned long limit_max; //!< MAX value for counting
+
+        unsigned long icapRegister; //!< Input capture register
+        ICaptureSource* icapSource; //!< Input capture source
+        bool icapRisingEdge; //!< Input capture on rising edge
+        bool icapNoiseCanceler; //!< Noise canceler for input capturing enabled
+        
         WGMtype wgm; //!< waveform generation mode
         wgmfunc_t wgmfunc[WGM_tablesize]; //!< waveform generator mode function table
         unsigned long compare[OCRIDX_maxUnits]; //!< compare values for output compare events
@@ -288,7 +296,7 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
         //! Supports the count operation, emits count events to HandleEvent method
         void CountTimer(void);
         //! Supports the input capture function
-        virtual void InputCapture(void) {}
+        virtual void InputCapture(void);
         //! Receives count events
         /*! CountTimer method counts internal counter depending on count mode
           (updown_counting) and generate events, if special count values are reached
@@ -308,6 +316,8 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
         
         //! returns true, if WGM is in one of the PWM modes
         bool WGMisPWM(void) { return wgm != WGM_NORMAL && wgm != WGM_CTC_OCRA && wgm != WGM_CTC_ICR; }
+        //! returns true, if WGM uses IC register for defining TOP counter value
+        bool WGMuseICR(void) { return wgm == WGM_FASTPWM_ICR || wgm == WGM_CTC_ICR || wgm == WGM_PCPWM_ICR || wgm == WGM_PFCPWM_ICR; }
         //! WGM noop function
         void WGMFunc_noop(CEtype event) {}
         //! WGM function for normal mode (unique for all different timers)
@@ -328,6 +338,7 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
                        int unit,
                        IRQLine* tov,
                        IRQLine* tcap,
+                       ICaptureSource* icapsrc,
                        int countersize = 8);
         ~BasicTimerUnit();
         //! Perform a reset of this unit
@@ -467,7 +478,8 @@ class HWTimer16: public BasicTimerUnit {
                   PinAtPort* outB,
                   IRQLine* tcompC,
                   PinAtPort* outC,
-                  IRQLine* ticap);
+                  IRQLine* ticap,
+                  ICaptureSource* icapsrc);
         //! Perform a reset of this unit
         void Reset(void);
 };
@@ -478,9 +490,10 @@ class HWTimer16: public BasicTimerUnit {
 
   TCCRx register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +---+---+---+---+---+----+----+----+
   | - | - | - | - | - |CSx2|CSx1|CSx0|
-  +---+---+---+---+---+----+----+----+ */
+  +---+---+---+---+---+----+----+----+ \endverbatim */
 class HWTimer8_0C: public HWTimer8 {
     
     protected:
@@ -507,9 +520,10 @@ class HWTimer8_0C: public HWTimer8 {
 
   TCCRx register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +----+-----+-----+-----+-----+----+----+----+
   |FOCx|WGMx0|COMx1|COMx0|WGMx1|CSx2|CSx1|CSx0|
-  +----+-----+-----+-----+-----+----+----+----+ */
+  +----+-----+-----+-----+-----+----+----+----+ \endverbatim */
 class HWTimer8_1C: public HWTimer8 {
     
     protected:
@@ -538,15 +552,17 @@ class HWTimer8_1C: public HWTimer8 {
 
   TCCRxA register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +------+------+------+------+---+---+-----+-----+
   |COMxA1|COMxA0|COMxB1|COMxB0| - | - |WGMx1|WGMx0|
-  +------+------+------+------+---+---+-----+-----+
+  +------+------+------+------+---+---+-----+-----+ \endverbatim
   
   TCCRxB register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +-----+-----+---+---+-----+----+----+----+
   |FOCxA|FOCxB| - | - |WGMx2|CSx2|CSx1|CSx0|
-  +-----+-----+---+---+-----+----+----+----+ */
+  +-----+-----+---+---+-----+----+----+----+ \endverbatim */
 class HWTimer8_2C: public HWTimer8 {
     
     private:
@@ -590,15 +606,17 @@ class HWTimer8_2C: public HWTimer8 {
 
   TCCRxA register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +-----+-----+---+---+---+---+-----+-----+
   |COMx1|COMx0| - | - | - | - |PWMx1|PWMx0|
-  +-----+-----+---+---+---+---+-----+-----+
+  +-----+-----+---+---+---+---+-----+-----+ \endverbatim
   
   TCCRxB register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +-----+-----+---+---+----+----+----+----+
   |ICNCx|ICESx| - | - |CTCx|CSx2|CSx1|CSx0|
-  +-----+-----+---+---+----+----+----+----+ */
+  +-----+-----+---+---+----+----+----+----+ \endverbatim */
 class HWTimer16_1C: public HWTimer16 {
     
     private:
@@ -631,7 +649,8 @@ class HWTimer16_1C: public HWTimer16 {
                      IRQLine* tov,
                      IRQLine* tcompA,
                      PinAtPort* outA,
-                     IRQLine* ticap);
+                     IRQLine* ticap,
+                     ICaptureSource* icapsrc);
         //! Perform a reset of this unit
         void Reset(void);
 };
@@ -641,17 +660,19 @@ class HWTimer16_1C: public HWTimer16 {
 
   TCCRxA register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +------+------+------+------+-----+-----+-----+-----+
   |COMxA1|COMxA0|COMxB1|COMxB0|FOCxA|FOCxB|WGMx1|WGMx0|
-  +------+------+------+------+-----+-----+-----+-----+
+  +------+------+------+------+-----+-----+-----+-----+ \endverbatim
   
   On AT90S8515 FOCx bits are not available, WGMxy bits are named PWMxy!
   
   TCCRxB register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +-----+-----+---+-----+-----+----+----+----+
   |ICNCx|ICESx| - |WGMx3|WGMx2|CSx2|CSx1|CSx0|
-  +-----+-----+---+-----+-----+----+----+----+
+  +-----+-----+---+-----+-----+----+----+----+ \endverbatim
   
   On AT90S8515 WGMx3 bit is not available, WGMx2 bit is named CTCx! */
 class HWTimer16_2C2: public HWTimer16 {
@@ -690,6 +711,7 @@ class HWTimer16_2C2: public HWTimer16 {
                       IRQLine* tcompB,
                       PinAtPort* outB,
                       IRQLine* ticap,
+                      ICaptureSource* icapsrc,
                       bool is_at8515);
         //! Perform a reset of this unit
         void Reset(void);
@@ -700,21 +722,24 @@ class HWTimer16_2C2: public HWTimer16 {
 
   TCCRxA register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +------+------+------+------+---+---+-----+-----+
   |COMxA1|COMxA0|COMxB1|COMxB0| - | - |WGMx1|WGMx0|
-  +------+------+------+------+---+---+-----+-----+
+  +------+------+------+------+---+---+-----+-----+ \endverbatim
   
   TCCRxB register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +----+------+---+-----+-----+----+----+----+
   |ICNCx|ICESx| - |WGMx3|WGMx2|CSx2|CSx1|CSx0|
-  +----+------+---+-----+-----+----+----+----+
+  +----+------+---+-----+-----+----+----+----+ \endverbatim
   
   TCCRxC register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +-----+-----+---+---+---+---+---+---+ 
   |FOCxA|FOCxB| - | - | - | - | - | - |
-  +-----+-----+---+---+---+---+---+---+ */
+  +-----+-----+---+---+---+---+---+---+ \endverbatim */
 class HWTimer16_2C3: public HWTimer16 {
     
     protected:
@@ -749,7 +774,8 @@ class HWTimer16_2C3: public HWTimer16 {
                       PinAtPort* outA,
                       IRQLine* tcompB,
                       PinAtPort* outB,
-                      IRQLine* ticap);
+                      IRQLine* ticap,
+                      ICaptureSource* icapsrc);
         //! Perform a reset of this unit
         void Reset(void);
 };
@@ -759,21 +785,24 @@ class HWTimer16_2C3: public HWTimer16 {
 
   TCCRxA register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +------+------+------+------+------+------+-----+-----+
   |COMxA1|COMxA0|COMxB1|COMxB0|COMxC1|COMxC0|WGMx1|WGMx0|
-  +------+------+------+------+------+------+-----+-----+
+  +------+------+------+------+------+------+-----+-----+ \endverbatim
   
   TCCRxB register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +----+------+---+-----+-----+----+----+----+
   |ICNCx|ICESx| - |WGMx3|WGMx2|CSx2|CSx1|CSx0|
-  +----+------+---+-----+-----+----+----+----+
+  +----+------+---+-----+-----+----+----+----+ \endverbatim
   
   TCCRxC register contains the following configuration bits (x=#timer):
   
+  \verbatim
   +-----+-----+-----+---+---+---+---+---+ 
   |FOCxA|FOCxB|FOCxC| - | - | - | - | - |
-  +-----+-----+-----+---+---+---+---+---+ */
+  +-----+-----+-----+---+---+---+---+---+ \endverbatim */
 class HWTimer16_3C: public HWTimer16 {
     
     protected:
@@ -810,7 +839,8 @@ class HWTimer16_3C: public HWTimer16 {
                      PinAtPort* outB,
                      IRQLine* tcompC,
                      PinAtPort* outC,
-                     IRQLine* ticap);
+                     IRQLine* ticap,
+                     ICaptureSource* icapsrc);
         //! Perform a reset of this unit
         void Reset(void);
 };

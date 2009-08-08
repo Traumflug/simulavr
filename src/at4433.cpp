@@ -74,13 +74,15 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
                              new PrescalerMultiplexerExt(prescaler, PinAtPort(portd, 4)),
                              0,
                              timer01irq->getLine("TOV0"));
+    inputCapture1 = new ICaptureSource(PinAtPort(portb, 0));
     timer1 = new HWTimer16_1C(this,
                               new PrescalerMultiplexerExt(prescaler, PinAtPort(portd, 5)),
                               1,
                               timer01irq->getLine("TOV1"),
                               timer01irq->getLine("OCF1"),
                               new PinAtPort(portb, 1),
-                              timer01irq->getLine("ICF1"));
+                              timer01irq->getLine("ICF1"),
+                              inputCapture1);
     
     extirq= new HWExtIrq( this, irqSystem, PinAtPort(portd, 2), PinAtPort(portd, 3), 1,2);
     mcucr= new HWMcucr(this); //, irqSystem, PinAtPort(portd, 2), PinAtPort(portd, 3));
