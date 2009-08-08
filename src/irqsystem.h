@@ -34,6 +34,9 @@
 #include "avrdevice.h"
 #include "traceval.h"
 
+//! global switch to enable irq statistic (default is disabled)
+extern bool enableIRQStatistic;
+
 class IrqStatisticEntry {
         
     public:

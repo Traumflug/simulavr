@@ -51,6 +51,7 @@ using namespace std;
 #include "string2.h"
 #include "helper.h"
 #include "specialmem.h"
+#include "irqsystem.h"
 
 const char *SplitOffsetFile(
   const char    *arg,
@@ -97,6 +98,8 @@ const char Usage[] =
 "-t --trace <file>     enable trace outputs to <file>\n"
 "-n --nogdbwait        do not wait for gdb connection\n"
 "-F --cpufrequency     set the cpu frequency to <Hz> \n"
+"-s --irqstatistic     prints statistic informations about irq usage after simulation\n"
+"                      is stopped\n"
 "-W --writetopipe <offset>,<file>\n"
 "                      add a special pipe register to device at\n"
 "                      IO-Offset and opens <file> for writing\n"
@@ -116,7 +119,7 @@ const char Usage[] =
 "                      same as -T for backward compatibility\n"
 "-c <tracing-option>   Enables a tracer with a set of options. The format for\n"
 "                      <tracing-option> is:\n"
-" 		       <tracer>[:further-options ...]\n"
+"                      <tracer>[:further-options ...]\n"
 "-o <trace-value-file> Specifies a file into which all available trace value names\n"
 "                      will be written.\n"
 "\n";
@@ -170,10 +173,11 @@ int main(int argc, char *argv[]) {
          {"verbose", 0,0,'V'},
          {"terminate",1,0,'T'},
          {"breakpoint",1,0,'B'},
+         {"irqstatistic",0,0,'s'},
          {0, 0, 0, 0}
       };
 
-      c = getopt_long (argc, argv, "a:e:f:d:gGm:Mp:t:uxyzhvniF:R:W:VT:B:c:o:", long_options, &option_index);
+      c = getopt_long (argc, argv, "a:e:f:d:gGm:Mp:t:uxyzhvnisF:R:W:VT:B:c:o:", long_options, &option_index);
       if (c == -1)
          break;
 
@@ -300,13 +304,20 @@ int main(int argc, char *argv[]) {
                     "simulation starts now!" << endl;
             globalWaitForGdbConnection=false;
             break;
+            
          case 'c':
-	     tracer_opts.push_back(optarg);
-	     break;
+             tracer_opts.push_back(optarg);
+             break;
+         
          case 'o':
-	     tracer_dump_avail=true;
-	     tracer_avail_out=optarg;
-	     break;
+             tracer_dump_avail=true;
+             tracer_avail_out=optarg;
+             break;
+             
+         case 's':
+            enableIRQStatistic = true;
+            break;
+
          default:
             cout << Usage;
             cout << "Supported devices:" << endl;

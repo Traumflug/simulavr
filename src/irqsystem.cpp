@@ -36,6 +36,9 @@
 
 using namespace std;
 
+// global switch to enable irq statistic (default is disabled)
+bool enableIRQStatistic = false;
+
 // if HEXOUT is set the statistic output will be written in hex
 // if not defined the output is decimal seperated with tabs for reading it with gnumeric
 //#define HEXOUT
@@ -268,6 +271,7 @@ IrqStatistic::IrqStatistic (AvrDevice *c):Printable(cout), core(c) {
 
 //the standard function object for a printable is printing to "out", so we do this here 
 void IrqStatistic::operator()() {
-    out << *this;
+    if(enableIRQStatistic)
+        out << *this;
 }
 
