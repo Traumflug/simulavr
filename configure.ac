@@ -12,6 +12,11 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_MAINTAINER_MODE
 
 ####
+# check for OS and build system: MSYS/MingW
+####
+AC_SYS_CHECK_MINGW
+
+####
 # support of libtool, g++, swig (for tcl module and python module used)
 ####
 AC_PROG_LIBTOOL
@@ -36,9 +41,16 @@ AZ_PYTHON_VERSION_ENSURE([2.1.1])
 SWIG_PYTHON
 
 ####
-## Check about the AVR cross compilation environment, check for libbfd and libiberty
+# Check about the AVR cross compilation environment, check for libz (used by
+# libtool!), libbfd and libiberty
 ####
 AX_AVR_ENVIRONMENT
+CHECK_ZLIB
+AC_SUBST([LIBZ_LIBPATH], [$ZLIB_HOME/lib])
+if test "$ac_sys_check_uname_o" = "Msys"; then
+  # need libwsock32 too
+  AVR_CHECK_WINSOCK
+fi
 
 ## Check for the XML files in src/fab/atmel-xml. This just checks for the
 ## existence of the file ATmega8.xml and assumes that all files have been placed into
@@ -77,6 +89,8 @@ AC_ARG_ENABLE([verilog],
     [test "$WE_HAVE_VERILOG" = "yes" && AVR_BUILD_VERILOG="yes"],
     [AVR_BUILD_VERILOG="no"])
 AM_CONDITIONAL([USE_VERILOG], [test "$AVR_BUILD_VERILOG" = "yes"])
+AC_PATH_PROG([GTKWAVE], [gtkwave])
+AM_CONDITIONAL([USE_GTKWAVE],[test "x$GTKWAVE" != 'x'])
 
 ####
 # support for some documenatation tools, texinfo and doxygen
@@ -160,6 +174,7 @@ AC_OUTPUT
 ####
 echo
 echo "Summary:"
+echo "build system = $ac_sys_check_uname_o"
 echo "AVR_GCC=${AVR_GCC}"
 echo "AVR_LIBBFD_INC=${AVR_LIBBFD_INC}"
 echo "AVR_LIBBFD_LIB=${AVR_LIBBFD_LIB}"
@@ -169,15 +184,4 @@ echo "TCL_WISH=${TCL_WISH}"
 echo "build verilog modul avr.vpi = ${AVR_BUILD_VERILOG}"
 
 # EOF
-
-# it seems to be, that this is not used at all!
-
-### If ddd is not installed, then just invoked command line gdb
-#AC_PATH_PROG(DDD, [ddd], [/usr/bin/ddd], [no])
-#if test "${ddd}" = yes ; then
-#  DDD_WITH_ARGS=ddd --debugger
-#else
-#  DDD_WITH_ARGS=
-#fi
-#AC_SUBST([DDD_WITH_ARGS],${DDD_WITH_ARGS})
 

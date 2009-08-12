@@ -10,6 +10,7 @@ config.h
 
 # files created by make
 simulavr
+simulavr.exe
 stamp-h1
 .deps
 .libs
