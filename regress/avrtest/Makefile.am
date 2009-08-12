@@ -4,11 +4,16 @@
 
 AVR_GCC=@AVR_GCC@
 
+if USE_AVR_CROSS
 AVR_TESTS     = maxruntime test_abort test_exit
 AVR_MODEL     = atmega128
 AVR_MCU_CFLAG =-mmcu=$(AVR_MODEL)
 
-noinst_DATA  = $(AVR_TESTS)
+check_target=runsim
+build_targets=$(AVR_TESTS)
+endif
+
+noinst_DATA  = $(build_targets)
 
 avr_objects=test_maxruntime.o test_abort.o test_exit.o avrtest_help.o
 CLEANFILES = $(AVR_TESTS) $(avr_objects) trace
@@ -46,5 +51,5 @@ run_exit: test_exit
 	@echo "*** Did it voluntarily exit? ***"
   
 # run target run_sim together with other tests on "make check"
-check-local: run_sim
+check-local: $(check_target)
 
