@@ -9,7 +9,7 @@ AVR_TESTS     = maxruntime test_abort test_exit
 AVR_MODEL     = atmega128
 AVR_MCU_CFLAG =-mmcu=$(AVR_MODEL)
 
-check_target=runsim
+check_target=run_sim
 build_targets=$(AVR_TESTS)
 endif
 
