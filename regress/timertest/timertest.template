@@ -7,7 +7,7 @@ test: %(vcdtargets)s
 
 %(rules)s
 
-%%.vcd: %%.elf
+%%.vcd: %%.elf $(SIMULAVR)
 	$(SIMULAVR) $($(basename $(notdir $@))_SIMOPTS) -f $<
 
 define compile-and-link
