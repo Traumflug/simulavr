@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,43 +29,48 @@
 
 #include "rwmem.h"
 #include "avrdevice.h"
-/* maybe the faster solution... */
+
+/* this is the fastes solution, tested on Ubuntu and WinXP */
 class HWSreg_bool {
-  public:
-    bool	I;
-    bool	T;
-    bool	H;
-    bool	S;
-    bool	V;
-    bool	N;
-    bool	Z;
-    bool	C;
-    operator int();
-    HWSreg_bool(const int i);
-    HWSreg_bool();
+    
+    public:
+        bool    I;
+        bool    T;
+        bool    H;
+        bool    S;
+        bool    V;
+        bool    N;
+        bool    Z;
+        bool    C;
+        operator int();
+        HWSreg_bool(const int i);
+        HWSreg_bool();
 };
 
-/* or is this the faster one ???? */
+#if 0
+/* or is this the faster one ???? NO!*/
 class HWSreg_bitarray {
-  public:
-    bool	I:1;
-    bool	T:1;
-    bool	H:1;
-    bool	S:1;
-    bool	V:1;
-    bool	N:1;
-    bool	Z:1;
-    bool	C:1;
-    operator int();
-    HWSreg_bitarray(const int );
-    HWSreg_bitarray();
+    
+    public:
+        bool    I:1;
+        bool    T:1;
+        bool    H:1;
+        bool    S:1;
+        bool    V:1;
+        bool    N:1;
+        bool    Z:1;
+        bool    C:1;
+        operator int();
+        HWSreg_bitarray(const int );
+        HWSreg_bitarray();
 };
+#endif
 
-
-class HWSreg: public HWSreg_bitarray {
-  public:
-    operator std::string();
-    HWSreg operator =(const int );
+class HWSreg: public HWSreg_bool {
+    
+    public:
+        operator std::string();
+        HWSreg operator =(const int );
 };
 
 /*! IO register mapping for the status register.
@@ -73,11 +78,16 @@ class HWSreg: public HWSreg_bitarray {
   inline access functions sN(), gN() to get/set flags. This should also make
   accesses faster. */
 class RWSreg: public RWMemoryMember {
-  public:
-  RWSreg(AvrDevice *core, HWSreg *s) :RWMemoryMember(core, "CORE.SREG"), status(s) {}
-  protected:
-    HWSreg *status;
-    unsigned char get() const;
-    void set(unsigned char);
+    
+    public:
+        RWSreg(AvrDevice *core, HWSreg *s):RWMemoryMember(core, "CORE.SREG"), status(s) {}
+        //! reflect a change, which comes from CPU core
+        void trigger_change(void) { tv->change((int)*status); }
+        
+    protected:
+        HWSreg *status;
+        unsigned char get() const;
+        void set(unsigned char);
 };
+
 #endif

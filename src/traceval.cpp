@@ -64,22 +64,24 @@ bool TraceValue::enabled() const { return _enabled; }
 void TraceValue::enable() { _enabled=true; }
 
 void TraceValue::change(unsigned val) {
-    // this is mostly the same as write, but dosn't set WRITE flag!
-    if ((v!=val) || !_written)
-        f=f|CHANGE;
-    v=val;
+    // this is mostly the same as write, but dosn't set WRITE nor _written flag!
+    if ((v != val) || !_written) {
+        f |= CHANGE;
+        v = val;
+    }
 }
 
 void TraceValue::write(unsigned val) {
-    if ((v!=val) || !_written)
-        f=f|CHANGE;
-    v=val;
-    f|=WRITE;
-    _written=true;
+    if ((v != val) || !_written) {
+        f |= CHANGE;
+        v = val;
+    }
+    f |= WRITE;
+    _written = true;
 }
 
 void TraceValue::read() {
-    f|=READ;
+    f |= READ;
 }
 
 bool TraceValue::written() const { return _written;  }

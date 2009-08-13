@@ -87,7 +87,7 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
     extirq= new HWExtIrq( this, irqSystem, PinAtPort(portd, 2), PinAtPort(portd, 3), 1,2);
     mcucr= new HWMcucr(this); //, irqSystem, PinAtPort(portd, 2), PinAtPort(portd, 3));
 
-    rw[0x5f]= new RWSreg(this, status);
+    rw[0x5f]= statusRegister;
     rw[0x5e]= & stack->sph_reg;
     rw[0x5d]= & stack->spl_reg;
     

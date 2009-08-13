@@ -201,7 +201,7 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
 
     rw[0x69]= & extirq->eicra_reg;
 
-    rw[0x5f]= new RWSreg(this, status);
+    rw[0x5f]= statusRegister;
     rw[0x5e]= & stack->sph_reg;
     rw[0x5d]= & stack->spl_reg;
 

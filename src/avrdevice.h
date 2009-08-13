@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,11 +36,14 @@
 #include <string>
 #include <map>
 
+// from hwsreg.h, but not included, because of circular include with this header
+class HWSreg;
+class RWSreg;
+
 class AvrFlash;
 class HWEeprom;
 class HWStack;
 class HWWado;
-class HWSreg;
 class Data;
 class HWIrqSystem;
 class MemoryOffsets;
@@ -49,9 +52,10 @@ class Hardware;
 class DumpManager;
 
 class AvrDevice: public SimulationMember, public TraceValueRegister {
+    
     protected:
         SystemClockOffset clockFreq;
-	std::map < std::string, Pin *> allPins; 
+        std::map < std::string, Pin *> allPins; 
         unsigned int ioSpaceSize;
 
         //old static vars for Step()
@@ -60,9 +64,8 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         unsigned int actualIrqVector;
         int noDirectIrqJump;
         
-
     public:
-	std::string actualFilename;
+        std::string actualFilename;
         Breakpoints BP;
         Exitpoints EP;
         word PC;
@@ -79,26 +82,27 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         RWMemoryMember **rw;
 
         HWStack *stack;
-        HWSreg *status;
+        HWSreg *status;           //!< the status register itself
+        RWSreg *statusRegister;   //!< the memory interface for status
         HWWado *wado;
 
-	std::vector<Hardware *> hwResetList; 
-	std::vector<Hardware *> hwCycleList; 
+        std::vector<Hardware *> hwResetList; 
+        std::vector<Hardware *> hwCycleList; 
 
-	DumpManager *dump_manager;
-	
-	/*! Adds to the list of parts to reset. If already in that list, does
-	  nothing. */
+        DumpManager *dump_manager;
+    
+        /*! Adds to the list of parts to reset. If already in that list, does
+          nothing. */
         void AddToResetList(Hardware *hw);
 
-	/*! Adds to the list of parts to cycle per clock tick. If already in that list, does
-	  nothing. */
+        /*! Adds to the list of parts to cycle per clock tick. If already in that list, does
+          nothing. */
         void AddToCycleList(Hardware *hw);
 
-	//! Removes from the cycle list, if possible.
-	/*! Does nothing if the part is not in the cycle list. */
+        //! Removes from the cycle list, if possible.
+        /*! Does nothing if the part is not in the cycle list. */
         void RemoveFromCycleList(Hardware *hw);
-	
+    
         void Load(const char* n);
         void ReplaceIoRegister(unsigned int offset, RWMemoryMember *);
         void RegisterTerminationSymbol(const char *symbol);
@@ -109,9 +113,9 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
 #endif
 
         AvrDevice(unsigned int ioSpaceSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int flashSize);
-	/*! Steps the AVR core.
-	  \param untilCoreStepFinished iff true, steps a core step and not a
-	  single clock cycle. */
+        /*! Steps the AVR core.
+          \param untilCoreStepFinished iff true, steps a core step and not a
+          single clock cycle. */
         int Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_ns =0);
         void Reset();
         void SetClockFreq(SystemClockOffset f);
@@ -129,6 +133,5 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
 
         const std::string &GetFname() { return actualFilename; }
 };
-
 
 #endif

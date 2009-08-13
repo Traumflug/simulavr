@@ -188,7 +188,7 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     rw[0x62]= & portf->port_reg;
     rw[0x61]= & portf->ddr_reg;
     
-    rw[0x5f]= new RWSreg(this, status);
+    rw[0x5f]= statusRegister;
     rw[0x5e]= & stack->sph_reg;
     rw[0x5d]= & stack->spl_reg;
     
