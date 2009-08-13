@@ -41,15 +41,15 @@ AZ_PYTHON_VERSION_ENSURE([2.1.1])
 SWIG_PYTHON
 
 ####
-# Check about the AVR cross compilation environment, check for libz (used by
-# libtool!), libbfd and libiberty
+# Check about the AVR cross compilation environment, check for libz (only on msys,
+# used automaticaly by libtool!), libbfd and libiberty
 ####
 AX_AVR_ENVIRONMENT
-CHECK_ZLIB
-AC_SUBST([LIBZ_LIBPATH], [$ZLIB_HOME/lib])
 if test "$ac_sys_check_uname_o" = "Msys"; then
   # need libwsock32 too
   AVR_CHECK_WINSOCK
+  # libtool links to libz by default, but on MSYS/MingW this is on other place
+  AVR_CHECK_ZLIB_MSYS
 fi
 
 ## Check for the XML files in src/fab/atmel-xml. This just checks for the
@@ -68,7 +68,7 @@ fi
 if test X"${AVR_GCC}" = X"" ; then
   AC_MSG_WARN([])
   AC_MSG_WARN([AVR Cross tools not installed])
-  AC_MSG_WARN([Not building examples])
+  AC_MSG_WARN([Not building examples and do tests])
   AC_MSG_WARN([])
   ac_have_avr_cross_tools=no
 else
