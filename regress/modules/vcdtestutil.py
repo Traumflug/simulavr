@@ -50,7 +50,7 @@ class VCDTestCase(TestCase):
     The vcd filename format is: "<testname>_<processor>.vcd" where "testname"
     could have also "_"!
     """
-    return basename(self.vcdname).splitext()[0].split("_")[-1]
+    return splitext(basename(self.vcdName))[0].split("_")[-1]
     
   def getVariable(self, name): return self.vcd.getVariable(name)
   
