@@ -44,6 +44,14 @@ class VCDTestCase(TestCase):
   def getVCD(self):
     self.vcd = getVCD(self.vcdName)
     
+  def getProcessorType(self):
+    """This parse self.vcdname and give back the processor part of vcd filename
+    
+    The vcd filename format is: "<testname>_<processor>.vcd" where "testname"
+    could have also "_"!
+    """
+    return basename(self.vcdname).splitext()[0].split("_")[-1]
+    
   def getVariable(self, name): return self.vcd.getVariable(name)
   
   def shortDescription(self):
