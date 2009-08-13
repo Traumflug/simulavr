@@ -42,19 +42,19 @@ using namespace std;
 
 void AvrDevice::AddToResetList(Hardware *hw) {
     if (find(hwResetList.begin(), hwResetList.end(), hw)==hwResetList.end())
-    hwResetList.push_back(hw);
+        hwResetList.push_back(hw);
 }
 
 void AvrDevice::AddToCycleList(Hardware *hw) {
     if (find(hwCycleList.begin(), hwCycleList.end(), hw)==hwCycleList.end())
-    hwCycleList.push_back(hw);
+        hwCycleList.push_back(hw);
 }
         
 void AvrDevice::RemoveFromCycleList(Hardware *hw) {
     vector<Hardware*>::iterator element;
     element=find(hwCycleList.begin(), hwCycleList.end(), hw);
     if (element != hwCycleList.end())
-    hwCycleList.erase(element);
+        hwCycleList.erase(element);
 }
 
 void AvrDevice::Load(const char* fname) {
