@@ -25,6 +25,7 @@
 
 using namespace std;
 
+#include <time.h>
 #include "externaltype.h"
 #include "ui.h"
 #include "trace.h"
