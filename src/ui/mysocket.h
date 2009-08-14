@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,43 @@
  *  $Id$
  */
 
-#ifndef SOCKET
-#define SOCKET
+#ifndef MYSOCKET
+#define MYSOCKET
+
+/*! \todo The implementation of Socket has to be cleaned. In the moment,
+  the Socket implementation for MingW acts only as client, the unix implementation
+  could act also as server, but is this necessary? */
+  
+#include <string>
+#include "config.h"
+
+#ifdef HAVE_SYS_MINGW
+
+#include <winsock2.h>
+#include <sys/types.h>
+
+class Socket {
+    
+    private:
+        static void Start();
+        static void End();
+        static int socketCount;
+        SOCKET _socket;
+        
+    public:
+        Socket(int port);
+        ~Socket();
+        ssize_t Read(std::string &a);
+        void Write(const std::string &s); 
+        ssize_t Poll();
+
+        void Write(const char *in) {
+            std::string a(in);
+            Write(a);
+        }
+};
+
+#else
 
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -39,10 +74,7 @@
 
 #include <unistd.h>
 
-#include <string>
 #include <iostream>
-#include <map>
-#include <sstream>
 
 class sockbuf 
 #ifndef SWIG
@@ -94,10 +126,12 @@ class Socket: public sockstream {
         ssize_t Poll();
 
         void Write(const char *in) {
-	    std::string a(in);
+        std::string a(in);
             Write(a);
         }
 };
+
+#endif
 
 #endif
 

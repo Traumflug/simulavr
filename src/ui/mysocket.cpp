@@ -2,11 +2,86 @@
  *  $Id$
  */
 
-#include <stdlib.h> //use exit()
+#include <iostream>
+
 #include "mysocket.h"
+#include "avrerror.h"
 
 using namespace std;
 
+#ifdef HAVE_SYS_MINGW
+
+int Socket::socketCount = 0;
+
+void Socket::Start() {
+    if(socketCount == 0) {
+        WSADATA info;
+        if(WSAStartup(MAKEWORD(2, 2), &info))
+            avr_error("Could not start WSA");
+    }
+    socketCount++;
+}
+
+void Socket::End() {
+    WSACleanup();
+}
+
+Socket::Socket(int port) {
+    Start();
+    _socket = socket(AF_INET, SOCK_STREAM, 0);
+    if(_socket == INVALID_SOCKET)
+        avr_error("Couldn't create socket: INVALID_SOCKET");
+    
+    hostent *he;
+    if((he = gethostbyname("127.0.0.1")) == 0)
+        avr_error("Couldn't create connection: %s", strerror(errno));
+    
+    sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    addr.sin_addr = *((in_addr *)he->h_addr);
+    memset(&(addr.sin_zero), 0, 8);
+    
+    u_long arg = 1;
+    ioctlsocket(_socket, FIONBIO, &arg);
+        
+    if(::connect(_socket, (sockaddr *) &addr, sizeof(sockaddr)))
+        avr_error("Couldn't create connection: %s", strerror(WSAGetLastError()));
+
+    cerr << "User Interface Connection opened by host " << inet_ntoa(addr.sin_addr) << " port " << ntohs(addr.sin_port) << endl;
+}
+
+Socket::~Socket() { 
+    closesocket(_socket);
+    socketCount--;
+    if(socketCount == 0)
+        End();
+}
+
+ssize_t Socket::Read(string &a) {
+    char buf[256];
+    ssize_t len = recv(_socket, buf, 255, 0);
+    if(len < 0)
+        len=0;
+    buf[len]= '\0';
+    a += buf;
+    return len;
+}
+
+void Socket::Write(const string &s) {
+    send(_socket, s.c_str(), s.length(), 0);
+}
+
+ssize_t Socket::Poll() {
+    u_long arg = 0;
+    if(ioctlsocket(_socket, FIONREAD, &arg) != 0)
+        return 0;
+    return arg;
+}
+
+#else
+
+#include <stdlib.h> //use exit()
 
 Socket::Socket(int port):sockstream(&conn) {
     OpenSocket(port);
@@ -16,7 +91,6 @@ Socket::~Socket() {
 }
 
 void Socket::OpenSocket(int port) {
-
     struct sockaddr_in address[1];
     int                i;
 
@@ -118,12 +192,12 @@ ssize_t Socket::Read( string &a) {
     if (len<0) len=0;
     dummy[len]=0;
     a+=dummy;
-    return len; 
+    return len;
 }
 
 void Socket::Write(const string &s) {
     int err=::write( conn, s.c_str(), s.size());
-    if (err<0) { cerr << "Write in UI fails!" << endl; } 
+    if (err<0) { cerr << "Write in UI fails!" << endl; }
 }
 
 ssize_t Socket::Poll() {
@@ -148,4 +222,6 @@ ssize_t Socket::Poll() {
 
     return erg;
 }
+
+#endif
 

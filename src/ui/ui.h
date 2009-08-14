@@ -26,6 +26,9 @@
 #ifndef UI
 #define UI
 
+#include <map>
+#include <sstream>
+
 #include "systemclocktypes.h"
 #include "simulationmember.h"
 #include "mysocket.h"
