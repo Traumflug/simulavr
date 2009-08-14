@@ -26,25 +26,19 @@
 #include <iostream>
 using namespace std;
 
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <signal.h>
+#include <time.h>
+
 #include "avrmalloc.h"
 #include "avrerror.h"
 #include "types.h"
 #include "global.h"
 #include "breakpoint.h"
-
 #include "systemclock.h"
-
 
 /* only for compilation ... later to be removed */
 #include "avrdevice.h"
@@ -53,7 +47,6 @@ using namespace std;
 
 #ifndef DOXYGEN /* have doxygen system ignore this. */
 enum {
-    //    MAX_BUF        = 400,         /* Maximum size of read/write buffers. */
     MAX_READ_RETRY = 50,          /* Maximum number of retries if a read is incomplete. */
 
     MEM_SPACE_MASK = 0x00ff0000,  /* mask to get bits which determine memory space */
@@ -74,45 +67,233 @@ enum {
 };
 #endif /* not DOXYGEN */
 
+#ifdef HAVE_SYS_MINGW
 
-GdbServer::GdbServer(AvrDevice *c, int _port, int debug, int _waitForGdbConnection): core(c), port(_port), global_debug_on(debug), waitForGdbConnection(_waitForGdbConnection) {
-    last_reply=NULL; //init static var for last_reply()
-    //is_running=0;    //init static var for continue()
-    block_on=1;      //init static var for pre_parse_packet()
-    conn=-1;        //no connection opened 
-    runMode= GDB_RET_NOTHING_RECEIVED;
-    lastCoreStepFinished=true;
-    //untilCoreStepFinished=true; //last core step must be finished :-) else we got never gdb into action
+int GdbServerSocketMingW::socketCount = 0;
 
+void GdbServerSocketMingW::Start() {
+    if(socketCount == 0) {
+        WSADATA info;
+        if(WSAStartup(MAKEWORD(2, 2), &info))
+            avr_error("Could not start WSA");
+    }
+    socketCount++;
+}
 
-    int i;
+void GdbServerSocketMingW::End() {
+    WSACleanup();
+}
 
+GdbServerSocketMingW::GdbServerSocketMingW(int port): _socket(0), _conn(0) {
+    sockaddr_in sa;
+    
+    Start();
+    _socket = socket(AF_INET, SOCK_STREAM, 0);
+    if(_socket == INVALID_SOCKET)
+        avr_error("Couldn't create socket: INVALID_SOCKET");
+    
+    u_long arg = 1;
+    ioctlsocket(_socket, FIONBIO, &arg);
+    
+    memset(&sa, 0, sizeof(sa));
+    sa.sin_family = PF_INET;
+    sa.sin_port = htons(port);
+    if(bind(_socket, (sockaddr *)&sa, sizeof(sockaddr_in)) == SOCKET_ERROR) {
+        closesocket(_socket);
+        avr_error("Couldn't bind socket: INVALID_SOCKET");
+    }
+    
+    listen(_socket, 1); // only 1 connection at time
+}
 
+GdbServerSocketMingW::~GdbServerSocketMingW() {
+    Close();
+    socketCount--;
+    if(socketCount == 0)
+        End();
+}
 
+void GdbServerSocketMingW::Close(void) {
+    CloseConnection();
+    closesocket(_socket);
+}
 
-    if ( (sock = socket( PF_INET, SOCK_STREAM, 0 )) < 0 )
-        avr_error( "Can't create socket: %s", strerror(errno) );
+int GdbServerSocketMingW::ReadByte(void) {
+    char buf[1];
+    int rv = recv(_conn, buf, 1, 0);
+    if(rv <= 0)
+        return -1;
+    return buf[0];
+}
+
+void GdbServerSocketMingW::Write(const void* buf, size_t count) {
+    send(_conn, (const char *)buf, count, 0);
+}
+
+void GdbServerSocketMingW::SetBlockingMode(int mode) {
+    u_long arg = 1;
+    if(mode)
+        arg = 0;
+    ioctlsocket(_socket, FIONBIO, &arg);
+}
+
+bool GdbServerSocketMingW::Connect(void) {
+    _conn = accept(_socket, 0, 0);
+    if(_conn == INVALID_SOCKET) {
+        int rc = WSAGetLastError();
+        if(rc == WSAEWOULDBLOCK)
+            return false;
+        else
+            avr_error("Couldn't connect: INVALID_SOCKET");
+    }
+    return true;
+}
+
+void GdbServerSocketMingW::CloseConnection(void) {
+    closesocket(_conn);
+}
+
+#else
+
+GdbServerSocketUnix::GdbServerSocketUnix(int port) {
+    conn = -1;        //no connection opened
+    
+    if((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0)
+        avr_error("Can't create socket: %s", strerror(errno));
 
     /* Let the kernel reuse the socket address. This lets us run
     twice in a row, without waiting for the (ip, port) tuple
     to time out. */
-    i = 1;  
-    setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &i, sizeof(i) );
-    fcntl( sock, F_SETFL, fcntl(sock, F_GETFL, 0) | O_NONBLOCK); //dont know 
+    int i = 1;  
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &i, sizeof(i));
+    fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) | O_NONBLOCK); //dont know 
 
     address->sin_family = AF_INET;
     address->sin_port = htons(port);
-    memset( &address->sin_addr, 0, sizeof(address->sin_addr) );
+    memset(&address->sin_addr, 0, sizeof(address->sin_addr));
 
-    if ( bind( sock, (struct sockaddr *)address, sizeof(address) ) )
-        avr_error( "Can not bind socket: %s", strerror(errno) );
+    if(bind(sock, (struct sockaddr *)address, sizeof(address)))
+        avr_error("Can not bind socket: %s", strerror(errno));
 
-    if ( listen(sock, 1) < 0)
-    {
-        cerr << "Can not listen on socket: " <<  strerror(errno) << endl;
+    if(listen(sock, 1) < 0)
+        avr_error("Can not listen on socket: %s", strerror(errno));
+}
+
+GdbServerSocketUnix::~GdbServerSocketUnix() {
+    // do nothing in the moment
+}
+
+void GdbServerSocketUnix::Close(void) {
+    CloseConnection();
+    close(sock);
+}
+
+int GdbServerSocketUnix::ReadByte(void) {
+    char c;
+    int res;
+    int cnt = MAX_READ_RETRY;
+
+    while(cnt--) {
+        res = read(conn, &c, 1);
+        if(res < 0) {
+            if (errno == EAGAIN)
+                /* fd was set to non-blocking and no data was available */
+                return -1;
+
+            avr_error("read failed: %s", strerror(errno));
+        }
+
+        if (res == 0) {
+            usleep(1000);
+            avr_warning("incomplete read\n");
+            continue;
+        }
+        return c;
     }
+    avr_error("Maximum read reties reached");
 
-    fprintf( stderr, "Waiting on port %d for gdb client to connect...\n", port );
+    return 0; /* make compiler happy */
+}
+
+void GdbServerSocketUnix::Write(const void* buf, size_t count) {
+    int res;
+
+    res = write(conn, buf, count);
+
+    /* FIXME: should we try and catch interrupted system calls here? */
+    if(res < 0)
+        avr_error("write failed: %s", strerror(errno));
+
+    /* FIXME: if this happens a lot, we could try to resend the
+    unsent bytes. */
+    if((unsigned int)res != count)
+        avr_error("write only wrote %d of %d bytes", res, count);
+}
+
+void GdbServerSocketUnix::SetBlockingMode(int mode) {
+    if(mode) {
+        /* turn non-blocking mode off */
+        if(fcntl(conn, F_SETFL, fcntl(conn, F_GETFL, 0) & ~O_NONBLOCK) < 0)
+            avr_warning("fcntl failed: %s\n", strerror(errno));
+    } else {
+        /* turn non-blocking mode on */
+        if(fcntl(conn, F_SETFL, fcntl(conn, F_GETFL, 0) | O_NONBLOCK) < 0)
+            avr_warning("fcntl failed: %s\n", strerror(errno));
+    }
+}
+
+bool GdbServerSocketUnix::Connect(void) {
+    /* accept() needs this set, or it fails (sometimes) */
+    addrLength[0] = sizeof(struct sockaddr *);
+
+    /* We only want to accept a single connection, thus don't need a loop. */
+    /* Wait until we have a connection */
+    conn = accept(sock, (struct sockaddr *)address, addrLength);
+    if(conn > 0) {
+        /* Tell TCP not to delay small packets.  This greatly speeds up
+        interactive response. WARNING: If TCP_NODELAY is set on, then gdb
+        may timeout in mid-packet if the (gdb)packet is not sent within a
+        single (tcp)packet, thus all outgoing (gdb)packets _must_ be sent
+        with a single call to write. (see Stevens "Unix Network
+        Programming", Vol 1, 2nd Ed, page 202 for more info) */
+        i = 1;
+        setsockopt (conn, IPPROTO_TCP, TCP_NODELAY, &i, sizeof (i));
+
+        /* If we got this far, we now have a client connected and can start 
+        processing. */
+        fprintf(stderr, "Connection opened by host %s, port %hd.\n",
+                inet_ntoa(address->sin_addr), ntohs(address->sin_port));
+
+        return true;
+    } else
+        return false;
+}
+
+void GdbServerSocketMingW::CloseConnection(void) {
+    close(conn);
+    conn = -1;
+}
+
+#endif
+
+GdbServer::GdbServer(AvrDevice *c, int _port, int debug, int _waitForGdbConnection):
+    core(c),
+    global_debug_on(debug),
+    waitForGdbConnection(_waitForGdbConnection)
+{
+    last_reply = NULL; //init static var for last_reply()
+    block_on = 1;      //init static var for pre_parse_packet()
+    runMode = GDB_RET_NOTHING_RECEIVED;
+    lastCoreStepFinished = true;
+    connState = false;
+
+#ifdef HAVE_SYS_MINGW
+    server = new GdbServerSocketMingW(_port);
+#else
+    server = new GdbServerSocketUnix(_port);
+#endif
+
+    fprintf(stderr, "Waiting on port %d for gdb client to connect...\n", _port);
 
 }
 
@@ -120,11 +301,9 @@ GdbServer::GdbServer(AvrDevice *c, int _port, int debug, int _waitForGdbConnecti
 vector<GdbServer*> GdbServer::allGdbServers;
 
 GdbServer::~GdbServer() {
-    close(conn);
-    close(sock);
+    server->Close();
+    delete server;
 }
-
-
 
 word GdbServer::avr_core_flash_read(int addr) {
     return (core->Flash->myMemory[addr*2]<<8)+core->Flash->myMemory[addr*2+1];
@@ -172,43 +351,9 @@ int GdbServer::signal_has_occurred(int signo) {return 0;}
 void GdbServer::signal_watch_start(int signo){};
 void GdbServer::signal_watch_stop(int signo){};
 
-
 static char HEX_DIGIT[] = "0123456789abcdef";
-/* Wrap read(2) so we can read a byte without having
-to do a shit load of error checking every time. */
 
-int GdbServer::gdb_read_byte( )
-{
-    char c;
-    int res;
-    int cnt = MAX_READ_RETRY;
-
-    while (cnt--)
-    {
-        res = read( conn, &c, 1 );
-        if (res < 0)
-        {
-            if (errno == EAGAIN)
-                /* fd was set to non-blocking and no data was available */
-                return -1;
-
-            avr_error( "read failed: %s", strerror(errno) );
-        }
-
-        if (res == 0) {
-            usleep(1000);
-            avr_warning( "incomplete read\n" );
-            continue;
-        }
-        return c;
-    }
-    avr_error( "Maximum read reties reached" );
-
-    return 0; /* make compiler happy */
-}
-
-/* Convert a hexidecimal digit to a 4 bit nibble. */
-
+//! Convert a hexidecimal digit to a 4 bit nibble.
 int GdbServer::hex2nib( char hex )
 {
     if ( (hex >= 'A') && (hex <= 'F') )
@@ -226,31 +371,9 @@ int GdbServer::hex2nib( char hex )
     return 0; /* make compiler happy */
 }
 
-/* Wrapper for write(2) which hides all the repetitive error
-checking crap. */
-
-void GdbServer::gdb_write( const void *buf, size_t count )
-{
-    int res;
-
-    res = write(  conn, buf, count );
-
-    /* FIXME: should we try and catch interrupted system calls here? */
-
-    if (res < 0)
-        avr_error( "write failed: %s", strerror(errno) );
-
-    /* FIXME: if this happens a lot, we could try to resend the
-    unsent bytes. */
-
-    if ((unsigned int)res != count)
-        avr_error( "write only wrote %d of %d bytes", res, count );
-}
-
-/* Use a single function for storing/getting the last reply message.
+/*! Use a single function for storing/getting the last reply message.
 If reply is NULL, return pointer to the last reply saved.
 Otherwise, make a copy of the buffer pointed to by reply. */
-
 const char* GdbServer::gdb_last_reply( const char *reply )
 {
 
@@ -268,18 +391,16 @@ const char* GdbServer::gdb_last_reply( const char *reply )
     return last_reply;
 }
 
-/* Acknowledge a packet from GDB */
-
+//! Acknowledge a packet from GDB
 void GdbServer::gdb_send_ack( )
 {
     if (global_debug_on)
         fprintf( stderr, " Ack -> gdb\n");
 
-    gdb_write( "+", 1 );
+    server->Write( "+", 1 );
 }
 
-/* Send a reply to GDB. */
-
+//! Send a reply to GDB.
 void GdbServer::gdb_send_reply( const char *reply )
 {
     int cksum = 0;
@@ -293,7 +414,7 @@ void GdbServer::gdb_send_reply( const char *reply )
 
     if (*reply == '\0')
     {
-        gdb_write( "$#00", 4 );
+        server->Write( "$#00", 4 );
 
         if (global_debug_on)
             fprintf( stderr, "%02x\n", cksum & 0xff );
@@ -327,16 +448,15 @@ void GdbServer::gdb_send_reply( const char *reply )
         buf[bytes++] = HEX_DIGIT[(cksum >> 4) & 0xf];
         buf[bytes++] = HEX_DIGIT[cksum & 0xf];
 
-        gdb_write( buf, bytes );
+        server->Write( buf, bytes );
     }
 }
 
-/* GDB needs the 32 8-bit, gpw registers (r00 - r31), the 
+/*! GDB needs the 32 8-bit, gpw registers (r00 - r31), the 
 8-bit SREG, the 16-bit SP (stack pointer) and the 32-bit PC
 (program counter). Thus need to send a reply with
 r00, r01, ..., r31, SREG, SPL, SPH, PCL, PCH
 Low bytes before High since AVR is little endian. */
-
 void GdbServer::gdb_read_registers( )
 {
     int   i;
@@ -399,9 +519,8 @@ void GdbServer::gdb_read_registers( )
     avr_free( buf );
 }
 
-/* GDB is sending values to be written to the registers. Registers are the
+/*! GDB is sending values to be written to the registers. Registers are the
 same and in the same order as described in gdb_read_registers() above. */
-
 void GdbServer::gdb_write_registers( char *pkt )
 {
     int   i;
@@ -455,14 +574,13 @@ void GdbServer::gdb_write_registers( char *pkt )
     gdb_send_reply( "OK" );
 }
 
-/* Extract a hexidecimal number from the pkt. Keep scanning pkt until stop char
+/*! Extract a hexidecimal number from the pkt. Keep scanning pkt until stop char
 is reached or size of int is exceeded or a NULL is reached. pkt is modified
 to point to stop char when done.
 
 Use this function to extract a num with an arbitrary num of hex
 digits. This should _not_ be used to extract n digits from a m len string
 of digits (n <= m). */
-
 int GdbServer::gdb_extract_hex_num( char **pkt, char stop )
 {
     int i = 0;
@@ -484,9 +602,8 @@ int GdbServer::gdb_extract_hex_num( char **pkt, char stop )
     return num;
 }
 
-/* Read a single register. Packet form: 'pn' where n is a hex number with no
+/*! Read a single register. Packet form: 'pn' where n is a hex number with no
 zero padding. */
-
 void GdbServer::gdb_read_register( char *pkt )
 {
     int reg;
@@ -533,10 +650,9 @@ void GdbServer::gdb_read_register( char *pkt )
     gdb_send_reply( reply );
 }
 
-/* Write a single register. Packet form: 'Pn=r' where n is a hex number with
+/*! Write a single register. Packet form: 'Pn=r' where n is a hex number with
 no zero padding and r is two hex digits for each byte in register (target
 byte order). */
-
 void GdbServer::gdb_write_register( char *pkt )
 {
     int reg;
@@ -603,11 +719,10 @@ void GdbServer::gdb_write_register( char *pkt )
     gdb_send_reply( "OK" );
 }
 
-/* Parse the pkt string for the addr and length.
+/*! Parse the pkt string for the addr and length.
 a_end is first char after addr.
 l_end is first char after len.
 Returns number of characters to advance pkt. */
-
 int GdbServer::gdb_get_addr_len( char *pkt, char a_end, char l_end, unsigned int *addr, int *len )
 {
     char *orig_pkt = pkt;
@@ -849,7 +964,7 @@ void GdbServer::gdb_write_memory( char *pkt )
     gdb_send_reply( reply );
 }
 
-/* Format of breakpoint commands (both insert and remove):
+/*! Format of breakpoint commands (both insert and remove):
 
 "z<t>,<addr>,<length>"  -  remove break/watch point
 "Z<t>,<add>r,<length>"  -  insert break/watch point
@@ -868,7 +983,6 @@ For a software breakpoint, length specifies the size of the instruction to
 be patched. For hardware breakpoints and watchpoints, length specifies the
 memory region to be monitored. To avoid potential problems, the operations
 should be implemented in an idempotent way. -- GDB 5.0 manual. */
-
 void GdbServer::gdb_break_point( char *pkt )
 {
     unsigned int addr = 0;
@@ -941,19 +1055,17 @@ void GdbServer::gdb_break_point( char *pkt )
     gdb_send_reply( "OK" );
 }
 
-/* Continue command format: "c<addr>" or "s<addr>"
+/*! Continue command format: "c<addr>" or "s<addr>"
 
 If addr is given, resume at that address, otherwise, resume at current
-address. */
+address.
 
-
-/* Continue with signal command format: "C<sig>;<addr>" or "S<sig>;<addr>"
+Continue with signal command format: "C<sig>;<addr>" or "S<sig>;<addr>"
 "<sig>" should always be 2 hex digits, possibly zero padded.
 ";<addr>" part is optional.
 
 If addr is given, resume at that address, otherwise, resume at current
 address. */
-
 int GdbServer::gdb_get_signal( char *pkt )
 {
     int signo;
@@ -973,7 +1085,7 @@ int GdbServer::gdb_get_signal( char *pkt )
 
     switch (signo)
     {
-        case SIGHUP:
+        case GDB_SIGHUP:
             /* Gdb user issuing the 'signal SIGHUP' command tells sim to reset
             itself. We reply with a SIGTRAP the same as we do when gdb
             makes first connection with simulator. */
@@ -982,13 +1094,11 @@ int GdbServer::gdb_get_signal( char *pkt )
     }
 
     return signo;
-
 }
 
-/* Parse the packet. Assumes that packet is null terminated.
+/*! Parse the packet. Assumes that packet is null terminated.
 Return GDB_RET_KILL_REQUEST if packet is 'kill' command,
 GDB_RET_OK otherwise. */
-
 int GdbServer::gdb_parse_packet( char *pkt )
 {
     switch (*pkt++) {
@@ -1032,12 +1142,11 @@ int GdbServer::gdb_parse_packet( char *pkt )
             break;
 
         case 'C':               /* continue with signal */
-            if(SIGHUP==gdb_get_signal(pkt)) { //very special solution only for regression testing woth
+            if(GDB_SIGHUP==gdb_get_signal(pkt)) { //very special solution only for regression testing woth
                                               //old scripts from old simulavr! Continue means not continue
                                               //if signal is SIGHUP :-(, so we do nothing then!
                 return GDB_RET_OK;
             }
-            
             return GDB_RET_CONTINUE;
             break;
 
@@ -1066,28 +1175,11 @@ int GdbServer::gdb_parse_packet( char *pkt )
     return GDB_RET_OK;
 }
 
-void GdbServer::gdb_set_blocking_mode( int mode )
-{
-    if (mode)
-    {
-        /* turn non-blocking mode off */
-        if (fcntl( conn, F_SETFL, fcntl(conn, F_GETFL, 0) & ~O_NONBLOCK) < 0)
-            avr_warning( "fcntl failed: %s\n", strerror(errno) );
-    }
-    else
-    {
-        /* turn non-blocking mode on */
-        if (fcntl( conn, F_SETFL, fcntl(conn, F_GETFL, 0) | O_NONBLOCK) < 0)
-            avr_warning( "fcntl failed: %s\n", strerror(errno) );
-    }
-}
-
-/* Perform pre-packet parsing. This will handle messages from gdb which are
+/*! Perform pre-packet parsing. This will handle messages from gdb which are
 outside the realm of packets or prepare a packet for parsing.
 
 Use the static block_on flag to reduce the over head of turning blocking on
 and off every time this function is called. */
-
 int GdbServer::gdb_pre_parse_packet( int blocking )
 {
     int  i, res;
@@ -1095,17 +1187,17 @@ int GdbServer::gdb_pre_parse_packet( int blocking )
     char pkt_buf[MAX_BUF+1];
     int  cksum, pkt_cksum;
 
-    gdb_set_blocking_mode( blocking);
+    server->SetBlockingMode( blocking);
 
     /*
     if ( block_on != blocking )
     {
-    gdb_set_blocking_mode( blocking );
+    server->SetBlockingMode( blocking );
     block_on = blocking;
     }
     */
     //cout << endl; //trace
-    c = gdb_read_byte( );
+    c = server->ReadByte();
 
     switch (c) {
         case '$':           /* read a packet */
@@ -1113,19 +1205,19 @@ int GdbServer::gdb_pre_parse_packet( int blocking )
             memset( pkt_buf, 0, sizeof(pkt_buf) );
 
             /* make sure we block on fd */
-            gdb_set_blocking_mode( GDB_BLOCKING_ON );
+            server->SetBlockingMode( GDB_BLOCKING_ON );
 
             pkt_cksum = i = 0;
-            c = gdb_read_byte();
+            c = server->ReadByte();
             while ( (c != '#') && (i < MAX_BUF) )
             {
                 pkt_buf[i++] = c;
                 pkt_cksum += (unsigned char)c;
-                c = gdb_read_byte();
+                c = server->ReadByte();
             }
 
-            cksum  = hex2nib( gdb_read_byte() ) << 4;
-            cksum |= hex2nib( gdb_read_byte() );
+            cksum  = hex2nib(server->ReadByte()) << 4;
+            cksum |= hex2nib(server->ReadByte());
 
             /* FIXME: Should send "-" (Nak) instead of aborting when we get
             checksum errors. Leave this as an error until it is actually
@@ -1204,7 +1296,7 @@ void GdbServer::Run( )
 
             case GDB_RET_CTRL_C:
                 gdb_send_ack( );
-                snprintf( reply, MAX_BUF, "S%02x", SIGINT );
+                snprintf( reply, MAX_BUF, "S%02x", GDB_SIGINT );
                 gdb_send_reply( reply );
                 break;
 
@@ -1214,49 +1306,21 @@ void GdbServer::Run( )
     }
 }
 
-/* try to open a new connection to gdb */
-
+//! try to open a new connection to gdb
 void GdbServer::TryConnectGdb() {
     int i;
-    time_t newTime=time(NULL);
+    time_t newTime = time(NULL);
 
-    if (oldTime!=newTime) {
-        oldTime=newTime;
+    if(oldTime != newTime) {
+        oldTime = newTime;
 
-
-        //cout << core->actualFilename << "--------- debugger not connected ------------" << endl;
-
-        /* accept() needs this set, or it fails (sometimes) */
-        addrLength[0] = sizeof(struct sockaddr *);
-
-        /* We only want to accept a single connection, thus don't need a loop. */
-        /* Wait until we have a connection */
-        conn = accept( sock, (struct sockaddr *)address, addrLength );
-        if (conn>0) {
-            /* Tell TCP not to delay small packets.  This greatly speeds up
-            interactive response. WARNING: If TCP_NODELAY is set on, then gdb
-            may timeout in mid-packet if the (gdb)packet is not sent within a
-            single (tcp)packet, thus all outgoing (gdb)packets _must_ be sent
-            with a single call to write. (see Stevens "Unix Network
-            Programming", Vol 1, 2nd Ed, page 202 for more info) */
-
-            i = 1;
-            setsockopt (conn, IPPROTO_TCP, TCP_NODELAY, &i, sizeof (i));
-
-            /* If we got this far, we now have a client connected and can start 
-            processing. */
-
-            fprintf( stderr, "Connection opened by host %s, port %hd.\n",
-                    inet_ntoa(address->sin_addr), ntohs(address->sin_port) );
-
-
+        if(connState = server->Connect())
             allGdbServers.push_back(this);  //remark that we now must called everytime
-        }   //new open (conn is >0 now!) 
-    } //time
+    }
 }
 
 int GdbServer::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
-    if (conn<0) { // no connection established -> look for it
+    if(!connState) { // no connection established -> look for it
         TryConnectGdb();
         if (!waitForGdbConnection) {
             core->Step(trueHwStep, timeToNextStepIn_ns);    //if not connected to gdb simple run it  
@@ -1287,7 +1351,7 @@ void GdbServer::IdleStep() {
 
             case GDB_RET_CTRL_C:
                 runMode=GDB_RET_CTRL_C;
-                SendPosition(SIGINT); //Give gdb an idea where the core is now 
+                SendPosition(GDB_SIGINT); //Give gdb an idea where the core is now 
                 break;
 
             default:
@@ -1332,12 +1396,13 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
                 case GDB_RET_CTRL_C:
                     //cout << "############################################################# CTRL C" << endl;
                     runMode=GDB_RET_CTRL_C;
-                    SendPosition(SIGINT); //Give gdb an idea where the core is now 
+                    SendPosition(GDB_SIGINT); //Give gdb an idea where the core is now 
                     break;
 
                 case GDB_RET_KILL_REQUEST:
                     core->Reset();
-                    conn= -1;   //we are not longer connected
+                    server->CloseConnection();   //we are not longer connected
+                    connState = false;
                     core->DeleteAllBreakpoints();
                     return 0; 
 
@@ -1351,7 +1416,7 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
                 leave=true;
             }
 
-            if(!leave) { //we can´t leave the loop so we have to request the other gdb instances now!
+            if(!leave) { //we canï¿½t leave the loop so we have to request the other gdb instances now!
                 // step through all gdblist members WITHOUT my self!
                 //cout << "we do not leave and check for gdb events" << endl;
                 vector<GdbServer*>::iterator ii;
@@ -1370,23 +1435,23 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
 
     if (res == BREAK_POINT) {
         runMode=GDB_RET_OK; //we will stop next call from GdbServer::Step
-        SendPosition(SIGTRAP);
+        SendPosition(GDB_SIGTRAP);
     }
 
     if (res == INVALID_OPCODE)
     {
         //why we send here another reply??? is it not better to send it later
         //the signo is set correct.... TODO
-        snprintf( reply, MAX_BUF, "S%02x", SIGILL );
+        snprintf( reply, MAX_BUF, "S%02x", GDB_SIGILL );
         gdb_send_reply( reply );
         runMode=GDB_RET_OK;
-        SendPosition(SIGILL);
+        SendPosition(GDB_SIGILL);
 
     }
 
     if (runMode==GDB_RET_SINGLE_STEP) {
         runMode=GDB_RET_OK;
-        SendPosition(SIGTRAP);
+        SendPosition(GDB_SIGTRAP);
     }
 
     return 0;

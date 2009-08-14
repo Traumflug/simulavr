@@ -5,8 +5,8 @@ AC_DEFUN([AVR_CHECK_FOR_WINSOCK], [
     AC_MSG_CHECKING($1 $2 in "$3" and "$4")
     winsock_h_location=$2/$3
     winsock_a_location=$2/$4
-    if test -f ${winsock_h_location}/winsock.h -a \
-            -f ${winsock_a_location}/libwsock32.a ; then
+    if test -f ${winsock_h_location}/winsock2.h -a \
+            -f ${winsock_a_location}/libws2_32.a ; then
       AC_MSG_RESULT(yes)
         winsock_root_location="$2"
     else
@@ -30,7 +30,7 @@ AC_DEFUN([AVR_WINSOCK_SEARCH_STEP], [
 AC_DEFUN([AVR_CHECK_WINSOCK], [
   # configure option to define the right path for winsock lib
   AC_ARG_WITH([winsock],
-          [AS_HELP_STRING([--with-winsock=path  location of winsock lib on MSYS/MingW where include/winsock.h and lib/libwsock32.a are found])],
+          [AS_HELP_STRING([--with-winsock=path  location of winsock lib on MSYS/MingW where include/winsock2.h and lib/libws2_32.a are found])],
           [],
           [with_winsock=check])
   AC_MSG_RESULT([with_winsock = $with_winsock])
@@ -43,8 +43,8 @@ AC_DEFUN([AVR_CHECK_WINSOCK], [
   fi
   
   # set variables for make and c code
-  AC_DEFINE([HAVE_WINSOCK_H], [1], [Define to 1 if you build simulavr on windows with MSYS/MingW and winsock.h was found])
-  AC_SUBST([LIBWSOCK_FLAGS], ["-L${winsock_root_location}/lib -lwsock32"])
+  AC_DEFINE([HAVE_WINSOCK_H], [1], [Define to 1 if you build simulavr on windows with MSYS/MingW and winsock2.h was found])
+  AC_SUBST([LIBWSOCK_FLAGS], ["-L${winsock_root_location}/lib -lws2_32"])
 ])
 
 # EOF

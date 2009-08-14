@@ -26,30 +26,100 @@
 
 #ifndef SIM_GDB_H
 #define SIM_GDB_H
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
+
+#include "config.h"
+
+#ifdef HAVE_SYS_MINGW
+#   include <winsock2.h>
+#   include <sys/types.h>
+#else
+#   include <sys/socket.h>
+#   include <sys/types.h>
+#   include <netinet/in.h>
+#   include <netinet/tcp.h>
+#   include <arpa/inet.h>
+#endif
 
 #include <vector>
 #include "avrdevice.h"
 #include "types.h"
 #include "simulationmember.h"
-//extern void gdb_interact( AvrDevice *core, int port, int debug_on );
 
 #define MAX_BUF 400 /* Maximum size of read/write buffers. */
 
-class GdbServer: public SimulationMember {
-    protected: 
+// this are similar to unix signal numbers, but here used only as number, not
+// as signal! See signum.h on unix systems for the values.
+#define GDB_SIGHUP  1      // Hangup (POSIX).
+#define GDB_SIGINT  2      // Interrupt (ANSI).
+#define GDB_SIGILL  4      // Illegal instruction (ANSI).
+#define GDB_SIGTRAP 5      // Trace trap (POSIX).
 
-        static std::vector<GdbServer*> allGdbServers;
-        AvrDevice *core;
-        int port;       //internet port number
-        int sock;       //the opened os-net-socket
-        int conn;       //the real established conection
+//! Interface for server socket wrapper
+class GdbServerSocket {
+    public:
+        //GdbServerSocket(int port);
+        virtual void Close(void)=0;
+        virtual int ReadByte(void)=0;
+        virtual void Write(const void* buf, size_t count)=0;
+        virtual void SetBlockingMode(int mode)=0;
+        virtual bool Connect(void)=0;
+        virtual void CloseConnection(void)=0;
+};
+
+#ifdef HAVE_SYS_MINGW
+
+//! Interface implementation for server socket wrapper on MingW systems (windows)
+class GdbServerSocketMingW: public GdbServerSocket {
+    
+    private:
+        static void Start();
+        static void End();
+        static int socketCount;
+        SOCKET _socket;
+        SOCKET _conn;
+        
+    public:
+        GdbServerSocketMingW(int port);
+        ~GdbServerSocketMingW();
+        virtual void Close(void);
+        virtual int ReadByte(void);
+        virtual void Write(const void* buf, size_t count);
+        virtual void SetBlockingMode(int mode);
+        virtual bool Connect(void);
+        virtual void CloseConnection(void);
+};
+
+#else
+
+//! Interface implementation for server socket wrapper on unix systems
+class GdbServerSocketUnix: public GdbServerSocket {
+    private:
+        int sock;       //!< the opened os-net-socket
+        int conn;       //!< the real established connection
         struct sockaddr_in address[1];
         socklen_t          addrLength[1]; 
+
+    public:
+        GdbServerSocketUnix(int port);
+        ~GdbServerSocketUnix();
+        virtual void Close(void);
+        virtual int ReadByte(void);
+        virtual void Write(const void* buf, size_t count);
+        virtual void SetBlockingMode(int mode);
+        virtual bool Connect(void);
+        virtual void CloseConnection(void);
+};
+
+#endif
+
+//! GDB server instance to give the possibility to debug target by debugger
+class GdbServer: public SimulationMember {
+    
+    protected: 
+        static std::vector<GdbServer*> allGdbServers;
+        AvrDevice *core;
+        GdbServerSocket *server; //!< the server socket wrapper
+        bool connState; //!< result of server->Connect()
 
         time_t oldTime;     //remember when we have tried to open a tcp connection
                             //last time. Only one try per second
@@ -78,9 +148,7 @@ class GdbServer: public SimulationMember {
         void signal_watch_start(int signo);
         void signal_watch_stop(int signo);
         int avr_core_step() ;
-        int gdb_read_byte( );
         int hex2nib( char hex );
-        void gdb_write( const void *buf, size_t count );
         const char* gdb_last_reply( const char *reply );
         void gdb_send_ack( );
         void gdb_send_reply( const char *reply );
@@ -94,10 +162,8 @@ class GdbServer: public SimulationMember {
         void gdb_write_memory( char *pkt );
         void gdb_break_point( char *pkt );
         void gdb_continue( char *pkt );
-        //void gdb_continue_with_signal( char *pkt );
         int gdb_get_signal(char *pkt);
         int gdb_parse_packet( char *pkt );
-        void gdb_set_blocking_mode( int mode );
         int gdb_pre_parse_packet( int blocking );
         void gdb_main_loop(); 
         void gdb_interact( int port, int debug_on );
