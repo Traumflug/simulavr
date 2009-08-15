@@ -10,10 +10,11 @@ endif
 if PYTHON_USE
 SUBDIRS += python
 endif
+if USE_VERILOG
+SUBDIRS += verilog
+endif
 
 noinst_DATA = kbd.xbm
-
-#CLEANFILES = $(builddir)/kbd.xbm
 
 all-local: $(builddir)/kbd.xbm
 

@@ -90,7 +90,10 @@ AC_ARG_ENABLE([verilog],
     [AVR_BUILD_VERILOG="no"])
 AM_CONDITIONAL([USE_VERILOG], [test "$AVR_BUILD_VERILOG" = "yes"])
 AC_PATH_PROG([GTKWAVE], [gtkwave])
-AM_CONDITIONAL([USE_GTKWAVE],[test "x$GTKWAVE" != 'x'])
+AM_CONDITIONAL([USE_GTKWAVE],[test "x$GTKWAVE" != "x"])
+AC_PATH_PROG([IVERILOG], [iverilog])
+AC_PATH_PROG([VVP], [vvp])
+AM_CONDITIONAL([USE_VERILOG_TOOLS],[test "x$IVERILOG" != "x" -a "x$VVP" != "x"])
 
 ####
 # support for some documenatation tools, texinfo and doxygen
