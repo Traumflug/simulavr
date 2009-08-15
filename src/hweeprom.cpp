@@ -55,7 +55,8 @@ void HWEeprom::Reset() {
 
 
 HWEeprom::~HWEeprom() {
-    free(myMemory);
+    avr_free(myMemory);
+    myMemory = NULL;    // to prevent a double-free error!
 }
 
 unsigned char HWEeprom::GetEearl() {return eear&0xff; }

@@ -41,6 +41,11 @@ AvrDevice_atmega668base::~AvrDevice_atmega668base() {
     delete wado;
     delete spi;
     delete ad;
+    delete timer2;
+    delete timerIrq2;
+    delete timer1;
+    delete inputCapture1;
+    delete timerIrq1;
     delete timer0;
     delete timerIrq0;
     delete extirq;
