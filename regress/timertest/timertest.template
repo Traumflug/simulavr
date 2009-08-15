@@ -2,7 +2,7 @@
 
 SIMULAVR=../../src/simulavr$(EXEEXT)
 
-test: %(vcdtargets)s
+test: %(targets)s
 	$(PYTHON) -m timer_testall $^
 
 %(rules)s

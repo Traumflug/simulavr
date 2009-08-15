@@ -1,0 +1,22 @@
+# template makefile for timertests
+
+SIMULAVR=../../src/simulavr$(EXEEXT)
+
+test: %(targets)s
+	@echo "##################################################################"
+	@echo "used runtime (time in userspace) of targets in sec.:"
+	@cat $^ | sort
+	@echo "##################################################################"
+
+%(rules)s
+
+%%.report: %%.elf $(SIMULAVR)
+	@./run_test.sh $@ $($(basename $(notdir $@))_SHELLOPTS) $< -- $(SIMULAVR) $($(basename $(notdir $@))_SIMOPTS) -f $<
+
+define compile-and-link
+$(AVR_GCC) $($(basename $(notdir $@))_CCOPTS) -o $@ $^
+endef
+
+include Makefile
+
+# EOF

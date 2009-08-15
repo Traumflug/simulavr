@@ -14,7 +14,7 @@ int main()
     "There should be no more messages after this one.\n"
   );
 
-  sim_exit(0);
+  sim_exit(1);
 
   debug_puts( "ERROR - Simulator did not exit?\n" );
 

@@ -1,3 +1,5 @@
-maxruntime
-test_abort
-test_exit
+*.elf
+*.report
+*.output
+avrtest.makefile
+

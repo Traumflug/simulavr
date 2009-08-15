@@ -78,28 +78,32 @@ def time2ns(timestr):
   return str(n * f)
   
 def create_rules(config):
+  def cfg_get_default(sec, opt, default):
+    if config.has_option(sec, opt):
+      return config.get(sec, opt)
+    else:
+      return default
   rules = list()
-  vcdtargets = list()
+  targets = list()
   for name in config.sections():
     if name == "_rule_": continue
     try:
       data = dict(name = name,
                   tab = "\t",
-                  ccopts = config.get(name, "ccopts"),
+                  ccopts = cfg_get_default(name, "ccopts", ""),
                   sources = config.get(name, "sources"),
-                  simtime = time2ns(config.get(name, "simtime")))
-      if config.has_option(name, "signals"):
-        data["signals"] = config.get(name, "signals")
-      else:
-        data["signals"] = name
+                  simtime = time2ns(config.get(name, "simtime")),
+                  signals = cfg_get_default(name, "signals", name),
+                  simopts = cfg_get_default(name, "simopts", ""),
+                  shellopts = cfg_get_default(name, "shellopts", ""))
       for p in config.get(name, "processors").split():
         d = dict(processor = p)
         d.update(data)
         rules.append(config.get("_rule_", "rule", False, d))
-        vcdtargets.append(name + "_" + p + ".vcd")
+        targets.append(config.get(name, "target", False, d))
     except Exception, e:
       print >> stderr, str(e)
-  return dict(rules = "\n".join(rules), vcdtargets = " ".join(vcdtargets))
+  return dict(rules = "\n".join(rules), targets = " ".join(targets))
   
 if __name__ == "__main__":
   
