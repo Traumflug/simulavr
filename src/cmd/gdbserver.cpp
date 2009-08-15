@@ -256,7 +256,7 @@ bool GdbServerSocketUnix::Connect(void) {
         single (tcp)packet, thus all outgoing (gdb)packets _must_ be sent
         with a single call to write. (see Stevens "Unix Network
         Programming", Vol 1, 2nd Ed, page 202 for more info) */
-        i = 1;
+        int i = 1;
         setsockopt (conn, IPPROTO_TCP, TCP_NODELAY, &i, sizeof (i));
 
         /* If we got this far, we now have a client connected and can start 
@@ -269,7 +269,7 @@ bool GdbServerSocketUnix::Connect(void) {
         return false;
 }
 
-void GdbServerSocketMingW::CloseConnection(void) {
+void GdbServerSocketUnix::CloseConnection(void) {
     close(conn);
     conn = -1;
 }
