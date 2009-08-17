@@ -47,9 +47,6 @@ RWMemoryMember::RWMemoryMember(AvrDevice *_core,
         if (!core) {
             avr_error("core not initialized for RWMemoryMember '%s'.", tracename.c_str());
         }
-        if (!core->dump_manager) {
-            avr_error("core->dump_manager not initialized for RWMemoryMember '%s'", tracename.c_str());
-        }
         core->dump_manager->regTrace(tv);
     } else {
         tv=0;

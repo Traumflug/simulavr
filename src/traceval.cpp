@@ -312,7 +312,25 @@ bool DumpVCD::enabled(const TraceValue *t) const {
 
 DumpVCD::~DumpVCD() { delete os; }
 
-DumpManager::DumpManager(AvrDevice *_core) : core(_core) {}
+DumpManager* DumpManager::Instance(void) {
+    static DumpManager *f;
+    if(f == NULL)
+        f = new DumpManager();
+    return f;
+}
+
+DumpManager::DumpManager() {
+    singleDeviceApp = false;
+}
+
+void DumpManager::appendDeviceName(std::string &s) {
+  static int devidx = 0;
+  devidx++;
+  if(singleDeviceApp && devidx > 1)
+      avr_error("Can't create device name twice, because it's a single device application");
+  if(!singleDeviceApp)
+    s += "Dev" + int2str(devidx) + ".";
+}
 
 void DumpManager::regTrace(TraceValue *tv) {
     if (all_map.find(tv->name())!=all_map.end())

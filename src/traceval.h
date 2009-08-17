@@ -30,8 +30,6 @@
 #include <map>
 #include <vector>
 
-class Dumper;
-
 /* TODO, notes:
 
    ===========================================================   
@@ -82,6 +80,8 @@ class Dumper;
    for boot loaders??) for each flash address.  A separate tool could then be
    used to merge the output of avr-objdump -S and this to produce nice
    per-line profiling statistics. */
+
+class Dumper;
 
 /*! Abstract interface for traceable values.
   Traced values can be written (marking it with a WRITE flag
@@ -207,40 +207,6 @@ class TraceValue {
 class AvrDevice;
 class TraceValueRegister;
 
-//! Build a register for TraceValue's
-/*! This is used by DumpManager to find TraceValues by name */
-class TraceValueRegister {
-    
-    private:
-        const std::string _tvr_scopeprefix; //!< the prefix scope for a TraceValue name
-        std::map<const std::string, TraceValue*> _tvr_values; //!< the registered TraceValue's
-        std::map<const std::string, TraceValueRegister*> _tvr_registers; //!< the sub-registers
-        
-        //! Registers a TraceValueRegister for this register, build a hierarchy
-        void _tvr_registerTraceValues(TraceValueRegister *r);
-        
-    public:
-        //! Create a TraceValueRegister, with a scope prefix built on parent scope + name
-        TraceValueRegister(TraceValueRegister *parent, const std::string &name):
-            _tvr_scopeprefix(parent->GetTraceValuePrefix() + name + ".")
-        {
-            parent->_tvr_registerTraceValues(this);
-        }
-        //! Create a TraceValueRegister, with a scope prefix built on device name
-        TraceValueRegister(AvrDevice *core, const std::string &name):
-            _tvr_scopeprefix(name + ".") {}
-        //! Create a TraceValueRegister, with a empty scope name, single device application
-        TraceValueRegister():
-            _tvr_scopeprefix("") {}
-        
-        //! Returns the scope prefix
-        const std::string GetTraceValuePrefix(void)  { return _tvr_scopeprefix; }
-        //! Registers a TraceValue for this register
-        void RegisterTraceValue(TraceValue *t);
-        //! Seek for a TraceValue by it's name
-        TraceValue* GetTraceValueByName(const std::string &name);
-};
-
 typedef std::vector<TraceValue*> TraceSet;
 
 /*! Generic interface for a trace value processor */
@@ -354,8 +320,21 @@ class DumpVCD : public Dumper {
   It also manages all trace values and sets them active as necessary.
   */
 class DumpManager {
+    
     public:
-        DumpManager(AvrDevice *core);
+        //! Singleton class access.
+        static DumpManager* Instance(void);
+        
+        //! Tell DumpManager, that we have only one device
+        /*! In normal simulavr application we have only one device aka processor.
+         But it's possible to make a simulation with 2 or more devices together.
+         For that, we have to assign a unique name for every device to identify
+         a device and to get a unique namespace in trace output.
+         
+         This method has to be called *before* the device instance will be
+         created in single device application! Default is multi device application. */
+         void SetSingleDeviceApp(void) { singleDeviceApp = true; }
+         
         /*! Registers a value of being traceable. Does NOT register
           the value as an ACTIVE trace value!
     
@@ -390,7 +369,19 @@ class DumpManager {
     
         /*! Gives all available tracers as a set. */
         const TraceSet& all() const;
+        
     private:
+        friend class TraceValueRegister;
+        
+        //! Private instance constructor
+        DumpManager();
+        
+        //! append a unique device name to a string
+        void appendDeviceName(std::string &s);
+        
+        //! Flag, if we use only one device, e.g. assign no device name
+        bool singleDeviceApp;
+        
         //! Set of active tracing values
         TraceSet active;
         //! Set of all traceable values
@@ -400,7 +391,40 @@ class DumpManager {
         
         //! All dumpers too use
         std::vector<Dumper*> dumps;
-        AvrDevice *core;
+};
+
+//! Build a register for TraceValue's
+/*! This is used by DumpManager to find TraceValues by name */
+class TraceValueRegister {
+    
+    private:
+        std::string _tvr_scopeprefix; //!< the prefix scope for a TraceValue name
+        std::map<const std::string, TraceValue*> _tvr_values; //!< the registered TraceValue's
+        std::map<const std::string, TraceValueRegister*> _tvr_registers; //!< the sub-registers
+        
+        //! Registers a TraceValueRegister for this register, build a hierarchy
+        void _tvr_registerTraceValues(TraceValueRegister *r);
+        
+    public:
+        //! Create a TraceValueRegister, with a scope prefix built on parent scope + name
+        TraceValueRegister(TraceValueRegister *parent, const std::string &name):
+            _tvr_scopeprefix(parent->GetTraceValuePrefix() + name + ".")
+        {
+            parent->_tvr_registerTraceValues(this);
+        }
+        //! Create a TraceValueRegister, with a empty scope name, single device application
+        TraceValueRegister():
+            _tvr_scopeprefix("")
+        {
+            DumpManager::Instance()->appendDeviceName(_tvr_scopeprefix);
+        }
+        
+        //! Returns the scope prefix
+        const std::string GetTraceValuePrefix(void)  { return _tvr_scopeprefix; }
+        //! Registers a TraceValue for this register
+        void RegisterTraceValue(TraceValue *t);
+        //! Seek for a TraceValue by it's name
+        TraceValue* GetTraceValueByName(const std::string &name);
 };
 
 /*! Sets a group for all next direct tracing values. Used to avoid

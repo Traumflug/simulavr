@@ -325,10 +325,15 @@ int main(int argc, char *argv[]) {
             cout << endl;
             exit(0);
       }
-   }   
+   }
+   
+   /* get dump manager an inform it, that we have a single device application */
+   DumpManager *dman = DumpManager::Instance();
+   dman->SetSingleDeviceApp();
+   
    /* now we create the device */
    AvrDevice *dev1=AvrFactory::instance().makeDevice(devicename.c_str());
-
+   
    for (size_t i=0; i < tracer_opts.size(); i++) {
        vector<string> ls=split(tracer_opts[i], ":");
        if (ls.size()<1) {
@@ -344,7 +349,7 @@ int main(int argc, char *argv[]) {
                cerr << "Invalid number of options for 'warnread'.";
                exit(0);
            }
-           ts=dev1->dump_manager->all();
+           ts = dman->all();
            d=new WarnUnknown(dev1);
        } else if (ls[0]=="vcd") {
            cerr << "vcd'." << endl;
@@ -358,7 +363,7 @@ int main(int argc, char *argv[]) {
 
            cerr << "Output VCD file is '" << ls[2] << "'." << endl;
            ofstream *out=new ofstream(ls[2].c_str());
-           ts=dev1->dump_manager->load(is);
+           ts = dman->load(is);
 
            bool rs=false, ws=false;
            if (ls.size()==4) { // ReadStrobe/WriteStrobe display specified?
@@ -379,7 +384,7 @@ int main(int argc, char *argv[]) {
            cerr << "Unknown tracer '" << ls[0] <<  "'." << endl;
            exit(0);
        }
-       dev1->dump_manager->addDumper(d, ts);
+       dman->addDumper(d, ts);
    }
    /* We had to wait with dumping the available tracing values
       until the device has been created! */
@@ -398,8 +403,7 @@ int main(int argc, char *argv[]) {
            else
                outf=&cout;
            
-           dev1->dump_manager->save(*outf,
-                                    dev1->dump_manager->all());
+           dman->save(*outf, dman->all());
            if (outf!=&cout)
                
                delete outf;
@@ -468,7 +472,7 @@ int main(int argc, char *argv[]) {
 
    if (global_trace_on) dev1->trace_on=1;
 
-   dev1->dump_manager->start();
+   dman->start();
    
    if (gdbserver_flag==0) {
       SystemClock::Instance().Add(dev1);
