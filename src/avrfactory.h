@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * Copyright (C) 2007 Onno Kortmann
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -37,40 +37,44 @@ class AvrDevice;
   using them. It is helpful to remove all direct references to particular
   AVR devices in the code which uses them, such as in main.cpp. */
 class AvrFactory {
- public:
-    typedef AvrDevice*(*AvrDeviceCreator)();
     
-    /*! Produces an AVR device according to the configuration string.
-      Right now, the configuration string is simply the full name of the AVR
-      device, like AT90S4433 or ATMEGA128.
-      */
-    AvrDevice* makeDevice(const char *config);
-
-    //! Singleton class access. 
-    static AvrFactory& instance();
-    /*! Gives a list of all supported devices, which can be supplied
-      to makeDevice() as is. */
-    static std::string supportedDevices();
-
-    //! Register a creation static method with the factory
-    static void reg(const std::string name,
-		    AvrDeviceCreator create);
- private:
-    AvrFactory();
+    public:
+        typedef AvrDevice*(*AvrDeviceCreator)();
+    
+        /*! Produces an AVR device according to the configuration string.
+          Right now, the configuration string is simply the full name of the AVR
+          device, like AT90S4433 or ATMEGA128.
+          */
+        AvrDevice* makeDevice(const char *config);
+    
+        //! Singleton class access. 
+        static AvrFactory& instance();
+        
+        /*! Gives a list of all supported devices, which can be supplied
+          to makeDevice() as is. */
+        static std::string supportedDevices();
+    
+        //! Register a creation static method with the factory
+        static void reg(const std::string name,
+                        AvrDeviceCreator create);
+        
+    private:
+        AvrFactory() {}
+        
 };
 
 /*! Macro to be used to register an AVR device with the AvrFactory.
   For a usage example, see atmega128.cpp. */
-#define AVR_REGISTER(name, class) 		\
-    struct AVRFactoryEntryMaker_ ## name {	\
-	public:					\
-    static AvrDevice *create_one() {			\
-	return new class;			\
-    }						\
-    AVRFactoryEntryMaker_ ## name() {		\
-	AvrFactory::reg(#name, create_one);	\
-    }						\
-};						\
-AVRFactoryEntryMaker_ ## name maker_ ##name;
+#define AVR_REGISTER(name, class) \
+    struct AVRFactoryEntryMaker_ ## name { \
+        public: \
+            static AvrDevice *create_one() { \
+                return new class; \
+            } \
+            AVRFactoryEntryMaker_ ## name() { \
+                AvrFactory::reg(#name, create_one); \
+            } \
+    }; \
+    AVRFactoryEntryMaker_ ## name maker_ ##name;
 
 #endif

@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * Copyright (C) 2007 Onno Kortmann
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -28,29 +28,28 @@
 #include <cstdlib>
 #include "config.h"
 #include "avrfactory.h"
+#include "avrerror.h"
 
 using namespace std;
+
 typedef map<std::string, AvrFactory::AvrDeviceCreator> AVRDeviceMap;
 
+//! map of registered AVR devices
 AVRDeviceMap devmap;
 
 void AvrFactory::reg(const std::string name,
-				 AvrDeviceCreator create) {
-    AVRDeviceMap::iterator i=devmap.find(name);
-    if (i==devmap.end())
-	devmap[name]=create;
-    else {
-	cerr << "Duplicate device specification " << name << endl;
-	exit(1);
-    }
+                     AvrDeviceCreator create) {
+    AVRDeviceMap::iterator i = devmap.find(name);
+    if(i == devmap.end())
+        devmap[name] = create;
+    else
+        avr_error("Duplicate device specification: %s", name.c_str());
 }
 
 AvrDevice* AvrFactory::makeDevice(const char *in) {
-    AVRDeviceMap::iterator i=devmap.find(in);
-    if (i==devmap.end()) {
-	cerr << "Invalid device specification: " << in << endl;
-	exit(1);
-    }
+    AVRDeviceMap::iterator i = devmap.find(in);
+    if(i == devmap.end())
+        avr_error("Invalid device specification: %s", in);
 
     return devmap[in]();
 }
@@ -58,19 +57,15 @@ AvrDevice* AvrFactory::makeDevice(const char *in) {
 std::string AvrFactory::supportedDevices() {
     std::string ret;
     
-    for (AVRDeviceMap::iterator i=devmap.begin();
-	 i!=devmap.end(); i++)
-	ret+=i->first+"\n";
+    for(AVRDeviceMap::iterator i = devmap.begin(); i != devmap.end(); i++)
+        ret += i->first + "\n";
     return ret;
 }
 
 AvrFactory& AvrFactory::instance() {
     static AvrFactory *f;
-    if (!f) {
-	f=new AvrFactory();
-	return *f;
-    }
+    if(!f)
+        f = new AvrFactory();
+    return *f;
 }
-
-AvrFactory::AvrFactory() {}
 
