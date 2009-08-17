@@ -50,16 +50,16 @@
 
 /* SPI verbosity level
    FIXME: Make this configurable through the command line interface. */
-#define SPI_VERBOSE	0
+#define SPI_VERBOSE 0
 
 using namespace std;
 void HWSpi::spdr_access() {
     if (spsr_read) {
-	// if status is read with SPIF == 1
-	//we can remove the SPIF and WCOL flag after reading
-	//data register
-	spsr&=~(SPIF|WCOL);
-	spsr_read=false;
+    // if status is read with SPIF == 1
+    //we can remove the SPIF and WCOL flag after reading
+    //data register
+    spsr&=~(SPIF|WCOL);
+    spsr_read=false;
     }
 }
 
@@ -81,13 +81,13 @@ void HWSpi::SetSPDR(unsigned char val) {
     spdr_access();
     data_write=val;
     if (spcr & MSTR) { // mster mode?
-	if (bitcnt<8) {
-	    spsr|=WCOL; // not yet ready -> Write Collision
-	} else {
-	    bitcnt=0;
-	    finished=false;
-	    clkcnt=0;
-	}
+    if (bitcnt<8) {
+        spsr|=WCOL; // not yet ready -> Write Collision
+    } else {
+        bitcnt=0;
+        finished=false;
+        clkcnt=0;
+    }
     }
 }
 
@@ -104,14 +104,14 @@ void HWSpi::updatePrescaler() {
 
 void HWSpi::SetSPSR(unsigned char val) {
     if (mega_mode) {
-	spsr&=~SPI2X;
-	spsr|=val&SPI2X;
-	updatePrescaler();
+    spsr&=~SPI2X;
+    spsr|=val&SPI2X;
+    updatePrescaler();
     } else {
-	((core->trace_on) ?
-	 (traceOut) : (cerr))
-	    << "spsr is read only! (0x" << hex << core->PC << " =  " <<
-	    core->Flash->GetSymbolAtAddress(core->PC) << ")" << endl;
+    ((core->trace_on) ?
+     (traceOut) : (cerr))
+        << "spsr is read only! (0x" << hex << core->PC << " =  " <<
+        core->Flash->GetSymbolAtAddress(core->PC) << ")" << endl;
     }
 }
 
@@ -119,18 +119,18 @@ void HWSpi::SetSPSR(unsigned char val) {
 void HWSpi::SetSPCR(unsigned char val) { 
     spcr=val;
     if ( spcr & SPE) { //SPI is enabled
-	core->AddToCycleList(this);
+    core->AddToCycleList(this);
         if (spcr & MSTR) { //master
             MISO.SetUseAlternateDdr(1);
             MISO.SetAlternateDdr(0); //always input
             MOSI.SetUseAlternatePortIfDdrSet(1);
 
-	    /* according to the graphics in the atmega8 datasheet, p.132
-	       (10/06), MOSI is high when idle. FIXME: check whether
-	       this applies to real hardware. */
-	    MOSI.SetAlternatePort(1);
+        /* according to the graphics in the atmega8 datasheet, p.132
+           (10/06), MOSI is high when idle. FIXME: check whether
+           this applies to real hardware. */
+        MOSI.SetAlternatePort(1);
             SCK.SetUseAlternatePortIfDdrSet(1);
-	    SCK.SetAlternatePort(spcr & CPOL);
+        SCK.SetAlternatePort(spcr & CPOL);
         } else { //slave
             MISO.SetUseAlternatePortIfDdrSet(1);
             MOSI.SetUseAlternateDdr(1);
@@ -142,12 +142,12 @@ void HWSpi::SetSPCR(unsigned char val) {
         } 
     } else { //Spi is off so unset alternate pin functions
 
-	/* FIXME: Check whether these will be really tied
-	   to reset state as long as the SPI is off. Check
-	   the switch on/off behaviour of the SPI interface! */
-	bitcnt=8;
-	finished=false;
-	core->RemoveFromCycleList(this);
+    /* FIXME: Check whether these will be really tied
+       to reset state as long as the SPI is off. Check
+       the switch on/off behaviour of the SPI interface! */
+    bitcnt=8;
+    finished=false;
+    core->RemoveFromCycleList(this);
         MOSI.SetUseAlternatePortIfDdrSet(0);
         MISO.SetUseAlternatePortIfDdrSet(0);
         SCK.SetUseAlternatePortIfDdrSet(0);
@@ -161,29 +161,29 @@ void HWSpi::SetSPCR(unsigned char val) {
 
 
 HWSpi::HWSpi(AvrDevice *_c,
-	     HWIrqSystem *_irq,
-	     PinAtPort mosi,
-	     PinAtPort miso,
-	     PinAtPort sck,
-	     PinAtPort ss,
-	     unsigned int ivec,
-	     bool mm) : 
-    Hardware(_c), core(_c), irq(_irq),
+         HWIrqSystem *_irq,
+         PinAtPort mosi,
+         PinAtPort miso,
+         PinAtPort sck,
+         PinAtPort ss,
+         unsigned int ivec,
+         bool mm) : 
+    Hardware(_c), TraceValueRegister(_c, "SPI"),
+    core(_c), irq(_irq),
     MOSI(mosi), MISO(miso), SCK(sck), SS(ss),
     irq_vector(ivec), mega_mode(mm),
-    spdr_reg(core, "SPI.SPDR", this, &HWSpi::GetSPDR, &HWSpi::SetSPDR),
-    spsr_reg(core, "SPI.SPSR", this, &HWSpi::GetSPSR, &HWSpi::SetSPSR),
-    spcr_reg(core, "SPI.SPCR", this, &HWSpi::GetSPCR, &HWSpi::SetSPCR)
+    spdr_reg(core, GetTraceValuePrefix() + "SPDR", this, &HWSpi::GetSPDR, &HWSpi::SetSPDR),
+    spsr_reg(core, GetTraceValuePrefix() + "SPSR", this, &HWSpi::GetSPSR, &HWSpi::SetSPSR),
+    spcr_reg(core, GetTraceValuePrefix() + "SPCR", this, &HWSpi::GetSPCR, &HWSpi::SetSPCR)
 {
     bitcnt=8;
     finished=false;
 
-    set_trace_group_s("SPI");
-    trace_direct(core, "shift_in", &shift_in);
-    trace_direct(core, "data_read", &data_read);
-    trace_direct(core, "data_write", &data_write);
-    trace_direct(core, "sSPSR", &spsr);
-    trace_direct(core, "sSPCR", &spcr);
+    trace_direct(this, "shift_in", &shift_in);
+    trace_direct(this, "data_read", &data_read);
+    trace_direct(this, "data_write", &data_write);
+    trace_direct(this, "sSPSR", &spsr);
+    trace_direct(this, "sSPCR", &spcr);
     Reset();
 }
 
@@ -212,137 +212,138 @@ void HWSpi::rxbit(const int bitpos) {
     // sample input
     bool bit=(spcr & MSTR) ? MISO : MOSI;
     if (bit)
-	shift_in|=(1<<bitpos);
+    shift_in|=(1<<bitpos);
 }
 
 void HWSpi::trxend() {
     if (finished) {
-	finished=false;
-	if (core->trace_on && SPI_VERBOSE)
-	    traceOut << "SPI: READ " << int(shift_in) << endl;
-	/* set also data_write to allow continuous shifting
-	   when slave. */
-	data_write=data_read=shift_in; 
-				       
-	spsr|=SPIF;
-	if (spcr&SPIE) {
-	    irq->SetIrqFlag(this, irq_vector);
-	}	
-	spsr_read=false;
+    finished=false;
+    if (core->trace_on && SPI_VERBOSE)
+        traceOut << "SPI: READ " << int(shift_in) << endl;
+    /* set also data_write to allow continuous shifting
+       when slave. */
+    data_write=data_read=shift_in; 
+                       
+    spsr|=SPIF;
+    if (spcr&SPIE) {
+        irq->SetIrqFlag(this, irq_vector);
+    }   
+    spsr_read=false;
     }
 }
 
 unsigned int HWSpi::CpuCycle() {
     if (spcr & SPE) { // active at all?
-	int bitpos=(spcr&DORD) ? bitcnt : 7-bitcnt;
-	int bitpos_prec=(spcr&DORD) ? bitcnt-1 : 8-bitcnt;
-	
-	if (core->trace_on && SPI_VERBOSE) {
-	    traceOut << "SPI: " << bitcnt << ", " << bitpos << ", " << clkcnt << endl;
-	}
-	
-	if (spcr & MSTR) {
-	    /* Check whether we're externally driven into slave mode.
-	       FIXME: It is unclear atleast from mega8 docs if this behaviour is
-	       also right when the SPI is inactive!*/
-	    if ((!SS.GetDdr()) &&
-		(!SS)) {
-		SetSPCR(spcr&~MSTR);
-		// request interrupt
-		spsr|=SPIF;
-		if (spcr&SPIE) {
-		    irq->SetIrqFlag(this, irq_vector);
-		}
-		bitcnt=8; // slave and idle
-		finished=false;
-		clkcnt=0;
-	    }
-	    if (!(clkcnt%clkdiv)){ // TRX bits
-		if (bitcnt<8) {
-		    if (bitcnt==0)
-			shift_in=0;
-		    switch ((clkcnt/clkdiv)&1) {
-		    case 0:
-			// set idle clock
-			SCK.SetAlternatePort(spcr&CPOL);
-			// late phase (for last bit)?
-			if (spcr&CPHA) {
-			    if (bitcnt) {
-				rxbit(bitpos_prec);
-			    }
-			} else {
-			    txbit(bitpos);
-			}
-			break;
-		    case 1:
-			// set valid clock
-			SCK.SetAlternatePort(!(spcr&CPOL));
-			if (spcr&CPHA) {
-			    txbit(bitpos);
-			} else {
-			    rxbit(bitpos);
-			}
- 			bitcnt++;
-			break;
-		    }
-		    finished=(bitcnt==8);
-		} else if (finished) {
-		    if (spcr&CPHA) {
-			rxbit(bitpos_prec);
-		    }
-		    trxend();
-		    // set idle clock
-		    SCK.SetAlternatePort(spcr&CPOL);
-		    // set idle MOSI (high if CPHA==0)
-		    if (!(spcr&CPHA))
-			MOSI.SetAlternatePort(1);
-		}
-	    }    
-	} else {
-	    // possible slave mode
-	    if (SS) {
-		// slave selected lifted-> force end of transmission
-		bitcnt=8;
-	    } else {
-		// Slave mode
-		
-		// start slave if necessary
-		if (bitcnt==8) {
-		    bitcnt=0;
-		    finished=false;
-		    shift_in=0;
-		    oldsck=SCK;
-		} else {
-		    /* Set initial bit for CPHA==0 */
-		    if (!(spcr&CPHA)) {
-			txbit(bitpos);
-		    }
-		}
-		if (SCK!=oldsck) { // edge detection
-		    bool leading=false; // leading edge clock?
-		    if (spcr&CPOL) {
-			// leading edge is falling edge
-			leading=!SCK;
-		    } else leading=SCK;
+    int bitpos=(spcr&DORD) ? bitcnt : 7-bitcnt;
+    int bitpos_prec=(spcr&DORD) ? bitcnt-1 : 8-bitcnt;
+    
+    if (core->trace_on && SPI_VERBOSE) {
+        traceOut << "SPI: " << bitcnt << ", " << bitpos << ", " << clkcnt << endl;
+    }
+    
+    if (spcr & MSTR) {
+        /* Check whether we're externally driven into slave mode.
+           FIXME: It is unclear atleast from mega8 docs if this behaviour is
+           also right when the SPI is inactive!*/
+        if ((!SS.GetDdr()) &&
+        (!SS)) {
+        SetSPCR(spcr&~MSTR);
+        // request interrupt
+        spsr|=SPIF;
+        if (spcr&SPIE) {
+            irq->SetIrqFlag(this, irq_vector);
+        }
+        bitcnt=8; // slave and idle
+        finished=false;
+        clkcnt=0;
+        }
+        if (!(clkcnt%clkdiv)){ // TRX bits
+        if (bitcnt<8) {
+            if (bitcnt==0)
+            shift_in=0;
+            switch ((clkcnt/clkdiv)&1) {
+            case 0:
+            // set idle clock
+            SCK.SetAlternatePort(spcr&CPOL);
+            // late phase (for last bit)?
+            if (spcr&CPHA) {
+                if (bitcnt) {
+                rxbit(bitpos_prec);
+                }
+            } else {
+                txbit(bitpos);
+            }
+            break;
+            case 1:
+            // set valid clock
+            SCK.SetAlternatePort(!(spcr&CPOL));
+            if (spcr&CPHA) {
+                txbit(bitpos);
+            } else {
+                rxbit(bitpos);
+            }
+            bitcnt++;
+            break;
+            }
+            finished=(bitcnt==8);
+        } else if (finished) {
+            if (spcr&CPHA) {
+            rxbit(bitpos_prec);
+            }
+            trxend();
+            // set idle clock
+            SCK.SetAlternatePort(spcr&CPOL);
+            // set idle MOSI (high if CPHA==0)
+            if (!(spcr&CPHA))
+            MOSI.SetAlternatePort(1);
+        }
+        }    
+    } else {
+        // possible slave mode
+        if (SS) {
+        // slave selected lifted-> force end of transmission
+        bitcnt=8;
+        } else {
+        // Slave mode
+        
+        // start slave if necessary
+        if (bitcnt==8) {
+            bitcnt=0;
+            finished=false;
+            shift_in=0;
+            oldsck=SCK;
+        } else {
+            /* Set initial bit for CPHA==0 */
+            if (!(spcr&CPHA)) {
+            txbit(bitpos);
+            }
+        }
+        if (SCK!=oldsck) { // edge detection
+            bool leading=false; // leading edge clock?
+            if (spcr&CPOL) {
+            // leading edge is falling edge
+            leading=!SCK;
+            } else leading=SCK;
 
-		    // determine whether we should sample or setup
-		    bool sample=leading ^ ((spcr&CPHA)!=0);
+            // determine whether we should sample or setup
+            bool sample=leading ^ ((spcr&CPHA)!=0);
 
-		    if (sample)
-			rxbit(bitpos);
-		    else
-			txbit(bitpos);
+            if (sample)
+            rxbit(bitpos);
+            else
+            txbit(bitpos);
 
-		    if (!leading) {
-			bitcnt++;
-			finished=(bitcnt==8);
-		    }
-		}
-		trxend();
-		oldsck=SCK;
-	    }
-	}
-	clkcnt++;
+            if (!leading) {
+            bitcnt++;
+            finished=(bitcnt==8);
+            }
+        }
+        trxend();
+        oldsck=SCK;
+        }
+    }
+    clkcnt++;
     }
     return 0;
 }
+

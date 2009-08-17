@@ -194,12 +194,12 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
                      unsigned int ERamSize,
                      unsigned int flashSize):
     TraceValueRegister(),
+    coreTraceGroup(this, "CORE"),
     ioSpaceSize(_ioSpaceSize)
 {
     dump_manager = DumpManager::Instance();
 
-    set_trace_group_s("CORE");
-    trace_direct(this, "PC", &PC);
+    trace_direct(&coreTraceGroup, "PC", &PC);
 
     unsigned int currentOffset=0;
     const unsigned int RegisterSpaceSize=32;

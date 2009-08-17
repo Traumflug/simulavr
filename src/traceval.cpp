@@ -474,22 +474,17 @@ std::vector<TraceValue*> DumpManager::load(istream &is) {
     return res;
 }
 
-//FIXME
-static std::string trgrp="FIXME.UNDEFINED";
-
-void trace_direct(AvrDevice *c, const std::string &name, bool *val) {
-    c->dump_manager->regTrace(new TraceValue(1, trgrp+"."+name, -1, val));
+void trace_direct(TraceValueRegister *t, const std::string &name, bool *val) {
+    DumpManager::Instance()->regTrace(new TraceValue(1, t->GetTraceValuePrefix() + name, -1, val));
 }
 
-void trace_direct(AvrDevice *c, const std::string &name, uint8_t *val) {
-    c->dump_manager->regTrace(new TraceValue(8, trgrp+"."+name, -1, val));
+void trace_direct(TraceValueRegister *t, const std::string &name, uint8_t *val) {
+    DumpManager::Instance()->regTrace(new TraceValue(8, t->GetTraceValuePrefix() + name, -1, val));
 }
-void trace_direct(AvrDevice *c, const std::string &name, uint16_t *val) {
-    c->dump_manager->regTrace(new TraceValue(16, trgrp+"."+name, -1, val));
+void trace_direct(TraceValueRegister *t, const std::string &name, uint16_t *val) {
+    DumpManager::Instance()->regTrace(new TraceValue(16, t->GetTraceValuePrefix() + name, -1, val));
 }
-void trace_direct(AvrDevice *c, const std::string &name, uint32_t *val) {
-    c->dump_manager->regTrace(new TraceValue(32, trgrp+"."+name, -1, val));
+void trace_direct(TraceValueRegister *t, const std::string &name, uint32_t *val) {
+    DumpManager::Instance()->regTrace(new TraceValue(32, t->GetTraceValuePrefix() + name, -1, val));
 }
-
-void set_trace_group_s(const std::string &grp) { trgrp=grp; }
 

@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ void HWUart::SetUsr(unsigned char val) {
     unsigned char usrold=usr;
 
     if ( val & TXC) {
-        usr &=0xff-TXC;	//clear TXC if 1 written to TXC
+        usr &=0xff-TXC; //clear TXC if 1 written to TXC
     }
 
     unsigned char irqold= ucr&usrold;
@@ -136,7 +136,7 @@ void HWUart::SetUcr(unsigned char val) {
         if (txState == TX_FIRST_RUN || txState == TX_SEND_STARTBIT) {
             pinTx.SetAlternatePort(1); //send high bit
         }
-        pinTx.SetAlternateDdr(1); 		//output!
+        pinTx.SetAlternateDdr(1);       //output!
         pinTx.SetUseAlternatePort(1);
         pinTx.SetUseAlternateDdr(1);
     } else {
@@ -146,7 +146,7 @@ void HWUart::SetUcr(unsigned char val) {
 
     if (ucr & RXEN) {
         pinRx.SetUseAlternateDdr(1);
-        pinRx.SetAlternateDdr(0);		// input 
+        pinRx.SetAlternateDdr(0);       // input 
     }
 
     //prepared for later remove from hwuart from every cpu cycle (only on demand)
@@ -173,7 +173,7 @@ void HWUart::SetUcr(unsigned char val) {
 
 unsigned int HWUart::CpuCycle() {
     baudCnt++;
-    if (baudCnt== (ubrr+1)) {	//16 times the baud rate!
+    if (baudCnt== (ubrr+1)) {   //16 times the baud rate!
         baudCnt=0;
         CpuCycleRx();
         CpuCycleTx();
@@ -222,7 +222,7 @@ unsigned int HWUart::CpuCycleRx() {
                     } else {
                         rxState=RX_WAIT_FOR_HIGH;
                     }
-                }	
+                }   
                 break;
 
             case RX_READ_DATABIT:
@@ -254,7 +254,7 @@ unsigned int HWUart::CpuCycleRx() {
                         }
                     }
 
-                }	
+                }   
 
                 break;
 
@@ -335,7 +335,7 @@ unsigned int HWUart::CpuCycleRx() {
                         else 
                             rxState = RX_WAIT_FOR_HIGH;
                     }
-                }	
+                }   
                 break;
 
             case RX_READ_STOPBIT2:
@@ -362,7 +362,7 @@ unsigned int HWUart::CpuCycleRx() {
                         rxState = RX_WAIT_FOR_LOWEDGE;
                     else 
                         rxState = RX_WAIT_FOR_HIGH;
-                }	
+                }   
 
 
                 break;
@@ -374,15 +374,15 @@ unsigned int HWUart::CpuCycleRx() {
         // check if as a result of this operation any interrupt flags sholud be changed.
         unsigned char irqold= ucr&usr_old;
         unsigned char irqnew= ucr&usr;
-  	 
-  	 
+     
+     
         unsigned char changed=irqold^irqnew;
         unsigned char setnew= changed&irqnew;
         unsigned char clearnew= changed& (~irqnew);
-  	 
+     
         CheckForNewSetIrq(setnew);
         CheckForNewClearIrq(clearnew);
-  	
+    
     } // end of rx enabled
     return 0;
 }
@@ -396,7 +396,7 @@ unsigned int HWUart::CpuCycleTx() {
     if (baudCnt16==16) { //1 time baud rate - baud rate / 16 here
         baudCnt16=0;
 
-        if (ucr & TXEN ) {	//transmitter enabled
+        if (ucr & TXEN ) {  //transmitter enabled
 
             // will be used to cause interrupts int the end of this if
             unsigned char usr_old=usr;
@@ -494,7 +494,7 @@ unsigned int HWUart::CpuCycleTx() {
                     break;
 
                 case TX_AFTER_STOPBIT: //transmit complete and no new data
-                    usr|=TXC; 			//set the txc 
+                    usr|=TXC;           //set the txc 
                     txState=TX_FINISH; 
                     break;
 
@@ -521,48 +521,68 @@ unsigned int HWUart::CpuCycleTx() {
             CheckForNewClearIrq(clearnew);
 
         } // end of tx enabled 
-    }	//end of 1 time baudrate
+    }   //end of 1 time baudrate
 
 
     return 0;
 }
 
-HWUart::HWUart( AvrDevice *core, HWIrqSystem *s, PinAtPort tx, PinAtPort rx, unsigned int vrx, unsigned int vudre, unsigned int vtx, int n):
-    Hardware(core), irqSystem(s), pinTx(tx), pinRx(rx), vectorRx(vrx), vectorUdre(vudre), vectorTx(vtx),
-    udr_reg(core, "UART"+int2str(n)+".UDR",
+HWUart::HWUart(AvrDevice *core,
+               HWIrqSystem *s,
+               PinAtPort tx,
+               PinAtPort rx,
+               unsigned int vrx,
+               unsigned int vudre,
+               unsigned int vtx,
+               int n):
+    Hardware(core),
+    TraceValueRegister(core, "UART" + int2str(n)),
+    irqSystem(s),
+    pinTx(tx),
+    pinRx(rx),
+    vectorRx(vrx),
+    vectorUdre(vudre),
+    vectorTx(vtx),
+    udr_reg(core, GetTraceValuePrefix() + "UDR",
             this, &HWUart::GetUdr, &HWUart::SetUdr),
-    usr_reg(core, "UART"+int2str(n)+".USR",
+    usr_reg(core, GetTraceValuePrefix() + "USR",
             this, &HWUart::GetUsr, &HWUart::SetUsr),
-    ucr_reg(core, "UART"+int2str(n)+".UCR",
+    ucr_reg(core, GetTraceValuePrefix() + "UCR",
             this, &HWUart::GetUcr, &HWUart::SetUcr),
-    ucsra_reg(core, "UART"+int2str(n)+".UCSRA",
+    ucsra_reg(core, GetTraceValuePrefix() + "UCSRA",
               this, &HWUart::GetUsr, &HWUart::SetUsr),
-    ucsrb_reg(core, "UART"+int2str(n)+".UCSRB",
+    ucsrb_reg(core, GetTraceValuePrefix() + "UCSRB",
               this, &HWUart::GetUcr, &HWUart::SetUcr),
-    ubrr_reg(core, "UART"+int2str(n)+".UBRR",
+    ubrr_reg(core, GetTraceValuePrefix() + "UBRR",
              this, &HWUart::GetUbrr, &HWUart::SetUbrr),
-    ubrrhi_reg(core, "UART"+int2str(n)+".UBRRHI",
-               this, &HWUart::GetUbrrhi, &HWUart::SetUbrrhi) {
+    ubrrhi_reg(core, GetTraceValuePrefix() + "UBRRHI",
+               this, &HWUart::GetUbrrhi, &HWUart::SetUbrrhi)
+{
     core->AddToCycleList(this);
 
-    set_trace_group_s("UART"+int2str(n));
-    trace_direct(core, "UDR_write", &udrWrite);
-    trace_direct(core, "UDR_read", &udrRead);
-    trace_direct(core, "sUSR", &usr);
-    trace_direct(core, "sUCR", &ucr);
-    trace_direct(core, "sUBR", &ubrr);
+    trace_direct(this, "UDR_write", &udrWrite);
+    trace_direct(this, "UDR_read", &udrRead);
+    trace_direct(this, "sUSR", &usr);
+    trace_direct(this, "sUCR", &ucr);
+    trace_direct(this, "sUBR", &ubrr);
 
     Reset();
 }
 
-HWUsart::HWUsart( AvrDevice *core, HWIrqSystem *s,
-		  PinAtPort tx, PinAtPort rx,
-		  PinAtPort xck,
-		  unsigned int vrx, unsigned int vudre, unsigned int vtx,
-                  int n):
-    HWUart( core, s, tx, rx, vrx, vudre, vtx, n), pinXck(xck),
-    ucsrc_reg(core, "UART"+int2str(n)+".UCSRC",
-              this, &HWUsart::GetUcsrc, &HWUsart::SetUcsrc) {
+HWUsart::HWUsart(AvrDevice *core,
+                 HWIrqSystem *s,
+                 PinAtPort tx,
+                 PinAtPort rx,
+                 PinAtPort xck,
+                 unsigned int vrx,
+                 unsigned int vudre,
+                 unsigned int vtx,
+                 int n):
+    HWUart(core, s, tx, rx, vrx, vudre, vtx, n),
+    pinXck(xck),
+    ucsrc_reg(core, GetTraceValuePrefix() + "UCSRC",
+              this, &HWUsart::GetUcsrc, &HWUsart::SetUcsrc)
+{
     Reset();
 }
 
@@ -585,7 +605,7 @@ unsigned char HWUart::GetUdr() {
         usr&=0xff-RXC; // unset RXC register
         if (ucr & RXC) {
             irqSystem->ClearIrqFlag(vectorRx); // and clear interrupt flag
-        }	 
+        }    
     }
     return udrRead;
 }

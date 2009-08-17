@@ -51,12 +51,14 @@ class RWMemoryMember;
 class Hardware;
 class DumpManager;
 
+//! Basic AVR device, contains the core functionality
 class AvrDevice: public SimulationMember, public TraceValueRegister {
     
     protected:
         SystemClockOffset clockFreq;
         std::map < std::string, Pin *> allPins; 
         unsigned int ioSpaceSize;
+        TraceValueRegister coreTraceGroup;
 
         //old static vars for Step()
         int cpuCycles;

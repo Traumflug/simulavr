@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003, 2004, 2005   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +30,13 @@
 #include "hardware.h"
 #include "pinatport.h"
 #include "rwmem.h"
+#include "traceval.h"
 
 class AvrDevice;
 class HWIrqSystem;
 
-class HWUart: public Hardware {
+class HWUart: public Hardware, public TraceValueRegister {
+    
     protected:
         unsigned char udrWrite;
         unsigned char udrRead;
@@ -86,8 +88,6 @@ class HWUart: public Hardware {
         T_RxState rxState;
         T_TxState txState;
 
-
-
         unsigned int CpuCycleRx();
         unsigned int CpuCycleTx();
 
@@ -100,8 +100,6 @@ class HWUart: public Hardware {
         int baudCnt16;
         unsigned char txDataTmp;
         int txBitCnt;
-
-
 
     public:
         HWUart(AvrDevice *core, HWIrqSystem *, PinAtPort tx, PinAtPort rx, unsigned int vrx, unsigned int vudre, unsigned int vtx, int n=0); // { irqSystem= s;}
@@ -134,18 +132,20 @@ class HWUart: public Hardware {
             ucsrb_reg,
             ubrr_reg,
             ubrrhi_reg;
+            
     protected:
         void SetFrameLengthFromRegister();
 };
 
 class HWUsart: public HWUart {
+    
     protected:
         PinAtPort pinXck;
 
     public:
         HWUsart(AvrDevice *core, HWIrqSystem *,
-		PinAtPort tx, PinAtPort rx, PinAtPort xck,
-		unsigned int vrx, unsigned int vudre, unsigned int vtx, int n=0);
+        PinAtPort tx, PinAtPort rx, PinAtPort xck,
+        unsigned int vrx, unsigned int vudre, unsigned int vtx, int n=0);
 
         void SetUcsrc(unsigned char val);
 

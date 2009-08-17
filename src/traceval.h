@@ -427,20 +427,16 @@ class TraceValueRegister {
         TraceValue* GetTraceValueByName(const std::string &name);
 };
 
-/*! Sets a group for all next direct tracing values. Used to avoid
-  repeated typing of the hardware group a direct traced value belongs to. */
-void set_trace_group_s(const std::string &grp);
-
 //! Register a directly traced bool value
-void trace_direct(AvrDevice *c, const std::string &name, bool *val);
+void trace_direct(TraceValueRegister *t, const std::string &name, bool *val);
 
 //! Register a directly traced byte value
-void trace_direct(AvrDevice *c, const std::string &name, uint8_t *val);
+void trace_direct(TraceValueRegister *t, const std::string &name, uint8_t *val);
 
 //! Register a directly traced 16bit word value
-void trace_direct(AvrDevice *c, const std::string &name, uint16_t *val);
+void trace_direct(TraceValueRegister *t, const std::string &name, uint16_t *val);
 
 //! Register a directly traced 32bit word value
-void trace_direct(AvrDevice *c, const std::string &name, uint32_t *val);
+void trace_direct(TraceValueRegister *t, const std::string &name, uint32_t *val);
 
 #endif
