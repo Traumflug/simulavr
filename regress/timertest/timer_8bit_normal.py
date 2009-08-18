@@ -3,7 +3,10 @@ from vcdtestutil import VCDTestCase, VCDTestLoader, mSec
 class TestCase(VCDTestCase):
   
   p2irq = {
-    "atmega128": "IRQ.VECTOR10",
+    "atmega128": "IRQ.VECTOR16",
+    "at90s4433": "IRQ.VECTOR6",
+    "at90s8515": "IRQ.VECTOR7",
+    "atmega48":  "IRQ.VECTOR16",
   }
   
   def setUp(self):
@@ -21,15 +24,13 @@ class TestCase(VCDTestCase):
   def test_01(self):
     """init port and counter"""
     self.assertVCD()
-    p = self.getVariable("PORTA.PORT")
-    self.assertEqual(p.firstedge.intValue, 0)
-    p = self.getVariable("TIMER2.TCNT")
+    p = self.getVariable("TIMER0.TCNT")
     self.assertEqual(p.firstedge.intValue, 0)
 
   def test_02(self):
     """counter period = 2us"""
     self.assertVCD()
-    c = self.getVariable("TIMER2.Counter")
+    c = self.getVariable("TIMER0.Counter")
     c1 = c.firstedge
     tp = self.tClock * 8
     t0 = c1.internalTime - tp
@@ -42,7 +43,7 @@ class TestCase(VCDTestCase):
   def test_03(self):
     """counter mode: count 0xff, then 0"""
     self.assertVCD()
-    c = self.getVariable("TIMER2.Counter")
+    c = self.getVariable("TIMER0.Counter")
     c1 = c.firstedge
     tp = self.tClock * 8
     t0 = c1.internalTime - tp
@@ -51,9 +52,9 @@ class TestCase(VCDTestCase):
     self.assertEqual(c2.intValue, 0)
         
   def test_04(self):
-    """check occurence of TOV2 interrupt"""
+    """check occurence of TOV0 interrupt"""
     self.assertVCD()
-    ctr = self.getVariable("TIMER2.Counter")
+    ctr = self.getVariable("TIMER0.Counter")
     tp = self.tClock * 8
     t0 = ctr.firstedge.internalTime - tp
     dtc = tp * 256
@@ -67,10 +68,10 @@ class TestCase(VCDTestCase):
     # check, when interrupt occurs
     ie = irq.getNextEdge(t)
     self.assertEqual(ie.intValue, 1)
-    self.assertTrue(ie.internalTime <= (t + idelay), "TOV2 occured to late")
-    # seek next TOV2
+    self.assertTrue(ie.internalTime <= (t + idelay), "TOV0 occured to late")
+    # seek next TOV0
     ie = irq.getNextEdge(irq.getNextEdge(ie))
-    self.assertTrue(ie.internalTime <= (t + dtc + idelay), "second TOV2 occured to late")
+    self.assertTrue(ie.internalTime <= (t + dtc + idelay), "second TOV0 occured to late")
     
 if __name__ == '__main__':
   
