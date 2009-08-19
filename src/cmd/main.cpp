@@ -488,6 +488,8 @@ int main(int argc, char *argv[]) {
       SystemClock::Instance().Endless();
    }
    
+   dman->stopApplication();
+   
    // delete device
    delete dev1;
 }

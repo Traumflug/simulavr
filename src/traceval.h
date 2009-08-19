@@ -347,16 +347,19 @@ class DumpManager {
           contains all the values this dumper should trace. */
         void addDumper(Dumper *dump, const TraceSet &vals);
     
-        /*! Start all dumpers. They will be stopped when the dump manager
-          gets destroyed. */
+        /*! Start processing on all dumpers. They will be stopped when stopApplication
+          method will be called or the dump manager gets destroyed. */
         void start();
     
+        //! Stop processing on all dumpers and removes it from dumpers list
+        void stopApplication(void);
+        
         /*! Process one AVR clock cycle. Must be done after the AVR did all
           processing so that changed values etc. can be collected. */
         void cycle();
     
-        //! Shut down all dumpers
-        ~DumpManager();
+        //! Destroys the DumpManager instance and shut down all dumpers
+        ~DumpManager() { stopApplication(); }
     
         /*! Write a list of tracing value names into the given
           output stream. */

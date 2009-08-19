@@ -404,11 +404,12 @@ void DumpManager::cycle() {
     }
 }
 
-DumpManager::~DumpManager() {
+void DumpManager::stopApplication(void) {
     for(size_t i = 0; i < dumps.size(); i++) {
         dumps[i]->stop(); // inform dumper to stop output
         delete dumps[i];
     }
+    dumps.clear();
 }
 
 void DumpManager::save(ostream &os, const TraceSet &s) const {
