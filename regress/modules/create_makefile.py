@@ -88,7 +88,7 @@ def create_rules(config):
   for name in config.sections():
     if name == "_rule_": continue
     try:
-      data = dict(name = name,
+      data = dict(name = cfg_get_default(name, "name", name),
                   tab = "\t",
                   ccopts = cfg_get_default(name, "ccopts", ""),
                   sources = config.get(name, "sources"),
