@@ -401,9 +401,13 @@ class DumpManager {
 class TraceValueRegister {
     
     private:
+        typedef std::map<std::string*, TraceValue*> valmap_t; //!< type of values map
+        typedef std::map<std::string*, TraceValueRegister*> regmap_t; //!< type of subregisters map
+        
+        std::string _tvr_scopename; //!< the scope name itself
         std::string _tvr_scopeprefix; //!< the prefix scope for a TraceValue name
-        std::map<const std::string, TraceValue*> _tvr_values; //!< the registered TraceValue's
-        std::map<const std::string, TraceValueRegister*> _tvr_registers; //!< the sub-registers
+        valmap_t _tvr_values; //!< the registered TraceValue's
+        regmap_t _tvr_registers; //!< the sub-registers
         
         //! Registers a TraceValueRegister for this register, build a hierarchy
         void _tvr_registerTraceValues(TraceValueRegister *r);
@@ -411,23 +415,38 @@ class TraceValueRegister {
     public:
         //! Create a TraceValueRegister, with a scope prefix built on parent scope + name
         TraceValueRegister(TraceValueRegister *parent, const std::string &name):
+            _tvr_scopename(name),
             _tvr_scopeprefix(parent->GetTraceValuePrefix() + name + ".")
         {
             parent->_tvr_registerTraceValues(this);
         }
         //! Create a TraceValueRegister, with a empty scope name, single device application
         TraceValueRegister():
+            _tvr_scopename(""),
             _tvr_scopeprefix("")
         {
-            DumpManager::Instance()->appendDeviceName(_tvr_scopeprefix);
+            DumpManager::Instance()->appendDeviceName(_tvr_scopename);
+            if(_tvr_scopename.length() > 0)
+                _tvr_scopeprefix += _tvr_scopename + ".";
         }
+        ~TraceValueRegister();
         
         //! Returns the scope prefix
-        const std::string GetTraceValuePrefix(void)  { return _tvr_scopeprefix; }
+        const std::string GetTraceValuePrefix(void) { return _tvr_scopeprefix; }
+        //! Returns the scope name
+        const std::string GetScopeName(void) { return _tvr_scopename; }
         //! Registers a TraceValue for this register
         void RegisterTraceValue(TraceValue *t);
-        //! Seek for a TraceValue by it's name
+        //! Get a here registered TraceValueRegister by it's name
+        TraceValueRegister* GetScopeGroupByName(const std::string &name);
+        //! Get a here registered TraceValue by it's name
         TraceValue* GetTraceValueByName(const std::string &name);
+        //! Seek for a TraceValueRegister by it's name
+        TraceValueRegister* FindScopeGroupByName(const std::string &name);
+        //! Seek for a TraceValue by it's name
+        TraceValue* FindTraceValueByName(const std::string &name);
+        //! Get all here registered TraceValue's only (not with descending values)
+        TraceSet* GetAllTraceValues(void);
 };
 
 //! Register a directly traced bool value

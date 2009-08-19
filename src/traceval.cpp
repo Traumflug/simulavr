@@ -135,18 +135,89 @@ void TraceValue::dump(Dumper &d) {
     f=0;
 }
 
+TraceValueRegister::~TraceValueRegister() {
+    for (valmap_t::iterator i = _tvr_values.begin(); i != _tvr_values.end(); i++)
+        delete i->first;
+    _tvr_values.clear();
+    for (regmap_t::iterator i = _tvr_registers.begin(); i != _tvr_registers.end(); i++)
+        delete i->first;
+    _tvr_registers.clear();
+}
+
 void TraceValueRegister::_tvr_registerTraceValues(TraceValueRegister *r) {
-    // check for duplicate names
-    // register this sub-register
+    string n = r->GetScopeName();
+    if(GetScopeGroupByName(n) == NULL) {
+        string *s = new string(n);
+        pair<string*, TraceValueRegister*> v(s, r);
+        _tvr_registers.insert(v);
+    } else
+        avr_error("add TraceValueRegister denied: name found: '%s'", n.c_str());
 }
 
 void TraceValueRegister::RegisterTraceValue(TraceValue *t) {
-    // check for duplicate names
+    // check for duplicate names and the right prefix
+    string p = t->barename();
+    int idx = _tvr_scopeprefix.length();
+    if((p.length() <= idx) || (p.substr(0, idx) != _tvr_scopeprefix))
+        avr_error("add TraceValue denied: wrong prefix: '%s'", p.c_str());
+    string n = p.substr(idx);
+    if(n.find('.') != -1)
+        avr_error("add TraceValue denied: wrong name: '%s'", n.c_str());
     // register this TraceValue
+    if(GetTraceValueByName(n) == NULL) {
+        string *s = new string(n);
+        pair<string*, TraceValue*> v(s, t);
+        _tvr_values.insert(v);
+    } else
+        avr_error("add TraceValue denied: name found: '%s'", n.c_str());
+}
+
+TraceValueRegister* TraceValueRegister::GetScopeGroupByName(const std::string &name) {
+    for (regmap_t::iterator i = _tvr_registers.begin(); i != _tvr_registers.end(); i++) {
+        if(name == *(i->first))
+            return i->second;
+    }
+    return NULL;
 }
 
 TraceValue* TraceValueRegister::GetTraceValueByName(const std::string &name) {
-  avr_error("method GetTraceValueByName is unimplemented yet");
+    for (valmap_t::iterator i = _tvr_values.begin(); i != _tvr_values.end(); i++) {
+        if(name == *(i->first))
+            return i->second;
+    }
+    return NULL;
+}
+
+TraceValueRegister* TraceValueRegister::FindScopeGroupByName(const std::string &name) {
+    int idx = name.find('.');
+    if(idx > 0) {
+        TraceValueRegister *r = GetScopeGroupByName(name.substr(0, idx));
+        if(r == NULL)
+            return NULL;
+        else
+            return r->FindScopeGroupByName(name.substr(idx + 1));
+    } else
+        return GetScopeGroupByName(name);
+}
+
+TraceValue* TraceValueRegister::FindTraceValueByName(const std::string &name) {
+    int idx = name.find('.');
+    if(idx > 0) {
+        TraceValueRegister *r = GetScopeGroupByName(name.substr(0, idx));
+        if(r == NULL)
+            return NULL;
+        else
+            return r->FindTraceValueByName(name.substr(idx + 1));
+    } else
+        return GetTraceValueByName(name);
+}
+
+TraceSet* TraceValueRegister::GetAllTraceValues(void) {
+    TraceSet* result = new TraceSet;
+    result->reserve(_tvr_values.size());
+    for (valmap_t::iterator i = _tvr_values.begin(); i != _tvr_values.end(); i++)
+        result->push_back(i->second);
+    return result;
 }
 
 WarnUnknown::WarnUnknown(AvrDevice *_core) : core(_core) {}
@@ -329,7 +400,7 @@ void DumpManager::appendDeviceName(std::string &s) {
   if(singleDeviceApp && devidx > 1)
       avr_error("Can't create device name twice, because it's a single device application");
   if(!singleDeviceApp)
-    s += "Dev" + int2str(devidx) + ".";
+    s += "Dev" + int2str(devidx);
 }
 
 void DumpManager::regTrace(TraceValue *tv) {
