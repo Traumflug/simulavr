@@ -403,9 +403,8 @@ int main(int argc, char *argv[]) {
            else
                outf=&cout;
            
-           dman->save(*outf, dman->all());
-           if (outf!=&cout)
-               
+           dman->save(*outf);
+           if(outf != &cout)
                delete outf;
        }
        exit(0);

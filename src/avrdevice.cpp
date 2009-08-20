@@ -187,7 +187,9 @@ Pin *AvrDevice::GetPin(const char *name) {
     return ret;
 }
 
-AvrDevice::~AvrDevice() {}
+AvrDevice::~AvrDevice() {
+    dump_manager->unregisterAvrDevice(this);
+}
 
 AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
                      unsigned int IRamSize,
@@ -198,7 +200,8 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     ioSpaceSize(_ioSpaceSize)
 {
     dump_manager = DumpManager::Instance();
-
+    dump_manager->registerAvrDevice(this);
+    
     trace_direct(&coreTraceGroup, "PC", &PC);
 
     unsigned int currentOffset=0;

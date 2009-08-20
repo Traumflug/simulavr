@@ -361,9 +361,9 @@ class DumpManager {
         //! Destroys the DumpManager instance and shut down all dumpers
         ~DumpManager() { stopApplication(); }
     
-        /*! Write a list of tracing value names into the given
+        /*! Write a list of all tracing value names into the given
           output stream. */
-        void save(std::ostream &os, const TraceSet &s) const;
+        void save(std::ostream &os) const;
         
         /*! Load a list of tracing values from the given input stream.
           Checks whether the values are part of the set of traceable
@@ -375,12 +375,19 @@ class DumpManager {
         
     private:
         friend class TraceValueRegister;
+        friend class AvrDevice;
         
         //! Private instance constructor
         DumpManager();
         
         //! append a unique device name to a string
         void appendDeviceName(std::string &s);
+        
+        //! Add a device to devicelist
+        void registerAvrDevice(AvrDevice* dev);
+        
+        //! Remove a device from devicelist
+        void unregisterAvrDevice(AvrDevice* dev);
         
         //! Flag, if we use only one device, e.g. assign no device name
         bool singleDeviceApp;
@@ -392,8 +399,11 @@ class DumpManager {
         //! Maps all names of traceable values to the values themselves
         std::map<std::string, TraceValue*> all_map;
         
-        //! All dumpers too use
+        //! All dumpers, which we want to use
         std::vector<Dumper*> dumps;
+        
+        //! Device list
+        std::vector<AvrDevice*> devices;
 };
 
 //! Build a register for TraceValue's
@@ -411,6 +421,12 @@ class TraceValueRegister {
         
         //! Registers a TraceValueRegister for this register, build a hierarchy
         void _tvr_registerTraceValues(TraceValueRegister *r);
+        
+        //! Get the count of all TraceValues, that are registered here and descending
+        size_t _tvr_getValuesCount(void);
+        
+        //! Insert all TraceValues into TraceSet, that registered here and descending
+        void _tvr_insertTraceValuesToSet(TraceSet &t);
         
     public:
         //! Create a TraceValueRegister, with a scope prefix built on parent scope + name
@@ -447,6 +463,8 @@ class TraceValueRegister {
         TraceValue* FindTraceValueByName(const std::string &name);
         //! Get all here registered TraceValue's only (not with descending values)
         TraceSet* GetAllTraceValues(void);
+        //! Get all here registered TraceValue's with descending values
+        TraceSet* GetAllTraceValuesRecursive(void);
 };
 
 //! Register a directly traced bool value

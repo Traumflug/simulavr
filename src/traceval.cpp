@@ -154,6 +154,20 @@ void TraceValueRegister::_tvr_registerTraceValues(TraceValueRegister *r) {
         avr_error("add TraceValueRegister denied: name found: '%s'", n.c_str());
 }
 
+size_t TraceValueRegister::_tvr_getValuesCount(void) {
+    size_t cnt = _tvr_values.size();
+    for (regmap_t::iterator i = _tvr_registers.begin(); i != _tvr_registers.end(); i++)
+        cnt += (i->second)->_tvr_getValuesCount();
+    return cnt;
+}
+
+void TraceValueRegister::_tvr_insertTraceValuesToSet(TraceSet &t) {
+    for (valmap_t::iterator i = _tvr_values.begin(); i != _tvr_values.end(); i++)
+        t.push_back(i->second);
+    for (regmap_t::iterator i = _tvr_registers.begin(); i != _tvr_registers.end(); i++)
+        (i->second)->_tvr_insertTraceValuesToSet(t);
+}
+
 void TraceValueRegister::RegisterTraceValue(TraceValue *t) {
     // check for duplicate names and the right prefix
     string p = t->barename();
@@ -217,6 +231,13 @@ TraceSet* TraceValueRegister::GetAllTraceValues(void) {
     result->reserve(_tvr_values.size());
     for (valmap_t::iterator i = _tvr_values.begin(); i != _tvr_values.end(); i++)
         result->push_back(i->second);
+    return result;
+}
+
+TraceSet* TraceValueRegister::GetAllTraceValuesRecursive(void) {
+    TraceSet* result = new TraceSet;
+    result->reserve(_tvr_getValuesCount());
+    _tvr_insertTraceValuesToSet(*result);
     return result;
 }
 
@@ -395,12 +416,24 @@ DumpManager::DumpManager() {
 }
 
 void DumpManager::appendDeviceName(std::string &s) {
-  static int devidx = 0;
-  devidx++;
-  if(singleDeviceApp && devidx > 1)
-      avr_error("Can't create device name twice, because it's a single device application");
-  if(!singleDeviceApp)
-    s += "Dev" + int2str(devidx);
+    static int devidx = 0;
+    devidx++;
+    if(singleDeviceApp && devidx > 1)
+        avr_error("Can't create device name twice, because it's a single device application");
+    if(!singleDeviceApp)
+        s += "Dev" + int2str(devidx);
+}
+
+void DumpManager::registerAvrDevice(AvrDevice* dev) {
+    devices.push_back(dev);
+}
+
+void DumpManager::unregisterAvrDevice(AvrDevice* dev) {
+    for(vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
+        AvrDevice* d = *i;
+        if((unsigned int)d == (unsigned int)dev)
+            devices.erase(i);
+    }
 }
 
 void DumpManager::regTrace(TraceValue *tv) {
@@ -483,29 +516,35 @@ void DumpManager::stopApplication(void) {
     dumps.clear();
 }
 
-void DumpManager::save(ostream &os, const TraceSet &s) const {
-    typedef std::vector<TraceValue*>::const_iterator citer;
-    for (citer i=s.begin(); i!=s.end(); i++) {
-        TraceValue& tv=*(*i);
-        if (tv.index()>=0) {
-            citer j=i;
-            int c=tv.index();
-            
-            while (((*i)->barename()==tv.barename()) &&
-                   (c==(*i)->index())) {
-                i++;
-                c++;
-            }
-            i--; c--;
-            
-            if (c) {
-                os << "| " << tv.barename() << ' ' 
-                   << tv.index() << " .. "
-                   << (*i)->index() << '\n';
-            } else {
+void DumpManager::save(ostream &os) const {
+    // s0 isn't used here!
+    TraceSet* s;
+    for(vector<AvrDevice*>::const_iterator d = devices.begin(); d != devices.end(); d++) {
+        s = (*d)->GetAllTraceValuesRecursive();
+        for(TraceSet::const_iterator i = s->begin(); i != s->end(); i++) {
+            TraceValue& tv = *(*i);
+            if (tv.index() >= 0) {
+                TraceSet::const_iterator j = i;
+                int c = tv.index();
+                
+                while(((*i)->barename() == tv.barename()) &&
+                      (c == (*i)->index())) {
+                    i++;
+                    c++;
+                }
+                i--; c--;
+                
+                if(c) {
+                    os << "| " << tv.barename() << ' ' 
+                       << tv.index() << " .. "
+                       << (*i)->index() << '\n';
+                } else {
+                    os << "+ " << (*i)->name() << '\n';
+                }
+            } else
                 os << "+ " << (*i)->name() << '\n';
-            }
-        } else os << "+ " << (*i)->name() << '\n';
+        }
+        delete s;
     }
 }
 
