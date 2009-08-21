@@ -111,7 +111,7 @@ class IrqStatistic: public Printable {
 
 std::ostream& operator<<(std::ostream &, const IrqStatistic&);
 
-class HWIrqSystem {
+class HWIrqSystem: public TraceValueRegister {
     
     protected:
         int bytesPerVector;

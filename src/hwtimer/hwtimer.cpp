@@ -61,7 +61,6 @@ BasicTimerUnit::BasicTimerUnit(AvrDevice *core,
     counterTrace = new TraceValue(countersize, GetTraceValuePrefix() + "Counter");
     RegisterTraceValue(counterTrace);
     counterTrace->set_written(0);
-    core->dump_manager->regTrace(counterTrace);
     
     // disable all compare registers, output pins and reset Compare IRQ's
     for(int i = 0; i < OCRIDX_maxUnits; i++) {

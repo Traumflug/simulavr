@@ -429,63 +429,66 @@ void DumpManager::registerAvrDevice(AvrDevice* dev) {
 }
 
 void DumpManager::unregisterAvrDevice(AvrDevice* dev) {
+    vector<AvrDevice*> dl;
     for(vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
         AvrDevice* d = *i;
-        if((unsigned int)d == (unsigned int)dev)
-            devices.erase(i);
+        if((unsigned int)d != (unsigned int)dev)
+            dl.push_back(d);
     }
+    devices.swap(dl);
+}
+
+TraceValue* DumpManager::seekValueByName(const std::string &name) {
+    for(vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
+        TraceValue* t = (*i)->FindTraceValueByName(name);
+        if(t != NULL)
+            return t;
+    }
+    return NULL;
 }
 
 void DumpManager::regTrace(TraceValue *tv) {
-    if (all_map.find(tv->name())!=all_map.end())
-        avr_error(("Internal error: Tracevalue '"+tv->name()+"' already registered.").c_str());
-    all_map[tv->name()]=tv;
-
-    /*FIXME: Note that the order in which the values come from _all
-      is important for clean output of the list of traceabe values!
-      The container should be ordered! */
-    _all.push_back(tv);
+    // do not use, will be deleted
 }
 
 void DumpManager::addDumper(Dumper *dump, const TraceSet &vals) {
-    TraceSet s_vals(vals),
-        s_all(_all);
-    
-    sort(s_vals.begin(), s_vals.end());
-    sort(s_all.begin(), s_all.end());
-    
-    TraceSet toomany;
-    set_difference(s_vals.begin(), s_vals.end(),
-                   s_all.begin(), s_all.end(),
-                   insert_iterator<TraceSet>(toomany, toomany.end()));
-    if (toomany.size()) {
-        TraceSet::iterator i=toomany.begin();
-        
-        // FIXME: Maybe make this more verbose.
-        avr_error(("Value '"+(*i)->name()+"'  not registered.").c_str());
-    }
-    for (TraceSet::iterator i=s_vals.begin();
-         i!=s_vals.end(); i++)
+    // enable values and insert into active list, if not there
+    for(TraceSet::const_iterator i = vals.begin(); i != vals.end(); i++) {
         (*i)->enable();
-
-    TraceSet s_active(active);
-    sort(s_active.begin(), s_active.end());
-
-    TraceSet newact;
-    set_union(s_vals.begin(), s_vals.end(),
-              s_active.begin(), s_active.end(),
-              insert_iterator<TraceSet>(newact, newact.end()));
-    active.swap(newact);
-
-    if (find(dumps.begin(), dumps.end(), dump)!=dumps.end())
+        if(find(active.begin(), active.end(), *i) == active.end())
+            active.push_back(*i);
+    }
+    
+    // check, if dumper exists in dumps list
+    if(find(dumps.begin(), dumps.end(), dump) != dumps.end())
         avr_error("Internal error: Dumper already registered.");
-
-    dump->setActiveSignals(s_vals);
-
+    // set active signals for dumper
+    dump->setActiveSignals(vals);
+    // and insert dumper in dumps list
     dumps.push_back(dump);
 }
 
-const TraceSet& DumpManager::all() const { return _all; }
+const TraceSet& DumpManager::all() {
+    TraceSet* s;
+    
+    // clear list
+    _all.clear();
+    
+    // over all registered devices
+    for(vector<AvrDevice*>::const_iterator d = devices.begin(); d != devices.end(); d++) {
+        // all values from device
+        s = (*d)->GetAllTraceValuesRecursive();
+        // change allocated vector size
+        _all.reserve(_all.size() + s->size());
+        // append all values from device list to result list
+        for(TraceSet::const_iterator i = s->begin(); i != s->end(); i++)
+            _all.push_back(*i);
+        delete s;
+    }
+    
+    // return resulting list
+    return _all;
+}
 
 void DumpManager::start() {
     for (size_t i=0; i< dumps.size(); i++)
@@ -517,7 +520,6 @@ void DumpManager::stopApplication(void) {
 }
 
 void DumpManager::save(ostream &os) const {
-    // s0 isn't used here!
     TraceSet* s;
     for(vector<AvrDevice*>::const_iterator d = devices.begin(); d != devices.end(); d++) {
         s = (*d)->GetAllTraceValuesRecursive();
@@ -548,39 +550,46 @@ void DumpManager::save(ostream &os) const {
     }
 }
 
-std::vector<TraceValue*> DumpManager::load(istream &is) {
-    std::vector<TraceValue*> res;
-    while (!is.eof()) {
-        std::string l=readline(is);
-        vector<std::string> ls=split(l);
-        if (ls.size()<2) continue;
-        if (ls[0]=="+") {
-            std::string n=ls[1];
-            if (all_map.find(n)==all_map.end()) {
-                string msg="TraceValue '"+n+"' is not known.";
-                avr_error(msg.c_str());
-            }
-            res.push_back(all_map[n]);
-        } else if (ls[0]=="|") {
-            if (ls[3]!="..") {
+TraceSet DumpManager::load(istream &is) {
+    TraceSet res;
+    
+    while(!is.eof()) {
+        // read line from stream and split it up
+        string l = readline(is);
+        vector<string> ls = split(l);
+        
+        // empty line or to short?
+        if(ls.size() < 2) continue;
+        
+        if(ls[0] == "+") {
+            // single value, get name
+            string n = ls[1];
+            // seek value
+            TraceValue *t = seekValueByName(n);
+            if(t == NULL)
+                avr_error("TraceValue '%s' is not known.", n.c_str());
+            // insert to list
+            res.push_back(t);
+        } else if(ls[0] == "|") {
+            // value range?
+            if(ls[3] != "..")
                 avr_error("'..' expected between range limits.");
+            // get name and range values
+            string bn = ls[1];
+            size_t min = atoi(ls[2].c_str());
+            size_t max = atoi(ls[4].c_str());
+            // seek for all values in range
+            for(size_t i = min; i <= max; i++) {
+                string n = ls[1] + int2str(i);
+                TraceValue *t = seekValueByName(n);
+                if(t == NULL)
+                    avr_error("While constructing range with '%s', TraceValue is not known.", n.c_str());
+                // insert to list
+                res.push_back(t);
             }
-            std::string bn=ls[1];
-            size_t
-                min=atoi(ls[2].c_str()),
-                max=atoi(ls[4].c_str());
-
-            for (size_t i=min; i <= max; i++) {
-                std::string n=ls[1]+int2str(i);
-                if (all_map.find(n)==all_map.end()) {
-                    string msg="While constructing range with '"+n+
-                        "', TraceValue is not known.";
-                    avr_error(msg.c_str());
-                }
-                res.push_back(all_map[n]);
-            }
-        } else if (ls[0][0]!='#') avr_error(
-            ("Invalid trace value specifier '"+ls[0]+"'.").c_str());
+        } else if(ls[0][0] != '#')
+            // not a comment, then it's an error
+            avr_error("Invalid trace value specifier '%s'.", ls[0].c_str());
     }
     return res;
 }

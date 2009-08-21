@@ -182,6 +182,7 @@ ostream& operator<<(ostream &os, const IrqStatistic& is) {
 }
 
 HWIrqSystem::HWIrqSystem(AvrDevice* _core, int bytes, int tblsize):
+    TraceValueRegister(_core, "IRQ"),
     bytesPerVector(bytes),
     vectorTableSize(tblsize),
     core(_core),
@@ -189,9 +190,9 @@ HWIrqSystem::HWIrqSystem(AvrDevice* _core, int bytes, int tblsize):
     irqStatistic(_core)
 {
     for(int i = 0; i < vectorTableSize; i++) {
-        TraceValue* tv = new TraceValue(1, "IRQ.VECTOR" + int2str(i));
+        TraceValue* tv = new TraceValue(1, GetTraceValuePrefix() + "VECTOR" + int2str(i));
         tv->set_written(0);
-        core->dump_manager->regTrace(tv);
+        RegisterTraceValue(tv);
         irqTrace[i] = tv;
     }
 }

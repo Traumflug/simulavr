@@ -371,7 +371,7 @@ class DumpManager {
         TraceSet load(std::istream &is);
     
         /*! Gives all available tracers as a set. */
-        const TraceSet& all() const;
+        const TraceSet& all();
         
     private:
         friend class TraceValueRegister;
@@ -389,15 +389,16 @@ class DumpManager {
         //! Remove a device from devicelist
         void unregisterAvrDevice(AvrDevice* dev);
         
+        //! Seek value by name in all devices
+        TraceValue* seekValueByName(const std::string &name);
+        
         //! Flag, if we use only one device, e.g. assign no device name
         bool singleDeviceApp;
         
         //! Set of active tracing values
         TraceSet active;
-        //! Set of all traceable values
+        //! Set of all traceable values (placeholder instance for all() method)
         TraceSet _all;
-        //! Maps all names of traceable values to the values themselves
-        std::map<std::string, TraceValue*> all_map;
         
         //! All dumpers, which we want to use
         std::vector<Dumper*> dumps;
