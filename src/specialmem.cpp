@@ -30,10 +30,10 @@
 using namespace std;
 
 RWWriteToFile::RWWriteToFile(
-    AvrDevice *core,
+    TraceValueRegister *registry,
     const string &tracename,
     const string &filename)
-    : RWMemoryMember(core, tracename),
+    : RWMemoryMember(registry, tracename),
       os(filename=="-" ? cout : ofs) {
   if(filename != "-")
       ofs.open(filename.c_str());
@@ -49,10 +49,10 @@ unsigned char RWWriteToFile::get() const {
 } 
 
 RWReadFromFile::RWReadFromFile(
-    AvrDevice *core,
+    TraceValueRegister *registry,
     const string &tracename,
     const string &filename)
-    : RWMemoryMember(core, tracename),
+    : RWMemoryMember(registry, tracename),
      is((filename=="-") ? cin : ifs) {
     if (filename != "-")
 	ifs.open(filename.c_str());
@@ -69,9 +69,9 @@ unsigned char RWReadFromFile::get() const {
 } 
 
 
-RWExit::RWExit(AvrDevice *core,
+RWExit::RWExit(TraceValueRegister *registry,
                const std::string &tracename) :
-    RWMemoryMember(core, tracename) {}
+    RWMemoryMember(registry, tracename) {}
 
 
 void RWExit::set(unsigned char c) {
@@ -85,9 +85,9 @@ unsigned char RWExit::get() const {
   return 0;
 }
 
-RWAbort::RWAbort(AvrDevice *core,
+RWAbort::RWAbort(TraceValueRegister *registry,
                  const std::string &tracename) :
-    RWMemoryMember(core, tracename) {}
+    RWMemoryMember(registry, tracename) {}
 
 void RWAbort::set(unsigned char c) {
   cerr << "Aborting at simulated program request" << endl;

@@ -37,17 +37,17 @@
 
 using namespace std;
 
-RWMemoryMember::RWMemoryMember(AvrDevice *_core,
+RWMemoryMember::RWMemoryMember(TraceValueRegister *_reg,
                                const std::string &tracename,
                                const int index):
-    core(_core)
+    registry(_reg)
 {
     if (tracename.size()) {
-        tv = new TraceValue(8, tracename, index);
-        if (!core) {
-            avr_error("core not initialized for RWMemoryMember '%s'.", tracename.c_str());
+        tv = new TraceValue(8, registry->GetTraceValuePrefix() + tracename, index);
+        if (!registry) {
+            avr_error("registry not initialized for RWMemoryMember '%s'.", tracename.c_str());
         }
-        core->dump_manager->regTrace(tv);
+        registry->RegisterTraceValue(tv);
     } else {
         tv=0;
     }
@@ -82,9 +82,9 @@ RWMemoryMember::~RWMemoryMember() {
         delete tv;
 }
 
-RAM::RAM(AvrDevice *core,
+RAM::RAM(TraceValueRegister *registry,
          const std::string &name,
-         const size_t number): RWMemoryMember(core, name, number) {}
+         const size_t number): RWMemoryMember(registry, name, number) {}
 
 unsigned char RAM::get() const { return value; }
 
@@ -95,21 +95,21 @@ RWMemoryMember& MemoryOffsets::operator[](unsigned int externOffset) const {
 }
 
 InvalidMem::InvalidMem(
-    AvrDevice *core,
+    TraceValueRegister *registry,
     const std::string &name,
-    const size_t number): RWMemoryMember(core, name, number) {}
+    const size_t number): RWMemoryMember(registry, name, number) {}
 
 unsigned char InvalidMem::get() const {
     avr_warning("Invalid read access to %s",tv->name().c_str());
 }
 
 void InvalidMem::set(unsigned char c) {
-    avr_warning("Invalid write access to %s, trying to set value [0x%x], PC=0x%x",
-                tv->name().c_str(), int(c), 2 * core->PC);
+    avr_warning("Invalid write access to %s, trying to set value [0x%x]",
+                tv->name().c_str(), int(c));
 }
 
-IOSpecialReg::IOSpecialReg(AvrDevice *core, const std::string &name):
-    RWMemoryMember(core, name)
+IOSpecialReg::IOSpecialReg(TraceValueRegister *registry, const std::string &name):
+    RWMemoryMember(registry, name)
 {
     Reset();
 }

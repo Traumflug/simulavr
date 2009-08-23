@@ -172,9 +172,9 @@ HWSpi::HWSpi(AvrDevice *_c,
     core(_c), irq(_irq),
     MOSI(mosi), MISO(miso), SCK(sck), SS(ss),
     irq_vector(ivec), mega_mode(mm),
-    spdr_reg(core, GetTraceValuePrefix() + "SPDR", this, &HWSpi::GetSPDR, &HWSpi::SetSPDR),
-    spsr_reg(core, GetTraceValuePrefix() + "SPSR", this, &HWSpi::GetSPSR, &HWSpi::SetSPSR),
-    spcr_reg(core, GetTraceValuePrefix() + "SPCR", this, &HWSpi::GetSPCR, &HWSpi::SetSPCR)
+    spdr_reg(this, "SPDR", this, &HWSpi::GetSPDR, &HWSpi::SetSPDR),
+    spsr_reg(this, "SPSR", this, &HWSpi::GetSPSR, &HWSpi::SetSPSR),
+    spcr_reg(this, "SPCR", this, &HWSpi::GetSPCR, &HWSpi::SetSPCR)
 {
     bitcnt=8;
     finished=false;

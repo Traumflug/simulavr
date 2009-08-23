@@ -30,8 +30,9 @@
 #include "pinatport.h"
 #include "rwmem.h"
 #include "pinnotify.h"
+#include "traceval.h"
 
-class HWMegaExtIrq: public Hardware, public HasPinNotifyFunction {
+class HWMegaExtIrq: public Hardware, public HasPinNotifyFunction, public TraceValueRegister {
 	protected:
         unsigned char eimsk;
         unsigned char eifr;

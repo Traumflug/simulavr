@@ -29,10 +29,11 @@
 #include "hardware.h"
 #include "pin.h"
 #include "rwmem.h"
+#include "traceval.h"
 
 #include <string>
 
-class HWPort: public Hardware {
+class HWPort: public Hardware, public TraceValueRegister {
     protected:
         std::string myName;
 

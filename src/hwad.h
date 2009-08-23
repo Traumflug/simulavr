@@ -30,8 +30,9 @@
 #include "avrdevice.h"
 #include "pinatport.h"
 #include "rwmem.h"
+#include "traceval.h"
 
-class HWAdmux: public Hardware {
+class HWAdmux: public Hardware, public TraceValueRegister {
     protected:
         unsigned char admux;
         Pin* ad[8]; //8 pins selectable from the mux
@@ -57,7 +58,7 @@ class HWAdmux: public Hardware {
 	IOReg<HWAdmux> admux_reg;
 };
 
-class HWAd: public Hardware {
+class HWAd: public Hardware, public TraceValueRegister {
     protected:
         unsigned char adch;
         bool adchLocked;

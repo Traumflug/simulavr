@@ -28,7 +28,7 @@
 #include <string>
 
 #include "rwmem.h"
-#include "avrdevice.h"
+#include "traceval.h"
 
 /* this is the fastes solution, tested on Ubuntu and WinXP */
 class HWSreg_bool {
@@ -80,7 +80,7 @@ class HWSreg: public HWSreg_bool {
 class RWSreg: public RWMemoryMember {
     
     public:
-        RWSreg(AvrDevice *core, HWSreg *s):RWMemoryMember(core, "CORE.SREG"), status(s) {}
+        RWSreg(TraceValueRegister *registry, HWSreg *s): RWMemoryMember(registry, "SREG"), status(s) {}
         //! reflect a change, which comes from CPU core
         void trigger_change(void) { tv->change((int)*status); }
         

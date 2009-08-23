@@ -38,9 +38,11 @@
 
 
 HWAcomp::HWAcomp(AvrDevice *core, HWIrqSystem *irqsys, PinAtPort ain0, PinAtPort ain1, unsigned int _irqVec):
-    Hardware(core), irqSystem(irqsys),
+    Hardware(core),
+    TraceValueRegister(core, "ACOMP"),
+    irqSystem(irqsys),
     pinAin0(ain0), pinAin1(ain1),
-    acsr_reg(core, "ACOMP.ACSR", this, &HWAcomp::GetAcsr, &HWAcomp::SetAcsr),
+    acsr_reg(this, "ACSR", this, &HWAcomp::GetAcsr, &HWAcomp::SetAcsr),
     irqVec(_irqVec) {
     ain0.GetPin().RegisterCallback(this);
     ain1.GetPin().RegisterCallback(this);

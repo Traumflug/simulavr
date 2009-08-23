@@ -40,10 +40,12 @@ ThreeLevelStack::~ThreeLevelStack() {
 }
 
 HWStack::HWStack(AvrDevice *c, MemoryOffsets *sr, unsigned int ceil):
-    Hardware(c), core(c),
-    sph_reg(core, "STACK.SPH",
+    Hardware(c),
+    TraceValueRegister(c, "STACK"),
+    core(c),
+    sph_reg(this, "SPH",
             this, &HWStack::GetSph, &HWStack::SetSph),
-    spl_reg(core, "STACK.SPL",
+    spl_reg(this, "SPL",
             this, &HWStack::GetSpl, &HWStack::SetSpl) {
     stackCeil=ceil;
     mem=sr;

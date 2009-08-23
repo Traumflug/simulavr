@@ -33,14 +33,17 @@
 using namespace std;
 
 HWEeprom::HWEeprom(AvrDevice *_core, unsigned int size):
-    Hardware(_core),Memory(size),core(_core),
-    eearh_reg(core, "EEPROM.EEARH",
+    Hardware(_core),
+    Memory(size),
+    TraceValueRegister(_core, "EEPROM"),
+    core(_core),
+    eearh_reg(this, "EEARH",
               this, &HWEeprom::GetEearh, &HWEeprom::SetEearh),
-    eearl_reg(core, "EEPROM.EEARL",
+    eearl_reg(this, "EEARL",
               this, &HWEeprom::GetEearl, &HWEeprom::SetEearl),
-    eedr_reg(core, "EEPROM.EEDR",
+    eedr_reg(this, "EEDR",
              this, &HWEeprom::GetEedr, &HWEeprom::SetEedr),
-    eecr_reg(core, "EEPROM.EECR",
+    eecr_reg(this, "EECR",
              this, &HWEeprom::GetEecr, &HWEeprom::SetEecr) {
     //core->AddToCycleList(this);
     Reset();

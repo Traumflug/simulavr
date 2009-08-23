@@ -28,14 +28,16 @@
 HWMega48ExtIrq::HWMega48ExtIrq(AvrDevice *core, HWIrqSystem *i,
         PinAtPort p0, PinAtPort p1,
         unsigned int iv0, unsigned int iv1):
-    Hardware(core), irqSystem(i),
-    eicra_reg(core, "EXTIRQ.EICRA",
+    Hardware(core),
+    TraceValueRegister(core, "EXTIRQ"),
+    irqSystem(i),
+    eicra_reg(this, "EICRA",
               this, &HWMega48ExtIrq::GetEicra, &HWMega48ExtIrq::SetEicra),
-    eicrb_reg(core, "EXTIRQ.EICRB",
+    eicrb_reg(this, "EICRB",
               this, &HWMega48ExtIrq::GetEicrb, &HWMega48ExtIrq::SetEicrb),
-    eimsk_reg(core, "EXTIRQ.EIMSK",
+    eimsk_reg(this, "EIMSK",
               this, &HWMega48ExtIrq::GetEimsk, &HWMega48ExtIrq::SetEimsk),
-    eifr_reg(core, "EXTIRQ.EIFR",
+    eifr_reg(this, "EIFR",
              this, &HWMega48ExtIrq::GetEifr, &HWMega48ExtIrq::SetEifr) {
     pinI.push_back(p0);
     pinI.push_back(p1);

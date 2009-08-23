@@ -30,12 +30,12 @@
 #include "pinatport.h"
 #include "rwmem.h"
 #include "pinnotify.h"
-
+#include "traceval.h"
 
 class HWIrqSystem;
 
 
-class HWExtIrq: public Hardware, public HasPinNotifyFunction {
+class HWExtIrq: public Hardware, public HasPinNotifyFunction, public TraceValueRegister {
 	protected:
 		unsigned char gimsk;
 		unsigned char gifr;

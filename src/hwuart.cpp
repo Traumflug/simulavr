@@ -543,19 +543,19 @@ HWUart::HWUart(AvrDevice *core,
     vectorRx(vrx),
     vectorUdre(vudre),
     vectorTx(vtx),
-    udr_reg(core, GetTraceValuePrefix() + "UDR",
+    udr_reg(this, "UDR",
             this, &HWUart::GetUdr, &HWUart::SetUdr),
-    usr_reg(core, GetTraceValuePrefix() + "USR",
+    usr_reg(this, "USR",
             this, &HWUart::GetUsr, &HWUart::SetUsr),
-    ucr_reg(core, GetTraceValuePrefix() + "UCR",
+    ucr_reg(this, "UCR",
             this, &HWUart::GetUcr, &HWUart::SetUcr),
-    ucsra_reg(core, GetTraceValuePrefix() + "UCSRA",
+    ucsra_reg(this, "UCSRA",
               this, &HWUart::GetUsr, &HWUart::SetUsr),
-    ucsrb_reg(core, GetTraceValuePrefix() + "UCSRB",
+    ucsrb_reg(this, "UCSRB",
               this, &HWUart::GetUcr, &HWUart::SetUcr),
-    ubrr_reg(core, GetTraceValuePrefix() + "UBRR",
+    ubrr_reg(this, "UBRR",
              this, &HWUart::GetUbrr, &HWUart::SetUbrr),
-    ubrrhi_reg(core, GetTraceValuePrefix() + "UBRRHI",
+    ubrrhi_reg(this, "UBRRHI",
                this, &HWUart::GetUbrrhi, &HWUart::SetUbrrhi)
 {
     core->AddToCycleList(this);
@@ -580,7 +580,7 @@ HWUsart::HWUsart(AvrDevice *core,
                  int n):
     HWUart(core, s, tx, rx, vrx, vudre, vtx, n),
     pinXck(xck),
-    ucsrc_reg(core, GetTraceValuePrefix() + "UCSRC",
+    ucsrc_reg(this, "UCSRC",
               this, &HWUsart::GetUcsrc, &HWUsart::SetUcsrc)
 {
     Reset();

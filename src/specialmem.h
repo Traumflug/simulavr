@@ -40,7 +40,7 @@ class RWWriteToFile: public RWMemoryMember {
  public:
     /*! The output filename can be '-' which will
       make this object use cout then. */
-    RWWriteToFile(AvrDevice *core,
+    RWWriteToFile(TraceValueRegister *registry,
                   const std::string &tracename,
                   const std::string &filename);
  protected:
@@ -59,7 +59,7 @@ class RWReadFromFile: public RWMemoryMember {
  public:
     /*! The input filename can be '-' which will
       make this object use cin then. */
-    RWReadFromFile(AvrDevice *core,
+    RWReadFromFile(TraceValueRegister *registry,
                    const std::string &tracename,
                    const std::string &filename);
  protected:
@@ -76,7 +76,7 @@ class RWReadFromFile: public RWMemoryMember {
   process. If a byte is being read, the exit code is 0x00. */
 class RWExit: public RWMemoryMember {
  public:
-    RWExit(AvrDevice *core, const std::string &tracename="");
+    RWExit(TraceValueRegister *registry, const std::string &tracename="");
  protected:
     unsigned char get() const;
     void set(unsigned char);
@@ -86,7 +86,7 @@ class RWExit: public RWMemoryMember {
 /*! Any access to this memory will instantly stop simulavr. */
 class RWAbort: public RWMemoryMember {
  public:
-    RWAbort(AvrDevice *core, const std::string &tracename="");
+    RWAbort(TraceValueRegister *registry, const std::string &tracename="");
  protected:
     unsigned char get() const;
     void set(unsigned char);

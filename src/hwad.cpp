@@ -47,8 +47,10 @@ HWAdmux::HWAdmux(
    Pin*  _ad6,
    Pin*  _ad7
 ) : 
-    Hardware(c), core(c),
-    admux_reg(core, "AD.ADMUX", this, &HWAdmux::GetAdmux, &HWAdmux::SetAdmux)
+    Hardware(c),
+    TraceValueRegister(c, "ADMUX"),
+    core(c),
+    admux_reg(this, "ADMUX", this, &HWAdmux::GetAdmux, &HWAdmux::SetAdmux)
 {
     ad[0]=_ad0;
     ad[1]=_ad1;
@@ -97,10 +99,16 @@ int HWAdmux::GetMuxOutput() {
 #define ADLAR (1<<5)
  
 HWAd::HWAd( AvrDevice *c, HWAdmux *a, HWIrqSystem *i, Pin& _aref, unsigned int iv) :
-    Hardware(c), core(c), admux(a), irqSystem(i), aref(_aref), irqVec(iv),
-    adch_reg (core, "AD.ADCH",  this, &HWAd::GetAdch, 0),
-    adcl_reg (core, "AD.ADCL",  this, &HWAd::GetAdcl, 0),
-    adcsr_reg(core, "AD.ADCSR", this, &HWAd::GetAdcsr, &HWAd::SetAdcsr)
+    Hardware(c),
+    TraceValueRegister(c, "AD"),
+    core(c),
+    admux(a),
+    irqSystem(i),
+    aref(_aref),
+    irqVec(iv),
+    adch_reg(this, "ADCH",  this, &HWAd::GetAdch, 0),
+    adcl_reg(this, "ADCL",  this, &HWAd::GetAdcl, 0),
+    adcsr_reg(this, "ADCSR", this, &HWAd::GetAdcsr, &HWAd::SetAdcsr)
 {
     core->AddToCycleList(this);
 //    irqSystem->RegisterIrqPartner(this, iv);

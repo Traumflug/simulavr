@@ -32,12 +32,14 @@ using namespace std;
 
 
 HWPort::HWPort(AvrDevice *core, const string &name):
-    Hardware(core), myName(name),
-    port_reg(core, "PORT"+name+".PORT",
+    Hardware(core),
+    TraceValueRegister(core, "PORT" + name),
+    myName(name),
+    port_reg(this, "PORT",
              this, &HWPort::GetPort, &HWPort::SetPort),
-    pin_reg(core, "PORT"+name+".PIN",
+    pin_reg(this, "PIN",
             this, &HWPort::GetPin, 0),
-    ddr_reg(core, "PORT"+name+".DDR",
+    ddr_reg(this, "DDR",
             this, &HWPort::GetDdr, &HWPort::SetDdr) {
     Reset();
     for (int tt=0; tt<8; tt++) { 

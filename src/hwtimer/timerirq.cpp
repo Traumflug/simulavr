@@ -37,26 +37,38 @@ void IRQLine::fireInterrupt(void) {
     if(irqreg) irqreg->fireInterrupt(irqvector);
 }
 
-static const std::string __hlp2str(const std::string p, const std::string s, int i) {
+static const std::string __hlp2name(const std::string s, int i) {
     // if i == -2, then precede name with "E", for example "ETIMSK"
     if(i == -2)
-        return p + ".E" + s;
+        return "E" + s;
     // if then i < 0, let the name unchanged
     if(i < 0)
-        return p + "." + s;
+        return s;
     // in all other cases append i as number
-    return p + "." + s + int2str(i);
+    return s + int2str(i);
+}
+
+static const std::string __hlp2scope(const std::string p, int i) {
+    // if i == -2, then append "X"
+    if(i == -2)
+        return p + "X";
+    // if then i < 0, let the name unchanged
+    if(i < 0)
+        return p;
+    // in all other cases append i as number
+    return p + int2str(i);
 }
 
 TimerIRQRegister::TimerIRQRegister(AvrDevice* c,
                                    HWIrqSystem* irqsys,
                                    int regidx):
     Hardware(c),
+    TraceValueRegister(c, __hlp2scope("TMRIRQ", regidx)),
     core(c),
     irqsystem(irqsys),
     lines(8),
-    timsk_reg(core, __hlp2str("TIMER", "TIMSK", regidx)),
-    tifr_reg(core, __hlp2str("TIMER", "TIFR", regidx))
+    timsk_reg(this, __hlp2name("TIMSK", regidx)),
+    tifr_reg(this, __hlp2name("TIFR", regidx))
 {
     timsk_reg.connectSRegClient(this);
     tifr_reg.connectSRegClient(this);

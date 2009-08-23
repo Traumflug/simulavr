@@ -33,7 +33,6 @@
 #include <vector>
 
 class TraceValue;
-class AvrDevice;
 
 //!Member of any memory area in an AVR device.
 /*! Allows to be read and written byte-wise.
@@ -44,11 +43,11 @@ class RWMemoryMember {
         /*! Constructs a new memory member cell
           with the given trace value name. Index is used
           for memory-like structures which have indices.
-          @param core pointer to AVRDevice instance
+          @param registry pointer to TraceValueRegister instance
           @param tracename name of this memory cell, used by TraceValue
           @param index (optional) index to identify a cell in a group of memory cells*/
         RWMemoryMember(
-            AvrDevice *core,
+            TraceValueRegister *registry,
             const std::string &tracename="",
             const int index=-1);
 #ifndef SWIG
@@ -76,7 +75,7 @@ class RWMemoryMember {
           will inform the tracing value of changes and
           accesses, if applicable. */
         mutable TraceValue *tv;
-        AvrDevice *core;
+        TraceValueRegister *registry;
 };
 
 //! One byte in any AVR RAM
@@ -84,7 +83,7 @@ class RWMemoryMember {
 class RAM : public RWMemoryMember {
     
     public:
-        RAM(AvrDevice *core,
+        RAM(TraceValueRegister *registry,
             const std::string &tracename,
             const size_t number);
         
@@ -101,7 +100,7 @@ class RAM : public RWMemoryMember {
 class InvalidMem : public RWMemoryMember {
     public:
         InvalidMem(
-            AvrDevice *core,
+            TraceValueRegister *registry,
             const std::string &tracename,
             const size_t number);
         
@@ -145,12 +144,12 @@ class IOReg: public RWMemoryMember {
           \param _p: pointer to object this will be part of
           \param _g: pointer to get method
           \param _s: pointer to set method */
-        IOReg(AvrDevice *core,
+        IOReg(TraceValueRegister *registry,
               const std::string &tracename,
               P *_p,
               getter_t _g=0,
               setter_t _s=0):
-            RWMemoryMember(core, tracename),
+            RWMemoryMember(registry, tracename),
             p(_p),
             g(_g),
             s(_s)
@@ -225,7 +224,7 @@ class IOSpecialReg: public RWMemoryMember {
     
     public:
         //! Creates a IOSpecialReg instance, see RWMemoryMember for more info
-        IOSpecialReg(AvrDevice *core, const std::string &tracename);
+        IOSpecialReg(TraceValueRegister *registry, const std::string &tracename);
         
         //! Registers a client to this IO register to inform this client on read or write access
         void connectSRegClient(IOSpecialRegClient *c) { clients.push_back(c); }

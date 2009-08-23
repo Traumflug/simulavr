@@ -217,7 +217,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     //the status register is generic to all devices
     status = new HWSreg();
     if(status == NULL) avr_error("Not enough memory for HWSreg in AvrDevice::AvrDevice");
-    statusRegister = new RWSreg(this, status);
+    statusRegister = new RWSreg(&coreTraceGroup, status);
     if(statusRegister == NULL) avr_error("Not enough memory for RWSreg in AvrDevice::AvrDevice");
     
     //the Registers also generic to all avr devices
@@ -238,7 +238,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
 
     //create all registers
     for (unsigned int ii=0; ii<RegisterSpaceSize; ii++ ) {
-        rw[currentOffset]=new RAM(this, "CORE.r", ii);
+        rw[currentOffset]=new RAM(&coreTraceGroup, "r", ii);
         currentOffset++;
     }      
 
@@ -248,26 +248,26 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
        a register will at least notify the user that there is an unimplemented
        feature. */
     for (unsigned int ii=0; ii<ioSpaceSize; ii++ ) {
-        rw[currentOffset]=new InvalidMem(this, "CORE.INVIO", ii);
+        rw[currentOffset]=new InvalidMem(&coreTraceGroup, "INVIO", ii);
         currentOffset++;
     }
 
     // create the internal ram handlers 
     for (unsigned int ii=0; ii<IRamSize; ii++ ) {
-        rw[currentOffset]=new RAM(this, "CORE.IRAM", ii);
+        rw[currentOffset]=new RAM(&coreTraceGroup, "IRAM", ii);
         currentOffset++;
     }
 
     //create the external ram handlers, TODO: make the configuration from mcucr available here
     for (unsigned int ii=0; ii<ERamSize; ii++ ) {
-        rw[currentOffset]=new RAM(this, "CORE.ERAM", ii);
+        rw[currentOffset]=new RAM(&coreTraceGroup, "ERAM", ii);
         currentOffset++;
     }
 
     //fill the rest of the adress space with error handlers
     unsigned int ii=0;
     for ( ; currentOffset<totalIoSpace;  ) {
-        rw[currentOffset]=new InvalidMem(this, "CORE.INVX", ii);
+        rw[currentOffset]=new InvalidMem(&coreTraceGroup, "INVX", ii);
         currentOffset++;
         ii++;
     }

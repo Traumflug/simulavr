@@ -36,10 +36,13 @@ using namespace std;
 #define    INT1         7
 #define    INT0         6
 HWExtIrq::HWExtIrq(AvrDevice *core, HWIrqSystem *i, PinAtPort p0, PinAtPort p1, unsigned int iv0, unsigned int iv1):
-    Hardware(core), irqSystem(i), pinI0(p0), pinI1(p1), vectorInt0(iv0), vectorInt1(iv1),
-    gimsk_reg(core, "EXTIRQ.GIMSK",
+    Hardware(core),
+    TraceValueRegister(core, "EXTIRQ"),
+    irqSystem(i),
+    pinI0(p0), pinI1(p1), vectorInt0(iv0), vectorInt1(iv1),
+    gimsk_reg(this, "GIMSK",
               this, &HWExtIrq::GetGimsk, &HWExtIrq::SetGimsk),
-    gifr_reg(core, "EXTIRQ.GIFR",
+    gifr_reg(this, "GIFR",
              this, &HWExtIrq::GetGifr, &HWExtIrq::SetGifr)
 {
     //irqSystem->RegisterIrqPartner(this, iv0);

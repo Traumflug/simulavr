@@ -170,13 +170,17 @@ void TraceValueRegister::_tvr_insertTraceValuesToSet(TraceSet &t) {
 
 void TraceValueRegister::RegisterTraceValue(TraceValue *t) {
     // check for duplicate names and the right prefix
-    string p = t->barename();
+    if(t->index() >= 0) return;
+    //cout << "register '" << t->name() << "'" << endl;
+    string p = t->name();
     int idx = _tvr_scopeprefix.length();
     if((p.length() <= idx) || (p.substr(0, idx) != _tvr_scopeprefix))
-        avr_error("add TraceValue denied: wrong prefix: '%s'", p.c_str());
+        avr_error("add TraceValue denied: wrong prefix: '%s', scope is '%s'",
+                  p.c_str(), _tvr_scopeprefix.c_str());
     string n = p.substr(idx);
     if(n.find('.') != -1)
-        avr_error("add TraceValue denied: wrong name: '%s'", n.c_str());
+        avr_error("add TraceValue denied: wrong name: '%s', scope is '%s'",
+                  n.c_str(), _tvr_scopeprefix.c_str());
     // register this TraceValue
     if(GetTraceValueByName(n) == NULL) {
         string *s = new string(n);

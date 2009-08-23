@@ -29,8 +29,9 @@
 #include "rwmem.h"
 #include "hardware.h"
 #include "memory.h"
+#include "traceval.h"
 
-class HWEeprom: public Hardware, public Memory {
+class HWEeprom: public Hardware, public Memory, public TraceValueRegister {
     protected:
         unsigned int eear;
         unsigned char eecr;

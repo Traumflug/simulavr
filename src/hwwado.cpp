@@ -66,10 +66,12 @@ unsigned int HWWado::CpuCycle() {
 	return 0;
 }
 
-HWWado::HWWado(AvrDevice *c)
-    : Hardware(c), core(c),
-      wdtcr_reg(core, "WADO.WDTCR",
-                this, &HWWado::GetWdtcr, &HWWado::SetWdtcr) {
+HWWado::HWWado(AvrDevice *c):
+    Hardware(c),
+    TraceValueRegister(c, "WADO"),
+    core(c),
+    wdtcr_reg(this, "WDTCR",
+              this, &HWWado::GetWdtcr, &HWWado::SetWdtcr) {
 	core->AddToCycleList(this);
 	Reset();
 }

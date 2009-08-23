@@ -31,8 +31,9 @@
 #include "irqsystem.h"
 #include "pinatport.h"
 #include "pinnotify.h"
+#include "traceval.h"
 
-class HWAcomp: public Hardware, public HasPinNotifyFunction {
+class HWAcomp: public Hardware, public HasPinNotifyFunction, public TraceValueRegister {
     protected:
         HWIrqSystem *irqSystem;
         PinAtPort pinAin0;

@@ -31,6 +31,7 @@
 #include "irqsystem.h"
 #include "avrdevice.h"
 #include "rwmem.h"
+#include "traceval.h"
 
 class TimerIRQRegister;
 
@@ -57,7 +58,7 @@ class IRQLine {
 //! Provices flag and mask register for timer interrupts and connects irq lines to irqsystem
 /*! \todo how to handle bits without assigned vector, same for tracevalues on that bits.
   clear a ifr is to be done with 1! */
-class TimerIRQRegister: public Hardware, public IOSpecialRegClient {
+class TimerIRQRegister: public Hardware, public IOSpecialRegClient, public TraceValueRegister {
     
     private:
         HWIrqSystem* irqsystem; //!< pointer to irq system

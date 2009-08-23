@@ -29,14 +29,16 @@ unsigned int HWMcucr::CpuCycle(){return 0;}
 
 HWRampz::HWRampz(AvrDevice *core):
     Hardware(core),
-    rampz_reg(core, "RAMPZ.RAMPZ",
+    TraceValueRegister(core, "RAMPZ"),
+    rampz_reg(this, "RAMPZ",
               this, &HWRampz::GetRampz, &HWRampz::SetRampz) {
     Reset();
 }
 
 HWMcucr::HWMcucr(AvrDevice *core ) :
     Hardware(core),
-    mcucr_reg(core, "MCUCR.MCUCR",
+    TraceValueRegister(core, "MCUCR"),
+    mcucr_reg(this, "MCUCR",
               this, &HWMcucr::GetMcucr, &HWMcucr::SetMcucr) {
     mcucr=0;
 }

@@ -27,8 +27,10 @@
 #define IOREGS
 
 #include "hwextirq.h"
+#include "traceval.h"
+#include "avrdevice.h"
 
-class HWRampz: public Hardware {
+class HWRampz: public Hardware, public TraceValueRegister {
     protected:
         unsigned char rampz;
 
@@ -42,7 +44,7 @@ class HWRampz: public Hardware {
 };
 //----------------------------------------------------------------
 
-class HWMcucr: public Hardware {
+class HWMcucr: public Hardware, public TraceValueRegister {
     protected:
         unsigned char mcucr;
 

@@ -30,6 +30,7 @@
 #include "hardware.h"
 #include "funktor.h"
 #include "avrdevice.h"
+#include "traceval.h"
 
 #include <map>
 
@@ -44,7 +45,7 @@ class ThreeLevelStack : public MemoryOffsets {
 };
 
 
-class HWStack: public Hardware {
+class HWStack: public Hardware, public TraceValueRegister {
   protected:
     AvrDevice *core;
     MemoryOffsets *mem;
