@@ -57,9 +57,11 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
     protected:
         SystemClockOffset clockFreq;
         std::map < std::string, Pin *> allPins; 
-        unsigned int ioSpaceSize;
-        TraceValueRegister coreTraceGroup;
-
+        const unsigned int ioSpaceSize;
+        const unsigned int totalIoSpace;
+        const unsigned int registerSpaceSize;
+        std::string actualFilename;
+        
         //old static vars for Step()
         int cpuCycles;
         unsigned int newIrqPc;
@@ -67,7 +69,6 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         int noDirectIrqJump;
         
     public:
-        std::string actualFilename;
         Breakpoints BP;
         Exitpoints EP;
         word PC;
@@ -76,6 +77,8 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         HWEeprom *eeprom;
         Data *data;
         HWIrqSystem *irqSystem;
+        bool abortOnInvalidAccess; //!< Flag, that simulation abort if an invalid access occured, default is false
+        TraceValueCoreRegister coreTraceGroup;
 
         //RWMemory *rwmem;
         MemoryOffsets *Sram;

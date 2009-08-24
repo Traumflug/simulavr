@@ -468,6 +468,24 @@ class TraceValueRegister {
         TraceSet* GetAllTraceValuesRecursive(void);
 };
 
+/*! TraceValueRegister for CORE group to hold also RAM groups */
+class TraceValueCoreRegister: public TraceValueRegister {
+  
+    private:
+        typedef std::map<std::string*, TraceSet*> setmap_t; //!< type of TraceSet map
+        
+        setmap_t _tvr_valset; //!< the registered TraceValue's
+
+    public:
+        //! Create a TraceValueCoreRegister instance
+        TraceValueCoreRegister(TraceValueRegister *parent);
+        
+        ~TraceValueCoreRegister();
+        
+        //! Registers a TraceValue for this register
+        void RegisterTraceSetValue(TraceValue *t, const std::string &name, const size_t size);
+};
+
 //! Register a directly traced bool value
 void trace_direct(TraceValueRegister *t, const std::string &name, bool *val);
 

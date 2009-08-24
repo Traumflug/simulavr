@@ -50,6 +50,9 @@ class RWMemoryMember {
             TraceValueRegister *registry,
             const std::string &tracename="",
             const int index=-1);
+        /*! Constructs a new memory member cell
+          with no trace value name. (for InvalidRam) */
+        RWMemoryMember(void);
 #ifndef SWIG
         //! Read access on memory
         operator unsigned char() const;
@@ -83,9 +86,10 @@ class RWMemoryMember {
 class RAM : public RWMemoryMember {
     
     public:
-        RAM(TraceValueRegister *registry,
+        RAM(TraceValueCoreRegister *registry,
             const std::string &tracename,
-            const size_t number);
+            const size_t number,
+            const size_t maxsize);
         
     protected:
         unsigned char get() const;
@@ -93,16 +97,18 @@ class RAM : public RWMemoryMember {
         
     private:
         unsigned char value;
+        TraceValueCoreRegister *corereg;
 };
 
 //! Memory on which access should be avoided! :-)
 /*! All accesses to this type of memory will produce an error. */
 class InvalidMem : public RWMemoryMember {
+    private:
+        AvrDevice* core;
+        int addr;
+        
     public:
-        InvalidMem(
-            TraceValueRegister *registry,
-            const std::string &tracename,
-            const size_t number);
+        InvalidMem(AvrDevice *core, int addr);
         
     protected:
         unsigned char get() const;

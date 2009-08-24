@@ -29,9 +29,10 @@
 using namespace std;
 
 ThreeLevelStack::ThreeLevelStack(AvrDevice *core) : MemoryOffsets(0, 0) {
-    rwHandler=(RWMemoryMember**)malloc(sizeof(RWMemoryMember*) * 6);
-    for (size_t i=0; i < 6; i++) {
-        rwHandler[i]=new RAM(core, "STACK.AREA", i);
+    const size_t size = 6;
+    rwHandler=(RWMemoryMember**)malloc(sizeof(RWMemoryMember*) * size);
+    for (size_t i=0; i < size; i++) {
+        rwHandler[i]=new RAM(&(core->coreTraceGroup), "STACKAREA", i, size);
     }
 }
 

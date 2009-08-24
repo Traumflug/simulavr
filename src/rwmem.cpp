@@ -53,6 +53,10 @@ RWMemoryMember::RWMemoryMember(TraceValueRegister *_reg,
     }
 }
 
+RWMemoryMember::RWMemoryMember(void):
+    registry(NULL),
+    tv(NULL) {}
+
 RWMemoryMember::operator unsigned char() const {
     if (tv)
         tv->read();
@@ -82,30 +86,45 @@ RWMemoryMember::~RWMemoryMember() {
         delete tv;
 }
 
-RAM::RAM(TraceValueRegister *registry,
-         const std::string &name,
-         const size_t number): RWMemoryMember(registry, name, number) {}
+RWMemoryMember& MemoryOffsets::operator[](unsigned int externOffset) const {
+    return *(rwHandler[myOffset+externOffset]);
+}
+
+RAM::RAM(TraceValueCoreRegister *_reg, const std::string &name, const size_t number, const size_t maxsize) {
+    corereg = _reg;
+    if(name.size()) {
+        tv = new TraceValue(8, corereg->GetTraceValuePrefix() + name, number);
+        if(!corereg) {
+            avr_error("registry not initialized for RWMemoryMember '%s'.", name.c_str());
+        }
+        corereg->RegisterTraceSetValue(tv, name, maxsize);
+    } else {
+        tv = NULL;
+    }
+}
 
 unsigned char RAM::get() const { return value; }
 
 void RAM::set(unsigned char v) { value=v; }
 
-RWMemoryMember& MemoryOffsets::operator[](unsigned int externOffset) const {
-    return *(rwHandler[myOffset+externOffset]);
-}
-
-InvalidMem::InvalidMem(
-    TraceValueRegister *registry,
-    const std::string &name,
-    const size_t number): RWMemoryMember(registry, name, number) {}
+InvalidMem::InvalidMem(AvrDevice* _c, int _a):
+    RWMemoryMember(),
+    core(_c),
+    addr(_a) {}
 
 unsigned char InvalidMem::get() const {
-    avr_warning("Invalid read access to %s",tv->name().c_str());
+    string s = "Invalid read access to iospace address " + int2str(addr);
+    if(core->abortOnInvalidAccess)
+        avr_error(s.c_str());
+    avr_warning(s.c_str());
+    return 0;
 }
 
 void InvalidMem::set(unsigned char c) {
-    avr_warning("Invalid write access to %s, trying to set value [0x%x]",
-                tv->name().c_str(), int(c));
+    string s = "Invalid write access to iospace address " + int2str(addr) + ", trying to set value=" + int2str(c);
+    if(core->abortOnInvalidAccess)
+        avr_error(s.c_str());
+    avr_warning(s.c_str());
 }
 
 IOSpecialReg::IOSpecialReg(TraceValueRegister *registry, const std::string &name):

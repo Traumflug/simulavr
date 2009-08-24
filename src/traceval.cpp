@@ -170,8 +170,6 @@ void TraceValueRegister::_tvr_insertTraceValuesToSet(TraceSet &t) {
 
 void TraceValueRegister::RegisterTraceValue(TraceValue *t) {
     // check for duplicate names and the right prefix
-    if(t->index() >= 0) return;
-    //cout << "register '" << t->name() << "'" << endl;
     string p = t->name();
     int idx = _tvr_scopeprefix.length();
     if((p.length() <= idx) || (p.substr(0, idx) != _tvr_scopeprefix))
@@ -243,6 +241,27 @@ TraceSet* TraceValueRegister::GetAllTraceValuesRecursive(void) {
     result->reserve(_tvr_getValuesCount());
     _tvr_insertTraceValuesToSet(*result);
     return result;
+}
+
+TraceValueCoreRegister::TraceValueCoreRegister(TraceValueRegister *parent):
+    TraceValueRegister(parent, "CORE") {}
+
+void TraceValueCoreRegister::RegisterTraceSetValue(TraceValue *t, const std::string &name, const size_t size) {
+    int setidx = t->index();
+    // seek TraceSet
+    TraceSet *set = NULL;
+    for (setmap_t::iterator i = _tvr_valset.begin(); i != _tvr_valset.end(); i++) {
+        if(name == *(i->first)) {
+            set = i->second;
+            break;
+        }
+    }
+    // create TraceSet, if not found
+    if(set == NULL) {
+    }
+}
+
+TraceValueCoreRegister::~TraceValueCoreRegister() {
 }
 
 WarnUnknown::WarnUnknown(AvrDevice *_core) : core(_core) {}

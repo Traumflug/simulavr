@@ -196,7 +196,10 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
                      unsigned int ERamSize,
                      unsigned int flashSize):
     TraceValueRegister(),
-    coreTraceGroup(this, "CORE"),
+    coreTraceGroup(this),
+    abortOnInvalidAccess(false),
+    totalIoSpace(0x10000),
+    registerSpaceSize(32),
     ioSpaceSize(_ioSpaceSize)
 {
     dump_manager = DumpManager::Instance();
@@ -205,8 +208,6 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     trace_direct(&coreTraceGroup, "PC", &PC);
 
     unsigned int currentOffset=0;
-    const unsigned int RegisterSpaceSize=32;
-    const unsigned int totalIoSpace= 0x10000;
 
     data= new Data; //only the symbol container
 
@@ -237,8 +238,8 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     if (Flash==0) { cerr << "Not enough memory for Flash in AvrDevice::AvrDevice" << endl; exit(0); }
 
     //create all registers
-    for (unsigned int ii=0; ii<RegisterSpaceSize; ii++ ) {
-        rw[currentOffset]=new RAM(&coreTraceGroup, "r", ii);
+    for (unsigned int ii=0; ii<registerSpaceSize; ii++ ) {
+        rw[currentOffset]=new RAM(&coreTraceGroup, "r", ii, registerSpaceSize);
         currentOffset++;
     }      
 
@@ -247,30 +248,26 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
        should be overwritten by the particular device type. But accessing such
        a register will at least notify the user that there is an unimplemented
        feature. */
-    for (unsigned int ii=0; ii<ioSpaceSize; ii++ ) {
-        rw[currentOffset]=new InvalidMem(&coreTraceGroup, "INVIO", ii);
+    for(unsigned int ii = 0; ii < ioSpaceSize; ii++) {
+        rw[currentOffset] = new InvalidMem(this, currentOffset);
         currentOffset++;
     }
 
     // create the internal ram handlers 
     for (unsigned int ii=0; ii<IRamSize; ii++ ) {
-        rw[currentOffset]=new RAM(&coreTraceGroup, "IRAM", ii);
+        rw[currentOffset]=new RAM(&coreTraceGroup, "IRAM", ii, IRamSize);
         currentOffset++;
     }
 
     //create the external ram handlers, TODO: make the configuration from mcucr available here
     for (unsigned int ii=0; ii<ERamSize; ii++ ) {
-        rw[currentOffset]=new RAM(&coreTraceGroup, "ERAM", ii);
+        rw[currentOffset]=new RAM(&coreTraceGroup, "ERAM", ii, ERamSize);
         currentOffset++;
     }
 
     //fill the rest of the adress space with error handlers
-    unsigned int ii=0;
-    for ( ; currentOffset<totalIoSpace;  ) {
-        rw[currentOffset]=new InvalidMem(&coreTraceGroup, "INVX", ii);
-        currentOffset++;
-        ii++;
-    }
+    for(; currentOffset<totalIoSpace; currentOffset++)
+        rw[currentOffset] = new InvalidMem(this, currentOffset);
 
 }
 
