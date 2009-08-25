@@ -247,10 +247,9 @@ TraceValueCoreRegister::TraceValueCoreRegister(TraceValueRegister *parent):
     TraceValueRegister(parent, "CORE") {}
 
 void TraceValueCoreRegister::RegisterTraceSetValue(TraceValue *t, const std::string &name, const size_t size) {
-    int setidx = t->index();
     // seek TraceSet
     TraceSet *set = NULL;
-    for (setmap_t::iterator i = _tvr_valset.begin(); i != _tvr_valset.end(); i++) {
+    for(setmap_t::iterator i = _tvr_valset.begin(); i != _tvr_valset.end(); i++) {
         if(name == *(i->first)) {
             set = i->second;
             break;
@@ -258,10 +257,36 @@ void TraceValueCoreRegister::RegisterTraceSetValue(TraceValue *t, const std::str
     }
     // create TraceSet, if not found
     if(set == NULL) {
+        set = new TraceSet(size, NULL);
+        string *s = new string(name);
+        pair<string*, TraceSet*> v(s, set);
+        _tvr_valset.insert(v);
     }
+    // set TraceValue to set[idx]
+    (*set)[t->index()] = t;
 }
 
 TraceValueCoreRegister::~TraceValueCoreRegister() {
+    for(setmap_t::iterator i = _tvr_valset.begin(); i != _tvr_valset.end(); i++)
+        delete i->second;
+}
+
+size_t TraceValueCoreRegister::_tvr_getValuesCount(void) {
+    size_t cnt = TraceValueRegister::_tvr_getValuesCount();
+    // now count too values in _tvr_valset
+    for(setmap_t::iterator i = _tvr_valset.begin(); i != _tvr_valset.end(); i++)
+        cnt += i->second->size();
+    return cnt;
+}
+
+void TraceValueCoreRegister::_tvr_insertTraceValuesToSet(TraceSet &t) {
+    TraceValueRegister::_tvr_insertTraceValuesToSet(t);
+    // now insert also all values from _tvr_valset
+    for(setmap_t::iterator i = _tvr_valset.begin(); i != _tvr_valset.end(); i++) {
+        TraceSet* s = i->second;
+        for(TraceSet::iterator j = s->begin(); j != s->end(); j++)
+            t.push_back(*j);
+    }
 }
 
 WarnUnknown::WarnUnknown(AvrDevice *_core) : core(_core) {}

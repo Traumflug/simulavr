@@ -423,11 +423,12 @@ class TraceValueRegister {
         //! Registers a TraceValueRegister for this register, build a hierarchy
         void _tvr_registerTraceValues(TraceValueRegister *r);
         
+    protected:
         //! Get the count of all TraceValues, that are registered here and descending
-        size_t _tvr_getValuesCount(void);
+        virtual size_t _tvr_getValuesCount(void);
         
         //! Insert all TraceValues into TraceSet, that registered here and descending
-        void _tvr_insertTraceValuesToSet(TraceSet &t);
+        virtual void _tvr_insertTraceValuesToSet(TraceSet &t);
         
     public:
         //! Create a TraceValueRegister, with a scope prefix built on parent scope + name
@@ -476,6 +477,15 @@ class TraceValueCoreRegister: public TraceValueRegister {
         
         setmap_t _tvr_valset; //!< the registered TraceValue's
 
+    protected:
+        //! Get the count of all TraceValues, that are registered here and descending
+        /*! This includes here also values in _tvr_valset! */
+        virtual size_t _tvr_getValuesCount(void);
+        
+        //! Insert all TraceValues into TraceSet, that registered here and descending
+        /*! This includes here also values in _tvr_valset! */
+        virtual void _tvr_insertTraceValuesToSet(TraceSet &t);
+        
     public:
         //! Create a TraceValueCoreRegister instance
         TraceValueCoreRegister(TraceValueRegister *parent);
