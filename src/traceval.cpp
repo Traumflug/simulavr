@@ -495,10 +495,6 @@ TraceValue* DumpManager::seekValueByName(const std::string &name) {
     return NULL;
 }
 
-void DumpManager::regTrace(TraceValue *tv) {
-    // do not use, will be deleted
-}
-
 void DumpManager::addDumper(Dumper *dump, const TraceSet &vals) {
     // enable values and insert into active list, if not there
     for(TraceSet::const_iterator i = vals.begin(); i != vals.end(); i++) {
@@ -643,16 +639,18 @@ TraceSet DumpManager::load(istream &is) {
 }
 
 void trace_direct(TraceValueRegister *t, const std::string &name, bool *val) {
-    DumpManager::Instance()->regTrace(new TraceValue(1, t->GetTraceValuePrefix() + name, -1, val));
+    t->RegisterTraceValue(new TraceValue(1, t->GetTraceValuePrefix() + name, -1, val));
 }
 
 void trace_direct(TraceValueRegister *t, const std::string &name, uint8_t *val) {
-    DumpManager::Instance()->regTrace(new TraceValue(8, t->GetTraceValuePrefix() + name, -1, val));
+    t->RegisterTraceValue(new TraceValue(8, t->GetTraceValuePrefix() + name, -1, val));
 }
+
 void trace_direct(TraceValueRegister *t, const std::string &name, uint16_t *val) {
-    DumpManager::Instance()->regTrace(new TraceValue(16, t->GetTraceValuePrefix() + name, -1, val));
+    t->RegisterTraceValue(new TraceValue(16, t->GetTraceValuePrefix() + name, -1, val));
 }
+
 void trace_direct(TraceValueRegister *t, const std::string &name, uint32_t *val) {
-    DumpManager::Instance()->regTrace(new TraceValue(32, t->GetTraceValuePrefix() + name, -1, val));
+    t->RegisterTraceValue(new TraceValue(32, t->GetTraceValuePrefix() + name, -1, val));
 }
 

@@ -76,8 +76,8 @@ AvrDevice_atmega128::AvrDevice_atmega128():
             PinAtPort(porte, 6),PinAtPort(porte, 7),
             1,2,3,4,5,6,7,8);
   
-    sfior_reg = new IOSpecialReg(this, "SFIOR");
-    assr_reg = new IOSpecialReg(this, "ASSR");
+    sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
+    assr_reg = new IOSpecialReg(&coreTraceGroup, "ASSR");
     prescaler0=new HWPrescalerAsync(this, "0", PinAtPort(portg, 4), assr_reg, 3, sfior_reg, 1, 7);
     prescaler123=new HWPrescaler(this, "123", sfior_reg, 0, 7);
     

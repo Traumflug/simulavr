@@ -33,7 +33,7 @@ HWPrescaler::HWPrescaler(AvrDevice *core, const std::string &tracename):
     _resetSyncBit(-1)
 {
     core->AddToCycleList(this);
-    trace_direct(core, "PRESCALER" + tracename, &preScaleValue);
+    trace_direct(&(core->coreTraceGroup), "PRESCALER" + tracename, &preScaleValue);
     resetRegister = NULL;
 }
 
@@ -47,7 +47,7 @@ HWPrescaler::HWPrescaler(AvrDevice *core,
     _resetSyncBit(-1)
 {
     core->AddToCycleList(this);
-    trace_direct(core, "PRESCALER" + tracename, &preScaleValue);
+    trace_direct(&(core->coreTraceGroup), "PRESCALER" + tracename, &preScaleValue);
     resetRegister = ioreg;
     ioreg->connectSRegClient(this);
 }
@@ -63,7 +63,7 @@ HWPrescaler::HWPrescaler(AvrDevice *core,
     _resetSyncBit(resetSyncBit)
 {
     core->AddToCycleList(this);
-    trace_direct(core, "PRESCALER" + tracename, &preScaleValue);
+    trace_direct(&(core->coreTraceGroup), "PRESCALER" + tracename, &preScaleValue);
     resetRegister = ioreg;
     ioreg->connectSRegClient(this);
 }

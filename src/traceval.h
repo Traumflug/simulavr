@@ -335,14 +335,6 @@ class DumpManager {
          created in single device application! Default is multi device application. */
          void SetSingleDeviceApp(void) { singleDeviceApp = true; }
          
-        /*! Registers a value of being traceable. Does NOT register
-          the value as an ACTIVE trace value!
-    
-          \todo Maybe implement a more efficient memory management than a
-          large mapping of custom strings to RWMemoryMember s...
-          */
-        void regTrace(TraceValue *tv);
-              
         /*! Add a dumper to the list. The vector vals
           contains all the values this dumper should trace. */
         void addDumper(Dumper *dump, const TraceSet &vals);
