@@ -19,7 +19,8 @@ AC_SYS_CHECK_MINGW
 ####
 # support of libtool, g++, swig (for tcl module and python module used)
 ####
-AC_PROG_LIBTOOL
+LT_INIT
+LT_PREREQ([2.2])
 AC_PROG_CXX
 AC_PROG_SWIG(1.3.17)
 SWIG_ENABLE_CXX

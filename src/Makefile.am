@@ -25,7 +25,11 @@ lib_LTLIBRARIES += libsimulavr.la
 endif
 
 if PYTHON_USE
+if SYS_MINGW
+PYTHON_MODUL_LIB=_pysimulavr.pyd
+else
 PYTHON_MODUL_LIB=_pysimulavr.so
+endif
 PYTHON_MODUL_INTERFACE=$(srcdir)/python/pysimulavr.i
 lib_LTLIBRARIES += lib_pysimulavr.la
 lib_pysimulavr_la_SOURCES=pysimulavr_wrap.cpp
@@ -38,7 +42,13 @@ pysimulavr_wrap.cpp: $(PYTHON_MODUL_INTERFACE)
 	$(SWIG) $(SWIG_PYTHON_OPT) -o $@ $?
 
 $(PYTHON_MODUL_LIB): lib_pysimulavr.la
+if SYS_MINGW
+	$(CXX) -shared -o $(PYTHON_MODUL_LIB) \
+		$(addprefix .libs/,$(lib_pysimulavr_la_OBJECTS:.lo=.o)) .libs/libsim.a \
+		-lstdc++ -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty $(PYTHON_LDFLAGS)
+else
 	cp .libs/lib_pysimulavr.so $(PYTHON_MODUL_LIB)
+endif
 endif
 
 endif
