@@ -202,6 +202,8 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x79]= & ad->adch_reg;
     rw[0x78]= & ad->adcl_reg;
 
+    rw[0x70]= & timerIrq2->timsk_reg;
+    rw[0x6F]= & timerIrq1->timsk_reg;
     rw[0x6E]= & timerIrq0->timsk_reg;
 
     rw[0x69]= & extirq->eicra_reg;
@@ -229,6 +231,8 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
 
     rw[0x3C]= & extirq->eifr_reg;
 
+    rw[0x37]= & timerIrq2->tifr_reg;
+    rw[0x36]= & timerIrq1->tifr_reg;
     rw[0x35]= & timerIrq0->tifr_reg;
 
     rw[0x2B]= & portd.port_reg;
