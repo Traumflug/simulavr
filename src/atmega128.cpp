@@ -103,7 +103,7 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     timer3irq = new TimerIRQRegister(this, irqSystem, -2);
     timer3irq->registerLine(0, new IRQLine("OCF1C", 24));
     timer3irq->registerLine(1, new IRQLine("OCF3C", 28));
-    timer3irq->registerLine(2, new IRQLine("TOV3",  19));
+    timer3irq->registerLine(2, new IRQLine("TOV3",  29));
     timer3irq->registerLine(3, new IRQLine("OCF3B", 27));
     timer3irq->registerLine(4, new IRQLine("OCF3A", 26));
     timer3irq->registerLine(5, new IRQLine("ICF3",  25));
