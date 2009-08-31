@@ -100,7 +100,7 @@ pkginclude_HEADERS = \
   spisrc.h spisink.h specialmem.h systemclock.h systemclocktypes.h \
   trace.h traceval.h types.h ui/ui.h ui/xcode_to_keynumber.dat
 
-simulavr_SOURCES = cmd/main.cpp
+simulavr_SOURCES = cmd/main.cpp cmd/dumpargs.cpp
 simulavr_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) \
   -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty \
   $(LIBWSOCK_FLAGS)

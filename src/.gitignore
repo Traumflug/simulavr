@@ -18,6 +18,7 @@ stamp-h1
 simulavr_wrap.cxx
 pysimulavr_wrap.cpp
 _pysimulavr.so
+_pysimulavr.pyd
 pysimulavr.py
 pysimulavr.pyc
 
