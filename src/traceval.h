@@ -450,7 +450,7 @@ class TraceValueRegister {
         //! Get a here registered TraceValueRegister by it's name
         TraceValueRegister* GetScopeGroupByName(const std::string &name);
         //! Get a here registered TraceValue by it's name
-        TraceValue* GetTraceValueByName(const std::string &name);
+        virtual TraceValue* GetTraceValueByName(const std::string &name);
         //! Seek for a TraceValueRegister by it's name
         TraceValueRegister* FindScopeGroupByName(const std::string &name);
         //! Seek for a TraceValue by it's name
@@ -469,6 +469,9 @@ class TraceValueCoreRegister: public TraceValueRegister {
         
         setmap_t _tvr_valset; //!< the registered TraceValue's
 
+        //! helper function to split up into name an number tail
+        int _tvr_numberindex(const std::string &str);
+        
     protected:
         //! Get the count of all TraceValues, that are registered here and descending
         /*! This includes here also values in _tvr_valset! */
@@ -486,6 +489,8 @@ class TraceValueCoreRegister: public TraceValueRegister {
         
         //! Registers a TraceValue for this register
         void RegisterTraceSetValue(TraceValue *t, const std::string &name, const size_t size);
+        //! Get a here registered TraceValue by it's name
+        virtual TraceValue* GetTraceValueByName(const std::string &name);
 };
 
 //! Register a directly traced bool value

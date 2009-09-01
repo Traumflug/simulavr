@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+#include <stdlib.h>
 #include "helper.h"
 #include "traceval.h"
 #include "avrerror.h"
@@ -266,6 +267,27 @@ void TraceValueCoreRegister::RegisterTraceSetValue(TraceValue *t, const std::str
     (*set)[t->index()] = t;
 }
 
+TraceValue* TraceValueCoreRegister::GetTraceValueByName(const std::string &name) {
+    TraceValue *res = TraceValueRegister::GetTraceValueByName(name);
+    if(res == NULL) {
+        int idx = _tvr_numberindex(name);
+        if(idx != -1) {
+            // name + number found, check name and index value
+            string n = name.substr(0, idx);
+            int v = atoi(name.substr(idx).c_str());
+            for(setmap_t::iterator i = _tvr_valset.begin(); i != _tvr_valset.end(); i++) {
+                if(n == *(i->first)) {
+                    TraceSet *set = i->second;
+                    if(v < set->size())
+                        res = (*set)[v];
+                    break;
+                }
+            }
+        }
+    }
+    return res;
+}
+
 TraceValueCoreRegister::~TraceValueCoreRegister() {
     for(setmap_t::iterator i = _tvr_valset.begin(); i != _tvr_valset.end(); i++)
         delete i->second;
@@ -287,6 +309,23 @@ void TraceValueCoreRegister::_tvr_insertTraceValuesToSet(TraceSet &t) {
         for(TraceSet::iterator j = s->begin(); j != s->end(); j++)
             t.push_back(*j);
     }
+}
+
+int TraceValueCoreRegister::_tvr_numberindex(const std::string &str) {
+    int l = str.size();
+    int i = l - 1;
+    // start from end of string to the beginning ...
+    for(; i >= 0; i--) {
+        char c = str[i];
+        // check, if number sign
+        if(c < '0' || c > '9') {
+            i++;
+            break;
+        }
+    }
+    if(i == l)
+        i = -1;
+    return i;
 }
 
 WarnUnknown::WarnUnknown(AvrDevice *_core) : core(_core) {}
