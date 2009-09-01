@@ -168,6 +168,14 @@ class IOReg: public RWMemoryMember {
         /*! Reflects a value change from hardware (for example timer count occured)
           @param val the new register value */
         void hardwareChange(unsigned char val) { if(tv) tv->change(val); }
+        /*! Releases the TraceValue to hide this IOReg from registry */
+        void releaseTraceValue(void) {
+            if(tv) {
+                registry->UnregisterTraceValue(tv);
+                delete tv;
+                tv = NULL;
+            }
+        }
         
     protected:
         unsigned char get() const {

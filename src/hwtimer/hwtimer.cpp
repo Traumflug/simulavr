@@ -586,12 +586,14 @@ HWTimer8::HWTimer8(AvrDevice *core,
         compareEnable[0] = true;
         timerCompare[0] = tcompA;
         compare_output[0] = outA;
-    }
+    } else
+      ocra_reg.releaseTraceValue();
     if(tcompB) {
         compareEnable[1] = true;
         timerCompare[1] = tcompB;
         compare_output[1] = outB;
-    }
+    } else
+      ocrb_reg.releaseTraceValue();
     
     // set WGM table
     wgmfunc[WGM_NORMAL] = &HWTimer8::WGMfunc_normal;
@@ -692,16 +694,25 @@ HWTimer16::HWTimer16(AvrDevice *core,
         compareEnable[0] = true;
         timerCompare[0] = tcompA;
         compare_output[0] = outA;
+    } else {
+      ocra_l_reg.releaseTraceValue();
+      ocra_h_reg.releaseTraceValue();
     }
     if(tcompB) {
         compareEnable[1] = true;
         timerCompare[1] = tcompB;
         compare_output[1] = outB;
+    } else {
+      ocrb_l_reg.releaseTraceValue();
+      ocrb_h_reg.releaseTraceValue();
     }
     if(tcompC) {
         compareEnable[2] = true;
         timerCompare[2] = tcompC;
         compare_output[2] = outC;
+    } else {
+      ocrc_l_reg.releaseTraceValue();
+      ocrc_h_reg.releaseTraceValue();
     }
     
     // set WGM table

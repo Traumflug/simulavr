@@ -189,6 +189,17 @@ void TraceValueRegister::RegisterTraceValue(TraceValue *t) {
         avr_error("add TraceValue denied: name found: '%s'", n.c_str());
 }
 
+void TraceValueRegister::UnregisterTraceValue(TraceValue *t) {
+    int idx = _tvr_scopeprefix.length();
+    string n = t->name().substr(idx);
+    for (valmap_t::iterator i = _tvr_values.begin(); i != _tvr_values.end(); i++) {
+        if(n == *(i->first)) {
+            _tvr_values.erase(i);
+            break;
+        }
+    }
+}
+
 TraceValueRegister* TraceValueRegister::GetScopeGroupByName(const std::string &name) {
     for (regmap_t::iterator i = _tvr_registers.begin(); i != _tvr_registers.end(); i++) {
         if(name == *(i->first))

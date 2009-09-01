@@ -447,6 +447,8 @@ class TraceValueRegister {
         const std::string GetScopeName(void) { return _tvr_scopename; }
         //! Registers a TraceValue for this register
         void RegisterTraceValue(TraceValue *t);
+        //! Unregisters a TraceValue, remove it from register
+        void UnregisterTraceValue(TraceValue *t);
         //! Get a here registered TraceValueRegister by it's name
         TraceValueRegister* GetScopeGroupByName(const std::string &name);
         //! Get a here registered TraceValue by it's name
