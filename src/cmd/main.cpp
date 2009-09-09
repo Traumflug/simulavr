@@ -121,6 +121,8 @@ const char Usage[] =
     "                      <tracer>[:further-options ...]\n"
     "-o <trace-value-file> Specifies a file into which all available trace value names\n"
     "                      will be written.\n"
+    "-v --version          print out version and exit immediately\n"
+    "-h --help             print this help\n"
     "\n";
 
 int main(int argc, char *argv[]) {
@@ -173,6 +175,7 @@ int main(int argc, char *argv[]) {
             {"terminate", 1, 0, 'T'},
             {"breakpoint", 1, 0, 'B'},
             {"irqstatistic", 0, 0, 's'},
+            {"help", 0, 0, 'h'},
             {0, 0, 0, 0}
         };
         

@@ -23,7 +23,7 @@ Copyright @copyright{} 2005 Klaus Rudolph
 
 Copyright @copyright{} 2008 Knut Schwichtenberg
 
-Copyright @copyright{} 2009 Joel Sherrill
+Copyright @copyright{} 2009 Joel Sherrill, Michael Hennebry, Onno Kortmann, Thomas Klepp
 @sp 2
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -100,45 +100,47 @@ to simulavr.
 
 What features are new:
 @itemize @bullet
-@item run multiple AVR devices in one simulation
-@item connect multiple AVR core pins to other devices like LCD, LED and
-others (environment)
-@item connect multiple AVR cores to multiple avr-gdb instances (each on its
-own socket/port number)
-@item write simulation scripts in Tcl/Tk, other languages could be added
-by simply adding swig scripts!
-@item tracing the execution of the program
-@item these traces support all debugging information directly from
-the ELF-file
-@item the traces run step by step for each device so you see all actions
-in the multiple devices in time-correct order
-@item every interrupt call is visible
-@item interrupt statistics with latency, longest and shortest execution
-time and some more
-@item multiple cores can run where each has a different clock frequency
-@item you have a simple text based UI interface to add LCD, switches,
+@item Run multiple AVR devices in one simulation. (only with interpreter
+interfaces or special application linked against simulavr library) Multiple
+cores can run where each has a different clock frequency.
+@item Connect multiple AVR core pins to other devices like LCD, LED and
+others. (environment)
+@item Connect multiple AVR cores to multiple avr-gdb instances. (each on its
+own socket/port number, but see first point for running multiple avr cores)
+@item Write simulation scripts in Tcl/Tk or Python, other languages could be
+added by simply adding swig scripts!
+@item Tracing the execution of the program, these traces support all debugging
+information directly from the ELF-file.
+@item The traces run step by step for each device so you see all actions
+in the multiple devices in time-correct order.
+@item Every interrupt call is visible.
+@item Interrupt statistics with latency, longest and shortest execution
+time and some more.
+@item There is a simple text based UI interface to add LCD, switches,
 LEDs or other components and can modify it during simulation, so there
-is no longer a need to enter a pin value during execution.
-@item execution timing should be nearly accurate, different access
+is no longer a need to enter a pin value during execution. (Tcl/Tk based)
+@item Execution timing should be nearly accurate, different access
 times for internal RAM / external RAM / EEPROM and other hardware
-components are simulated
-@item a pseudo core hardware component is introduced to do "printf"
+components are simulated.
+@item A pseudo core hardware component is introduced to do "printf"
 debugging. This "device" is connected to a normal named UNIX socket so
-you do not have to waste a UART or other hardware in your test environment
-@item ELF-file loading is supported, no objcopy needed anymore
-@item execution speed is tuned a lot, most hardware simulations are now
-only done if needed
-@item external IO pins which are not ports are also available
-@item simulavr.so provides a "loadable" Tcl/Tk library to write
-simulation sessions without compiling simulator sources.
+you do not have to waste a UART or other hardware in your test environment.
+@item ELF-file loading is supported, no objcopy needed anymore.
+@item Execution speed is tuned a lot, most hardware simulations are now
+only done if needed.
+@item External IO pins which are not ports are also available.
+@item External I/O and some internal states of hardware units (link prescaler
+counter and interrupt states) can be dumped ot into a VCD trace to analyse I/O
+behaviour and timing. Or you can use it for tests.
 @end itemize
 
 The core of SimulAVR is functionally a library. This library is linked together
 with a command-line interface to create a command-line program. It is also
 linked together with a interpreter interface to create a library that can
-be use by a graphical interpreter language (currently python / TCL). In
+be use by a graphical interpreter language (currently Python / TCL). In
 the examples directory there are examples of simulations with a graphical
-environment. The graphic components do not show any hardware / registers
+environment (with the Tcl/Tk interface) or writing unit tests by using Python
+interface. The graphic components do not show any hardware / registers
 of the simulated CPU. It shows only external components attached to the
 IO-pins of the simulated CPU.
 
@@ -150,11 +152,10 @@ IO-pins of the simulated CPU.
 The following options are only valid for the command-line version of simulavr:
 @table @samp
 @item -d --device <device name>
-simulate <device name>
-The following devices are supported:
-at90s8515,
-at90s4433,
-atmega128
+tell simulavr, what type of device it has to simulate. The following devices
+are supported: at90s8515, at90s4433, atmega128, atmega48, atmega88, atmega168,
+atmega328. To find out, which devices are supported with your current
+installation, use the help option!
 @item -f --file <name>
 load ELF-file <name> for simulation in simulated target.
 @item -F --cpufrequency <value>
@@ -191,14 +192,29 @@ show the software version of simulavr
 output some hints to console
 @item -W --writetopipe <offset>,<file>
 add a special pipe register to device at IO-Offset and opens <file> for writing
+@item -s --irqstatistic
+Writes IRQ statistic to stdout at the end of simulation.
+@item -o <filename|->
+Writes all available VCD trace sources for a device to <filename> or to stdout,
+if <-> is given.
+@item -c <trace-params>
+Enable a trace dump, for valid <trace-params> see below.
+@item -h --help
+show commandline help for simulavr and what devices are supported
+@item -a --writetoabort <offset>
+add a special register to device at IO-Offset which aborts simulation
+@item -e --writetoexit <offset>
+add a special register to device at IO-Offset which exits simulation (if you
+write to this IO-Offset, then the written value will be given back as exit value
+of the simulator!)
 @end table
 
-The commands -R / -W are not AVR-hardware related. Here you can link
+The commands -R / -W / -a / -e are not AVR-hardware related. Here you can link
 an address within the address space of the AVR to an input or output
 pipe. This is a simple way to create a "printf"- debugger, e.g. after
-leaving the debugging phase and running the AVR-Software in the simulator.
+leaving the debugging phase and running the AVR-Software in the simulator or to
+abort/exit a simulation on a specified situation inside of your program.
 For more details see the example in the directory simple_ex1.
-
 
 @node Using with avr-gdb, Tracing, Invoking, Top
 @chapter Using with avr-gdb
@@ -595,15 +611,16 @@ steps to build and install simulavr:
 @example
 tar zxvf simulavr-@value{VERSION}.tar.gz
 cd simulavr-@value{VERSION}
-configure
+./configure @{configure options@}
 make
 make install
 @end example
 
-
 Simulavr does rely on a few other GNU tools. In particular, it relies
 on libbfd from binutils, and by libbfd's dependency, it also relies on
-libiberty. I have found it useful to install my hand-configured-installed
+libiberty.
+
+I have found it useful to install my hand-configured-installed
 files in one area. That way I can put the AVR-tools in my path only when
 I'm working on AVR related work.  For reference, here is how I could
 install AVR tools to /home/user/install:
@@ -664,7 +681,74 @@ do more dependency tracking.  In particular, they will check the
 dependencies on all automake and autoconf generated files.  When
 not building in maintainer mode, the file @c{src/keytrans.h} will
 not be built or dependencies checked.
+
+@item --with-winsock
+Specifies, where the winsock library is located. @b{Only used, if you want
+to build simulavr for windows with MingW environment and this library cannot be
+found. This should not occur.}
+
+@item --with-zlib
+Specifies, where the libz library is located. Libtool want's to link against
+libz too, this library isn't used by simulavr. @b{Only used, if you want
+to build simulavr for windows with MingW environment and this library cannot be
+found. This should not occur.}
+
+@item --enable-doxygen-doc
+If Doxygen is installed, you can build too a programming documentation. If you
+enable this with this option, then you can build this documentation with
+@command{make doxygen-doc}. (not enabled by default)
+
+@item --enable-python
+If Python is installed with a version younger than 2.1, then you can enable
+building the python interface. Python is also used for some tests and examples.
+If not enabled, (the default) then you can't run this tests and examples.
+
+@item --enable-verilog
+If you have installed verilog package, then it's possible to enable building a
+verilog interface. (not enabled by default) See next chapter!
+
 @end table
+
+There are more options for running @command{./configure}. To find out, what's
+possible, see autotools documentation or try @command{./configure --help}.
+
+@b{A few words about libbfd and libiberty:} simulavr dosn't use any AVR specific
+things from libbfd, so it should be possible to use the system libbfd (and
+libiberty). But I have seen cases, where building simulavr against this system
+libbfd was successfull and running simulavr with a AVR elf file end in a
+segmentation fault. Then it's necessary to use a special AVR binutils build.
+
+@b{How to build simulavr on MingW/Windows:}
+
+(Your should have experience with shell scripts, MingW on Windows, how to
+configure MingW)
+
+@itemize @bullet
+@item Install msys and mingw on your windows box. Further you need the following
+packages for msys/mingw: autoconf, automake, crypt, gmp, libtool, mpfr, perl,
+pthreads, w32api, zlib.
+@item If you want to use python interface, you need to install a python package
+and swigwin.
+@item Try @command{autoconf --version}, if autoconf isn't found, then it could
+be that you can find autoconf-VVV (with VVV as autoconf version!) in your
+@command{/mingw/bin}. If so, copy autoconf-VVV to autoconf. Same
+procedure with automake, autoheader, autom4te, aclocal!
+@item Unpack simulavr package or checkout/clone a simulavr repo. If you use a
+simulavr distribution package (you can find configure script), then it's high
+recommended to run @command{make clean && make distclean && ./bootstrap -c}
+in package root.
+@item Run @command{./bootstrap} in package root. This will (re)build configure
+script and also all necessary files to run configure.
+@item Then run configure: @command{./configure --with-bfd=/mingw}
+@item If configure was successfull, then you cann proceed with @command{make} and
+so one ...
+@item If you want to use python interface and you have installed Python and SWIG,
+then you should use the following options for configure:
+@command{./configure --with-bfd=/mingw --enable-python PYTHON_LDFLAGS="-LX:/PYPATH/libs -lpython25"}
+where X:/PYPATH is YOUR path to your python installations. (e.g. where the
+python.exe can be found) Don't use @command{--enable-python=X:/PYPATH/python},
+because there is a bug in m4 scripts.
+@end itemize
 
 @node The VPI interface to Verilog, Examples, Building and Installing SimulAVR, Top
 @chapter The VPI interface to Verilog
