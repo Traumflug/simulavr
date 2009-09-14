@@ -268,8 +268,12 @@ class DumpVCD : public Dumper {
     
     public:
         //! Create tracer with time scale tscale and output os
-        DumpVCD(std::ostream *os, const std::string &tscale="ns",
-            const bool rstrobes=false, const bool wstrobes=false);
+        DumpVCD(std::ostream *os, const std::string &tscale = "ns",
+            const bool rstrobes = false, const bool wstrobes = false);
+        
+        //! Create tracer with time scale tscale for output file name
+        DumpVCD(const std::string &name, const std::string &tscale = "ns",
+            const bool rstrobes = false, const bool wstrobes = false);
         
         void setActiveSignals(const TraceSet &act);
     
@@ -359,9 +363,16 @@ class DumpManager {
         
         /*! Load a list of tracing values from the given input stream.
           Checks whether the values are part of the set of traceable
-          values. */
+          values.
+          @return TraceSet with found TraceValue's */
         TraceSet load(std::istream &is);
-    
+
+        /*! Load a list of tracing values from the given input string.
+          Checks whether the values are part of the set of traceable
+          values.
+          @return TraceSet with found TraceValue's */
+        TraceSet load(const std::string &istr);
+
         /*! Gives all available tracers as a set. */
         const TraceSet& all();
         

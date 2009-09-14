@@ -66,7 +66,6 @@ void SetDumpTraceArgs(const vector<string> &traceopts, AvrDevice *dev) {
             }
         
             cerr << "Output VCD file is '" << ls[2] << "'." << endl;
-            ofstream *out = new ofstream(ls[2].c_str());
             ts = dman->load(is);
         
             bool rs = false, ws = false;
@@ -83,7 +82,7 @@ void SetDumpTraceArgs(const vector<string> &traceopts, AvrDevice *dev) {
                     exit(1);
                 }
             }
-            d = new DumpVCD(out, "ns", rs, ws);
+            d = new DumpVCD(ls[2], "ns", rs, ws);
         } else {
             cerr << "Unknown tracer '" << ls[0] <<  "'." << endl;
             exit(1);

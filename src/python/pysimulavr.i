@@ -1,6 +1,7 @@
 %module pysimulavr
 
 %{
+
   #include "systemclocktypes.h"
   #include "avrdevice.h"
   #include "systemclock.h"
@@ -16,9 +17,18 @@
   #include "rwmem.h"
   #include "breakpoint.h"
   #include "global.h"
+  
+  // to get devices registered (automatically on linux, but necessary on windows)
+  #include "atmega128.h"
+  #include "at4433.h"
+  #include "at8515.h"
+  #include "atmega668base.h"
+  
 %}
 
 %include "std_vector.i"
+%include "std_iostream.i"
+%include "std_sstream.i"
 
 namespace std {
    %template(DWordVector) vector<dword>;
@@ -31,6 +41,17 @@ namespace std {
 %include "pinnotify.h"
 %include "traceval.h"
 %include "avrdevice.h"
+
+%extend DumpManager {
+  void addDumpVCD(const std::string &vcdname,
+                  const std::string &istr,
+                  const std::string &timebase,
+                  const bool rstrobe,
+                  const bool wstrobe) {
+    DumpVCD *d = new DumpVCD(vcdname, timebase, rstrobe, wstrobe);
+    $self->addDumper(d, $self->load(istr));
+  }
+}
 
 %extend AvrDevice {
   unsigned char getRWMem(unsigned a) {
@@ -64,20 +85,15 @@ namespace std {
     char c = *$self;
     return c;
   }
+  void SetPin(const char c) {
+    *$self = c;
+  }
 }
 
 %include "net.h"
 %include "rwmem.h"
 %include "avrfactory.h"
 %include "memory.h"
-
-%extend Memory {
-  unsigned int GetAddressAtSymbol(const char *cs) {
-    std::string s = std::string(cs);
-    return $self->GetAddressAtSymbol(s);
-  }
-}
-
 %include "flash.h"
 %include "rwmem.h"
 %include "breakpoint.h"
@@ -93,5 +109,11 @@ namespace std {
 }
 
 %include "global.h"
+
+// to get devices registered (automatically on linux, but necessary on windows)
+%include "atmega128.h"
+%include "at4433.h"
+%include "at8515.h"
+%include "atmega668base.h"
 
 // EOF

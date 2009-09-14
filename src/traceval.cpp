@@ -380,6 +380,16 @@ DumpVCD::DumpVCD(ostream *_os,
     ws(wstrobes),
     changesWritten(false) {}
 
+DumpVCD::DumpVCD(const std::string &_name,
+                 const std::string &_tscale,
+                 const bool rstrobes,
+                 const bool wstrobes) :
+    os(new ofstream(_name.c_str())),
+    tscale(_tscale),
+    rs(rstrobes),
+    ws(wstrobes),
+    changesWritten(false) {}
+
 void DumpVCD::setActiveSignals(const TraceSet &act) {
     tv=act;
     unsigned n=0;
@@ -686,6 +696,11 @@ TraceSet DumpManager::load(istream &is) {
             avr_error("Invalid trace value specifier '%s'.", ls[0].c_str());
     }
     return res;
+}
+
+TraceSet DumpManager::load(const string &istr) {
+    istringstream is(istr.c_str());
+    return load(is);
 }
 
 void trace_direct(TraceValueRegister *t, const std::string &name, bool *val) {
