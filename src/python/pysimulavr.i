@@ -1,4 +1,4 @@
-%module pysimulavr
+%module(directors="1") pysimulavr
 
 %{
 
@@ -78,6 +78,8 @@ namespace std {
 }
 
 %include "hardware.h"
+
+%feature("director") Pin;
 %include "pin.h"
 
 %extend Pin {
