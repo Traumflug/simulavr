@@ -337,7 +337,7 @@ class DumpManager {
          
          This method has to be called *before* the device instance will be
          created in single device application! Default is multi device application. */
-         void SetSingleDeviceApp(void) { singleDeviceApp = true; }
+         void SetSingleDeviceApp(void);
          
         /*! Add a dumper to the list. The vector vals
           contains all the values this dumper should trace. */

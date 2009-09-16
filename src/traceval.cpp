@@ -547,12 +547,27 @@ void DumpManager::unregisterAvrDevice(AvrDevice* dev) {
 }
 
 TraceValue* DumpManager::seekValueByName(const std::string &name) {
-    for(vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
-        TraceValue* t = (*i)->FindTraceValueByName(name);
-        if(t != NULL)
-            return t;
+    if(singleDeviceApp) {
+        if(devices.size() == 0)
+            return NULL;
+        return devices[0]->FindTraceValueByName(name);
+    } else {
+        int idx = name.find('.');
+        if(idx <= 0)
+            return NULL;
+        for(vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
+            if((*i)->GetScopeName() == name.substr(0, idx)) {
+                return (*i)->FindTraceValueByName(name.substr(idx + 1));
+            }
+        }
+        return NULL;
     }
-    return NULL;
+}
+
+void DumpManager::SetSingleDeviceApp(void) {
+    if(devices.size() > 0)
+        avr_error("method SetSingleDeviceApp have to be used before creating and adding devices to DumpManager");
+    singleDeviceApp = true;
 }
 
 void DumpManager::addDumper(Dumper *dump, const TraceSet &vals) {
