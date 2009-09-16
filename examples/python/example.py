@@ -1,43 +1,16 @@
 # -*- coding: UTF-8 -*-
 # Python test script as demonstration of using pysimulavr in unit tests
-
 from unittest import TestSuite, TextTestRunner, TestCase, defaultTestLoader
-import pysimulavr
+from sys import argv
 
-class SimulavrAdapter(object):
-  
-  DEFAULT_CLOCK_SETTING = 250 # 250ns or 4MHz
-  
-  def loadDevice(self, t, e):
-    self.__sc = pysimulavr.SystemClock.Instance()
-    self.__sc.ResetClock()
-    dev = pysimulavr.AvrFactory.instance().makeDevice(t)
-    dev.Load(e)
-    dev.SetClockFreq(self.DEFAULT_CLOCK_SETTING)
-    self.__sc.Add(dev)
-    return dev
-    
-  def doRun(self, n):
-    ct = self.__sc.GetCurrentTime
-    while ct() < n:
-      res = self.__sc.Step()
-      if res is not 0: return res
-    return 0
-      
-  def doStep(self, stepcount = 1):
-    while stepcount > 0:
-      res = self.__sc.Step()
-      if res is not 0: return res
-      stepcount -= 1
-    return 0
-    
-  def getCurrentTime(self):
-    return self.__sc.GetCurrentTime()
-    
+import pysimulavr
+from ex_utils import SimulavrAdapter
+
 class TestBaseClass(TestCase, SimulavrAdapter):
   
   def setUp(self):
-    self.device = self.loadDevice("atmega128", "example.elf")
+    proc, elffile = argv[1].split(":")
+    self.device = self.loadDevice(proc, elffile)
     
   def tearDown(self):
     del self.device
