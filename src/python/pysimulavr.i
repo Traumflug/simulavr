@@ -17,6 +17,7 @@
   #include "rwmem.h"
   #include "breakpoint.h"
   #include "global.h"
+  #include "avrerror.h"
   
   // to get devices registered (automatically on linux, but necessary on windows)
   #include "atmega128.h"
@@ -33,6 +34,18 @@
 namespace std {
    %template(DWordVector) vector<dword>;
 };
+
+%exception {
+  try {
+    $action
+  } catch(char const* s) {
+    PyErr_SetString(PyExc_SystemError, s);
+    return NULL;
+  } catch(int i) {
+    PyErr_Format(PyExc_RuntimeError, "%d", i);
+    return NULL;
+  }
+}
 
 %include "types.h"
 %include "systemclocktypes.h"
@@ -111,6 +124,7 @@ namespace std {
 }
 
 %include "global.h"
+%include "avrerror.h"
 
 // to get devices registered (automatically on linux, but necessary on windows)
 %include "atmega128.h"

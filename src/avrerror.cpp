@@ -24,60 +24,113 @@
  *  $Id$
  */
 
-/**
-   \file avrerror.c
+/*!
+   \file avrerror.cpp
    \brief Functions for printing messages, warnings and errors.
 
-   This module provides output printing facilities. */
+   This module provides output printing facilities. Further it provides
+   raising exceptions instead of calling exit/abort, if needed and the
+   possibility to redirect output to a stream instead of stdout/stderr. */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <string.h>
 
 #include "avrerror.h"
 
-void private_avr_message( const char *file, int line, const char *fmt, ... )
-{
-    va_list ap;
-    char    ffmt[128];
-
-    snprintf(ffmt, sizeof(ffmt), "MESSAGE: file %s: line %d: %s", 
-             file, line, fmt );
-    ffmt[127] = '\0';
-
-    va_start(ap, fmt);
-    vfprintf(stdout, ffmt, ap);
-    va_end(ap);
+SystemConsoleHandler::SystemConsoleHandler() {
+    useExitAndAbort = true;
+    msgStream = &std::cout;
+    wrnStream = &std::cerr;
 }
 
-void private_avr_warning( const char *file, int line, const char *fmt, ... )
-{
-    va_list ap;
-    char    ffmt[128];
-
-    snprintf(ffmt, sizeof(ffmt), "WARNING: file %s: line %d: %s", 
-             file, line, fmt );
-    ffmt[127] = '\0';
-
-    va_start(ap, fmt);
-    vfprintf(stderr, ffmt, ap);
-    va_end(ap);
+void SystemConsoleHandler::SetUseExit(bool useExit) {
+    useExitAndAbort = useExit;
 }
 
-void private_avr_error( const char *file, int line, const char *fmt, ... )
-{
-    va_list ap;
-    char    ffmt[128];
-
-    snprintf(ffmt, sizeof(ffmt), "\nERROR: file %s: line %d: %s\n\n", 
-             file, line, fmt );
-    ffmt[127] = '\0';
-
-    va_start(ap, fmt);
-    vfprintf(stderr, ffmt, ap);
-    va_end(ap);
-
-    exit(1);                    /* exit instead of abort */
+void SystemConsoleHandler::SetMessageStream(std::ostream *s) {
+    msgStream = s;
 }
 
+void SystemConsoleHandler::SetWarningStream(std::ostream *s) {
+    wrnStream = s;
+}
+
+void SystemConsoleHandler::vfmessage(const char *file, int line, const char *fmt, ...) {
+    va_list ap;
+    char *mfmt = getFormatString("MESSAGE", file, line, fmt);
+    va_start(ap, fmt);
+    vsnprintf(messageStringBuffer, sizeof(messageStringBuffer), mfmt, ap);
+    va_end(ap);
+    *msgStream << messageStringBuffer;
+}
+
+void SystemConsoleHandler::vfwarning(const char *file, int line, const char *fmt, ...) {
+    va_list ap;
+    char *mfmt = getFormatString("WARNING", file, line, fmt);
+    va_start(ap, fmt);
+    vsnprintf(messageStringBuffer, sizeof(messageStringBuffer), mfmt, ap);
+    va_end(ap);
+    *wrnStream << messageStringBuffer;
+    wrnStream->flush();
+}
+
+void SystemConsoleHandler::vferror(const char *file, int line, const char *fmt, ...) {
+    va_list ap;
+    char *mfmt = getFormatString("ERROR", file, line, fmt);
+    va_start(ap, fmt);
+    vsnprintf(messageStringBuffer, sizeof(messageStringBuffer), mfmt, ap);
+    va_end(ap);
+    *wrnStream << messageStringBuffer;
+    wrnStream->flush();
+}
+
+void SystemConsoleHandler::vffatal(const char *file, int line, const char *fmt, ...) {
+    va_list ap;
+    char *mfmt = getFormatString("FATAL", file, line, fmt);
+    va_start(ap, fmt);
+    vsnprintf(messageStringBuffer, sizeof(messageStringBuffer), mfmt, ap);
+    va_end(ap);
+    if(useExitAndAbort) {
+        *wrnStream << "\n" << messageStringBuffer << "\n" << std::endl;
+        exit(1);
+    } else {
+        throw (char const*)messageStringBuffer;
+    }
+}
+
+void SystemConsoleHandler::AbortApplication(int code) {
+    if(useExitAndAbort) {
+        abort();
+    } else {
+        throw -code;
+    }
+}
+
+void SystemConsoleHandler::ExitApplication(int code) {
+    if(useExitAndAbort) {
+        exit(code);
+    } else {
+        throw code;
+    }
+}
+
+char* SystemConsoleHandler::getFormatString(const char *prefix,
+                                            const char *file,
+                                            int line,
+                                            const char *fmtstr) {
+    snprintf(formatStringBuffer,
+             sizeof(formatStringBuffer),
+             "%s: file %s: line %d: %s",
+             prefix,
+             file,
+             line,
+             fmtstr);
+    formatStringBuffer[sizeof(formatStringBuffer) - 1] = '\0';
+    return formatStringBuffer;
+}
+
+// create the handler instance
+SystemConsoleHandler sysConHandler;
+
+// EOF
