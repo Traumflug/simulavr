@@ -58,11 +58,11 @@ run_example:
 endif
 
 
-noinst_DATA = $(EXAMPLE1) $(EXAMPLE3) $(EXAMPLE4) ex_utils.pyc ex_pinout.vcd
+noinst_DATA = $(EXAMPLE1) $(EXAMPLE3) $(EXAMPLE4)
 
 CLEANFILES = $(EXAMPLE1) $(EXAMPLE3) $(EXAMPLE4) ex_utils.pyc ex_pinout.vcd
 
-EXTRA_DIST = example.c example.py example_pin.py example_io.c example_io.py  ex_utils.py ex_pinout.py ex_pinout.c README
+EXTRA_DIST = example.c example.py example_pin.py example_io.c example_io.py ex_utils.py ex_pinout.py ex_pinout.c README
 
 example: run_example
 

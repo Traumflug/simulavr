@@ -1,3 +1,5 @@
 # files to ignore by git
-example.elf
+*.elf
+*.pyc
+*.vcd
 
