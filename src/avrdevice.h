@@ -134,9 +134,18 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
             allPins.insert(std::pair<std::string, Pin*>(name, p));
         }
 
-        void DeleteAllBreakpoints();
+        //! Clear all breakpoints in device
+        void DeleteAllBreakpoints(void);
 
-        const std::string &GetFname() { return actualFilename; }
+        //! Return filename from loaded program
+        const std::string &GetFname(void) { return actualFilename; }
+        
+        //! Get configured total memory space size
+        unsigned int GetMemTotalSize(void) { return totalIoSpace; }
+        //! Get configured IO memory space size
+        unsigned int GetMemIOSize(void) { return ioSpaceSize; }
+        //! Get configured register space size
+        unsigned int GetMemRegisterSize(void) { return registerSpaceSize; }
 };
 
 #endif

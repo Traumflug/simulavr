@@ -68,10 +68,26 @@ namespace std {
 
 %extend AvrDevice {
   unsigned char getRWMem(unsigned a) {
+    if(a >= $self->GetMemTotalSize())
+      return (unsigned char)0;
     return (unsigned char)*($self->rw[a]);
   }
-  void setRWMem(unsigned a, unsigned char v) {
+  bool setRWMem(unsigned a, unsigned char v) {
+    if(a >= $self->GetMemTotalSize())
+      return false;
     *($self->rw[a]) = v;
+    return true;
+  }
+  bool replaceRWMemCell(unsigned a, RWMemoryMember* c) {
+    if(a >= $self->GetMemTotalSize())
+      return false;
+    $self->rw[a] = c;
+    return true;
+  }
+  RWMemoryMember* getRWMemCell(unsigned a) {
+    if(a >= $self->GetMemTotalSize())
+      return NULL;
+    return $self->rw[a];
   }
 }
 
@@ -106,7 +122,10 @@ namespace std {
 }
 
 %include "net.h"
+
+%feature("director") RWMemoryMember;
 %include "rwmem.h"
+
 %include "avrfactory.h"
 %include "memory.h"
 %include "flash.h"
