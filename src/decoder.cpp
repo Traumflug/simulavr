@@ -28,7 +28,7 @@
 #include "flash.h"
 #include "hwwado.h"
 #include "hwsreg.h"
-
+#include "avrerror.h"
 
 void avr_core_stack_push( AvrDevice *core, int cnt, long val);
 dword avr_core_stack_pop( AvrDevice *core, int cnt); 
@@ -2350,8 +2350,7 @@ avr_op_ILLEGAL::avr_op_ILLEGAL
 
 int avr_op_ILLEGAL::operator()() 
 {
-    std::cerr<< "Simulation terminated! IllegalInstruction executed!" << std::endl;
-    exit(0);
+    avr_error("Simulation terminated! IllegalInstruction executed!");
     return 1;
 }
 

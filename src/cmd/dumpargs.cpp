@@ -29,6 +29,7 @@
 
 #include "dumpargs.h"
 #include "helper.h"
+#include "avrerror.h"
 
 using namespace std;
  
@@ -36,34 +37,26 @@ void SetDumpTraceArgs(const vector<string> &traceopts, AvrDevice *dev) {
     DumpManager *dman = DumpManager::Instance();
     for(size_t i = 0; i < traceopts.size(); i++) {
         vector<string> ls = split(traceopts[i], ":");
-        if(ls.size() < 1) {
-            cerr << "Invalid tracing option '" << traceopts[i] << "'.";
-            exit(1);
-        }
+        if(ls.size() < 1)
+            avr_error("Invalid tracing option '%s'.", traceopts[i].c_str());
         Dumper *d;
         TraceSet ts;
         cerr << "Enabling tracer: '";
         if(ls[0] == "warnread") {
             cerr << "warnread'." << endl;
-            if(ls.size() > 1) {
-                cerr << "Invalid number of options for 'warnread'.";
-                exit(1);
-            }
+            if(ls.size() > 1)
+                avr_error("Invalid number of options for 'warnread'.");
             ts = dman->all();
             d = new WarnUnknown(dev);
         } else if (ls[0] == "vcd") {
             cerr << "vcd'." << endl;
-            if(ls.size() < 3 || ls.size() > 4) {
-                cerr << "Invalid number of options for 'vcd'.";
-                exit(1);
-            }
+            if(ls.size() < 3 || ls.size() > 4)
+                avr_error("Invalid number of options for 'vcd'.");
             cerr << "Reading values to trace from '" << ls[1] << "'." << endl;
         
             ifstream is(ls[1].c_str());
-            if(is.is_open() == 0) {
-                cerr << "Can't open '" << ls[1] << "'.";
-                exit(1);
-            }
+            if(is.is_open() == 0)
+                avr_error("Can't open '%s'", ls[1].c_str());
         
             cerr << "Output VCD file is '" << ls[2] << "'." << endl;
             ts = dman->load(is);
@@ -76,17 +69,12 @@ void SetDumpTraceArgs(const vector<string> &traceopts, AvrDevice *dev) {
                     rs = true;
                 } else if(ls[3] == "w") {
                     ws = true;
-                } else {
-                    cerr << "Invalid read/write strobe specifier '" << ls[3]
-                         << "'." << endl;
-                    exit(1);
-                }
+                } else
+                    avr_error("Invalid read/write strobe specifier '%s'", ls[3].c_str());
             }
             d = new DumpVCD(ls[2], "ns", rs, ws);
-        } else {
-            cerr << "Unknown tracer '" << ls[0] <<  "'." << endl;
-            exit(1);
-        }
+        } else
+            avr_error("Unknown tracer '%s'", ls[0].c_str());
         dman->addDumper(d, ts);
     }
 }

@@ -37,7 +37,7 @@ class Printable {
 
  public:
     Printable(std::ostream &os):out(os){};
-    virtual void operator()();
+    virtual void operator()()=0;
     virtual ~Printable() {}
 };
 

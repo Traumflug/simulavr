@@ -310,30 +310,23 @@ word GdbServer::avr_core_flash_read(int addr) {
 }
 
 void GdbServer::avr_core_flash_write(int addr, word val) {
-    if ((addr*2+1)>= (int)core->Flash->GetSize()) {
-        cerr << "try to write in flash after last valid address!" << endl;
-        exit(0);
-    }
-
+    if ((addr*2+1)>= (int)core->Flash->GetSize())
+        avr_error("try to write in flash after last valid address!");
     core->Flash->myMemory[addr*2+1]=val&0xff;
     core->Flash->myMemory[addr*2]=val>>8;
     core->Flash->Decode(addr*2);
 }
 
 void GdbServer::avr_core_flash_write_hi8( int addr, byte val) {
-    if ((addr*2)>= (int)core->Flash->GetSize()) {
-        cerr << "try to write in flash after last valid address!" << endl;
-        exit(0);
-    }
+    if ((addr*2)>= (int)core->Flash->GetSize())
+        avr_error("try to write in flash after last valid address! (hi8)");
     core->Flash->myMemory[addr*2]=val;
     core->Flash->Decode();
 }
 
 void GdbServer::avr_core_flash_write_lo8( int addr, byte val) {
-    if ((addr*2+1)>= (int)core->Flash->GetSize()) {
-        cerr << "try to write in flash after last valid address!" << endl;
-        exit(0);
-    }
+    if ((addr*2+1)>= (int)core->Flash->GetSize())
+        avr_error("try to write in flash after last valid address! (lo8)");
     core->Flash->myMemory[addr*2+1]=val;
     core->Flash->Decode();
 }

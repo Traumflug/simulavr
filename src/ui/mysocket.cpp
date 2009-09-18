@@ -81,8 +81,6 @@ ssize_t Socket::Poll() {
 
 #else
 
-#include <stdlib.h> //use exit()
-
 Socket::Socket(int port):sockstream(&conn) {
     OpenSocket(port);
 }
@@ -162,14 +160,10 @@ void Socket::OpenSocket(int port) {
         
     } while (retry++ <10);
 
-    if (ret<0) {
-        cerr << "Could not contact the ui-server, sorry"<< endl;
-        exit(0);
-    }
-
+    if(ret < 0)
+        avr_error("Could not contact the ui-server, sorry");
 
 #endif
-
 
     /* Let the kernel reuse the socket address. This lets us run
     twice in a row, without waiting for the (ip, port) tuple

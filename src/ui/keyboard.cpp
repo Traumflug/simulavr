@@ -23,10 +23,10 @@
  *  $Id$
  */
 
-#include <stdlib.h> //use exit
 #include <map>
 #include <sstream>
 
+#include "avrerror.h"
 #include "ui.h"   
 using namespace std;
 
@@ -128,8 +128,7 @@ int Keyboard::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
             break;
 
         default:
-            cerr << "Default state in kbd ????????????????????" << endl;
-            exit(0);
+            avr_error("Default state in kbd ????????????????????");
     } //end switch myState
 
     if (lastPortValue!= myPortValue) {

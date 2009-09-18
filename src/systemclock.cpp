@@ -29,19 +29,18 @@
 #include "helper.h"
 #include "trace.h"
 #include "application.h"
+#include "avrerror.h"
 
 #include "signal.h"
 
 using namespace std;
 
 SystemClock::SystemClock() { 
-    static int no=0;
-    currentTime=0; 
+    static int no = 0;
+    currentTime = 0; 
     no++;
-    if (no>1) {
-        cerr << "Crazy problem: Second instance of SystemClock created!" << endl;
-        exit(0);
-    }
+    if(no > 1)
+        avr_error("Crazy problem: Second instance of SystemClock created!");
 }
 
 void SystemClock::SetTraceModeForAllMembers(int trace_on) {

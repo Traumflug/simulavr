@@ -26,6 +26,7 @@
 #include "serialtx.h"
 #include "systemclock.h"
 #include "string2.h"
+#include "avrerror.h"
 
 using namespace std;
 
@@ -94,8 +95,7 @@ int SerialTxBuffered::Step(
             break;
 
         default:
-            cerr << "Illegal state in SerialTx" << endl;
-            exit(0);
+            avr_error("Illegal state in SerialTx");
     }
 
 

@@ -1,52 +1,70 @@
-#include <iostream>
+/*
+ ****************************************************************************
+ *
+ * simulavr - A simulator for the Atmel AVR family of microcontrollers.
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ ****************************************************************************
+ *
+ *  $Id$
+ */
 #include "adcpin.h"
-using namespace std;
+#include "avrerror.h"
 
-AdcPin::AdcPin(	const char*		fileName,
-				Net&			pinNet
-				) throw():
-		_analogPin(),
-		_anaFile(fileName)
-		{
-		_analogPin.SetOutState(Pin::ANALOG);
-		pinNet.Add(&_analogPin);
+AdcPin::AdcPin(const char* fileName, Net& pinNet) throw():
+    _analogPin(),
+    _anaFile(fileName)
+{
+    _analogPin.SetOutState(Pin::ANALOG);
+    pinNet.Add(&_analogPin);
 
-		if(!_anaFile){
-			cerr << "Cannot open Analog input file \"" << fileName << "\"." << endl;
-			exit(1);
-			}
-	}
+    if(!_anaFile)
+        avr_error("Cannot open Analog input file '%s'.", fileName);
+}
 
-char*	readNextLine(std::ifstream& f,char* buffer,unsigned len,SystemClockOffset *timeToNextStepIn_ns){
-	for(unsigned i=0;i<2;++i){
-		while(f.getline(buffer, len)){
-			// Skip comment lines
-			if(buffer[0] == '#') continue;
-			return buffer;
-			}
-		f.clear();
-		f.seekg (0, ios::beg);
-		}
-	return 0;
-	}
+char* readNextLine(std::ifstream& f, char* buffer, unsigned len, SystemClockOffset *timeToNextStepIn_ns) {
+    for(unsigned i = 0; i < 2; ++i){
+        while(f.getline(buffer, len)){
+            // Skip comment lines
+            if(buffer[0] == '#')
+                continue;
+            return buffer;
+        }
+        f.clear();
+        f.seekg (0, std::ios::beg);
+    }
+    return 0;
+}
 
-int	AdcPin::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
-	if(!_anaFile) return 0;
+int AdcPin::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
+    char lineBuffer[1024];
 
-	char	lineBuffer[1024];
+    if(!readNextLine(_anaFile, lineBuffer, sizeof(lineBuffer), timeToNextStepIn_ns)) {
+        _anaFile.close();
+    }
 
-	if(!readNextLine(_anaFile,lineBuffer,sizeof(lineBuffer),timeToNextStepIn_ns)){
-		_anaFile.close();
-		}
+    char* p = lineBuffer;
+    unsigned long delayInNs = strtoul(p, &p, 0);
+    int analogValue = (int)strtol(p, &p, 0);
 
-	char*	p	= lineBuffer;
-	unsigned long	delayInNs		= strtoul(p, &p, 0);
-	int	analogValue		= (int)strtol(p, &p, 0);
+    _analogPin.setAnalogValue(analogValue);
 
-	_analogPin.setAnalogValue(analogValue);
+    *timeToNextStepIn_ns = delayInNs;
 
-	*timeToNextStepIn_ns	= delayInNs;
-
-	return 0;
-	}
+    return 0;
+}
 

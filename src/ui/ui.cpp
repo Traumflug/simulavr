@@ -32,7 +32,7 @@ using namespace std;
 #include "hardware.h"
 #include "pin.h"
 #include "systemclock.h"
-
+#include "avrerror.h"
 
 UserInterface::UserInterface(int port, bool _withUpdateControl): Socket(port), updateOn(1), pollFreq(100000)  {
     if (_withUpdateControl) {
@@ -82,10 +82,8 @@ int UserInterface::Step(bool &dummy1, SystemClockOffset *nextStepIn_ns) {
                     string net=dummy.substr(0, pos);
                     string rest=dummy.substr(pos+1); //vfrom pos+1 to end
 
-                    if (net == "exit" ) {
-                        cerr << "Exiting at external UI request" << endl;
-                        exit(0);
-                    }
+                    if (net == "exit" )
+                        avr_error("Exiting at external UI request");
 
                     string par;
                     int pos2=rest.find(" ");
