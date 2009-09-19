@@ -25,6 +25,7 @@
 
 #include <map>
 #include <sstream>
+#include <stdlib.h>
 
 #include "avrerror.h"
 #include "ui.h"   
