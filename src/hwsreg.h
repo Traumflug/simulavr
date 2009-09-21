@@ -42,35 +42,20 @@ class HWSreg_bool {
         bool    N;
         bool    Z;
         bool    C;
+#ifndef SWIG
         operator int();
+#endif
         HWSreg_bool(const int i);
         HWSreg_bool();
 };
 
-#if 0
-/* or is this the faster one ???? NO!*/
-class HWSreg_bitarray {
-    
-    public:
-        bool    I:1;
-        bool    T:1;
-        bool    H:1;
-        bool    S:1;
-        bool    V:1;
-        bool    N:1;
-        bool    Z:1;
-        bool    C:1;
-        operator int();
-        HWSreg_bitarray(const int );
-        HWSreg_bitarray();
-};
-#endif
-
 class HWSreg: public HWSreg_bool {
     
     public:
+#ifndef SWIG
         operator std::string();
         HWSreg operator =(const int );
+#endif
 };
 
 /*! IO register mapping for the status register.
@@ -83,7 +68,7 @@ class RWSreg: public RWMemoryMember {
         RWSreg(TraceValueRegister *registry, HWSreg *s): RWMemoryMember(registry, "SREG"), status(s) {}
         //! reflect a change, which comes from CPU core
         void trigger_change(void) { tv->change((int)*status); }
-        
+
     protected:
         HWSreg *status;
         unsigned char get() const;

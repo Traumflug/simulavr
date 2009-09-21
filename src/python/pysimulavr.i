@@ -11,10 +11,10 @@
   #include "net.h"
   #include "trace.h"
   #include "rwmem.h"
+  #include "hwsreg.h"
   #include "avrfactory.h"
   #include "memory.h"
   #include "flash.h"
-  #include "rwmem.h"
   #include "breakpoint.h"
   #include "global.h"
   #include "avrerror.h"
@@ -126,10 +126,21 @@ namespace std {
 %feature("director") RWMemoryMember;
 %include "rwmem.h"
 
+%include "hwsreg.h"
+%extend RWSreg {
+  unsigned char GetValue(void) {
+    unsigned char v = *$self;
+    return v;
+  }
+  void SetValue(unsigned char v) {
+    RWMemoryMember* m = $self;
+    *m = v;
+  }
+}
+
 %include "avrfactory.h"
 %include "memory.h"
 %include "flash.h"
-%include "rwmem.h"
 %include "breakpoint.h"
 
 %extend Breakpoints {
