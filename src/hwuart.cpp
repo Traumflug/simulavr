@@ -339,32 +339,26 @@ unsigned int HWUart::CpuCycleRx() {
                 break;
 
             case RX_READ_STOPBIT2:
-                {
-                    cntRxSamples++;
-                    if (cntRxSamples>=8 && cntRxSamples<=10) {
-                        if (pinRx==0) {
-                            rxLowCnt++;
-                        } else {
-                            rxHighCnt++;
-                        }
+                cntRxSamples++;
+                if (cntRxSamples>=8 && cntRxSamples<=10) {
+                    if (pinRx==0) {
+                        rxLowCnt++;
+                    } else {
+                        rxHighCnt++;
                     }
-
-                    if (cntRxSamples>10) { //the last stopbit could allways be shorter than normal data-bit
-                        if ( rxLowCnt<rxHighCnt) { //the bit was high this is ok
-                            usr&=0xff-FE;
-                        }
+                } else if (cntRxSamples>10) { //the last stopbit could allways be shorter than normal data-bit
+                    if ( rxLowCnt<rxHighCnt) { //the bit was high this is ok
+                        usr&=0xff-FE;
                     } else { //stopbit was low so set framing error
                         usr|=FE;
                     }
-
+                    
                     usr|=RXC; //receiving is complete, regardless of framing error!
                     if (rxLowCnt<rxHighCnt)
                         rxState = RX_WAIT_FOR_LOWEDGE;
                     else 
                         rxState = RX_WAIT_FOR_HIGH;
-                }   
-
-
+                }
                 break;
 
             case RX_DISABLED:
