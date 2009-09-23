@@ -68,7 +68,8 @@ void AvrDevice::Load(const char* fname) {
     if(abfd == NULL)
         avr_error("Could not open file: %s", fname);
 
-    bfd_check_format(abfd, bfd_object);
+    if(bfd_check_format(abfd, bfd_object) == FALSE)
+        avr_error("File '%s' isn't a elf object", fname);
 
     //reading out the symbols
     {
