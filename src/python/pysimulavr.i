@@ -18,6 +18,7 @@
   #include "breakpoint.h"
   #include "global.h"
   #include "avrerror.h"
+  #include "pysimulationmember.h"
   
   // to get devices registered (automatically on linux, but necessary on windows)
   #include "atmega128.h"
@@ -50,6 +51,10 @@ namespace std {
 %include "types.h"
 %include "systemclocktypes.h"
 %include "simulationmember.h"
+
+%feature("director") PySimulationMember;
+%include "pysimulationmember.h"
+
 %include "externaltype.h"
 %include "pinnotify.h"
 %include "traceval.h"
@@ -106,6 +111,7 @@ namespace std {
   }
 }
 
+%feature("director") Hardware;
 %include "hardware.h"
 
 %feature("director") Pin;
