@@ -1,19 +1,27 @@
-from unittest import TextTestRunner, TestSuite, TestLoader
-from sys import argv
-from sys import stderr
+from unittest import TextTestRunner, TestSuite
+from sys import argv, stderr
 
 from vcdtestutil import VCDTestLoader
+from simtestutil import SimTestLoader
 
-def parseVCDName(name):
+def parseTargetName(name):
   l = name.split(".")[0].split("_")
   return "_".join(l[:-1])
   
-def getTests(vcdfiles):
+def parseTargetType(name):
+  return name.split(".")[-1].lower()
+  
+targetLoader = {
+  "vcd": VCDTestLoader,
+  "elf": SimTestLoader,
+}
+
+def getTests(targets):
   l = list()
-  for name in vcdfiles:
+  for name in targets:
     try:
-      m = __import__(parseVCDName(name))
-      l.append(VCDTestLoader(name).loadTestsFromModule(m))
+      m = __import__(parseTargetName(name))
+      l.append(targetLoader[parseTargetType(name)](name).loadTestsFromModule(m))
     except Exception, e:
       print >> stderr, "error: %s" % str(e)
   return TestSuite(l)
