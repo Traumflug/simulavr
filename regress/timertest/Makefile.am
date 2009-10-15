@@ -6,7 +6,7 @@ MAINTAINERCLEANFILES = Makefile.in stamp-vti
 
 EXTRA_DIST = timertest.cfg timertest.template
 
-export PYTHONPATH=$(srcdir)/../modules
+export PYTHONPATH=$(srcdir)/../modules:$(srcdir)/../../src
 
 check-local: timertest
 
