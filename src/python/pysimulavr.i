@@ -15,6 +15,7 @@
   #include "avrfactory.h"
   #include "memory.h"
   #include "flash.h"
+  #include "hweeprom.h"
   #include "breakpoint.h"
   #include "global.h"
   #include "avrerror.h"
@@ -146,7 +147,20 @@ namespace std {
 
 %include "avrfactory.h"
 %include "memory.h"
+
+%extend Memory {
+  unsigned char GetMemory(unsigned int a) {
+    if(a < $self->GetSize())
+      return $self->myMemory[a];
+    return 0;
+  }
+  void PyWriteMem(char *src, unsigned int offset, unsigned int secSize) {
+    $self->WriteMem((unsigned char *)src, offset, secSize);
+  }
+}
+
 %include "flash.h"
+%include "hweeprom.h"
 %include "breakpoint.h"
 
 %extend Breakpoints {

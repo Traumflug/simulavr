@@ -79,15 +79,13 @@ class Memory {
         /*! Add the (address, symbol) pair
         
           @param p a std::pair with address and symbol string */
-        void AddSymbol( std::pair<unsigned int, std::string> p) { sym.insert(p); }
+        void AddSymbol(std::pair<unsigned int, std::string> p) { sym.insert(p); }
         
         /*! Returns the size of memory block */
         unsigned int GetSize() { return size; }
         
-        /*! Write memory data to memory 
-        
-          \todo Should it be a virtual method? (isn't implemented in Memory!) */
-        void WriteMem(unsigned char*, unsigned int offset, unsigned int size);
+        /*! Write memory data to memory */
+        virtual void WriteMem(unsigned char*, unsigned int offset, unsigned int size) = 0;
 };
 
 //! Hold data memory block and symbol informations.
@@ -97,7 +95,8 @@ class Memory {
 class Data : public Memory {
     public:
         /*! Creates the data memory block */
-        Data(): Memory(0) { }
+        Data(): Memory(0) {}
+        void WriteMem(unsigned char*, unsigned int offset, unsigned int size) {}
 };
 
 #endif

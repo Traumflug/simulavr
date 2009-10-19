@@ -45,7 +45,7 @@ unsigned int Memory::GetAddressAtSymbol(const string &s) {
     convlen = (unsigned int)(dummy - copy);
     avr_free(copy);
     
-    if ((retval != 0) && ((unsigned int)s.length() == convlen)) {
+    if((retval != 0) && ((unsigned int)s.length() == convlen)) {
         // number found, return this
         return retval;
     }
@@ -53,8 +53,8 @@ unsigned int Memory::GetAddressAtSymbol(const string &s) {
     // isn't a number, try to find symbol ...
     multimap<unsigned int, string>::iterator ii;
 
-    for (ii=sym.begin(); ii!=sym.end(); ii++) {
-        if (ii->second == s) {
+    for(ii = sym.begin(); ii != sym.end(); ii++) {
+        if(ii->second == s) {
             return ii->first;
         }
     }
@@ -66,36 +66,41 @@ unsigned int Memory::GetAddressAtSymbol(const string &s) {
 
 string Memory::GetSymbolAtAddress(unsigned int add){
     string lastName;
-    unsigned int lastAddr=0;
+    unsigned int lastAddr = 0;
     multimap<unsigned int, string>::iterator ii;
     multimap<unsigned int, string>::iterator last_ii;
 
-    ii=sym.begin();
-    last_ii=ii;
-    if (ii==sym.end()) return ""; //we have no sym at all
+    ii = sym.begin();
+    last_ii = ii;
+    if(ii == sym.end())
+        return ""; // we have no symbols at all
     do {
-        if(lastAddr!= ii->first) {
-            last_ii=ii;
-            lastName=ii->second;
+        if(lastAddr != ii->first) {
+            last_ii = ii;
+            lastName = ii->second;
         }
-        lastAddr=ii->first;
+        lastAddr = ii->first;
 
-        if (ii->first == add) break; //found symbol
+        if(ii->first == add)
+            break; // found symbol
         ii++;
-        if ((ii!=sym.end()) && (ii->first> add)) break; //behind the right symbol
-    } while (ii!=sym.end());
+        if((ii != sym.end()) && (ii->first > add))
+            break; // behind the right symbol
+    } while(ii != sym.end());
+    
     ostringstream os;
 
     os << lastName;
-    ii=last_ii;
-    while ((++ii)!=sym.end()) { 
-        if (lastAddr!= ii->first) break;
+    ii = last_ii;
+    while((++ii) != sym.end()) { 
+        if(lastAddr != ii->first)
+            break;
         os << "," << ii->second;
     };
 
-    unsigned int offset=add-lastAddr;
-    if ((offset)!=0) {
-        os << "+0x"<<hex<<offset;
+    unsigned int offset = add - lastAddr;
+    if((offset) != 0) {
+        os << "+0x" << hex << offset;
     }
 
     return os.str();
@@ -104,8 +109,4 @@ string Memory::GetSymbolAtAddress(unsigned int add){
 Memory::Memory(int _size): size(_size) {
     myMemory = avr_new(unsigned char, size);
 }
-
-void Memory::WriteMem(unsigned char*, unsigned int offset, unsigned int size){
-    avr_warning("method not implemented (WriteMem)");
-};
 

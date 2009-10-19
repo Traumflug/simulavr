@@ -40,15 +40,14 @@ class HWEeprom: public Hardware, public Memory, public TraceValueRegister {
         unsigned int cpuHoldCycles;
         unsigned int uSleepForOutput;
         unsigned int state;
-        unsigned int writeEnableCycles;    //let EEMWE stay only 4 cycles
+        unsigned int writeEnableCycles;    // let EEMWE stay only 4 cycles
         unsigned int writeStartTime;
         AvrDevice *core;
 
     public:
         HWEeprom(AvrDevice *core, unsigned int size);
         void WriteMem(unsigned char *, unsigned int offset, unsigned int size);
-        void Load(const std::string &filename);
-        virtual    ~HWEeprom();
+        virtual ~HWEeprom();
         void SetEearl(unsigned char);
         void SetEearh(unsigned char);
         void SetEedr(unsigned char);
@@ -71,11 +70,11 @@ class HWEeprom: public Hardware, public Memory, public TraceValueRegister {
             WRITE_ENABLED
         } T_State;
 
-	IOReg<HWEeprom>
-	    eearh_reg,
-	    eearl_reg,
-	    eedr_reg,
-	    eecr_reg;
+        IOReg<HWEeprom>
+            eearh_reg,
+            eearl_reg,
+            eedr_reg,
+            eecr_reg;
 };
 
 class HWIrqSystem;
@@ -87,10 +86,10 @@ class HWMegaEeprom: public HWEeprom {
         bool irqFlag;
 
     public:
-    HWMegaEeprom(AvrDevice *core, HWIrqSystem *, unsigned int size, unsigned int irqVec);
-    void SetEecr(unsigned char);
-    virtual unsigned int CpuCycle();
-    //bool IsIrqFlagSet(unsigned int vector);
-    void ClearIrqFlag(unsigned int vector);
+        HWMegaEeprom(AvrDevice *core, HWIrqSystem *, unsigned int size, unsigned int irqVec);
+        virtual unsigned int CpuCycle();
+        //bool IsIrqFlagSet(unsigned int vector);
+        void ClearIrqFlag(unsigned int vector);
 };
+
 #endif
