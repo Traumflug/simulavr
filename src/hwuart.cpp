@@ -24,9 +24,6 @@
  */
 
 #include "hwuart.h"
-#include "avrdevice.h"
-#include "irqsystem.h"
-#include "traceval.h"
 #include "helper.h"
 
 //usr & ucsra
@@ -53,6 +50,7 @@
 #define TXB8 0x01
 
 //ussrc usart only
+#define URSEL 0x80
 #define UMSEL 0x40
 #define UPM1  0x20
 #define UPM0  0x10
@@ -71,7 +69,6 @@ void HWUart::SetUdr(unsigned char val) {
     }
 
 } 
-
 
 void HWUart::SetUsr(unsigned char val) { 
     unsigned char usrold=usr;
@@ -92,14 +89,13 @@ void HWUart::SetUsr(unsigned char val) {
     CheckForNewClearIrq(clearnew);
 } 
 
-void HWUsart::SetUcsrc(unsigned char val) {
-    ucsrc=val;
-    SetFrameLengthFromRegister();
+void HWUart::SetUbrr(unsigned char val) {
+    ubrr = (ubrr & 0xff00) | val;
 }
 
-
-void HWUart::SetUbrr(unsigned char val) { ubrr=(ubrr&0xff00)|val; } 
-void HWUart::SetUbrrhi( unsigned char val) { ubrr=(ubrr&0xff)|(val<<8); }
+void HWUart::SetUbrrhi(unsigned char val) {
+    ubrr = (ubrr & 0xff) | ((val & 0xf) << 8);
+}
 
 void HWUart::SetFrameLengthFromRegister() {
     if ( ucr&UCSZ2) {
@@ -179,8 +175,13 @@ unsigned int HWUart::CpuCycle() {
         CpuCycleTx();
     }
 
+    // controling read sequence down counter
+    if(regSeq > 0)
+        regSeq--;
+      
     return 0;
 }
+
 unsigned int HWUart::CpuCycleRx() {
     // receiver part
     //
@@ -381,7 +382,6 @@ unsigned int HWUart::CpuCycleRx() {
     return 0;
 }
 
-
 unsigned int HWUart::CpuCycleTx() {
     /*************************************** TRANCEIVER PART **********************************/
     //unsigned char usr_old=usr;
@@ -563,37 +563,6 @@ HWUart::HWUart(AvrDevice *core,
     Reset();
 }
 
-HWUsart::HWUsart(AvrDevice *core,
-                 HWIrqSystem *s,
-                 PinAtPort tx,
-                 PinAtPort rx,
-                 PinAtPort xck,
-                 unsigned int vrx,
-                 unsigned int vudre,
-                 unsigned int vtx,
-                 int n):
-    HWUart(core, s, tx, rx, vrx, vudre, vtx, n),
-    pinXck(xck),
-    ucsrc_reg(this, "UCSRC",
-              this, &HWUsart::GetUcsrc, &HWUsart::SetUcsrc)
-{
-    Reset();
-}
-
-void HWUart::Reset() {
-    udrWrite=0;
-    udrRead=0;
-    usr=UDRE; //UDRE in USR is set 1 on reset
-    ucr=0;
-    ucsrc=UCSZ1|UCSZ0;
-    ubrr=0;
-
-    rxState=RX_WAIT_FOR_LOWEDGE;
-    txState=TX_FIRST_RUN;
-
-    SetFrameLengthFromRegister(); 
-}
-
 unsigned char HWUart::GetUdr() {
     if (usr&RXC) {
         usr&=0xff-RXC; // unset RXC register
@@ -608,9 +577,6 @@ unsigned char HWUart::GetUsr() { return usr; }
 unsigned char HWUart::GetUcr() { return ucr; }
 unsigned char HWUart::GetUbrr() { return ubrr&0xff; }
 unsigned char HWUart::GetUbrrhi() { return (ubrr&0xff00)>>8; }
-
-unsigned char HWUsart::GetUcsrc() { return ucsrc; }
-
 
 void HWUart::ClearIrqFlag(unsigned int vector){
     //other Uart IRQ Flags can't be cleared by executing the vector here
@@ -632,3 +598,66 @@ void HWUart::CheckForNewClearIrq(unsigned char val) {
     if (val & TXC) { irqSystem->ClearIrqFlag(vectorTx); }
 }
 
+void HWUart::Reset() {
+    udrWrite=0;
+    udrRead=0;
+    usr=UDRE; //UDRE in USR is set 1 on reset
+    ucr=0;
+    ucsrc=UCSZ1|UCSZ0;
+    ubrr=0;
+
+    regSeq = 0;
+    
+    rxState=RX_WAIT_FOR_LOWEDGE;
+    txState=TX_FIRST_RUN;
+
+    SetFrameLengthFromRegister(); 
+}
+
+// implementation of HWUsart
+
+void HWUsart::SetUcsrc(unsigned char val) {
+    ucsrc=val;
+    SetFrameLengthFromRegister();
+}
+
+void HWUsart::SetUcsrcUbrrh(unsigned char val) {
+    if((val & URSEL) == URSEL) {
+        SetUcsrc(val & 0x7f);
+    } else {
+        SetUbrrhi(val);
+    }
+}
+
+unsigned char HWUsart::GetUcsrc() { return ucsrc; }
+
+unsigned char HWUsart::GetUcsrcUbrrh() {
+    if(regSeq == 0) {
+        regSeq = 2;
+        return GetUbrrhi();
+    } else {
+        regSeq = 0;
+        return GetUcsrc();
+    }
+}
+
+HWUsart::HWUsart(AvrDevice *core,
+                 HWIrqSystem *s,
+                 PinAtPort tx,
+                 PinAtPort rx,
+                 PinAtPort xck,
+                 unsigned int vrx,
+                 unsigned int vudre,
+                 unsigned int vtx,
+                 int n):
+    HWUart(core, s, tx, rx, vrx, vudre, vtx, n),
+    pinXck(xck),
+    ucsrc_reg(this, "UCSRC",
+              this, &HWUsart::GetUcsrc, &HWUsart::SetUcsrc),
+    ucsrc_ubrrh_reg(this, "UCSRC_UBRRH",
+                    this, &HWUsart::GetUcsrcUbrrh, &HWUsart::SetUcsrcUbrrh)
+{
+    Reset();
+}
+
+// EOF

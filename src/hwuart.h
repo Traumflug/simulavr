@@ -26,41 +26,42 @@
 #ifndef HWUART
 #define HWUART
 
+#include "avrdevice.h"
+#include "irqsystem.h"
 #include "trace.h" 
 #include "hardware.h"
 #include "pinatport.h"
 #include "rwmem.h"
 #include "traceval.h"
 
-class AvrDevice;
-class HWIrqSystem;
-
+//! Implements the I/O hardware necessary to do UART transfers.
 class HWUart: public Hardware, public TraceValueRegister {
     
     protected:
-        unsigned char udrWrite;
-        unsigned char udrRead;
-        unsigned char usr;  //also used as ucsra
-        unsigned char ucr;  //also used as ucsrb
-        unsigned char ucsrc; 
-        unsigned short ubrr; //16 bit ubrr to fit also 4433 device
+        unsigned char udrWrite; //!< Write stage of UDR register value
+        unsigned char udrRead;  //!< Read stage of UDR register value
+        unsigned char usr;      //!< USR register value, also used as UCSRA register value
+        unsigned char ucr;      //!< UCR register value, also used as UCSRB register value
+        unsigned char ucsrc;    //!< UCSRC register value
+        unsigned short ubrr;    //!< Baud rate register value (UBRR)
 
-        bool readParity;    //the parity for usart
-        bool writeParity;
+        bool readParity;        //!< The read parity flag for usart
+        bool writeParity;       //!< The write parity flag for usart
 
-        int frameLength;
+        int frameLength;        //!< Hold length of UART frame
 
-        HWIrqSystem *irqSystem;
+        HWIrqSystem *irqSystem; //!< Connection to interrupt system
 
-        PinAtPort pinTx;
-        PinAtPort pinRx;
+        PinAtPort pinTx;        //!< TX pin
+        PinAtPort pinRx;        //!< RX pin
 
-        unsigned int vectorRx;
-        unsigned int vectorUdre;
-        unsigned int vectorTx;
+        unsigned int vectorRx;   //!< Interrupt vector ID for receive interrupt
+        unsigned int vectorUdre; //!< Interrupt vector ID for UDR empty interrupt
+        unsigned int vectorTx;   //!< Interrupt vector ID for sent byte interrupt
 
+        unsigned char regSeq;    //!< Cycle timer for controling read access to UCSRC/UBRRH combined register
+        
         int baudCnt;
-
 
         enum T_RxState {
             RX_DISABLED,
@@ -102,7 +103,15 @@ class HWUart: public Hardware, public TraceValueRegister {
         int txBitCnt;
 
     public:
-        HWUart(AvrDevice *core, HWIrqSystem *, PinAtPort tx, PinAtPort rx, unsigned int vrx, unsigned int vudre, unsigned int vtx, int n=0); // { irqSystem= s;}
+        //! Creates a instance of HWUart class
+        HWUart(AvrDevice *core,
+               HWIrqSystem *,
+               PinAtPort tx,
+               PinAtPort rx,
+               unsigned int vrx,
+               unsigned int vudre,
+               unsigned int vtx,
+               int n = 0);
         virtual unsigned int CpuCycle();
 
         void Reset();
@@ -119,7 +128,6 @@ class HWUart: public Hardware, public TraceValueRegister {
         unsigned char GetUbrr();
         unsigned char GetUbrrhi();
 
-        //bool IsIrqFlagSet(unsigned int);
         void ClearIrqFlag(unsigned int);
         void CheckForNewSetIrq(unsigned char);
         void CheckForNewClearIrq(unsigned char);
@@ -137,21 +145,32 @@ class HWUart: public Hardware, public TraceValueRegister {
         void SetFrameLengthFromRegister();
 };
 
+//! Implements the I/O hardware necessary to do USART transfers.
 class HWUsart: public HWUart {
     
     protected:
-        PinAtPort pinXck;
+        PinAtPort pinXck; //!< Clock pin for synchronous mode
 
     public:
-        HWUsart(AvrDevice *core, HWIrqSystem *,
-        PinAtPort tx, PinAtPort rx, PinAtPort xck,
-        unsigned int vrx, unsigned int vudre, unsigned int vtx, int n=0);
+        //! Creates a instance of HWUsart class
+        HWUsart(AvrDevice *core,
+                HWIrqSystem *,
+                PinAtPort tx,
+                PinAtPort rx,
+                PinAtPort xck,
+                unsigned int vrx,
+                unsigned int vudre,
+                unsigned int vtx,
+                int n = 0);
 
         void SetUcsrc(unsigned char val);
+        void SetUcsrcUbrrh(unsigned char val);
 
         unsigned char GetUcsrc();
+        unsigned char GetUcsrcUbrrh();
 
-        IOReg<HWUsart> ucsrc_reg;
+        IOReg<HWUsart> ucsrc_reg,
+                       ucsrc_ubrrh_reg;
 };
 
 #endif
