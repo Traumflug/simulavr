@@ -26,4 +26,46 @@
 #ifndef ATMEGA16
 #define ATMEGA16
 
+#include "avrdevice.h"
+#include "hardware.h"
+#include "rwmem.h"
+#include "timerprescaler.h"
+#include "timerirq.h"
+#include "hwtimer.h"
+#include "hwmegaextirq.h"
+#include "hwuart.h"
+#include "hwspi.h"
+#include "hwad.h"
+#include "pin.h"
+
+//! AVRDevice class for ATMega16
+class AvrDevice_atmega16: public AvrDevice {
+    
+    public:
+        Pin aref;                       //!< analog reference pin
+        HWPort *porta;                  //!< port A
+        HWPort *portb;                  //!< port B
+        HWPort *portc;                  //!< port C
+        HWPort *portd;                  //!< port D
+        HWMegaExtIrq *extirq;           //!< external interrupt unit
+
+        HWAdmux *admux;                 //!< adc multiplexer unit
+        HWAd *ad;                       //!< adc unit
+
+        IOSpecialReg *assr_reg;         //!< ASSR IO register
+        IOSpecialReg *sfior_reg;        //!< SFIOR IO register
+        HWPrescaler *prescaler01;       //!< prescaler unit for timer 0 and 1
+        HWPrescalerAsync *prescaler2;   //!< prescaler unit for timer 2
+        ICaptureSource *inputCapture1;  //!< input capture source for timer1
+        HWTimer8_1C*   timer0;          //!< timer 0 unit
+        HWTimer16_2C2* timer1;          //!< timer 1 unit
+        HWTimer8_1C*   timer2;          //!< timer 2 unit
+        TimerIRQRegister* timer012irq;  //!< timer interrupt unit for timer 0 to 2
+        HWSpi *spi;                     //!< spi unit
+        HWUsart *usart;                 //!< usart unit
+
+        AvrDevice_atmega16();
+        ~AvrDevice_atmega16(); 
+};
+
 #endif
