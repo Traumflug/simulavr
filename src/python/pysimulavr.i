@@ -26,6 +26,9 @@
   #include "at4433.h"
   #include "at8515.h"
   #include "atmega668base.h"
+  #include "atmega16.h"
+  #include "atmega32.h"
+  #include "attiny2313.h"
   
 %}
 
@@ -181,5 +184,8 @@ namespace std {
 %include "at4433.h"
 %include "at8515.h"
 %include "atmega668base.h"
+%include "atmega16.h"
+%include "atmega32.h"
+%include "attiny2313.h"
 
 // EOF
