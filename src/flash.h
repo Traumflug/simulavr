@@ -59,7 +59,12 @@ class AvrFlash: public Memory {
         
         /*! Decode only operation at address
           @param addr address, where operation have to be decoded */
-        void Decode(int addr);
+        void Decode(unsigned int addr);
+        
+        /*! Decode memory block with offset and size
+          @param offset data offset in memory block, beginning from start of THIS memory block!
+          @param secSize count of available data (bytes) in src */
+        void Decode(unsigned int offset, int secSize);
         
         /*! Write memory data to memory block.
           @param src binary c-string with data to write in

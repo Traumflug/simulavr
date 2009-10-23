@@ -37,43 +37,44 @@ extern "C" {
 #include "memory.h"
 
 void AvrFlash::Decode(){
-    for (unsigned int addr=0; addr<size ; addr+=2) {
+    for(unsigned int addr = 0; addr < size ; addr += 2)
         Decode(addr);
-    }
 }
 
-AvrFlash::AvrFlash(AvrDevice *c, int _size):Memory(_size), core(c), DecodedMem(size) {
-    for (unsigned int tt=0; tt<size; tt++) { 
-        myMemory[tt]=0xff;
-    }
-
+AvrFlash::AvrFlash(AvrDevice *c, int _size): Memory(_size), core(c), DecodedMem(size) {
+    for(unsigned int tt = 0; tt < size; tt++)
+        myMemory[tt] = 0xff;
     Decode();
 }
 
-void AvrFlash::WriteMem( unsigned char *src, unsigned int offset, unsigned int secSize) {
-    for (unsigned tt=0; tt<secSize; tt+=2) { 
-        if (tt+offset<size) {
+void AvrFlash::WriteMem(unsigned char *src, unsigned int offset, unsigned int secSize) {
+    for(unsigned tt = 0; tt < secSize; tt += 2) { 
+        if(tt + offset < size) {
 #ifndef WORDS_BIGENDIAN
-            *(myMemory+tt+offset)=src[tt+1];
-            *(myMemory+tt+1+offset)=src[tt];
+            *(myMemory + tt + offset) = src[tt + 1];
+            *(myMemory + tt + 1 + offset) = src[tt];
 #else
-            *(myMemory+tt+offset)=src[tt];
-            *(myMemory+tt+1+offset)=src[tt+1];
+            *(myMemory + tt + offset) = src[tt];
+            *(myMemory + tt + 1 + offset) = src[tt + 1];
 #endif
         } 
     }
-
-    Decode();
+    Decode(offset, secSize);
 }
 
+void AvrFlash::Decode(unsigned int offset, int secSize) {
+    for(; (offset < size) && (secSize > 0); offset += 2, secSize -= 2)
+        Decode(offset);
+}
 
-void AvrFlash::Decode(int addr ) {
-    addr>>=1; //PC runs per word
+void AvrFlash::Decode(unsigned int addr) {
+    addr >>= 1; //PC runs per word
 
-    word *MemPtr=(word*)(myMemory);
+    word *MemPtr = (word *)(myMemory);
     word opcode;
 
-    opcode=((MemPtr[addr])>>8)+((MemPtr[addr]&0xff)<<8);
-    if (DecodedMem[addr]!=0) delete DecodedMem[addr];       //delete old Instruction here 
-    DecodedMem[addr]= lookup_opcode(opcode, core);          //and set new one
+    opcode = ((MemPtr[addr]) >> 8) + ((MemPtr[addr] & 0xff) << 8);
+    if(DecodedMem[addr] != 0)
+        delete DecodedMem[addr];                     //delete old Instruction here 
+    DecodedMem[addr] = lookup_opcode(opcode, core);  //and set new one
 }
