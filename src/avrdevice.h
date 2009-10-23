@@ -32,6 +32,7 @@
 #include "net.h"
 #include "breakpoint.h"
 #include "traceval.h"
+#include "flashprog.h"
 
 #include <string>
 #include <map>
@@ -74,6 +75,7 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         word PC;
         int PC_size;
         AvrFlash *Flash;
+        FlashProgramming * spmRegister;
         HWEeprom *eeprom;
         Data *data;
         HWIrqSystem *irqSystem;

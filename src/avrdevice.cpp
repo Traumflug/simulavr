@@ -228,6 +228,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
         avr_error("Not enough memory for Sram in AvrDevice::AvrDevice");
 
     //create the flash area with specified size
+    spmRegister = NULL;
     Flash = new AvrFlash(this, flashSize);
     if(Flash == NULL)
         avr_error("Not enough memory for Flash in AvrDevice::AvrDevice");
