@@ -26,6 +26,9 @@
 #include "flashprog.h"
 #include "avrdevice.h"
 
+//#include <iostream>
+//using namespace std;
+
 FlashProgramming::FlashProgramming(AvrDevice *c,
                                    unsigned int pgsz,
                                    unsigned int nrww):
@@ -35,24 +38,39 @@ FlashProgramming::FlashProgramming(AvrDevice *c,
     spmcr_reg(c, "SPMCR",
               this, &FlashProgramming::GetSpmcr, &FlashProgramming::SetSpmcr)
 {
+    c->AddToCycleList(this);
     Reset();
 }
 
 unsigned int FlashProgramming::CpuCycle() {
+    if(opr_enable_count > 0)
+        opr_enable_count--;
     return 0;
 }
 
 void FlashProgramming::Reset() {
+    spmcr_val = 0;
+    opr_enable_count = 0;
 }
 
-void FlashProgramming::SPM_action(unsigned int data, unsigned int addr) {
+int FlashProgramming::SPM_action(unsigned int data, unsigned int xaddr, unsigned int addr) {
+    int res = 0;
+    if(opr_enable_count > 0)
+        res = 1;
+    //cout << "spm-action(0x" << hex << data << ",0x" << hex << addr << ",0x" << hex << xaddr << ")=" << res << endl;
+    return res;
 }
 
 void FlashProgramming::SetSpmcr(unsigned char v) {
+    spmcr_val = v & 0x80;
+    //cout << "spmcr=0x" << hex << (unsigned int)v << endl;
+    if(v & 0x1)
+        opr_enable_count = 4;
 }
 
 unsigned char FlashProgramming::GetSpmcr() {
-    return 0;
+    //cout << "spmcr:0x" << hex << (unsigned int)spmcr_val << endl;
+    return spmcr_val;
 }
 
 // EOF

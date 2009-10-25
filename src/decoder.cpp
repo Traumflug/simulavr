@@ -29,6 +29,7 @@
 #include "hwwado.h"
 #include "hwsreg.h"
 #include "avrerror.h"
+#include "ioregs.h"
 
 void avr_core_stack_push( AvrDevice *core, int cnt, long val);
 dword avr_core_stack_pop( AvrDevice *core, int cnt); 
@@ -627,7 +628,10 @@ int avr_op_ELPM_Z::operator()()
     int Z, flash_addr;
     word data;
 
-    Z = ((core->GetRampz() & 0x3f) << 16) +
+    unsigned char rampz = 0;
+    if(core->rampz != NULL)
+        rampz = core->rampz->GetRampz();
+    Z = ((rampz & 0x3f) << 16) +
         (ZH << 8) +
         ZL;
 
@@ -654,7 +658,10 @@ int avr_op_ELPM_Z_incr::operator()()
     int Z, flash_addr;
     word data;
 
-    Z = ((core->GetRampz() & 0x3f) << 16) +
+    unsigned char rampz = 0;
+    if(core->rampz != NULL)
+        rampz = core->rampz->GetRampz();
+    Z = ((rampz & 0x3f) << 16) +
         (ZH << 8) +
         ZL;
 
@@ -665,7 +672,8 @@ int avr_op_ELPM_Z_incr::operator()()
 
     /* post increment Z */
     Z += 1;
-    core->SetRampz((Z >> 16) & 0x3f);
+    if(core->rampz != NULL)
+        core->rampz->SetRampz((Z >> 16) & 0x3f);
     ZL=Z&0xff;
     ZH=(Z>>8)&0xff;
 
@@ -687,7 +695,10 @@ int avr_op_ELPM::operator()()
     int Z, flash_addr;
     word data;
 
-    Z = ((core->GetRampz() & 0x3f) << 16) +
+    unsigned char rampz = 0;
+    if(core->rampz != NULL)
+        rampz = core->rampz->GetRampz();
+    Z = ((rampz & 0x3f) << 16) +
         (ZH << 8) +
         ZL;
 
@@ -728,16 +739,32 @@ int avr_op_EOR::operator()()
 
 avr_op_ESPM::avr_op_ESPM
 (word opcode, AvrDevice *c):
-    DecodedInstruction(c, 0,0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    R2((*(core->R))[get_rr_5(opcode)]),
-    status(core->status) ,
-    K(get_K_6(opcode))
+    DecodedInstruction(c, 0, 0),
+    R0((*(core->R))[0]),
+    R1((*(core->R))[1]),
+    R30((*(core->R))[30]),
+    R31((*(core->R))[31])
 {}
 
-int avr_op_ESPM::operator()()  //TODO currently not supported
+int avr_op_ESPM::operator()()
 {
-    return 0;
+    unsigned char xaddr = 0;
+    if(core->rampz != NULL)
+        xaddr = core->rampz->GetRampz();
+    if(core->spmRegister != NULL) {
+        unsigned int Z = R30 + (R31 << 8);
+        unsigned int D = R0 + (R1 << 8);
+        int res = core->spmRegister->SPM_action(D, xaddr, Z);
+        if(res) {
+            // increment Z register
+            Z++;
+            R30 = Z & 0xff;
+            R31 = (Z >> 8) & 0xff;
+            if(core->rampz != NULL)
+                core->rampz->SetRampz((Z >> 16) & 0x3f);
+        }
+    }
+    return 1;
 }
 
 
@@ -1949,14 +1976,22 @@ avr_op_SPM::avr_op_SPM
 (word opcode, AvrDevice *c):
     DecodedInstruction(c,0,0),
     R0((*(core->R))[0]),
-    R1((*(core->R))[1])
+    R1((*(core->R))[1]),
+    R30((*(core->R))[30]),
+    R31((*(core->R))[31])
 {}
 
 int avr_op_SPM::operator()() 
 {
-
-
-    return 0;
+    unsigned char xaddr = 0;
+    if(core->rampz != NULL)
+        xaddr = core->rampz->GetRampz();
+    if(core->spmRegister != NULL) {
+        unsigned int Z = R30 + (R31 << 8);
+        unsigned int D = R0 + (R1 << 8);
+        core->spmRegister->SPM_action(D, xaddr, Z);
+    }
+    return 1;
 }
 
 avr_op_STD_Y::avr_op_STD_Y

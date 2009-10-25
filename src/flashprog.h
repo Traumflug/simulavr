@@ -37,6 +37,8 @@ class FlashProgramming: public Hardware {
     protected:
         unsigned int pageSize;  //!< page size in words
         unsigned int nrww_addr; //!< start address of non RWW area of flash
+        unsigned char spmcr_val; //!< holds the register value
+        int opr_enable_count; //!< enable counter for SPM operation
         
     public:
         //! Create a instance of FlashProgramming class
@@ -45,7 +47,7 @@ class FlashProgramming: public Hardware {
         unsigned int CpuCycle();
         void Reset();
         
-        void SPM_action(unsigned int data, unsigned int addr);
+        int SPM_action(unsigned int data, unsigned int xaddr, unsigned int addr);
         void SetSpmcr(unsigned char v);
         unsigned char GetSpmcr();
 

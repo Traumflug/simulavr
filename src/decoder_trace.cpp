@@ -32,6 +32,7 @@
 #include "helper.h"
 #include "flash.h"
 #include "rwmem.h"
+#include "ioregs.h"
 
 #define MONSREG traceOut << (string)(*(core->status))  
 
@@ -241,7 +242,10 @@ int avr_op_ELPM_Z::Trace( ) {
     traceOut << "ELPM R" << p1 << ", Z " ;
     int ret=this->operator()();
 
-    unsigned int Z = ((core->GetRampz() & 0x3f) << 16) +
+    unsigned char rampz = 0;
+    if(core->rampz != NULL)
+        rampz = core->rampz->GetRampz();
+    unsigned int Z = ((rampz & 0x3f) << 16) +
         (((*(core->R))[31]) << 8) + 
         (*(core->R))[30];
 
@@ -256,7 +260,10 @@ int avr_op_ELPM_Z_incr::Trace( ) {
     traceOut << "ELPM R" << p1 << ", Z+ ";
     int ret=this->operator()();
 
-    unsigned int Z = ((core->GetRampz() & 0x3f) << 16) +
+    unsigned char rampz = 0;
+    if(core->rampz != NULL)
+        rampz = core->rampz->GetRampz();
+    unsigned int Z = ((rampz & 0x3f) << 16) +
         (((*(core->R))[31]) << 8) + 
         (*(core->R))[30];
 
@@ -273,7 +280,10 @@ int avr_op_ELPM::Trace( ) {
     traceOut << "ELPM ";
     int ret=this->operator()();
 
-    unsigned int Z = ((core->GetRampz() & 0x3f) << 16) +
+    unsigned char rampz = 0;
+    if(core->rampz != NULL)
+        rampz = core->rampz->GetRampz();
+    unsigned int Z = ((rampz & 0x3f) << 16) +
         (((*(core->R))[31]) << 8) + 
         (*(core->R))[30];
 
@@ -293,7 +303,7 @@ int avr_op_EOR::Trace( ) {
 }
 
 int avr_op_ESPM::Trace( ) {
-    traceOut << "ESPM??? " << p1 << ", " << p2 << " ";
+    traceOut << "SPM Z+ ";
     int ret=this->operator()();
     return ret;
 }

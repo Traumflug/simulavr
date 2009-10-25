@@ -675,16 +675,13 @@ class avr_op_ESPM:public DecodedInstruction
      * Flags      : None
      * Num Clocks : -
      */
-    //avr_error( "This opcode is not implemented yet: 0x%04x", opcode );
 
-    //TODO
-    //avr_error( "This opcode is not implemented yet: 0x%04x", opcode );
     protected:
+        RWMemoryMember &R0;
         RWMemoryMember &R1;
-        RWMemoryMember &R2;
-        HWSreg *status;
-        unsigned char K;
-
+        RWMemoryMember &R30;
+        RWMemoryMember &R31;
+        
     public:
         avr_op_ESPM (word opcode, AvrDevice *c);
         int operator()();
@@ -1843,6 +1840,8 @@ class avr_op_SPM:public DecodedInstruction
     protected:
         RWMemoryMember &R0;
         RWMemoryMember &R1;
+        RWMemoryMember &R30;
+        RWMemoryMember &R31;
 
     public:
         avr_op_SPM (word opcode, AvrDevice *c);

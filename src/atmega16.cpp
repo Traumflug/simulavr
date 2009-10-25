@@ -33,12 +33,35 @@
 #include "hweeprom.h"
 #include "hwwado.h"
 #include "hwsreg.h"
+#include "flashprog.h"
 
 #include "avrfactory.h"
 
 AVR_REGISTER(atmega16, AvrDevice_atmega16);
 
-AvrDevice_atmega16::~AvrDevice_atmega16() {}
+AvrDevice_atmega16::~AvrDevice_atmega16() {
+    delete timer2;
+    delete timer1;
+    delete inputCapture1;
+    delete timer0;
+    delete usart;
+    delete wado;
+    delete prescaler2;
+    delete prescaler01;
+    delete assr_reg;
+    delete sfior_reg;
+    delete spi;
+    delete ad;
+    delete admux;
+    delete spmRegister;
+    delete portd;
+    delete portc;
+    delete portb;
+    delete porta;
+    delete stack;
+    delete eeprom;
+    delete irqSystem;
+}
 
 AvrDevice_atmega16::AvrDevice_atmega16():
     AvrDevice(64, 4096, 0, 16*1024),
@@ -52,6 +75,8 @@ AvrDevice_atmega16::AvrDevice_atmega16():
     portc = new HWPort(this, "C");
     portd = new HWPort(this, "D");
 
+    spmRegister = new FlashProgramming(this, 64, 0x1c00);
+    
     RegisterPin("AREF", &aref);
 
     admux = new HWAdmux(this,
@@ -134,6 +159,7 @@ AvrDevice_atmega16::AvrDevice_atmega16():
     
     rw[0x59]= & timer012irq->timsk_reg;
     rw[0x58]= & timer012irq->tifr_reg;
+    rw[0x57]= & spmRegister->spmcr_reg;
     
     rw[0x53]= & timer0->tccr_reg;
     rw[0x52]= & timer0->tcnt_reg;
