@@ -199,6 +199,9 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
 
     data = new Data; //only the symbol container
 
+    // placeholder for RAMPZ register
+    rampz = NULL;
+    
     //memory space for all RW-Memory addresses    
     rw = (RWMemoryMember**)malloc(sizeof(RWMemoryMember*) * totalIoSpace);
     if(rw == NULL)

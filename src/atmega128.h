@@ -52,7 +52,6 @@ class AvrDevice_atmega128: public AvrDevice {
         HWPort *porte;                  //!< port E
         HWPort *portf;                  //!< port F
         HWPort *portg;                  //!< port G
-        HWRampz *rampz;
         HWMegaExtIrq *extirq;           //!< external interrupt unit
 
         HWAdmux *admux;                 //!< adc multiplexer unit

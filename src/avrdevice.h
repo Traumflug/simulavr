@@ -51,6 +51,7 @@ class MemoryOffsets;
 class RWMemoryMember;
 class Hardware;
 class DumpManager;
+class HWRampz;
 
 //! Basic AVR device, contains the core functionality
 class AvrDevice: public SimulationMember, public TraceValueRegister {
@@ -79,6 +80,7 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         HWEeprom *eeprom;
         Data *data;
         HWIrqSystem *irqSystem;
+        HWRampz *rampz;
         bool abortOnInvalidAccess; //!< Flag, that simulation abort if an invalid access occured, default is false
         TraceValueCoreRegister coreTraceGroup;
 
