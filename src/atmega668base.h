@@ -75,19 +75,6 @@ class AvrDevice_atmega668base: public AvrDevice {
         
         ~AvrDevice_atmega668base();
         
-        /*! read support of Rampz register
-        
-          This method shows a warning message, because this hardware feature
-          isn't available on ATMega48/88/168/328
-          @return allways 0 */
-        unsigned char GetRampz(); 
-        
-        /*! write support of Rampz register
-        
-          This method shows a warning message, because this hardware feature
-          isn't available on ATMega48/88/168/328
-          @param val value to write */
-        void SetRampz(unsigned char val);
 };
 
 //! AVR device class for ATMega328, see AvrDevice_atmega668base.

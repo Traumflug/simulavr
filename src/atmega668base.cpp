@@ -250,13 +250,3 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     Reset();
 }
 
-unsigned char AvrDevice_atmega668base::GetRampz() {
-    avr_warning("Rampz is not a valid Register in ATMega668!");
-    return 0;
-}
-
-void AvrDevice_atmega668base::SetRampz(unsigned char val) {
-    avr_warning("Illegal Rampz operation in ATMega668 core");
-}
-
-

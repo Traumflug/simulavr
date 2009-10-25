@@ -62,8 +62,6 @@ class AvrDevice_at90s8515: public AvrDevice {
         
         AvrDevice_at90s8515();
         ~AvrDevice_at90s8515();
-        unsigned char GetRampz();
-        void SetRampz(unsigned char);
 };
 #endif
 

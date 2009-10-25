@@ -155,12 +155,3 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
 AvrDevice_at90s8515::~AvrDevice_at90s8515() {
 }
 
-unsigned char AvrDevice_at90s8515::GetRampz() {
-    std::cerr << "RAMPZ is not a valid register in at90s8515!" ;
-    return 0;
-}
-
-void AvrDevice_at90s8515::SetRampz(unsigned char val) {
-    std::cerr << "Illegal RAMPZ operation in at90s8515 core";
-}
-

@@ -131,8 +131,6 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         SystemClockOffset GetClockFreq();
 
         virtual ~AvrDevice();
-        virtual unsigned char GetRampz();
-        virtual void SetRampz(unsigned char);
 
         void RegisterPin(const std::string &name, Pin *p) {
             allPins.insert(std::pair<std::string, Pin*>(name, p));

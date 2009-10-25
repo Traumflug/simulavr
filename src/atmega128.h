@@ -75,8 +75,6 @@ class AvrDevice_atmega128: public AvrDevice {
 
         AvrDevice_atmega128();
         ~AvrDevice_atmega128(); 
-        unsigned char GetRampz();
-        void SetRampz(unsigned char);
 };
 
 #endif

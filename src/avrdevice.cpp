@@ -435,15 +435,6 @@ void AvrDevice::Reset() {
     noDirectIrqJump = 0;
 }
 
-unsigned char AvrDevice::GetRampz() { 
-    avr_warning("Illegal use off virtual Base Class!!! AvrDevice");
-    return 0;
-}
-
-void AvrDevice::SetRampz(unsigned char val) {
-    avr_warning("Illegal use of virtual BAseClass AvrDevice");
-}
-
 void AvrDevice::DeleteAllBreakpoints() {
     BP.erase(BP.begin(), BP.end());
 }

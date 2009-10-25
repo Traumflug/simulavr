@@ -266,11 +266,3 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     Reset();
 }
 
-unsigned char AvrDevice_atmega128::GetRampz() {
-    return rampz->GetRampz();
-}
-
-void AvrDevice_atmega128::SetRampz(unsigned char val) {
-    rampz->SetRampz(val);
-}
-
