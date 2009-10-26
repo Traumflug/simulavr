@@ -749,22 +749,21 @@ avr_op_ESPM::avr_op_ESPM
 int avr_op_ESPM::operator()()
 {
     unsigned char xaddr = 0;
+    int cycles = 1;
     if(core->rampz != NULL)
         xaddr = core->rampz->GetRampz();
     if(core->spmRegister != NULL) {
         unsigned int Z = R30 + (R31 << 8);
         unsigned int D = R0 + (R1 << 8);
-        int res = core->spmRegister->SPM_action(D, xaddr, Z);
-        if(res) {
-            // increment Z register
-            Z++;
-            R30 = Z & 0xff;
-            R31 = (Z >> 8) & 0xff;
-            if(core->rampz != NULL)
-                core->rampz->SetRampz((Z >> 16) & 0x3f);
-        }
+        cycles += core->spmRegister->SPM_action(D, xaddr, Z);
+        // increment Z register
+        Z++;
+        R30 = Z & 0xff;
+        R31 = (Z >> 8) & 0xff;
+        if(core->rampz != NULL)
+            core->rampz->SetRampz((Z >> 16) & 0x3f);
     }
-    return 1;
+    return cycles;
 }
 
 
@@ -1984,14 +1983,15 @@ avr_op_SPM::avr_op_SPM
 int avr_op_SPM::operator()() 
 {
     unsigned char xaddr = 0;
+    int cycles = 1;
     if(core->rampz != NULL)
         xaddr = core->rampz->GetRampz();
     if(core->spmRegister != NULL) {
         unsigned int Z = R30 + (R31 << 8);
         unsigned int D = R0 + (R1 << 8);
-        core->spmRegister->SPM_action(D, xaddr, Z);
+        cycles += core->spmRegister->SPM_action(D, xaddr, Z);
     }
-    return 1;
+    return cycles;
 }
 
 avr_op_STD_Y::avr_op_STD_Y

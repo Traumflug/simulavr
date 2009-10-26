@@ -28,21 +28,49 @@
 
 #include "rwmem.h"
 #include "hardware.h"
+#include "systemclocktypes.h"
 
 class AvrDevice;
 
 //! Provides the programming engine for flash self programming
+/*! \todo not implemented yet: SPM interrupt, locking access to RWW areas on
+   flash. Support of LPM operation. Setting boot lock bits. Read-While-Write,
+   if run code in NRWW section. */
 class FlashProgramming: public Hardware {
   
     protected:
+        //! states of processing engine
+        enum SPM_ACTIONtype {
+          SPM_ACTION_NOOP = 0,
+          SPM_ACTION_PREPARE,
+          SPM_ACTION_LOCKCPU,
+          SPM_ACTION_WAIT
+        };
+        //! SPM operations
+        enum SPM_OPStype {
+          SPM_OPS_NOOP = 0,
+          SPM_OPS_STOREBUFFER,
+          SPM_OPS_WRITEBUFFER,
+          SPM_OPS_ERASE,
+          SPM_OPS_UNLOCKRWW
+        };
         unsigned int pageSize;  //!< page size in words
-        unsigned int nrww_addr; //!< start address of non RWW area of flash
+        unsigned int nrww_addr; //!< start address of non RWW area of flash (word address)
         unsigned char spmcr_val; //!< holds the register value
         int opr_enable_count; //!< enable counter for SPM operation
+        SPM_ACTIONtype action; //!< state of the processing engine
+        SPM_OPStype spm_opr; //!< selected SPM operation
+        AvrDevice *core; //!< link to AvrDevice
+        SystemClockOffset timeout; //!< system time till operation run
+        unsigned char *tempBuffer;
+        
+        void ClearOperationBits(void);
+        void SetRWWLock(unsigned int addr);
         
     public:
         //! Create a instance of FlashProgramming class
         FlashProgramming(AvrDevice *c, unsigned int pgsz, unsigned int nrww);
+        ~FlashProgramming();
         
         unsigned int CpuCycle();
         void Reset();
