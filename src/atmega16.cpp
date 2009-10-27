@@ -75,7 +75,7 @@ AvrDevice_atmega16::AvrDevice_atmega16():
     portc = new HWPort(this, "C");
     portd = new HWPort(this, "D");
 
-    spmRegister = new FlashProgramming(this, 64, 0x1c00);
+    spmRegister = new FlashProgramming(this, 64, 0x1c00, FlashProgramming::SPM_MEGA_MODE);
     
     RegisterPin("AREF", &aref);
 

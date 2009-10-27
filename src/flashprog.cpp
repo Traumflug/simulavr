@@ -33,19 +33,26 @@
 //using namespace std;
 
 void FlashProgramming::ClearOperationBits(void) {
-    spmcr_val &= 0xe0;
+    spmcr_val &= ~spmcr_opr_bits;
     action = SPM_ACTION_NOOP;
     spm_opr = SPM_OPS_NOOP;
 }
 
 void FlashProgramming::SetRWWLock(unsigned int addr) {
-    if(addr < (nrww_addr * 2))
+    // no op, if not in ATMega mode
+    if(!isATMega)
+        return;
+    // set lock, if addr in RWW area
+    if(addr < (nrww_addr * 2)) {
         spmcr_val |= 0x40;
+        core->Flash->SetRWWLock(nrww_addr * 2);
+    }
 }
 
 FlashProgramming::FlashProgramming(AvrDevice *c,
                                    unsigned int pgsz,
-                                   unsigned int nrww):
+                                   unsigned int nrww,
+                                   int mode):
     Hardware(c),
     core(c),
     pageSize(pgsz),
@@ -53,9 +60,27 @@ FlashProgramming::FlashProgramming(AvrDevice *c,
     spmcr_reg(c, "SPMCR",
               this, &FlashProgramming::GetSpmcr, &FlashProgramming::SetSpmcr)
 {
+    // initialize hidden buffer
     tempBuffer = avr_new(unsigned char, pgsz * 2);
-    core->AddToCycleList(this);
+    for(int i = 0; i < (pageSize * 2); i++)
+        tempBuffer[i] = 0xff;
+    
+    // set masks and modes
+    isATMega = (mode & SPM_MEGA_MODE) == SPM_MEGA_MODE;
+    spmcr_opr_bits = 0x1f;
+    if((mode & SPM_SIG_OPR) == SPM_SIG_OPR)
+        // extra operation on bit 5 available
+        spmcr_opr_bits |= 0x20;
+    spmcr_valid_bits = spmcr_opr_bits;
+    if(isATMega)
+        // ATMega support SPMIE bit
+        spmcr_valid_bits |= 0x80;
+    
+    // reset processing engine
     Reset();
+    
+    // add to cycle list
+    core->AddToCycleList(this);
 }
 
 FlashProgramming::~FlashProgramming() {
@@ -69,6 +94,7 @@ unsigned int FlashProgramming::CpuCycle() {
         if(opr_enable_count == 0)
             ClearOperationBits();
     }
+    // process CPU lock
     if(action == SPM_ACTION_LOCKCPU) {
         if(SystemClock::Instance().GetCurrentTime() < timeout)
             return 1;
@@ -85,6 +111,10 @@ void FlashProgramming::Reset() {
     timeout = 0;
 }
 
+unsigned char FlashProgramming::LPM_action(unsigned int xaddr, unsigned int addr) {
+    return 0;
+}
+
 int FlashProgramming::SPM_action(unsigned int data, unsigned int xaddr, unsigned int addr) {
   
     // do nothing, if called from RWW section
@@ -98,14 +128,10 @@ int FlashProgramming::SPM_action(unsigned int data, unsigned int xaddr, unsigned
     // process/start prepared operation
     if(action == SPM_ACTION_PREPARE) {
         opr_enable_count = 0;
-        if(spm_opr == SPM_OPS_NOOP) {
-            ClearOperationBits();
-            //cout << "no opr: [0x" << hex << addr << "]" << endl;
-            return 0;
-        }
         if(spm_opr == SPM_OPS_UNLOCKRWW) {
             ClearOperationBits();
             spmcr_val &= ~0x40;
+            core->Flash->SetRWWLock(0);
             //cout << "unlock rww: [0x" << hex << addr << "]" << endl;
             return 0; // is this right, 1 cpu clock for this operation?
         }
@@ -126,8 +152,8 @@ int FlashProgramming::SPM_action(unsigned int data, unsigned int xaddr, unsigned
             addr &= ~((pageSize * 2) - 1);
             // store temp buffer to flash
             core->Flash->WriteMem(tempBuffer, addr, pageSize * 2);
-            // calculate system time, where operation is finished (+4ms)
-            timeout = SystemClock::Instance().GetCurrentTime() + 4000000;
+            // calculate system time, where operation is finished
+            timeout = SystemClock::Instance().GetCurrentTime() + FlashProgramming::SPM_TIMEOUT;
             // lock cpu while writing flash
             action = SPM_ACTION_LOCKCPU;
             // lock RWW, if necessary
@@ -139,10 +165,11 @@ int FlashProgramming::SPM_action(unsigned int data, unsigned int xaddr, unsigned
             // calculate page address
             addr &= ~((pageSize * 2) - 1);
             // erase temp. buffer and store to flash
-            for(int i = 0; i < (pageSize * 2); i++) tempBuffer[i] = 0xff;
+            for(int i = 0; i < (pageSize * 2); i++)
+                tempBuffer[i] = 0xff;
             core->Flash->WriteMem(tempBuffer, addr, pageSize * 2);
-            // calculate system time, where operation is finished (+4ms)
-            timeout = SystemClock::Instance().GetCurrentTime() + 4000000;
+            // calculate system time, where operation is finished
+            timeout = SystemClock::Instance().GetCurrentTime() + FlashProgramming::SPM_TIMEOUT;
             // lock cpu while erasing flash
             action = SPM_ACTION_LOCKCPU;
             // lock RWW, if necessary
@@ -150,19 +177,20 @@ int FlashProgramming::SPM_action(unsigned int data, unsigned int xaddr, unsigned
             //cout << "erase page: [0x" << hex << addr << "]" << endl;
             return 0; // cpu clocks will be extended by CpuCycle calls
         }
-        //cout << "unknown spm-action(0x" << hex << data << ",0x" << hex << addr << ")" << endl;
+        //cout << "unhandled spm-action(0x" << hex << data << ",0x" << hex << addr << ")" << endl;
+        ClearOperationBits();
     }
     return 0;
 }
 
 void FlashProgramming::SetSpmcr(unsigned char v) {
-    spmcr_val = (spmcr_val & 0x60) + (v & 0x9f);
+    spmcr_val = (spmcr_val & ~spmcr_valid_bits) + (v & spmcr_valid_bits);
     
     // calculate operation
     if(action == SPM_ACTION_NOOP) {
         opr_enable_count = 4;
         action = SPM_ACTION_PREPARE;
-        switch(spmcr_val & 0x1f) {
+        switch(spmcr_val & spmcr_opr_bits) {
             case 0x1:
                 spm_opr = SPM_OPS_STOREBUFFER;
                 break;
@@ -176,11 +204,18 @@ void FlashProgramming::SetSpmcr(unsigned char v) {
                 break;
                 
             case 0x9:
-                spm_opr = SPM_OPS_NOOP;
+                spm_opr = SPM_OPS_LOCKBITS;
                 break;
                 
             case 0x11:
-                spm_opr = SPM_OPS_UNLOCKRWW;
+                if(isATMega)
+                    spm_opr = SPM_OPS_UNLOCKRWW;
+                else
+                    spm_opr = SPM_OPS_CLEARBUFFER;
+                break;
+                
+            case 0x21:
+                spm_opr = SPM_OPS_READSIG;
                 break;
                 
             default:
@@ -193,11 +228,6 @@ void FlashProgramming::SetSpmcr(unsigned char v) {
         }
     }
     //cout << "spmcr=0x" << hex << (unsigned int)spmcr_val << "," << action << "," << spm_opr << endl;
-}
-
-unsigned char FlashProgramming::GetSpmcr() {
-    //cout << "spmcr:0x" << hex << (unsigned int)spmcr_val << endl;
-    return spmcr_val;
 }
 
 // EOF
