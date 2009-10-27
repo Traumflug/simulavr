@@ -35,6 +35,7 @@ extern "C" {
 #include "flash.h"
 #include "helper.h"
 #include "memory.h"
+#include "avrerror.h"
 
 void AvrFlash::Decode(){
     for(unsigned int addr = 0; addr < size ; addr += 2)
@@ -42,8 +43,12 @@ void AvrFlash::Decode(){
 }
 
 AvrFlash::AvrFlash(AvrDevice *c, int _size): Memory(_size), core(c), DecodedMem(size) {
+    // initialize memory block
     for(unsigned int tt = 0; tt < size; tt++)
         myMemory[tt] = 0xff;
+    // reset RWW lock
+    rww_lock = 0;
+    // initialize DecodedMem
     Decode();
 }
 
@@ -60,6 +65,28 @@ void AvrFlash::WriteMem(unsigned char *src, unsigned int offset, unsigned int se
         } 
     }
     Decode(offset, secSize);
+}
+
+DecodedInstruction* AvrFlash::GetInstruction(unsigned int pc) {
+    if(IsRWWLock(pc * 2))
+        avr_error("flash is locked (RWW lock)");
+    return DecodedMem[pc];
+}
+
+unsigned char AvrFlash::ReadMem(unsigned int offset) {
+    if(IsRWWLock(offset)) {
+        avr_warning("flash is locked (RWW lock)");
+        return 0;
+    }
+    return myMemory[offset];
+}
+
+unsigned int AvrFlash::ReadMemWord(unsigned int offset) {
+    if(IsRWWLock(offset)) {
+        avr_warning("flash is locked (RWW lock)");
+        return 0;
+    }
+    return (myMemory[offset] << 8) + myMemory[offset + 1];
 }
 
 void AvrFlash::Decode(unsigned int offset, int secSize) {

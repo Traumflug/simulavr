@@ -381,19 +381,16 @@ avr_op_CALL::avr_op_CALL
 
 int avr_op_CALL::operator()() 
 {
+    int kh = KH;
+    word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);
+    int kl = offset;
+    int k = (kh << 16) + kl;
+    int pc_bytes = core->PC_size;
 
-    int kh=KH;
-    word *MemPtr=(word*)core->Flash->myMemory;
-    word offset=MemPtr[(core->PC)+1];         //this is k!
-    offset=(offset>>8)+((offset&0xff)<<8);
-    int kl=offset;
-    int k=(kh<<16)+kl;
-    int pc_bytes=core->PC_size;
+    avr_core_stack_push(core, pc_bytes, core->PC + 2);
+    core->PC = k - 1;
 
-    avr_core_stack_push( core, pc_bytes, core->PC+2 );
-    core->PC=k-1;
-
-    return pc_bytes+2;
+    return pc_bytes + 2;
 }
 
 avr_op_CBI::avr_op_CBI
@@ -637,7 +634,7 @@ int avr_op_ELPM_Z::operator()()
 
 
     flash_addr = Z ^ 0x0001;
-    data = core->Flash->myMemory[flash_addr];
+    data = core->Flash->ReadMem(flash_addr);
     R1=data;
 
     return 3;
@@ -667,7 +664,7 @@ int avr_op_ELPM_Z_incr::operator()()
 
     flash_addr = Z ^ 0x0001;
 
-    data = core->Flash->myMemory[flash_addr];
+    data = core->Flash->ReadMem(flash_addr);
     R1=data;
 
     /* post increment Z */
@@ -704,7 +701,7 @@ int avr_op_ELPM::operator()()
 
     flash_addr = Z ^ 0x0001;
 
-    data = core->Flash->myMemory[flash_addr];
+    data = core->Flash->ReadMem(flash_addr);
     R0=data;
     return 3;
 }
@@ -949,13 +946,8 @@ avr_op_JMP::avr_op_JMP
 
 int avr_op_JMP::operator()() 
 {
-
-    word *MemPtr=(word*)core->Flash->myMemory;
-    word offset=MemPtr[(core->PC)+1];         //this is k!
-    offset=(offset>>8)+((offset&0xff)<<8);
-
-    core->PC=K+offset-1;
-
+    word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);
+    core->PC = K + offset - 1;
     return 3;
 }
 
@@ -1027,14 +1019,10 @@ avr_op_LDS::avr_op_LDS
 
 int avr_op_LDS::operator()()  //TODO, read sram as reference also! read second word!!!
 {
-
     /* Get data at k in current data segment and put into Rd */
-    word *MemPtr=(word*)core->Flash->myMemory;
-    word offset=MemPtr[(core->PC)+1];         //this is k!
-    offset=(offset>>8)+((offset&0xff)<<8);
-    R1=(*(core->Sram))[offset];
+    word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);
+    R1 = (*(core->Sram))[offset];
     core->PC++; //2 word instr
-
     return 2;
 }
 
@@ -1262,7 +1250,7 @@ int  avr_op_LPM_Z::operator()()
     Z = (Rh << 8 ) + Rl;
 
     Z^=0x0001;
-    data = core->Flash->myMemory[Z];
+    data = core->Flash->ReadMem(Z);
 
     Rd=data;
 
@@ -1285,7 +1273,7 @@ int avr_op_LPM::operator()()
     Z = (Rh << 8 ) + Rl; 
 
     Z^=0x0001;
-    data = core->Flash->myMemory[Z];
+    data = core->Flash->ReadMem(Z);
 
     R0=data;
     return 3;
@@ -1309,7 +1297,7 @@ int avr_op_LPM_Z_incr::operator()()
 
     Z = ( Rh << 8 ) + Rl ;
     flashAddr= Z^ 0x0001;
-    data = core->Flash->myMemory[flashAddr];
+    data = core->Flash->ReadMem(flashAddr);
 
     Rd=data;
     Z += 1;
@@ -2059,24 +2047,11 @@ avr_op_STS::avr_op_STS
 
 int avr_op_STS::operator()() 
 {
-
-    //int Rd = get_rd_5(opcode);
-
     /* Get data at k in current data segment and put into Rd */
-    //int k_pc = avr_core_PC_get(core) + 1;
-    //int k    = core->Flash->myMemory[ k_pc];
-    word *MemPtr=(word*)core->Flash->myMemory;
-    word k=MemPtr[(core->PC)+1];         //this is k!
-    k=(k>>8)+((k&0xff)<<8);
+    word k = core->Flash->ReadMemWord((core->PC + 1) * 2);
 
-
-    //avr_core_mem_write( core, k, (*(core->R))[ Rd] );
-
-    (*(core->Sram))[k]=R1;
+    (*(core->Sram))[k] = R1;
     core->PC++;
-
-    //avr_core_PC_incr( core, 2 );
-    //avr_core_inst_CKS_set( core, 2 );
 
     return 2;
 }

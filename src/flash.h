@@ -38,9 +38,10 @@ class DecodedInstruction;
 class AvrFlash: public Memory {
   
     protected:
-        AvrDevice *core; /*!< ptr to connected device core */
-        std::vector <DecodedInstruction*> DecodedMem; /*!< list of decoded ops */
-
+        AvrDevice *core; //!< ptr to connected device core
+        std::vector <DecodedInstruction*> DecodedMem; //!< list of decoded ops
+        unsigned int rww_lock; //!< RWW flash lock address, the area below is locked
+        
         friend int avr_op_CPSE::operator()();
         friend int avr_op_SBIC::operator()();
         friend int avr_op_SBIS::operator()();
@@ -72,6 +73,29 @@ class AvrFlash: public Memory {
           @param secSize count of available data (bytes) in src */
         void WriteMem(unsigned char* src, unsigned int offset, unsigned int secSize);
         
+        /*! Returns true, if lock is set for address
+          @param addr address to check
+          @return true, if address is locked, false, if not */
+        bool IsRWWLock(unsigned int addr) { return (addr < rww_lock);}
+        
+        /*! Sets/Resets RWW lock address
+          @param addr address, below flash is locked, 0 to disable lock */
+        void SetRWWLock(unsigned int addr) { rww_lock = addr;}
+        
+        /*! Returns instruction at address
+          @param pc pc word address
+          @return instruction at pc word address */
+        DecodedInstruction* GetInstruction(unsigned int pc);
+        
+        /*! Returns byte at flash address
+          @param offset data offset in memory block, beginning from start of THIS memory block!
+          @return byte at offset */
+        unsigned char ReadMem(unsigned int offset);
+        
+        /*! Returns word at flash address
+          @param offset data offset in memory block, beginning from start of THIS memory block!
+          @return word at offset */
+        unsigned int ReadMemWord(unsigned int offset);
 };
 
 #endif

@@ -371,7 +371,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                     avr_error(s.c_str());
                 }
 
-                DecodedInstruction *de = (Flash->DecodedMem[PC]);
+                DecodedInstruction *de = (Flash->GetInstruction(PC));
                 if(trace_on) {
                     cpuCycles = de->Trace();
                 } else {
