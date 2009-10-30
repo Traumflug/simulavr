@@ -23,8 +23,8 @@
  *  $Id$
  */
 
-#ifndef ATMEGA16
-#define ATMEGA16
+#ifndef ATMEGA16_32
+#define ATMEGA16_32
 
 #include "avrdevice.h"
 #include "hardware.h"

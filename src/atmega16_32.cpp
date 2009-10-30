@@ -23,7 +23,7 @@
  *  $Id$
  */
 
-#include "atmega16.h"
+#include "atmega16_32.h"
 
 #include "hardware.h"
 #include "irqsystem.h"
