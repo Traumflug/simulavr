@@ -38,8 +38,9 @@
 #include "avrfactory.h"
 
 AVR_REGISTER(atmega16, AvrDevice_atmega16);
+AVR_REGISTER(atmega32, AvrDevice_atmega32);
 
-AvrDevice_atmega16::~AvrDevice_atmega16() {
+AvrDevice_atmega16_32::~AvrDevice_atmega16_32() {
     delete timer2;
     delete timer1;
     delete inputCapture1;
@@ -63,19 +64,25 @@ AvrDevice_atmega16::~AvrDevice_atmega16() {
     delete irqSystem;
 }
 
-AvrDevice_atmega16::AvrDevice_atmega16():
-    AvrDevice(64, 4096, 0, 16*1024),
+AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
+                                             unsigned flash_bytes,
+                                             unsigned ee_bytes,
+                                             unsigned nrww_start):
+    AvrDevice(64 ,          // I/O space above General Purpose Registers
+              ram_bytes,    // RAM size
+              0,            // External RAM size
+              flash_bytes), // Flash Size
     aref()
 {
     irqSystem = new HWIrqSystem(this, 4, 21); //4 bytes per vector, 21 vectors
-    eeprom = new HWMegaEeprom(this, irqSystem, 512, 15); 
+    eeprom = new HWMegaEeprom(this, irqSystem, ee_bytes, 15); 
     stack = new HWStack(this, Sram, 0x1000);
     porta = new HWPort(this, "A");
     portb = new HWPort(this, "B");
     portc = new HWPort(this, "C");
     portd = new HWPort(this, "D");
 
-    spmRegister = new FlashProgramming(this, 64, 0x1c00, FlashProgramming::SPM_MEGA_MODE);
+    spmRegister = new FlashProgramming(this, 64, nrww_start, FlashProgramming::SPM_MEGA_MODE);
     
     RegisterPin("AREF", &aref);
 
@@ -146,24 +153,21 @@ AvrDevice_atmega16::AvrDevice_atmega16():
                              timer012irq->getLine("OCF2"),
                              new PinAtPort(portd, 7));
     
-    /*
-    rw[0x6a]= & extirq->eicra_reg;
-    rw[0x5a]= & extirq->eicrb_reg;
-    rw[0x59]= & extirq->eimsk_reg;
-    rw[0x58]= & extirq->eifr_reg;
-    */
     rw[0x5f]= statusRegister;
     rw[0x5e]= & stack->sph_reg;
     rw[0x5d]= & stack->spl_reg;
     rw[0x5c]= & timer0->ocra_reg;
-    
+    //rw[0x5b]= & extirq->eifr_reg; // GIFR
+    //rw[0x5a]= & extirq->eicra_reg; // GICR
     rw[0x59]= & timer012irq->timsk_reg;
     rw[0x58]= & timer012irq->tifr_reg;
     rw[0x57]= & spmRegister->spmcr_reg;
-    
+    //rw[0x56] TWCR
+    //rw[0x55] MCUCR
+    //rw[0x54] MCUCSR
     rw[0x53]= & timer0->tccr_reg;
     rw[0x52]= & timer0->tcnt_reg;
-    
+    //rw[0x51] OSCCAL/OCDR
     rw[0x50]= sfior_reg;
     rw[0x4f]= & timer1->tccra_reg; 
     rw[0x4e]= & timer1->tccrb_reg;
@@ -204,11 +208,15 @@ AvrDevice_atmega16::AvrDevice_atmega16():
     rw[0x2b]= & usart->ucsra_reg;
     rw[0x2a]= & usart->ucsrb_reg;
     rw[0x29]= & usart->ubrr_reg;
-    
+    //rw[0x28] ACSR
     rw[0x27]= & admux->admux_reg;
     rw[0x26]= & ad->adcsr_reg;
     rw[0x25]= & ad->adch_reg;
     rw[0x24]= & ad->adcl_reg;
+    //rw[0x23] TWDR
+    //rw[0x22] TWAR
+    //rw[0x21] TWSR
+    //rw[0x20] TWBR
     
     Reset();
 }
