@@ -26,4 +26,32 @@
 #ifndef ATTINY2313
 #define ATTINY2313
 
+#include "avrdevice.h"
+#include "hardware.h"
+#include "rwmem.h"
+#include "timerprescaler.h"
+#include "timerirq.h"
+#include "hwtimer.h"
+#include "hwuart.h"
+
+//! AVRDevice class for ATTiny2313
+class AvrDevice_attiny2313: public AvrDevice {
+    
+    public:
+        HWPort *porta;                  //!< port A (only 3 bit)
+        HWPort *portb;                  //!< port B
+        HWPort *portd;                  //!< port D (only 7 bit)
+
+        IOSpecialReg *gtccr_reg;        //!< GTCCR IO register
+        HWPrescaler *prescaler01;       //!< prescaler unit for timer 0 and 1
+        ICaptureSource *inputCapture1;  //!< input capture source for timer1
+        HWTimer8_2C*   timer0;          //!< timer 0 unit
+        HWTimer16_2C3* timer1;          //!< timer 1 unit
+        TimerIRQRegister* timer01irq;   //!< timer interrupt unit for timer 0 and 1
+        HWUsart *usart;                 //!< usart unit
+
+        AvrDevice_attiny2313();
+        ~AvrDevice_attiny2313(); 
+};
+
 #endif

@@ -649,14 +649,23 @@ HWUsart::HWUsart(AvrDevice *core,
                  unsigned int vrx,
                  unsigned int vudre,
                  unsigned int vtx,
-                 int n):
+                 int n,
+                 bool mxReg):
     HWUart(core, s, tx, rx, vrx, vudre, vtx, n),
     pinXck(xck),
     ucsrc_reg(this, "UCSRC",
               this, &HWUsart::GetUcsrc, &HWUsart::SetUcsrc),
+    ubrrh_reg(this, "UBRRH",
+              this, &HWUsart::GetUbrrhi, &HWUsart::SetUbrrhi),
     ucsrc_ubrrh_reg(this, "UCSRC_UBRRH",
                     this, &HWUsart::GetUcsrcUbrrh, &HWUsart::SetUcsrcUbrrh)
 {
+    if(mxReg) {
+        ucsrc_reg.releaseTraceValue();
+        ubrrh_reg.releaseTraceValue();
+    } else
+        ucsrc_ubrrh_reg.releaseTraceValue();
+        
     Reset();
 }
 

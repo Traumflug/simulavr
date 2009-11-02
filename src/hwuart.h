@@ -161,7 +161,8 @@ class HWUsart: public HWUart {
                 unsigned int vrx,
                 unsigned int vudre,
                 unsigned int vtx,
-                int n = 0);
+                int n = 0,
+                bool mxReg = true);
 
         void SetUcsrc(unsigned char val);
         void SetUcsrcUbrrh(unsigned char val);
@@ -170,6 +171,7 @@ class HWUsart: public HWUart {
         unsigned char GetUcsrcUbrrh();
 
         IOReg<HWUsart> ucsrc_reg,
+                       ubrrh_reg,
                        ucsrc_ubrrh_reg;
 };
 
