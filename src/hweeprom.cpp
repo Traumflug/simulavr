@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,8 +44,12 @@ HWEeprom::HWEeprom(AvrDevice *_core, unsigned int size):
     eedr_reg(this, "EEDR",
              this, &HWEeprom::GetEedr, &HWEeprom::SetEedr),
     eecr_reg(this, "EECR",
-             this, &HWEeprom::GetEecr, &HWEeprom::SetEecr) {
-    //core->AddToCycleList(this);
+             this, &HWEeprom::GetEecr, &HWEeprom::SetEecr)
+{
+    // in a "fresh" device eeprom is intialized to 0xff like flash too
+    for(unsigned int tt = 0; tt < size; tt++)
+        myMemory[tt] = 0xff;
+
     Reset();
 }
 
@@ -120,8 +124,8 @@ void HWEeprom::SetEecr(unsigned char newval) {
         } else { //read enable
             cpuHoldCycles=4;
 
-	    state=READ;
-	    core->AddToCycleList(this);
+        state=READ;
+        core->AddToCycleList(this);
 
             eecr=0x01 | localIrqFlag;
             if (core->trace_on==1) traceOut << " EEPROM: Read ";
@@ -181,8 +185,8 @@ unsigned int HWEeprom::CpuCycle() {
 
     } //end of switch
 
-    if (cpuHoldCycles>0) return 1;	//let the cpu sleep a cycle
-    return 0;						//let the cpu continue
+    if (cpuHoldCycles>0) return 1;  //let the cpu sleep a cycle
+    return 0;                       //let the cpu continue
 
 
 }
@@ -278,8 +282,8 @@ unsigned int HWMegaEeprom::CpuCycle() {
     } //end of switch
     //    traceOut<< endl << "eecr=0x" << hex << (unsigned int) eecr << endl;
 
-    if (cpuHoldCycles>0) return 1;	//let the cpu sleep a cycle
-    return 0;						//let the cpu continue
+    if (cpuHoldCycles>0) return 1;  //let the cpu sleep a cycle
+    return 0;                       //let the cpu continue
 
 
 }
