@@ -62,6 +62,8 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         const unsigned int ioSpaceSize;
         const unsigned int totalIoSpace;
         const unsigned int registerSpaceSize;
+        const unsigned int iRamSize;
+        const unsigned int eRamSize;
         std::string actualFilename;
         
         //old static vars for Step()
@@ -148,6 +150,11 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         unsigned int GetMemIOSize(void) { return ioSpaceSize; }
         //! Get configured register space size
         unsigned int GetMemRegisterSize(void) { return registerSpaceSize; }
+        //! Get configured internal RAM size
+        unsigned int GetMemIRamSize(void) { return iRamSize; }
+        //! Get configured external RAM size
+        unsigned int GetMemERamSize(void) { return eRamSize; }
+        
 };
 
 #endif

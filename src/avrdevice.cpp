@@ -188,6 +188,8 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     abortOnInvalidAccess(false),
     totalIoSpace(0x10000),
     registerSpaceSize(32),
+    iRamSize(IRamSize),
+    eRamSize(ERamSize),
     ioSpaceSize(_ioSpaceSize)
 {
     dump_manager = DumpManager::Instance();
