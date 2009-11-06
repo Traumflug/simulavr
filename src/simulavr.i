@@ -27,6 +27,7 @@
 #include "pinmon.h"
 #include "rwmem.h"
 #include "ui/scope.h"
+#include "avrerror.h"
     
 SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %}
@@ -59,8 +60,6 @@ SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %include "pinmon.h"
 %include "rwmem.h"
 %include "ui/scope.h"
+%include "avrerror.h"
 
-void setVerbose(int value);
-void setMessageOnBadAccess(int value);
-void StartTrace(const char*);
 SystemClock &GetSystemClock();

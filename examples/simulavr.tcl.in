@@ -110,8 +110,8 @@ proc Getopts {alistname args} {
 
 #parse arguments?
 
-Getopts argv "hVt:Mm:f:d:F:ua:e:W:R:gGp:ns:l:S:" \
-  doHelp verbose traceFile noMsgOnBadAccess maxRunTime \
+Getopts argv "hVt:m:f:d:F:ua:e:W:R:gGp:ns:l:S:" \
+  doHelp verbose traceFile maxRunTime \
   AvrExecutable AvrCPUModel Frequency hasUserInterface\
   abortOffset exitOffset writeToArgs readFromArgs \
   gdbEnable gdbDebugEnable gdbPort gdbWaitArg \
@@ -162,7 +162,6 @@ proc isSet { str } {
 if { ${verbose} == 1 } {
   puts "Verbose           : ${verbose}"
   puts "Trace File        : [isSet ${traceFile}]" 
-  puts "noMsgOnBadAccess  : ${noMsgOnBadAccess}"
   puts "maxRunTime        : [isSet ${maxRunTime}]"
   puts "AvrExecutable     : ${AvrExecutable}"
   puts "AvrCPUModel       : ${AvrCPUModel}"
@@ -290,7 +289,7 @@ set dev1 [AvrFactory_makeDevice [AvrFactory_instance] ${AvrCPUModel}]
 
 #start the trace output to given filename
 if { "$traceFile" != "" } {
-  StartTrace $traceFile
+  ${sysConHandler} SetTraceFile ${traceFile} 1000000
   SimulationMember_trace_on_set $dev1 1
 }
 
@@ -313,13 +312,7 @@ if { ${exitOffset} != "" } {
   AvrDevice_ReplaceIoRegister ${dev1} ${exitOffset} $exitInstance
 }
 
-setVerbose ${verbose}
-
-if { ${noMsgOnBadAccess} == 0 } {
-  setMessageOnBadAccess 1
-} else {
-  setMessageOnBadAccess 0
-}
+set global_verbose_on ${verbose}
 
 # Write magic register (only stdout supported)
 if { "${writeToOffset}" != "" } {
