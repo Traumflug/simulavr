@@ -28,7 +28,6 @@
 
 #include "avrdevice.h"
 #include "irqsystem.h"
-#include "trace.h" 
 #include "hardware.h"
 #include "pinatport.h"
 #include "rwmem.h"

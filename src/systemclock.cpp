@@ -27,7 +27,6 @@
 #include "systemclock.h"
 #include "simulationmember.h"
 #include "helper.h"
-#include "trace.h"
 #include "application.h"
 #include "avrerror.h"
 

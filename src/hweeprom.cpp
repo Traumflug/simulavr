@@ -27,7 +27,6 @@
 #include "global.h"
 #include "avrdevice.h"
 #include "systemclock.h"
-#include "trace.h"
 #include "irqsystem.h"
 #include "avrerror.h"
 

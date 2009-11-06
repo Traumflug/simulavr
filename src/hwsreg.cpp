@@ -25,7 +25,6 @@
 
 #include "hwsreg.h"
 #include "global.h"
-#include "trace.h"
 
 #include <iostream>
 using namespace std;

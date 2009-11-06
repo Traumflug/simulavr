@@ -27,7 +27,6 @@
 #include "hwad.h"
 
 #include "irqsystem.h"
-#include "trace.h"
 #include "avrerror.h"
 
 #define MUX0 0x01

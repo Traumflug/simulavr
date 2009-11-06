@@ -77,7 +77,7 @@ libsim_la_SOURCES = \
   ioregs.cpp irqsystem.cpp ui/keyboard.cpp ui/lcd.cpp memory.cpp \
   ui/mysocket.cpp net.cpp pin.cpp ui/extpin.cpp pinatport.cpp pinmon.cpp \
   rwmem.cpp ui/scope.cpp ui/serialrx.cpp ui/serialtx.cpp spisrc.cpp spisink.cpp \
-  specialmem.cpp string2.cpp systemclock.cpp trace.cpp traceval.cpp ui/ui.cpp 
+  specialmem.cpp string2.cpp systemclock.cpp traceval.cpp ui/ui.cpp 
 
 libsim_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 
@@ -99,7 +99,7 @@ pkginclude_HEADERS = \
   memory.h ui/mysocket.h net.h pin.h ui/extpin.h pinatport.h pinnotify.h pinmon.h \
   printable.h rwmem.h ui/scope.h ui/serialrx.h ui/serialtx.h simulationmember.h \
   spisrc.h spisink.h specialmem.h systemclock.h systemclocktypes.h \
-  trace.h traceval.h types.h ui/ui.h ui/xcode_to_keynumber.dat
+  traceval.h types.h ui/ui.h ui/xcode_to_keynumber.dat
 
 simulavr_SOURCES = cmd/main.cpp cmd/dumpargs.cpp
 simulavr_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) \
@@ -120,7 +120,7 @@ endif
 TCLHEADER = avrdevice.h at8515.h atmega128.h at4433.h cmd/gdb.h hardware.h \
     ui/keyboard.h ui/lcd.h net.h pin.h ui/extpin.h ui/keyboard.h rwmem.h \
     ui/scope.h ui/serialrx.h ui/serialtx.h systemclock.h systemclocktypes.h \
-    trace.h ui/ui.h
+    ui/ui.h
 
 simulavr_wrap.cxx: simulavr.i $(TCLHEADER)
 	@SWIG@ -o $@ $(srcdir)/simulavr.i

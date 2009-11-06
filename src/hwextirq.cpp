@@ -29,7 +29,6 @@ using namespace std;
 #include "avrdevice.h"
 #include "hwextirq.h"
 #include "irqsystem.h"
-#include "trace.h"
 
 //#define NEW
 

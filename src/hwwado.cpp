@@ -26,7 +26,6 @@
 #include "hwwado.h"
 #include "avrdevice.h"
 #include "systemclock.h"
-#include "trace.h"
 
 #define WDTOE 0x10
 #define WDE 0x08

@@ -26,7 +26,6 @@
 #include "types.h"
 #include "decoder.h"
 #include "avrdevice.h"
-#include "trace.h"
 
 #include "hwsreg.h"
 #include "helper.h"

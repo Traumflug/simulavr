@@ -28,7 +28,6 @@
 #include "hwspi.h"
 #include "flash.h"
 #include "avrdevice.h"
-#include "trace.h"
 #include "traceval.h"
 #include "irqsystem.h"
 #include "avrerror.h"

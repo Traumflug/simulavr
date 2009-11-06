@@ -26,7 +26,6 @@
 #include "irqsystem.h"
 #include "avrdevice.h"
 #include "funktor.h"
-#include "trace.h"
 #include "systemclock.h"
 #include "helper.h"
 #include "avrerror.h"

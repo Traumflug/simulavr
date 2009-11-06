@@ -26,7 +26,6 @@
 #include "avrdevice.h"
 #include "hwmegaextirq.h"
 #include "irqsystem.h"
-#include "trace.h"
 
 //#define NEW
 

@@ -24,7 +24,7 @@
  */
 
 #include "ioregs.h"
-#include "trace.h"
+
 unsigned int HWMcucr::CpuCycle(){return 0;}
 
 HWRampz::HWRampz(AvrDevice *core):

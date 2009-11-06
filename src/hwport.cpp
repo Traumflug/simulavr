@@ -28,7 +28,6 @@ using namespace std;
 
 #include "hwport.h"
 #include "avrdevice.h"
-#include "trace.h"
 
 
 HWPort::HWPort(AvrDevice *core, const string &name):

@@ -9,7 +9,6 @@
   #include "externaltype.h"
   #include "pin.h"
   #include "net.h"
-  #include "trace.h"
   #include "rwmem.h"
   #include "hwsreg.h"
   #include "avrfactory.h"

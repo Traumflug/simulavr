@@ -196,6 +196,8 @@ char* SystemConsoleHandler::getFormatString(const char *prefix,
 // create the handler instance
 SystemConsoleHandler sysConHandler;
 
+int global_verbose_on = 0;
+
 void trioaccess(const char *t, unsigned char val) {
     sysConHandler.traceOutStream() << t << "=" << HexChar(val) << " ";
 }

@@ -16,7 +16,6 @@
 #include "pin.h"
 #include "ui/extpin.h"
 #include "net.h"
-#include "trace.h"
 #include "cmd/gdb.h"
 #include "ui/keyboard.h"
 #include "ui/lcd.h"

@@ -1,7 +1,6 @@
 #include <iostream>
 #include "hwpinchange.h"
 #include "irqsystem.h"
-#include "trace.h"
 
 using namespace std;
 

@@ -23,7 +23,6 @@
 #include "avrdevice.h"
 #include "hwmega48extirq.h"
 #include "irqsystem.h"
-#include "trace.h"
 
 HWMega48ExtIrq::HWMega48ExtIrq(AvrDevice *core, HWIrqSystem *i,
         PinAtPort p0, PinAtPort p1,

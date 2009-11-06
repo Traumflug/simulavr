@@ -28,7 +28,6 @@
 #include "avrfactory.h"
 #include "rwmem.h"
 #include "pin.h"
-#include "trace.h"
 #include "avrerror.h"
 
 static std::vector<AvrDevice*> devices;

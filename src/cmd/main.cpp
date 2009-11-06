@@ -44,7 +44,6 @@ using namespace std;
 #include "systemclock.h"
 #include "lcd.h"
 #include "keyboard.h"
-#include "trace.h"
 #include "traceval.h"
 #include "scope.h"
 #include "string2.h"

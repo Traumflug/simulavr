@@ -26,7 +26,6 @@
 #include "hwacomp.h"
 
 #include "irqsystem.h"
-#include "trace.h"
 
 #define ACD 0x80
 #define ACO 0x20
