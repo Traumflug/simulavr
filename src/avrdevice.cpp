@@ -407,7 +407,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
     cpuCycles--;
     if(trace_on == 1) {
         traceOut << endl;
-        TraceNextLine();
+        sysConHandler.TraceNextLine();
     }
 
     //if (untilCoreStepFinished == false) { //we wait not until end so reply the finish state

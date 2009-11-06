@@ -54,7 +54,7 @@ class SystemConsoleHandler {
         //! Returns true, if tracing is global enabled
         bool GetTraceState(void) { return traceEnabled; }
         //! Gives Access to trace stream
-        std::ostream &traceOut(void) { return *traceStream; }
+        std::ostream &traceOutStream(void) { return *traceStream; }
         //! Ends a trace line, performs reopen new filestream, if necessary
         void TraceNextLine(void);
         
@@ -93,6 +93,17 @@ class SystemConsoleHandler {
 
 //! The SystemConsoleHandler instance for common usage
 extern SystemConsoleHandler sysConHandler;
+
+// redirect old definition ostream traceOut to SystemConsoleHandler.traceStream
+#define traceOut sysConHandler.traceOutStream()
+
+// moved from trace.h
+//! Verbose enable flag
+extern int global_verbose_on;
+
+// moved from trace.h
+//! Helper function for writing trace (trace IO access)
+void trioaccess(const char *t, unsigned char val);
 
 /* FIXME: TRoth 2002-02-23 : '## args' is gcc specific. If porting to another
    compiler, this will have to be handled. Although, I believe the C99

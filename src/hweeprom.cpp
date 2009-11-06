@@ -29,6 +29,7 @@
 #include "systemclock.h"
 #include "trace.h"
 #include "irqsystem.h"
+#include "avrerror.h"
 
 using namespace std;
 

@@ -29,93 +29,93 @@
 #include "rwmem.h"
 #include "pin.h"
 #include "trace.h"
-
+#include "avrerror.h"
 
 static std::vector<AvrDevice*> devices;
 
 static bool checkHandle(int h) {
     if (h>=devices.size()) {
-	vpi_printf("There has never been an AVR device with the handle %d.", h);
-	vpi_control(vpiFinish, 1);
-	return false;
+    vpi_printf("There has never been an AVR device with the handle %d.", h);
+    vpi_control(vpiFinish, 1);
+    return false;
     } else {
-	if (!devices[h]) {
-	    vpi_printf("The AVR with handle %d has already been destroyed.", h);
-	    vpi_control(vpiFinish, 1);
-	    return false;
-	}
+    if (!devices[h]) {
+        vpi_printf("The AVR with handle %d has already been destroyed.", h);
+        vpi_control(vpiFinish, 1);
+        return false;
+    }
     }
     return true;
 }
 
-#define VPI_UNPACKS(name)					\
-    {								\
-	vpiHandle name	= vpi_scan(argv);			\
-	if (! name) {						\
-	    vpi_printf("%s: " #name " parameter missing.\n", xx);\
-	    vpi_free_object(argv);				\
-	    return 0;						\
-	}							\
-	value.format = vpiStringVal;				\
-	vpi_get_value(name, &value);				\
-    }								\
+#define VPI_UNPACKS(name)                   \
+    {                               \
+    vpiHandle name  = vpi_scan(argv);           \
+    if (! name) {                       \
+        vpi_printf("%s: " #name " parameter missing.\n", xx);\
+        vpi_free_object(argv);              \
+        return 0;                       \
+    }                           \
+    value.format = vpiStringVal;                \
+    vpi_get_value(name, &value);                \
+    }                               \
     std::string name = value.value.str;
 
-#define VPI_UNPACKI(name)					\
-    {								\
-	vpiHandle name	= vpi_scan(argv);			\
-	if (! name) {						\
-	    vpi_printf("%s: " #name " parameter missing.\n", xx);\
-	    vpi_free_object(argv);				\
-	    return 0;						\
-	}							\
-	value.format = vpiIntVal;				\
-	vpi_get_value(name, &value);				\
-    }								\
+#define VPI_UNPACKI(name)                   \
+    {                               \
+    vpiHandle name  = vpi_scan(argv);           \
+    if (! name) {                       \
+        vpi_printf("%s: " #name " parameter missing.\n", xx);\
+        vpi_free_object(argv);              \
+        return 0;                       \
+    }                           \
+    value.format = vpiIntVal;               \
+    vpi_get_value(name, &value);                \
+    }                               \
     int name = value.value.integer;
 
-#define VPI_RETURN_INT(val) 					\
-    value.format = vpiIntVal;					\
-    value.value.integer = (val);				\
-    vpi_put_value(ch, &value, 0, vpiNoDelay);			\
+#define VPI_RETURN_INT(val)                     \
+    value.format = vpiIntVal;                   \
+    value.value.integer = (val);                \
+    vpi_put_value(ch, &value, 0, vpiNoDelay);           \
     return 0;
 
-#define AVR_HCHECK()						\
-    if (!checkHandle(handle)) {					\
-	vpi_printf("%s: Invalid handle parameter.\n", xx);	\
-	return 0;						\
+#define AVR_HCHECK()                        \
+    if (!checkHandle(handle)) {                 \
+    vpi_printf("%s: Invalid handle parameter.\n", xx);  \
+    return 0;                       \
     }
 
-#define VPI_BEGIN()						\
-    s_vpi_value value;						\
-    vpiHandle ch	= vpi_handle(vpiSysTfCall, 0);		\
-    vpiHandle argv	= vpi_iterate(vpiArgument, ch);
+#define VPI_BEGIN()                     \
+    s_vpi_value value;                      \
+    vpiHandle ch    = vpi_handle(vpiSysTfCall, 0);      \
+    vpiHandle argv  = vpi_iterate(vpiArgument, ch);
 
-#define VPI_END()						\
+#define VPI_END()                       \
     vpi_free_object(argv);
 
-#define VPI_REGISTER_TASK(name)					\
-    {								\
-	s_vpi_systf_data tf_data;				\
-	tf_data.type      = vpiSysTask;				\
-	tf_data.tfname    = "$" #name;				\
-	tf_data.calltf    = name ## _tf;			\
-	tf_data.compiletf = 0;					\
-	tf_data.sizetf    = 0;					\
-	tf_data.user_data = "$" #name;				\
-	vpi_register_systf(&tf_data);				\
+#define VPI_REGISTER_TASK(name)                 \
+    {                               \
+    s_vpi_systf_data tf_data;               \
+    tf_data.type      = vpiSysTask;             \
+    tf_data.tfname    = "$" #name;              \
+    tf_data.calltf    = name ## _tf;            \
+    tf_data.compiletf = 0;                  \
+    tf_data.sizetf    = 0;                  \
+    tf_data.user_data = "$" #name;              \
+    vpi_register_systf(&tf_data);               \
     }
 
-#define VPI_REGISTER_FUNC(name)					\
-    {								\
-	s_vpi_systf_data tf_data;				\
-	tf_data.type      = vpiSysFunc;				\
-	tf_data.tfname    = "$" #name;				\
-	tf_data.calltf    = name ## _tf;			\
-	tf_data.compiletf = 0;					\
-	tf_data.sizetf    = 0;					\
-	tf_data.user_data = "$" #name;				\
-	vpi_register_systf(&tf_data);				\
+#define VPI_REGISTER_FUNC(name)                 \
+    {                               \
+    s_vpi_systf_data tf_data;               \
+    tf_data.type      = vpiSysFunc;             \
+    tf_data.tfname    = "$" #name;              \
+    tf_data.calltf    = name ## _tf;            \
+    tf_data.compiletf = 0;                  \
+    tf_data.sizetf    = 0;                  \
+    tf_data.user_data = "$" #name;              \
+    vpi_register_systf(&tf_data);               \
     }
 
 /*!
@@ -319,13 +319,13 @@ static PLI_INT32 avr_trace_tf(char *xx) {
     VPI_END();
     
     if (tracename.length()) {
-	traceOut.open(tracename.c_str());
-	for (size_t i=0; i < devices.size(); i++)
-	    devices[i]->trace_on=1;
+    sysConHandler.SetTraceFile(tracename.c_str(), 1000000);
+    for (size_t i=0; i < devices.size(); i++)
+        devices[i]->trace_on=1;
     } else {
-	traceOut.close();
-	for (size_t i=0; i < devices.size(); i++)
-	    devices[i]->trace_on=0;
+    sysConHandler.StopTrace();
+    for (size_t i=0; i < devices.size(); i++)
+        devices[i]->trace_on=0;
     }
 }
 

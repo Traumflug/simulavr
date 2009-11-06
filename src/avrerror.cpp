@@ -40,6 +40,7 @@
 #include <stdarg.h>
 
 #include "avrerror.h"
+#include "helper.h"
 
 SystemConsoleHandler::SystemConsoleHandler() {
     useExitAndAbort = true;
@@ -194,5 +195,9 @@ char* SystemConsoleHandler::getFormatString(const char *prefix,
 
 // create the handler instance
 SystemConsoleHandler sysConHandler;
+
+void trioaccess(const char *t, unsigned char val) {
+    sysConHandler.traceOutStream() << t << "=" << HexChar(val) << " ";
+}
 
 // EOF

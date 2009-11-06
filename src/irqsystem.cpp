@@ -29,6 +29,7 @@
 #include "trace.h"
 #include "systemclock.h"
 #include "helper.h"
+#include "avrerror.h"
 
 #include "application.h"
 

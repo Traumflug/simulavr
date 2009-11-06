@@ -25,6 +25,7 @@
 
 #include "hwstack.h"
 #include "trace.h"
+#include "avrerror.h"
 
 using namespace std;
 

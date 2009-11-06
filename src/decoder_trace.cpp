@@ -33,6 +33,7 @@
 #include "flash.h"
 #include "rwmem.h"
 #include "ioregs.h"
+#include "avrerror.h"
 
 #define MONSREG traceOut << (string)(*(core->status))  
 

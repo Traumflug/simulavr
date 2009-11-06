@@ -31,6 +31,7 @@
 #include "trace.h"
 #include "traceval.h"
 #include "irqsystem.h"
+#include "avrerror.h"
 
 //configuration
 #define SPIE 0x80

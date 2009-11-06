@@ -14,10 +14,11 @@ ofstream traceOut;
 int global_trace_on=0;
 int global_verbose_on=0;
 
+/*
 void trioaccess(const char *t, unsigned char val) {
         traceOut << t << "=" << HexChar(val) << " ";
 }
-
+*/
 string traceFname;
 
 void StartTrace(const char *fname) {

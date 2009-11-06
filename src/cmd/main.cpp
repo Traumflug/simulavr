@@ -139,8 +139,6 @@ int main(int argc, char *argv[]) {
     unsigned long long maxRunTime = 0;
     UserInterface *ui;
     
-    global_trace_on = 0;
-    
     unsigned long writeToPipeOffset = 0x20;
     unsigned long readFromPipeOffset = 0x21;
     unsigned long writeToAbort = 0;
@@ -286,7 +284,7 @@ int main(int argc, char *argv[]) {
             case 't':
                 if(global_verbose_on)
                     cout << "Running in Trace Mode" << endl;
-                StartTrace(optarg);
+                sysConHandler.SetTraceFile(optarg, 1000000);
                 break;
             
             case 'v':
@@ -395,7 +393,7 @@ int main(int argc, char *argv[]) {
     
     dev1->SetClockFreq(1000000000 / fcpu); // time base is 1ns!
     
-    if(global_trace_on)
+    if(sysConHandler.GetTraceState())
         dev1->trace_on = 1;
     
     dman->start(); // start dump session
