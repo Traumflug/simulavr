@@ -36,6 +36,7 @@ class SystemConsoleHandler {
         /*! This is needed only once for a application, see global variable
           sysConHandler, where such instance is created by default. */
         SystemConsoleHandler();
+        ~SystemConsoleHandler();
         
         //! Tells the handler, that exit/abort is to use instead of exceptions
         void SetUseExit(bool useExit = true);
@@ -43,6 +44,19 @@ class SystemConsoleHandler {
         void SetMessageStream(std::ostream *s);
         //! Sets the output stream, where warnings and errors are sent to
         void SetWarningStream(std::ostream *s);
+        
+        //! Sets the trace to file stream and enables tracing global
+        void SetTraceFile(const char *name, unsigned int maxlines = 0);
+        //! Sets the trace to given stream and enables tracing global
+        void SetTraceStream(std::ostream *s);
+        //! Stops tracing global, close file, if set, redirect trace to nullStream
+        void StopTrace(void);
+        //! Returns true, if tracing is global enabled
+        bool GetTraceState(void) { return traceEnabled; }
+        //! Gives Access to trace stream
+        std::ostream &traceOut(void) { return *traceStream; }
+        //! Ends a trace line, performs reopen new filestream, if necessary
+        void TraceNextLine(void);
         
         //! Format and send a message to message stream (default stdout)
         void vfmessage(const char *file, int line, const char *fmt, ...);
@@ -64,6 +78,14 @@ class SystemConsoleHandler {
         char messageStringBuffer[512]; //!< Buffer for built message string itself
         std::ostream *msgStream; //!< Stream, where normal messages are sent to
         std::ostream *wrnStream; //!< Stream, where warning and error messages are sent to
+        std::ostream *traceStream; //!< Stream for trace output
+        std::ostream *nullStream; //!< /dev/null! ;-)
+        bool traceEnabled; //!< flag, true if trace is enabled
+        bool traceToFile; //!< flag, true if trace writes to filestream
+        std::string traceFilename; //!< file name for trace file (will be appended with file count!)
+        unsigned int traceLinesOnFile; //!< how much lines will be written on one trace file
+        unsigned int traceLines; //!< how much lines are written on current trace file
+        int traceFileCount; //!< Counter for trace files
         
         //! Creates the format string for formatting a message
         char *getFormatString(const char *prefix, const char *file, int line, const char *fmtstr);

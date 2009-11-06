@@ -32,6 +32,9 @@
    raising exceptions instead of calling exit/abort, if needed and the
    possibility to redirect output to a stream instead of stdout/stderr. */
 
+#include <fstream>
+#include <sstream>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -40,8 +43,16 @@
 
 SystemConsoleHandler::SystemConsoleHandler() {
     useExitAndAbort = true;
+    nullStream = new std::ostream(0);
     msgStream = &std::cout;
     wrnStream = &std::cerr;
+    traceStream = nullStream;
+    traceEnabled = false;
+}
+
+SystemConsoleHandler::~SystemConsoleHandler() {
+    StopTrace();
+    delete nullStream;
 }
 
 void SystemConsoleHandler::SetUseExit(bool useExit) {
@@ -54,6 +65,57 @@ void SystemConsoleHandler::SetMessageStream(std::ostream *s) {
 
 void SystemConsoleHandler::SetWarningStream(std::ostream *s) {
     wrnStream = s;
+}
+
+void SystemConsoleHandler::SetTraceFile(const char *name, unsigned int maxlines) {
+    StopTrace();
+    std::ofstream* os = new std::ofstream();
+    os->open(name);
+    traceFilename = name;
+    traceStream = os;
+    traceFileCount = 1;
+    traceLinesOnFile = maxlines;
+    traceLines = 0;
+    traceEnabled = true;
+    traceToFile = true;
+}
+
+void SystemConsoleHandler::SetTraceStream(std::ostream *s) {
+    StopTrace();
+    traceStream = s;
+    traceEnabled = true;
+    traceToFile = false;
+}
+
+void SystemConsoleHandler::StopTrace(void) {
+    if(!traceEnabled)
+        return;
+    if(traceToFile)
+        ((std::ofstream *)traceStream)->close();
+    traceStream = nullStream;
+    traceEnabled = false;
+}
+
+void SystemConsoleHandler::TraceNextLine(void) {
+    if(!traceEnabled || !traceToFile)
+        return;
+    
+    traceLines++;
+    if(traceLines >= traceLinesOnFile) {
+        traceFileCount++;
+        traceLines = 0;
+        
+        ((std::ofstream *)traceStream)->close();
+        delete traceStream;
+        
+        std::ostringstream n;
+        int idx = traceFilename.rfind('.');
+        n << traceFilename.substr(0, idx) << "_" << traceFileCount << traceFilename.substr(idx);
+        std::ofstream* os = new std::ofstream();
+        os->open(n.str().c_str());
+        
+        traceStream = os;
+    }
 }
 
 void SystemConsoleHandler::vfmessage(const char *file, int line, const char *fmt, ...) {
