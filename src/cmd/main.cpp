@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
             {0, 0, 0, 0}
         };
         
-        c = getopt_long(argc, argv, "a:e:f:d:gGm:Mp:t:uxyzhvnisF:R:W:VT:B:c:o:", long_options, &option_index);
+        c = getopt_long(argc, argv, "a:e:f:d:gGm:p:t:uxyzhvnisF:R:W:VT:B:c:o:", long_options, &option_index);
         if(c == -1)
             break;
         
@@ -187,10 +187,6 @@ int main(int argc, char *argv[]) {
             case 'B':
             case 'T':
                 terminationArgs.push_back(optarg);
-                break;
-            
-            case 'M':
-                global_message_on_bad_access = 0;
                 break;
             
             case 'V':

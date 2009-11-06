@@ -168,8 +168,6 @@ running as avr-gdb-server and write debug info for avr-gdb-connection
 do not wait for avr-gdb connection
 @item -m  <nanoseconds>
 maximum run time of <nanoseconds>
-@item -M
-disable messages for bad I/O and memory references
 @item -p  <port>
 change <port> for avr-gdb server to port
 @item -R --readfrompipe <offset>,<file>
