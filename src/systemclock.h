@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,24 +42,22 @@ class SystemClock
 
     protected:
         SystemClockOffset currentTime;
-	std::vector<SimulationMember*> asyncMembers;
+        std::vector<SimulationMember*> asyncMembers;
+        
     public:
-	SystemClockOffset getCurrentTime() const { return currentTime; }
-	
-        //SystemClock();
-
+        SystemClockOffset GetCurrentTime() const { return currentTime; }
+        void IncrTime(SystemClockOffset of) { currentTime+= of; }
         void Add(SimulationMember *dev);
         void AddAsyncMember(SimulationMember *dev);
         int Step(bool &untilCoreStepFinished);
-        void IncrTime(SystemClockOffset of) { currentTime+= of; }
-        SystemClockOffset GetCurrentTime();
         void Endless();
         void Run(SystemClockOffset maxRunTime);
+        int RunTimeRange(SystemClockOffset timeRange);
         static SystemClock& Instance();
         void Rescedule( SimulationMember *sm, SystemClockOffset newTime);
         void SetTraceModeForAllMembers(int trace_on);
-
-	void stop();
+        void stop();
+        void ResetClock(void);
 };
 
 #endif

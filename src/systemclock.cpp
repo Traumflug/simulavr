@@ -136,6 +136,12 @@ void SystemClock::stop() {
     breakMessage=true;
 }
 
+void SystemClock::ResetClock(void) {
+    asyncMembers.clear();
+    clear();
+    currentTime = 0;
+}
+
 void SystemClock::Endless() {
     int steps=0;
     signal(SIGINT, OnBreak);
@@ -169,12 +175,26 @@ void SystemClock::Run(SystemClockOffset maxRunTime) {
     Application::GetInstance()->PrintResults();
 }
 
+int SystemClock::RunTimeRange(SystemClockOffset timeRange) {
+    int res = 0;
+    bool untilCoreStepFinished;
+    
+    signal(SIGINT, OnBreak);
+    signal(SIGTERM, OnBreak);
+    
+    timeRange += SystemClock::Instance().GetCurrentTime();
+    while((breakMessage == 0) && (SystemClock::Instance().GetCurrentTime() < timeRange)) {
+        untilCoreStepFinished = false;
+        res = Step(untilCoreStepFinished);
+        if(res != 0)
+            break;
+    }
+    
+    return res;
+}
+
 SystemClock& SystemClock::Instance() {
     static SystemClock obj;
     return obj;
 }
-
-
-
-SystemClockOffset SystemClock::GetCurrentTime() { return currentTime; }
 
