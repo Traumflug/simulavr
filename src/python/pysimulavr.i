@@ -105,12 +105,6 @@ namespace std {
     bool untilCoreStepFinished = false;
     return $self->Step(untilCoreStepFinished);
   }
-  void ResetClock(void) {
-    //$self->asyncMembers.clear(); // isn't reachable, because protected and no
-                                 // clear method available
-    $self->clear();
-    $self->IncrTime(-$self->GetCurrentTime()); // Quickfix! Needs a real time reset!
-  }
 }
 
 %feature("director") Hardware;

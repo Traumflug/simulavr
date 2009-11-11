@@ -343,7 +343,7 @@ WarnUnknown::WarnUnknown(AvrDevice *_core) : core(_core) {}
 
 void WarnUnknown::markReadUnknown(const TraceValue *t) {
     cerr << "READ-before-WRITE for value " << t->name()
-         << " at time " << SystemClock::Instance().getCurrentTime()
+         << " at time " << SystemClock::Instance().GetCurrentTime()
          << ", PC=0x" << hex << 2*core->PC << dec << endl;
 }
 bool WarnUnknown::enabled(const TraceValue *t) const {
@@ -460,7 +460,7 @@ void DumpVCD::cycle() {
     flushbuffer();
     
     // write new time marker to buffer
-    SystemClockOffset clock=SystemClock::Instance().getCurrentTime();
+    SystemClockOffset clock=SystemClock::Instance().GetCurrentTime();
     osbuffer << "#" << clock << '\n';
 
     // reset RS, WS states
@@ -476,7 +476,7 @@ void DumpVCD::stop() {
     flushbuffer();
     
     // write a last time marker to report end of dump
-    SystemClockOffset clock=SystemClock::Instance().getCurrentTime();
+    SystemClockOffset clock=SystemClock::Instance().GetCurrentTime();
     *os << "#" << clock << '\n';
     
     os->flush(); // flush stream
