@@ -45,7 +45,7 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     aref()
 {
     irqSystem = new HWIrqSystem(this, 4, 35); //4 bytes per vector, 35 vectors
-        eeprom = new HWMegaEeprom( this, irqSystem, 4096, 22); 
+        eeprom = new HWEeprom( this, irqSystem, 4096, 22); 
     stack = new HWStack(this, Sram, 0x10000);
     porta= new HWPort(this, "A");
     portb= new HWPort(this, "B");

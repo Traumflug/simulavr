@@ -75,7 +75,7 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     aref()
 {
     irqSystem = new HWIrqSystem(this, 4, 21); //4 bytes per vector, 21 vectors
-    eeprom = new HWMegaEeprom(this, irqSystem, ee_bytes, 15); 
+    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 15); 
     stack = new HWStack(this, Sram, 0x1000);
     porta = new HWPort(this, "A");
     portb = new HWPort(this, "B");

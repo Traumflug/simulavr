@@ -30,66 +30,77 @@
 #include "hardware.h"
 #include "memory.h"
 #include "traceval.h"
+#include "irqsystem.h"
 
 class HWEeprom: public Hardware, public Memory, public TraceValueRegister {
     protected:
-        unsigned int eear;
-        unsigned char eecr;
-        unsigned char eedr;
-
-        unsigned int cpuHoldCycles;
-        unsigned int uSleepForOutput;
-        unsigned int state;
-        unsigned int writeEnableCycles;    // let EEMWE stay only 4 cycles
-        unsigned int writeStartTime;
         AvrDevice *core;
-
+        unsigned int eear;
+        unsigned int eear_mask;
+        unsigned char eecr;
+        unsigned char eecr_mask;
+        unsigned char eedr;
+        HWIrqSystem* irqSystem;
+        unsigned int irqVectorNo;
+        int opEnableCycles;
+        int cpuHoldCycles;
+        int opState;
+        int opMode;
+        unsigned int opAddr;
+        SystemClockOffset eraseWriteDelayTime;
+        SystemClockOffset eraseDelayTime;
+        SystemClockOffset writeDelayTime;
+        SystemClockOffset writeDoneTime;
+        
     public:
-        HWEeprom(AvrDevice *core, unsigned int size);
-        void WriteMem(unsigned char *, unsigned int offset, unsigned int size);
+        enum {
+          DEVMODE_NORMAL = 0,
+          DEVMODE_EXTENDED
+        };
+        
+        enum {
+          OPSTATE_READY,
+          OPSTATE_ENABLED,
+          OPSTATE_WRITE
+        };
+        
+        enum {
+          CTRL_MODE_ERASEWRITE = 0,
+          CTRL_READ = 1,
+          CTRL_WRITE = 2,
+          CTRL_ENABLE = 4,
+          CTRL_IRQ = 8,
+          CTRL_MODE_ERASE = 16,
+          CTRL_MODE_WRITE = 32,
+          CTRL_MODES = 48,
+        };
+        
+        HWEeprom(AvrDevice *core, HWIrqSystem *irqs, unsigned int size, unsigned int irqVec, int devMode = DEVMODE_NORMAL);
         virtual ~HWEeprom();
+
+        virtual unsigned int CpuCycle();
+        void Reset();
+        void ClearIrqFlag(unsigned int vector);
+
+        void WriteMem(unsigned char *, unsigned int offset, unsigned int size);
+        void WriteAtAddress(unsigned int, unsigned char);
+        unsigned char ReadFromAddress(unsigned int);
+
         void SetEearl(unsigned char);
         void SetEearh(unsigned char);
         void SetEedr(unsigned char);
         void SetEecr(unsigned char);
 
-        unsigned char GetEearl();
-        unsigned char GetEearh();
-        unsigned char GetEecr();
-        unsigned char GetEedr();
-        void WriteAtAddress(unsigned int, unsigned char);
-        unsigned char ReadFromAddress(unsigned int);
-
-        virtual unsigned int CpuCycle();
-        void Reset();
-
-        enum {
-            READY,
-            READ,
-            WRITE,
-            WRITE_ENABLED
-        } T_State;
+        unsigned char GetEearl() {return eear & 0xff; }
+        unsigned char GetEearh() {return (eear >> 8) & 0xff; }
+        unsigned char GetEecr() { return eecr; }
+        unsigned char GetEedr() { return eedr; }
 
         IOReg<HWEeprom>
             eearh_reg,
             eearl_reg,
             eedr_reg,
             eecr_reg;
-};
-
-class HWIrqSystem;
-
-class HWMegaEeprom: public HWEeprom {
-    protected:
-        HWIrqSystem* irqSystem;
-        unsigned int irqVectorNo;
-        bool irqFlag;
-
-    public:
-        HWMegaEeprom(AvrDevice *core, HWIrqSystem *, unsigned int size, unsigned int irqVec);
-        virtual unsigned int CpuCycle();
-        //bool IsIrqFlagSet(unsigned int vector);
-        void ClearIrqFlag(unsigned int vector);
 };
 
 #endif

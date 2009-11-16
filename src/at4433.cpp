@@ -42,7 +42,7 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
 { 
 
     irqSystem = new HWIrqSystem(this, 2, 14);
-    eeprom= new HWMegaEeprom(this, irqSystem, 256, 12); //we use a eeprom with irq here
+    eeprom= new HWEeprom(this, irqSystem, 256, 12); //we use a eeprom with irq here
     stack = new HWStack(this, Sram, 0x0100);
 
     portb= new HWPort(this, "B");

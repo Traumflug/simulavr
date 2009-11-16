@@ -39,7 +39,7 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
     portx(this, "X"),
     ocr1b(portx.GetPin(0))
 { 
-    eeprom= new HWEeprom(this, 512);
+    eeprom= new HWEeprom(this, NULL, 512, 0);
 
     irqSystem = new HWIrqSystem(this, 2, 13);
     stack = new HWStack(this, Sram, 0x10000);

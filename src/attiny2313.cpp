@@ -48,7 +48,7 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
               2 * 1024)     // Flash Size
 {
     irqSystem = new HWIrqSystem(this, 2, 19); //2 bytes per vector, 19 vectors
-    eeprom = new HWMegaEeprom(this, irqSystem, 128, 17); 
+    eeprom = new HWEeprom(this, irqSystem, 128, 17, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStack(this, Sram, 0x80);
     porta = new HWPort(this, "A");
     portb = new HWPort(this, "B");
