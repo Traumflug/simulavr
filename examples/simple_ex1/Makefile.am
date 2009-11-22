@@ -2,14 +2,16 @@
 #  $Id$
 #
 
-EXAMPLE=fred
+exampledir=$(docdir)/examples/simple_ex1
+
+EXAMPLE=fred.elf
 AVR_GCC=@AVR_GCC@
 AVR_CPU=at90s8515
 AVR_CFLAGS  = -g -O2 -mmcu=$(AVR_CPU)
 
-noinst_DATA = $(EXAMPLE)
+example_DATA = $(EXAMPLE) fred.c README
 
-CLEANFILES = $(EXAMPLE) fred.o trace
+CLEANFILES = $(EXAMPLE) fred.o
 
 EXTRA_DIST = fred.c
 

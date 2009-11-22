@@ -2,17 +2,19 @@
 #  $Id$
 #
 
+examplesdir = $(docdir)/examples/atmega128_timer
+
 EXAMPLE=timer.elf
 AVR_GCC=@AVR_GCC@
 AVR_CPU=atmega128
 AVR_FREQUENCY=4000000
 AVR_CFLAGS= -g -Os -mmcu=$(AVR_CPU) -DF_CPU=$(AVR_FREQUENCY)
 
-noinst_DATA = $(EXAMPLE)
+EXTRA_DIST = debugio.c debugio.h main.c
+
+examples_DATA = $(EXAMPLE) $(EXTRA_DIST) README
 
 CLEANFILES = $(EXAMPLE) main.o debugio.o trace
-
-EXTRA_DIST = debugio.c debugio.h main.c
 
 do:
 	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE) \

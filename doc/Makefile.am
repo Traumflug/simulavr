@@ -109,7 +109,7 @@ if DX_COND_latex
 DX_CLEAN_LATEX = @DX_DOCDIR@/latex
 endif DX_COND_latex
 
-.PHONY: doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
+.PHONY: doxygen-run doxygen-doc install-doxygen $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
 .INTERMEDIATE: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
@@ -121,20 +121,13 @@ doxygen-doc: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
 	rm -rf @DX_DOCDIR@
 	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
 
-#DX_CLEANFILES = \
-#    @DX_DOCDIR@/@PACKAGE@.tag \
-#    -r \
-#    $(DX_CLEAN_HTML) \
-#    $(DX_CLEAN_CHM) \
-#    $(DX_CLEAN_CHI) \
-#    $(DX_CLEAN_MAN) \
-#    $(DX_CLEAN_RTF) \
-#    $(DX_CLEAN_XML) \
-#    $(DX_CLEAN_PS) \
-#    $(DX_CLEAN_PDF) \
-#    $(DX_CLEAN_LATEX)
-
 DX_CLEANFILES = doxygen.warnings.log -r @DX_DOCDIR@
+
+install-doxygen: doxygen-doc
+	for p in `find @DX_DOCDIR@ -type d`; do \
+		install -d $(DESTDIR)$(docdir)/$$p; \
+		find $$p -maxdepth 1 -a -type f -exec install -m 644 {} $(DESTDIR)$(docdir)/$$p \;; \
+	done
 
 endif DX_COND_doc
 

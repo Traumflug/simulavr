@@ -3,6 +3,8 @@
 #
 #
 
+examplesdir = $(docdir)/examples/verilog
+
 AVR_PROGS = toggle.elf loop.elf \
             left-unit.elf right-unit.elf \
             spi.elf \
@@ -17,6 +19,13 @@ EXAMPLE_TARGETS=$(AVR_PROGS) baretest.run loop.run spc.run spi.run
 endif
 endif
 endif
+
+EXTRA_DIST = README baretest.sav baretest.v right-unit.s singlepincomm.h \
+    singlepincomm.s spc.sav spc.v csinglepincomm.c csinglepincomm.h left-unit.c \
+    loop.c loop.sav loop.v toggle.c spi.c spi.sav spi.v spi-waveforms.c \
+    spi-waveforms.sav spi-waveforms.v
+
+examples_DATA = $(EXTRA_DIST) $(AVR_PROGS) Makefile
 
 example: $(EXAMPLE_TARGETS)
 

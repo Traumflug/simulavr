@@ -14,6 +14,7 @@ bin_PROGRAMS    = simulavr
 @MAINT@ noinst_PROGRAMS = kbdgentables
 
 lib_LTLIBRARIES = 
+noinst_LTLIBRARIES =
 
 if USE_SWIG
 
@@ -30,6 +31,7 @@ PYTHON_MODUL_LIB=_pysimulavr.pyd
 else
 PYTHON_MODUL_LIB=_pysimulavr.so
 endif
+PYTHON_MODUL_SCRIPT=pysimulavr.py
 PYTHON_XTRA_INC=-Ipython
 PYTHON_MODUL_INTERFACE=$(srcdir)/python/pysimulavr.i
 lib_LTLIBRARIES += lib_pysimulavr.la
@@ -50,12 +52,16 @@ if SYS_MINGW
 else
 	cp .libs/lib_pysimulavr.so $(PYTHON_MODUL_LIB)
 endif
+
+python_PYTHON = $(PYTHON_MODUL_SCRIPT)
+python_DATA = $(PYTHON_MODUL_LIB)
+
 endif
 
 endif
 
 if USE_VERILOG
-lib_LTLIBRARIES += libavrvpi.la
+noinst_LTLIBRARIES += libavrvpi.la
 endif
 
 lib_LTLIBRARIES += libsim.la
@@ -115,6 +121,11 @@ libavrvpi_la_LIBADD= $(libsim_la_OBJECTS) -lz \
 
 $(VPI_LIB): libavrvpi.la
 	cp .libs/libavrvpi.so $(VPI_LIB)
+
+install-vpi:
+	$(INSTALL) -d $(DESTDIR)$(libdir)/ivl
+	$(INSTALL_PROGRAM) $(VPI_LIB) $(DESTDIR)$(libdir)/ivl
+
 endif
 
 TCLHEADER = avrdevice.h at8515.h atmega128.h at4433.h cmd/gdb.h hardware.h \
@@ -137,12 +148,12 @@ $(srcdir)/ui/keyboard.cpp: $(srcdir)/ui/keytrans.h
 @MAINT@     $(srcdir)/ui/xcode_to_keynumber.dat
 @MAINT@	$(builddir)/kbdgentables $(srcdir)/ui
 
-EXTRA_DIST = simulavr.i pysimulavr.i
+EXTRA_DIST = simulavr.i python/pysimulavr.i
 
 MAINTAINERCLEANFILES = ui/keytrans.h
 
 CLEANFILES = simulavr_wrap.cxx _pysimulavr.so pysimulavr.py avr.vpi \
-             pysimulavr_wrap.cpp
+             pysimulavr_wrap.cpp pysimulavr_wrap.h pysimulavr.py pysimulavr.pyc
 
 $(FAB_CPP) $(FAB_HEADER): fab/* fab/atmel-xml/*
 	cd fab; ./avr-fab.py

@@ -1,0 +1,18 @@
+To run examples in this directory:
+
+- as standalone simulation:
+
+  > simulavr --device at90s8515 -f fred.elf -W 0x20,- -R 0x22,- -T exit
+  
+- with tcl interface, but also standalone:
+
+  > ../simulavr.tcl -d at90s8515 -f fred.elf -W 0x20,- -R 0x22,- -T exit
+  
+- with tcl interface, but as target for gdb:
+
+  > ../simulavr.tcl -d at90s8515 -f fred.elf -W 0x20,- -R 0x22,- -T exit -g
+  
+To get a .elf for a different cpu (replace AVR_CPU to your cpu!):
+
+  > avr-gcc -g -O2 -mmcu=AVR_CPU -o fred.elf fred.c
+

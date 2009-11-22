@@ -4,3 +4,7 @@
 
 This example uses Timer 2 on the ATMega128 to generate a periodic interrupt.
 It prints 1 to 500 as the number of ticks increases.
+
+You can start it with:
+
+  > ../simulavr.tcl -d atmega128 -f timer.elf -W 0x20,- -R 0x22,- -T exit

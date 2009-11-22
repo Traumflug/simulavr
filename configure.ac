@@ -40,6 +40,7 @@ AZ_PYTHON_DEFAULT
 AZ_PYTHON_ENABLE
 AZ_PYTHON_VERSION_ENSURE([2.1.1])
 SWIG_PYTHON
+AM_PATH_PYTHON
 
 ####
 # Check about the AVR cross compilation environment, check for libz (only on msys,

@@ -62,7 +62,9 @@ Step 2:
 
 Step 3:
 	Run the test TCL script from this directory.
-	$ check.tcl
+	$ make do
+or (if atmega48.elf is available):
+	$ ../simulavr.tcl -d atmega48 -f atmega48.elf -F 1000 -s atmega.tcl
 
 Step 4:
 	Marvel at the stdio activity.

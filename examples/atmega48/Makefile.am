@@ -2,16 +2,18 @@
 #  $Id$
 #
 
+examplesdir = $(docdir)/examples/atmega48
+
 EXAMPLE=atmega48
 AVR_GCC=@AVR_GCC@
 AVR_CPU=atmega48
 AVR_CFLAGS  = -g -Os -mmcu=$(AVR_CPU)
 
-noinst_DATA = $(EXAMPLE).elf
+EXTRA_DIST = main.cpp spidata anadata1 anadata2 anadata3 $(EXAMPLE).tcl
+
+examples_DATA = $(EXAMPLE).elf $(EXTRA_DIST) README
 
 CLEANFILES = $(EXAMPLE).elf main.o trace
-
-EXTRA_DIST = main.cpp spidata anadata1 anadata2 anadata3 $(EXAMPLE).tcl
 
 all-local: $(objdir)/spidata $(objdir)/anadata1 \
     $(objdir)/anadata2 $(objdir)/anadata3

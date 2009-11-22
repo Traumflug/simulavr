@@ -614,6 +614,38 @@ make
 make install
 @end example
 
+This will build @command{simulavr} and, if switched on by configure options, some extension
+modules and libraries. It installs simulavr itself, libraries, python interface,
+if python is available and some examples and the @file{simulavr.info} in documentation
+directory @file{@{prefix@}/share/doc/simulavr}.
+
+If you want to install @file{simulavr.pdf} too, you can do that after the normal
+installation:
+
+@example
+make install-pdf
+@end example
+
+To install simulavr documentation as html:
+
+@example
+make install-html
+@end example
+
+Installing doxygen documentation is also possible, if doxygen is installed and
+switched on by configure option:
+
+@example
+make install-doxygen
+@end example
+
+Same is possible for the verilog extension. avr.vpi will be installed in @file{@{prefix@}/lib/ivl}
+if switched on by configure option:
+
+@example
+make install-vpi
+@end example
+
 Simulavr does rely on a few other GNU tools. In particular, it relies
 on libbfd from binutils, and by libbfd's dependency, it also relies on
 libiberty.
@@ -621,7 +653,7 @@ libiberty.
 I have found it useful to install my hand-configured-installed
 files in one area. That way I can put the AVR-tools in my path only when
 I'm working on AVR related work.  For reference, here is how I could
-install AVR tools to /home/user/install:
+install AVR tools to @file{/home/user/install}:
 
 @example
 mkdir b-binutils
@@ -648,11 +680,11 @@ of the configure options.
 @table @samp
 @item --prefix
 Use this option to specify the root directory to install simulavr
-to. /usr/local is the default.
+to. @file{/usr/local} is the default.
 
 @item --with-bfd
 If configure tells you it can't find libbfd, try
---with-bfd=/your/path/. Notice that you are expected to point to
+@code{--with-bfd=/your/path/}. Notice that you are expected to point to
 the libbfd from binutils configured for AVR.
 
 @item --with-libiberty
@@ -663,21 +695,21 @@ from the same binutils install that gave you the libbfd you have.
 
 @item --disable-tcl
 By default, the Tcl interface is enabled.  However, it is possible to
-build a standalone simulavr executable without Tcl.  When @c{--disable-tcl}
+build a standalone simulavr executable without Tcl.  When @code{--disable-tcl}
 is specified, neither the simulator shared library not the examples
 requiring the Tcl GUI will be built.  By default, Tcl is enabled
 but if Tcl is not installed on your computer, Tcl will be automatically
 disabled.
 
 @item --with-tclconfig
-If configure tells you it can't find tclConfig.sh, try
---with-tclconfig=/your/path/.
+If configure tells you it can't find @file{tclConfig.sh}, try
+@code{--with-tclconfig=/your/path/}.
 
 @item --enable-maintainer-mode
 If specified on the configure command, the generated Makefiles will
 do more dependency tracking.  In particular, they will check the
 dependencies on all automake and autoconf generated files.  When
-not building in maintainer mode, the file @c{src/keytrans.h} will
+not building in maintainer mode, the file @file{src/keytrans.h} will
 not be built or dependencies checked.
 
 @item --with-winsock
@@ -743,7 +775,7 @@ so one ...
 @item If you want to use python interface and you have installed Python and SWIG,
 then you should use the following options for configure:
 @command{./configure --with-bfd=/mingw --enable-python PYTHON_LDFLAGS="-LX:/PYPATH/libs -lpython25"}
-where X:/PYPATH is YOUR path to your python installations. (e.g. where the
+where @file{X:/PYPATH} is @b{your} path to your python installations. (e.g. where the
 python.exe can be found) Don't use @command{--enable-python=X:/PYPATH/python},
 because there is a bug in m4 scripts.
 @end itemize

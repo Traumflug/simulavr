@@ -2,6 +2,8 @@
 #  $Id$
 #
 
+examplesdir = $(docdir)/examples/atmel_key
+
 EXAMPLE=atmel_key
 AVR_GCC=@AVR_GCC@
 AVR_CPU=atmega128
@@ -10,12 +12,12 @@ AVR_CFLAGS = $(AVR_CPU_CFLAGS) -I. -DF_CPU=4000000UL \
   -Os -funsigned-char -funsigned-bitfields -fpack-struct \
   -fshort-enums -Wall -Wstrict-prototypes 
 
-noinst_DATA = $(EXAMPLE).elf
-
-CLEANFILES = $(EXAMPLE).elf kb.o main.o serial.o StdDefs.o
-
 EXTRA_DIST = kb.c kb.h main.c pindefs.h scancodes.h serial.c serial.h \
   StdDefs.c StdDefs.h README Notes.txt
+
+examples_DATA = $(EXAMPLE).elf $(EXTRA_DIST) README
+
+CLEANFILES = $(EXAMPLE).elf kb.o main.o serial.o StdDefs.o
 
 # Frequency 250 ==> 4.0 MHz
 do: $(EXAMPLE).elf

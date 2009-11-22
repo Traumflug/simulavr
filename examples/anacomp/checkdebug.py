@@ -29,7 +29,7 @@ ui = UserInterface( 7777 )
 dev1 = AvrDevice_at90s4433()
 
 #load elf file to the device 
-dev1.Load("./anacomp" )
+dev1.Load("./anacomp.elf" )
 
 #set the clock cycle time [ns]
 dev1.SetClockFreq( 250 )

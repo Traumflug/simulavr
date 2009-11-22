@@ -16,3 +16,4 @@ install-sh
 libtool
 ltmain.sh
 missing
+py-compile

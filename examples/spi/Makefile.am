@@ -2,16 +2,18 @@
 #  $Id$
 #
 
+examplesdir = $(docdir)/examples/spi
+
 EXAMPLE=spi
 AVR_GCC=@AVR_GCC@
 AVR_CPU=atmega128
 AVR_CFLAGS  = -g -Os -mmcu=$(AVR_CPU)
 
-noinst_DATA = $(EXAMPLE).elf
+EXTRA_DIST = main.cpp spidata anadata $(EXAMPLE).tcl
+
+examples_DATA = $(EXAMPLE).elf $(EXTRA_DIST) README
 
 CLEANFILES = $(EXAMPLE).elf main.o trace
-
-EXTRA_DIST = main.cpp spidata anadata $(EXAMPLE).tcl
 
 all-local: $(objdir)/spidata $(objdir)/anadata
 

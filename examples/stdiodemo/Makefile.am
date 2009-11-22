@@ -2,18 +2,20 @@
 #  $Id$
 #
 
+examplesdir = $(docdir)/examples/stdiodemo
+
 AVR_GCC=@AVR_GCC@
 EXAMPLE=stdiodemo
 AVR_CPU=atmega128
 AVR_CPU_CFLAGS =-mmcu=$(AVR_CPU)
 AVR_CFLAGS = $(AVR_CPU_CFLAGS) -Os -Wall -DF_CPU=3686400UL
 
-noinst_DATA = $(EXAMPLE).elf
+EXTRA_DIST = defines.h hd44780.c hd44780.h lcd.c lcd.h stdiodemo.tcl \
+  README stdiodemo.c stdiodemo.dox stdiodemo-setup.jpg uart.c uart.h
+
+examples_DATA = $(EXAMPLE).elf $(EXTRA_DIST)
 
 CLEANFILES = $(EXAMPLE).elf hd44780.o lcd.o stdiodemo.o uart.o
-
-EXTRA_DIST = defines.h hd44780.c hd44780.h lcd.c lcd.h Makefile.am \
-  README stdiodemo.c stdiodemo.dox stdiodemo-setup.jpg uart.c uart.h
 
 # Frequency 271 ==> ~3.686400 MHz
 do: $(EXAMPLE).elf
