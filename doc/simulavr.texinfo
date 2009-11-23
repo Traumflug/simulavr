@@ -776,7 +776,9 @@ so one ...
 then you should use the following options for configure:
 @command{./configure --with-bfd=/mingw --enable-python PYTHON_LDFLAGS="-LX:/PYPATH/libs -lpython25"}
 where @file{X:/PYPATH} is @b{your} path to your python installations. (e.g. where the
-python.exe can be found) Don't use @command{--enable-python=X:/PYPATH/python},
+python.exe can be found) Replace also the name of the library (here @file{python25})
+to the right name from @b{your} installation, for python 2.6.x it is for example
+@file{python26} Don't use configure option @command{--enable-python=X:/PYPATH/python},
 because there is a bug in m4 scripts.
 @end itemize
 

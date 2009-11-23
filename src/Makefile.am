@@ -28,13 +28,16 @@ endif
 if PYTHON_USE
 if SYS_MINGW
 PYTHON_MODUL_LIB=_pysimulavr.pyd
+# Bugfix: staged install will not work with windows paths!
+pythonxdir = $(libdir)/python$(PYTHON_VERSION)
 else
 PYTHON_MODUL_LIB=_pysimulavr.so
+pythonxdir = $(pythondir)
 endif
 PYTHON_MODUL_SCRIPT=pysimulavr.py
 PYTHON_XTRA_INC=-Ipython
 PYTHON_MODUL_INTERFACE=$(srcdir)/python/pysimulavr.i
-lib_LTLIBRARIES += lib_pysimulavr.la
+noinst_LTLIBRARIES += lib_pysimulavr.la
 lib_pysimulavr_la_SOURCES=pysimulavr_wrap.cpp
 lib_pysimulavr_la_CPPFLAGS=$(PYTHON_CPPFLAGS) $(PYTHON_XTRA_INC)
 lib_pysimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
@@ -53,8 +56,8 @@ else
 	cp .libs/lib_pysimulavr.so $(PYTHON_MODUL_LIB)
 endif
 
-python_PYTHON = $(PYTHON_MODUL_SCRIPT)
-python_DATA = $(PYTHON_MODUL_LIB)
+pythonx_PYTHON = $(PYTHON_MODUL_SCRIPT)
+pythonx_DATA = $(PYTHON_MODUL_LIB)
 
 endif
 
