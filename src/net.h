@@ -28,25 +28,15 @@
 
 #include <vector>
 
-//class Pin;
 #include "pin.h"
 
 class NetInterface {
     public:
         virtual bool CalcNet()=0;
-        virtual ~NetInterface();
+        virtual ~NetInterface() {}
 
     private:
-        // this function could delete the Net itself
-        // if the net is a MirrorNet. Because of this
-        // not really "normal" behaviour we have to take
-        // care that this function is only used if the
-        // user knows about this wanted "side effect"
-        // Only allow Pin::RegisterNet to use the Delete 
-        // function. Pin::RegisterNet has signed a
-        // special agreemend with me :-)
         virtual void Delete(Pin*)=0; 
-
         friend void Pin::RegisterNet(Net*);
 };
 
@@ -56,24 +46,11 @@ class Net:
 #endif
     public NetInterface 
 {
- public:
-    void Add(Pin *p);
-    void Delete(Pin *p);
-    bool CalcNet();
-    ~Net();
-};
-
-class MirrorNet: public NetInterface {
-    protected:
-        Pin *p;
-
     public:
-        MirrorNet(Pin *p);
-        bool CalcNet(); //only give in out-state to in-state  
+        void Add(Pin *p);
         void Delete(Pin *p);
-    private: //Do never allow that MirrorNet becomes an automatic object,
-             //because Delete kills the this pointer which is never possible
-             //for auto objects
-        ~MirrorNet();
+        bool CalcNet();
+        ~Net();
 };
+
 #endif

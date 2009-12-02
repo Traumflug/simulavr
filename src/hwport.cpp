@@ -74,7 +74,7 @@ void HWPort::CalcPin() {
     //calculating the value for register "pin" from the Pin p[] array
     pin=0;
     for (int tt=0; tt<8; tt++) {
-        if (p[tt].connectedTo->CalcNet()) pin|=(1<<tt);
+        if (p[tt].CalcPin()) pin|=(1<<tt);
     }
 }
 

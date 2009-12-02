@@ -23,26 +23,30 @@
  *  $Id$
  */
 
-#include <algorithm> //use find()
-
 #include "net.h"
 #include "pin.h"
 
-NetInterface::~NetInterface() {}
-
-
 void Net::Add(Pin *p) {
-    push_back(p); 
+    push_back(p);
     p->RegisterNet(this);
     CalcNet();
 }
 
 void Net::Delete(Pin *p) {
-    erase(find(begin(), end(), p));
+    iterator ii;
+    for(ii = begin(); ii != end(); ii++) {
+        if((Pin*)(*ii) == p) {
+            erase(ii);
+            break;
+        }
+    }
 }
 
-Net::~Net() {}
-
+Net::~Net() {
+    iterator ii;
+    for(ii = begin(); ii != end(); ii++)
+        (*ii)->UnRegisterNet(this);
+}
 
 bool Net::CalcNet() {
     Pin result(Pin::TRISTATE);
@@ -60,18 +64,4 @@ bool Net::CalcNet() {
 
     return (bool) result;
 }
-
-MirrorNet::MirrorNet(Pin *_p): p(_p) { }
-MirrorNet::~MirrorNet() {}
-bool MirrorNet::CalcNet() {
-    p->SetInState(*p);
-    return (bool)*p;
-}
-
-//Attention, after the call the Net is not longer available nor valid!
-void MirrorNet::Delete(Pin *p) { 
-    delete(this);
-}
-    
-
 

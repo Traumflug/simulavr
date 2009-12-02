@@ -34,6 +34,8 @@
 #include <string>
 
 class HWPort: public Hardware, public TraceValueRegister {
+    private:
+        void CalcPin();
     protected:
         std::string myName;
 
@@ -67,7 +69,6 @@ class HWPort: public Hardware, public TraceValueRegister {
         void SetPort(unsigned char val) { port=val; CalcOutputs();}
         void SetDdr(unsigned char val) { ddr=val;CalcOutputs();}
         Pin& GetPin(unsigned char pinNo) ;
-        void CalcPin();
 	std::string GetName() { return myName; } 
 
         unsigned char GetPort() { return port; }

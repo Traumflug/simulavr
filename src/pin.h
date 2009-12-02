@@ -29,27 +29,8 @@
 
 #include "pinnotify.h"
 
-class NetInterface;
 class Net;
 class OpenDrain;
-
-
-/*! This constant is used to prevent memory leaks for pins when using
- simulavrxx as a Verilog device. It is an ugly workaround for a memory leak
- that should be properly fixed one day. If the contents of this variable is
- non-null, MirrorNets of pins will be destroyed when the pins they are
- connected to disappears. If this is not done, a lot of memory will be leaked
- in verilog mode. Unfortunately, enabling this for more complex
- Pin-Net-connection scenarios ignores assumptions by other parts of the AVR
- code and some tests will segfault.
-
- This is basically the patch commited in cvs-upstream @
- 94df3ffc2226f99f739432db2166aae1b7c8c69f and reverted on the next morning
- in 854b6505abda34d9f16d3c6d21da1bf1a751d01f, but extended with this
- 'safe-flag'.
- 
- \todo FIX the memory leaks! */
-extern bool pin_memleak_verilog_workaround;
 
 class Pin {
     
@@ -58,12 +39,8 @@ class Pin {
         unsigned char mask;
         int analogValue;
 
-        NetInterface *connectedTo;
+        Net *connectedTo;
 
-        /*! iff mynet is true, the NetInterface connectedTo belongs to this
-          PIN and must be memory-managed by this PIN! */
-        bool myNet;
-        
     public:
 
         Pin(const OpenDrain &od);
@@ -92,6 +69,7 @@ class Pin {
     
         Pin(T_Pinstate ps);
         Pin();
+        Pin(const Pin& p);
         Pin( unsigned char *parentPin, unsigned char mask); 
 #ifndef SWIG
         operator char() const;
@@ -101,12 +79,12 @@ class Pin {
         virtual Pin operator+= (const Pin& p);
 #endif
         virtual void RegisterNet(Net *n);
+        virtual void UnRegisterNet(Net *n);
         virtual Pin GetPin() { return *this;}
         virtual ~Pin();
-        //T_Pinstate GetOutState();
         int GetAnalog() const;
         void RegisterCallback( HasPinNotifyFunction *);
-
+        bool CalcPin(void);
 
         friend class HWPort;
         friend class Net;

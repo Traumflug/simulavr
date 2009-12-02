@@ -28,8 +28,6 @@
 #include "pin.h"
 #include "net.h"
 
-bool pin_memleak_verilog_workaround=false;
-
 // This is the value used to set the analogValue
 // when the pin output is TRISTATE. Originally, the
 // value was simply (INT_MAX/2), but when I was debugging
@@ -90,10 +88,19 @@ void Pin::SetInState ( const Pin &p) {
     } 
 }
 
+bool Pin::CalcPin(void) {
+    if(connectedTo == NULL) {
+        // no net connected, transfer the output to own input
+        SetInState(*this);
+        return (bool)*this;
+    } else {
+        return connectedTo->CalcNet();
+    }
+}
+
 Pin::Pin(T_Pinstate ps) { 
     pinOfPort=0; 
-    connectedTo=new MirrorNet(this);
-    myNet=true;
+    connectedTo=NULL;
     
     outState=ps;
 
@@ -119,42 +126,43 @@ Pin::Pin(T_Pinstate ps) {
 
 Pin::Pin() { 
     pinOfPort=0; 
-    connectedTo= new MirrorNet(this);
-    myNet=true;
+    connectedTo= NULL;
     
     outState=TRISTATE;
     analogValue=TRISTATE_ANALOG_VALUE;
-    //ui=0;
 }
 
 Pin::~Pin() {
-    if (myNet && pin_memleak_verilog_workaround)
-        delete connectedTo;
+    // unregister myself on Net instance
+    UnRegisterNet(connectedTo);
 }
 
 Pin::Pin( unsigned char *parentPin, unsigned char _mask) { 
     pinOfPort=parentPin;
     mask=_mask;
-    connectedTo=new MirrorNet(this);
-    myNet=true;
+    connectedTo=NULL;
     
     outState=TRISTATE;
     analogValue=INT_MAX;
 }
 
-void Pin::RegisterNet(Net *n) {
-    if (connectedTo!=0) { // we are allready connected!
-        connectedTo->Delete(this); //remove it from old Net
-        //Attention: Delete can also destroy the Net itself if
-        //the Net is from type MirrorNet. So it is not allowed
-        //to use connectedTo anymore after the Delete call.
-        //in this function it is absolutly the correct semantic,
-        //because we set directly the new net and the
-        //old value is not longer accessable.
-    }
+Pin::Pin(const Pin& p) {
+    pinOfPort = 0; // don't take over HWPort connection!
+    connectedTo = NULL; // don't take over Net instance!
+    
+    outState = p.outState;
+    analogValue = p.analogValue;
+}
 
-    connectedTo=n;
-    myNet=false;
+void Pin::RegisterNet(Net *n) {
+    UnRegisterNet(connectedTo); // unregister old Net instance, if exists
+    connectedTo = n; // register new Net instance
+}
+
+void Pin::UnRegisterNet(Net *n) {
+    if(connectedTo == n && connectedTo != NULL)
+        connectedTo->Delete(this);
+    connectedTo = NULL;
 }
 
 Pin::operator char() const { 
@@ -171,21 +179,6 @@ Pin::operator char() const {
     }
     return 'S'; //only default, should never be reached
 }
-/* patch removed -> test again , not working as expected
-Pin::operator bool() const {
-    if (outState==HIGH) return 1;
-    if ((outState==ANALOG) || (outState==TRISTATE) || (outState==PULLUP) || (outState==PULLDOWN)) 
-    { //maybe for TRISTATE not handled complete in simulavr... TODO
-        if (analogValue > (INT_MAX/2)) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
-
-    return 0;
-}
-*/
 
 Pin::operator bool() const {
     if ((outState==HIGH) || (outState==PULLUP))
@@ -215,7 +208,7 @@ Pin& Pin::operator= (char c) {
         case 'A': outState=ANALOG_SHORTED; analogValue=0; break;
     }
 
-    connectedTo->CalcNet();
+    CalcPin();
 
     return *this;
 }
