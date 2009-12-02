@@ -15,6 +15,11 @@ AM_MAINTAINER_MODE
 # check for OS and build system: MSYS/MingW
 ####
 AC_SYS_CHECK_MINGW
+if test "$ac_sys_check_uname_o" = "Msys"; then
+  AC_SUBST([PYTHON_MODULE_EXTENSION],[.pyd])
+else
+  AC_SUBST([PYTHON_MODULE_EXTENSION],[.so])
+fi
 
 ####
 # support of libtool, g++, swig (for tcl module and python module used)
@@ -130,7 +135,7 @@ AC_CONFIG_FILES(
   [regress/regress.py],
   [chmod +x regress/regress.py])
 AC_CONFIG_FILES([
-  Makefile src/Makefile
+  Makefile src/Makefile src/setup.py
   doc/Makefile doc/config.texi
   regress/Makefile regress/modules/Makefile regress/test_opcodes/Makefile
   regress/avrtest/Makefile regress/timertest/Makefile examples/verilog/Makefile

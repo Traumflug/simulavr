@@ -26,15 +26,7 @@ lib_LTLIBRARIES += libsimulavr.la
 endif
 
 if PYTHON_USE
-if SYS_MINGW
-PYTHON_MODUL_LIB=_pysimulavr.pyd
-# Bugfix: staged install will not work with windows paths!
-pythonxdir = $(libdir)/python$(PYTHON_VERSION)
-else
-PYTHON_MODUL_LIB=_pysimulavr.so
-pythonxdir = $(pythondir)
-endif
-PYTHON_MODUL_SCRIPT=pysimulavr.py
+PYTHON_MODUL_LIB=_pysimulavr@PYTHON_MODULE_EXTENSION@
 PYTHON_XTRA_INC=-Ipython
 PYTHON_MODUL_INTERFACE=$(srcdir)/python/pysimulavr.i
 noinst_LTLIBRARIES += lib_pysimulavr.la
@@ -55,9 +47,6 @@ if SYS_MINGW
 else
 	cp .libs/lib_pysimulavr.so $(PYTHON_MODUL_LIB)
 endif
-
-pythonx_PYTHON = $(PYTHON_MODUL_SCRIPT)
-pythonx_DATA = $(PYTHON_MODUL_LIB)
 
 endif
 
@@ -155,7 +144,7 @@ EXTRA_DIST = simulavr.i python/pysimulavr.i
 
 MAINTAINERCLEANFILES = ui/keytrans.h
 
-CLEANFILES = simulavr_wrap.cxx _pysimulavr.so pysimulavr.py avr.vpi \
+CLEANFILES = simulavr_wrap.cxx $(PYTHON_MODUL_LIB) avr.vpi setup.py \
              pysimulavr_wrap.cpp pysimulavr_wrap.h pysimulavr.py pysimulavr.pyc
 
 $(FAB_CPP) $(FAB_HEADER): fab/* fab/atmel-xml/*

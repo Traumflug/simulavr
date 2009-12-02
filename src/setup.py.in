@@ -1,0 +1,19 @@
+# -*- coding: UTF-8 -*-
+# setup.py: Install-Script
+
+try:
+  from setuptools import setup
+except:
+  from distutils import setup
+  
+from distutils.sysconfig import get_python_lib
+
+setup(name = 'pysimulavr',
+      version = "@PACKAGE_VERSION@",
+      py_modules = ["pysimulavr"],
+      data_files = [(get_python_lib(), ["_pysimulavr@PYTHON_MODULE_EXTENSION@"])],
+      author="Klaus Rudolph & others",
+      author_email="<simulavr-devel@nongnu.org>",
+      license="GPL",
+      description="python modul for simulavr")
+# EOF

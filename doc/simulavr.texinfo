@@ -614,10 +614,10 @@ make
 make install
 @end example
 
-This will build @command{simulavr} and, if switched on by configure options, some extension
-modules and libraries. It installs simulavr itself, libraries, python interface,
-if python is available and some examples and the @file{simulavr.info} in documentation
-directory @file{@{prefix@}/share/doc/simulavr}.
+This will build @command{simulavr} and, if switched on by configure options,
+some extension modules and libraries. It installs simulavr itself, libraries and
+some examples and the @file{simulavr.info} in documentation directory
+@file{@{prefix@}/share/doc/simulavr}.
 
 If you want to install @file{simulavr.pdf} too, you can do that after the normal
 installation:
@@ -645,6 +645,26 @@ if switched on by configure option:
 @example
 make install-vpi
 @end example
+
+Python interface will not be installed by @command{make-install...}, because a right
+installation depends on the actual python installation. To support the installation
+of python module there is a @file{setup.py} in @file{src} directory:
+
+@example
+cd simulavr-@value{VERSION}/src
+python setup.py install
+@end example
+
+If you want to create a egg-package from this python module, you have to install
+python's setuptools package first. Then run:
+
+@example
+python setup.py build bdist_egg
+@end example
+
+For more possibilities on installing python interface, please see python
+documentation (distutils package) and documentation for setuptools python
+package.@*
 
 Simulavr does rely on a few other GNU tools. In particular, it relies
 on libbfd from binutils, and by libbfd's dependency, it also relies on
