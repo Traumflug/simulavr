@@ -11,11 +11,11 @@ if __name__ == "__main__":
 
   print "create 2 pins ..."
   p1 = XPin()
-  p1.SetOutState(pysimulavr.Pin.LOW)
+  p1.outState = pysimulavr.Pin.LOW
   print "  pin 1: id=%s, out='%s'" % (id(p1), p1.toChar())
   
   p2 = XPin()
-  p2.SetOutState(pysimulavr.Pin.TRISTATE)
+  p2.outState = pysimulavr.Pin.TRISTATE
   print "  pin 2: id=%s, out='%s'" % (id(p2), p2.toChar())
   
   print "\ncreate net ..."

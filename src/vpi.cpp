@@ -135,8 +135,6 @@ static PLI_INT32 avr_create_tf(char *xx) {
     VPI_UNPACKS(progname);
     VPI_END();
 
-    pin_memleak_verilog_workaround=true;
-    
     AvrDevice* dev=AvrFactory::instance().makeDevice(device.c_str());
     devices.push_back(dev);
     
