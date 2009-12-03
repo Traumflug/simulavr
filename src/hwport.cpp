@@ -109,15 +109,15 @@ void HWPort::CalcOutputs() { //Calculate the new output value to be transmitted 
 
         if (workingDdr&actualBit) {	//Ddr is output
             if (workingPort&actualBit) { //Port is High
-                p[actualBitNo].SetOutState(Pin::HIGH);
+                p[actualBitNo].outState = Pin::HIGH;
             } else {
-                p[actualBitNo].SetOutState(Pin::LOW);
+                p[actualBitNo].outState = Pin::LOW;
             }
         } else { //ddr is low
             if (workingPort&actualBit) {
-                p[actualBitNo].SetOutState(Pin::PULLUP);
+                p[actualBitNo].outState = Pin::PULLUP;
             } else { 
-                p[actualBitNo].SetOutState(Pin::TRISTATE);
+                p[actualBitNo].outState = Pin::TRISTATE;
             }
         }
 

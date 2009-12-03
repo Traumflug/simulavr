@@ -29,13 +29,13 @@ SpiSink::SpiSink(	Net&		ssNet,
 		_prevClkState(clockIsIdleHigh),
 		_prevSS(true)
 		{
-		_ss.SetOutState(Pin::PULLUP);
+		_ss.outState = Pin::PULLUP;
 		ssNet.Add(&_ss);
 
-		_sclk.SetOutState(Pin::PULLUP);
+		_sclk.outState = Pin::PULLUP;
 		sclkNet.Add(&_sclk);
 
-		_miso.SetOutState(Pin::PULLUP);
+		_miso.outState = Pin::PULLUP;
 		misoNet.Add(&_miso);
 	}
 

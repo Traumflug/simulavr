@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,27 +30,22 @@
 
 #include "pin.h"
 
-class NetInterface {
-    public:
-        virtual bool CalcNet()=0;
-        virtual ~NetInterface() {}
-
-    private:
-        virtual void Delete(Pin*)=0; 
-        friend void Pin::RegisterNet(Net*);
-};
-
-class Net:
+//! Connect Pins to each other and transfers a output change from a pin to input values for all pins
+class Net
 #ifndef SWIG
-    public std::vector <Pin *>,
+    : public std::vector <Pin *>
 #endif
-    public NetInterface 
 {
     public:
-        void Add(Pin *p);
-        void Delete(Pin *p);
-        bool CalcNet();
-        ~Net();
+        //Net() {} //!< Common Constructor, initially it'a a "empty net" and useless!
+        virtual ~Net(); //!< Destructor, disconnects save all pins, which are connected
+        void Add(Pin *p); //!< Add a pin to net, e.g. connect a pin to others
+        virtual void Delete(Pin *p); //!< Remove a pin from net
+         //! Calculate a "electrical potential" on the net and set all pin inputs with this value
+        virtual bool CalcNet();
+        
+    private:
+        friend void Pin::RegisterNet(Net*);
 };
 
 #endif

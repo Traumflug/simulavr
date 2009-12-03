@@ -14,13 +14,13 @@ SpiSource::SpiSource(   const char* fileName,
         _mosi(),
         _spiFile(fileName)
         {
-        _ss.SetOutState(Pin::HIGH);
+        _ss.outState = Pin::HIGH;
         ssNet.Add(&_ss);
 
-        _sclk.SetOutState(Pin::HIGH);
+        _sclk.outState = Pin::HIGH;
         sclkNet.Add(&_sclk);
 
-        _mosi.SetOutState(Pin::HIGH);
+        _mosi.outState = Pin::HIGH;
         mosiNet.Add(&_mosi);
 
         if(!_spiFile)

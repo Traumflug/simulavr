@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,25 +43,20 @@ void Net::Delete(Pin *p) {
 }
 
 Net::~Net() {
-    iterator ii;
-    for(ii = begin(); ii != end(); ii++)
-        (*ii)->UnRegisterNet(this);
+    while(begin() != end())
+        (*begin())->UnRegisterNet(this);
 }
 
 bool Net::CalcNet() {
     Pin result(Pin::TRISTATE);
     iterator ii;
-    for (ii=begin(); ii!=end(); ii++) {
-        result+=((*ii)->GetPin()); //get state of pin (TRISTATE, HIGH, LOW ....)
-    }
+    for(ii = begin(); ii != end(); ii++)
+        result += ((*ii)->GetPin()); //get state of pin (TRISTATE, HIGH, LOW ....)
+
     //new result is now found, so set all pins in the Net to new state
-    //
-
-    for (ii=begin(); ii!=end(); ii++) {
-        //(*ii)->SetInState( result.GetOutState()); //In-State that means the state of register PIN not the complete pin here
+    for(ii = begin(); ii != end(); ii++)
         (*ii)->SetInState( result); //In-State that means the state of register PIN not the complete pin here
-    }
 
-    return (bool) result;
+    return (bool)result;
 }
 

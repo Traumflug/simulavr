@@ -29,7 +29,7 @@ AdcPin::AdcPin(const char* fileName, Net& pinNet) throw():
     _analogPin(),
     _anaFile(fileName)
 {
-    _analogPin.SetOutState(Pin::ANALOG);
+    _analogPin.outState = Pin::ANALOG;
     pinNet.Add(&_analogPin);
 
     if(!_anaFile)
