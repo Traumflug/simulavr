@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,47 +33,57 @@
 
 #include <string>
 
+//! Defines a Port, e.g. a hardware device for GPIO
+/*! Example for use alternateDdr and useAlternateDdr:
+  If the UART Tx will be enabled, the UART set alternateDdr to output,
+  useAlternateDdr to 1 and sets port according to Tx Pin value, thats all :-)
+  
+  useAlternatePortIfDdrSet: special case for the OCR outputs, which only be
+  connected to pin if ddr is set to output! */
 class HWPort: public Hardware, public TraceValueRegister {
+    
     private:
-        void CalcPin();
+        void CalcPin(void); //!< calculating the value for register "pin" from the Pin p[] array
+        
     protected:
-        std::string myName;
+        std::string myName; //!< the "name" of the port
 
-        unsigned char port;
-        unsigned char pin;
-        unsigned char ddr;
+        unsigned char port; //!< port output register
+        unsigned char pin;  //!< port input register
+        unsigned char ddr;  //!< data direction register
 
-        unsigned char alternateDdr;
-        unsigned char useAlternateDdr;
+        unsigned char alternateDdr; //!< data direction register for special functions
+        unsigned char useAlternateDdr; //!< bit mask, which bit in alternateDdr is used
 
-        unsigned char alternatePort;
-        unsigned char useAlternatePort;
+        unsigned char alternatePort; //!< output register for special functions
+        unsigned char useAlternatePort; //!< bit mask, which bit in alternatePort is used
 
-        unsigned char useAlternatePortIfDdrSet; //special case for the ocr1a&b is selected on pin
-        //which only be send to pin if ddr is set to output
-        Pin p[8];
-
+        /*! special case for the ocr1a&b is selected on pin, which only be send
+          to pin if ddr is set to output */
+        unsigned char useAlternatePortIfDdrSet; 
+        
+        Pin p[8]; //!< the port pins, e.g. the final IO stages
+        int portSize; //!< how much bits does this port have [1..8]
+        unsigned char portMask; //!< mask out unused bits, if necessary
+        bool portToggleFeature; //!< controls functionality of SetPin method (write to PIN toggles port register)
+        
     public:
-        void CalcOutputs();  //Calculate the new output value to be transmitted to the environment
-	std::string GetPortString();
+        HWPort(AvrDevice *core, const std::string &name, bool portToggle = false, int size = 8);
         ~HWPort() {}
-
-        //Example:
-        //if the UART Tx will be enabled, the UART set alternate DDR to output, useAltDdr to 1 and sets port according to Tx Pin value
-        //thats all :-)
-
-
-    public:
-        HWPort(AvrDevice *core, const std::string &name);
-        void Reset();
-        void SetPort(unsigned char val) { port=val; CalcOutputs();}
-        void SetDdr(unsigned char val) { ddr=val;CalcOutputs();}
-        Pin& GetPin(unsigned char pinNo) ;
-	std::string GetName() { return myName; } 
-
-        unsigned char GetPort() { return port; }
-        unsigned char GetDdr() { return ddr;}
-        unsigned char GetPin() { /*CalcPin(); */ return pin; } 
+        
+        void CalcOutputs(void);  //!< Calculate the new output value to be transmitted to the environment
+        std::string GetPortString(void); //!< returns a string representation of output states
+        void Reset(void);
+        std::string GetName(void) { return myName; } //!< returns the port name as given in constructor
+        Pin& GetPin(unsigned char pinNo); //!< returns a pin reference of pin with pin number
+        int GetPortSize(void) { return portSize; } //!< returns, how much bits this port controls
+        
+        void SetPort(unsigned char val) { port = val & portMask; CalcOutputs(); } //!< setter method for port register
+        void SetDdr(unsigned char val) { ddr = val & portMask; CalcOutputs(); } //!< setter method for data direction register
+        void SetPin(unsigned char val); //!< setter method for PIN register (for new devices with toggle port)
+        unsigned char GetPort(void) { return port; } //!< getter method for port register
+        unsigned char GetDdr(void) { return ddr; } //!< getter method for data direction register
+        unsigned char GetPin(void) { return pin; }  //!< getter method for PIN register
 
         friend class PinAtPort;
 

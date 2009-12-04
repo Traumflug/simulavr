@@ -39,6 +39,20 @@
 AVR_REGISTER(attiny2313, AvrDevice_attiny2313);
 
 AvrDevice_attiny2313::~AvrDevice_attiny2313() {
+    delete timer1;
+    delete inputCapture1;
+    delete timer0;
+    delete timer01irq;
+    delete usart;
+    delete prescaler01;
+    delete gtccr_reg;
+    delete spmRegister;
+    delete portd;
+    delete portb;
+    delete porta;
+    delete stack;
+    delete eeprom;
+    delete irqSystem;
 }
 
 AvrDevice_attiny2313::AvrDevice_attiny2313():
@@ -50,9 +64,9 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     irqSystem = new HWIrqSystem(this, 2, 19); //2 bytes per vector, 19 vectors
     eeprom = new HWEeprom(this, irqSystem, 128, 17, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStack(this, Sram, 0x80);
-    porta = new HWPort(this, "A");
-    portb = new HWPort(this, "B");
-    portd = new HWPort(this, "D");
+    porta = new HWPort(this, "A", true, 3);
+    portb = new HWPort(this, "B", true);
+    portd = new HWPort(this, "D", true, 7);
 
     spmRegister = new FlashProgramming(this, 16, 0, FlashProgramming::SPM_TINY_MODE);
     

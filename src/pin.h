@@ -101,6 +101,10 @@ class Pin {
         output value to own input value. Otherwise it calls Net::CalcNet method */
         bool CalcPin(void);
 
+        bool isPortPin(void) { return pinOfPort != NULL; } //!< True, if it's a port pin
+        bool isConnected(void) { return connectedTo != NULL; } //!< True, if it's connected to other pins
+        bool hasListener(void) { return notifyList.size() != 0; } //!< True, if there change listeners
+
         friend class HWPort;
         friend class Net;
 

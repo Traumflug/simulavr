@@ -19,6 +19,7 @@
   #include "global.h"
   #include "avrerror.h"
   #include "pysimulationmember.h"
+  #include "hwport.h"
   
   // to get devices registered (automatically on linux, but necessary on windows)
   #include "atmega128.h"
@@ -61,6 +62,7 @@ namespace std {
 %include "pinnotify.h"
 %include "traceval.h"
 %include "avrdevice.h"
+%include "hwport.h"
 
 %extend DumpManager {
   void addDumpVCD(const std::string &vcdname,
