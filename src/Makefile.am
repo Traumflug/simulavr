@@ -65,7 +65,7 @@ endif
 
 libsim_la_SOURCES = \
   adcpin.cpp application.cpp at4433.cpp at8515.cpp atmega668base.cpp atmega128.cpp \
-  atmega16_32.cpp attiny2313.cpp $(FAB_CPP) \
+  atmega16_32.cpp attiny2313.cpp externalirq.cpp $(FAB_CPP) \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp flashprog.cpp hardware.cpp helper.cpp cmd/gdbserver.cpp \
   hwacomp.cpp hwad.cpp hweeprom.cpp hwextirq.cpp hwmega48extirq.cpp \
@@ -86,7 +86,7 @@ libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz \
 
 pkginclude_HEADERS = \
   adcpin.h application.h at4433.h at8515.h atmega128.h atmega16_32.h attiny2313.h \
-  atmega668base.h avrdevice.h $(FAB_HEADER) \
+  atmega668base.h avrdevice.h externalirq.h $(FAB_HEADER) \
   avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h breakpoint.h \
   config_deprecated.h decoder.h externaltype.h flash.h flashprog.h \
   funktor.h hwacomp.h hwad.h hweeprom.h hwextirq.h hwmega48extirq.h \

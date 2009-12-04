@@ -51,6 +51,11 @@ AvrDevice_atmega16_32::~AvrDevice_atmega16_32() {
     delete prescaler01;
     delete assr_reg;
     delete sfior_reg;
+    delete extirq;
+    delete mcucsr_reg;
+    delete mcucr_reg;
+    delete gifr_reg;
+    delete gicr_reg;
     delete spi;
     delete ad;
     delete admux;
@@ -98,13 +103,14 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
                     PinAtPort(portb, 5), PinAtPort(portb, 6), PinAtPort(portb, 7),
                     PinAtPort(portb, 4),/*irqvec*/ 10, true);
 
-    /*
-    extirq = new HWMegaExtIrq(this, irqSystem, 
-             PinAtPort(portd, 0), PinAtPort(portd, 1), PinAtPort(portd, 2),
-             PinAtPort(portd, 3), PinAtPort(porte, 4), PinAtPort(porte, 5),
-             PinAtPort(porte, 6),PinAtPort(porte, 7),
-             1,2,3,4,5,6,7,8);
-    */
+    gicr_reg = new IOSpecialReg(&coreTraceGroup, "GICR");
+    gifr_reg = new IOSpecialReg(&coreTraceGroup, "GIFR");
+    mcucr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCR");
+    mcucsr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCSR");
+    extirq = new ExternalIRQHandler(this, irqSystem, gicr_reg, gifr_reg);
+    extirq->registerIrq(1, 6, new ExternalIRQ(mcucr_reg, 0, 2));
+    extirq->registerIrq(2, 7, new ExternalIRQ(mcucr_reg, 2, 2));
+    extirq->registerIrq(18, 5, new ExternalIRQ(mcucsr_reg, 6, 1));
     
     sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
     assr_reg = new IOSpecialReg(&coreTraceGroup, "ASSR");
@@ -157,14 +163,14 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     rw[0x5e]= & stack->sph_reg;
     rw[0x5d]= & stack->spl_reg;
     rw[0x5c]= & timer0->ocra_reg;
-    //rw[0x5b]= & extirq->eifr_reg; // GIFR
-    //rw[0x5a]= & extirq->eicra_reg; // GICR
+    rw[0x5b]= gifr_reg;
+    rw[0x5a]= gicr_reg;
     rw[0x59]= & timer012irq->timsk_reg;
     rw[0x58]= & timer012irq->tifr_reg;
     rw[0x57]= & spmRegister->spmcr_reg;
     //rw[0x56] TWCR
-    //rw[0x55] MCUCR
-    //rw[0x54] MCUCSR
+    rw[0x55] = mcucr_reg;
+    rw[0x54] = mcucsr_reg;
     rw[0x53]= & timer0->tccr_reg;
     rw[0x52]= & timer0->tcnt_reg;
     //rw[0x51] OSCCAL/OCDR

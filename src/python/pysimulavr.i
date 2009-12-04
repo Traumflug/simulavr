@@ -62,7 +62,6 @@ namespace std {
 %include "pinnotify.h"
 %include "traceval.h"
 %include "avrdevice.h"
-%include "hwport.h"
 
 %extend DumpManager {
   void addDumpVCD(const std::string &vcdname,
@@ -111,6 +110,7 @@ namespace std {
 
 %feature("director") Hardware;
 %include "hardware.h"
+%include "hwport.h"
 
 %feature("director") Pin;
 %include "pin.h"
