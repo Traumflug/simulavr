@@ -125,8 +125,8 @@ void HWPort::CalcOutputs(void) { //Calculate the new output value to be transmit
 
         actualBit <<= 1;
         actualBitNo++;
-
-    } while(actualBitNo <= portSize); // as long as all bits are calculated
+        
+    } while(actualBitNo < portSize); // as long as all bits are calculated
     
     CalcPin(); //now transfer the result also to all HWPort::pin instances
 } //end of Calc()
