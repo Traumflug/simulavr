@@ -108,9 +108,9 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     mcucr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCR");
     mcucsr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCSR");
     extirq = new ExternalIRQHandler(this, irqSystem, gicr_reg, gifr_reg);
-    extirq->registerIrq(1, 6, new ExternalIRQ(mcucr_reg, 0, 2));
-    extirq->registerIrq(2, 7, new ExternalIRQ(mcucr_reg, 2, 2));
-    extirq->registerIrq(18, 5, new ExternalIRQ(mcucsr_reg, 6, 1));
+    extirq->registerIrq(1, 6, new ExternalIRQSingle(mcucr_reg, 0, 2, GetPin("D2")));
+    extirq->registerIrq(2, 7, new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3")));
+    extirq->registerIrq(18, 5, new ExternalIRQSingle(mcucsr_reg, 6, 1, GetPin("B2")));
     
     sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
     assr_reg = new IOSpecialReg(&coreTraceGroup, "ASSR");

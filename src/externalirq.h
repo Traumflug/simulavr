@@ -27,21 +27,34 @@
 #define EXTERNALIRQ
 
 #include <vector>
+
 #include "hardware.h"
 #include "irqsystem.h"
 #include "rwmem.h"
 #include "avrdevice.h"
+#include "pinnotify.h"
+#include "hwport.h"
 
 class ExternalIRQ;
 
+//! Handler for external IRQ's to communicate with IRQ system and mask/flag registers
 class ExternalIRQHandler: public Hardware, public IOSpecialRegClient {
     
     protected:
         HWIrqSystem *irqsystem; //!< pointer to irq system
-        AvrDevice* core; //!< pointer to device
         IOSpecialReg *mask_reg; //!< the interrupt mask register
         IOSpecialReg *flag_reg; //!< the interrupt flag register
         std::vector<ExternalIRQ*> extirqs; //!< list with external IRQ's
+        unsigned char irq_mask; //!< mask register value for registered IRQ's
+        unsigned char irq_flag; //!< flag register value for registered IRQ's
+        unsigned char reg_mask; //!< mask for relevant bits in flag and mask register
+        std::vector<int> vectors; //!< mapping index to vector
+        std::vector<int> irqbits; //!< mapping index to mask bit
+        std::map<int, int> vector2idx; //!< mapping irq vector to index
+        
+        void fireInterrupt(int idx); //!< fire a interupt from IRQ with index
+        
+        friend class ExternalIRQ;
         
     public:
         ExternalIRQHandler(AvrDevice* core, HWIrqSystem* irqsys, IOSpecialReg *mask, IOSpecialReg *flag);
@@ -54,16 +67,84 @@ class ExternalIRQHandler: public Hardware, public IOSpecialRegClient {
         // from IOSpecialRegClient
         virtual unsigned char set_from_reg(const IOSpecialReg* reg, unsigned char nv);
         virtual unsigned char get_from_client(const IOSpecialReg* reg, unsigned char v);
+        
 };
 
+//! Basic handler for one external IRQ, handles control register
 class ExternalIRQ: public IOSpecialRegClient {
-  
+    
+    protected:
+        int handlerIndex; //!< my own index on handler instance
+        ExternalIRQHandler *handler; //!< reference to IRQ handler
+        int bitshift; //!< how many bits to shift to get mode from control register
+        unsigned char mask; //!< mask for extract mode from control register
+        unsigned char mode; //!< control mode from control register
+        
+        //! register handler and index for signaling interrupt
+        void setHandlerIndex(ExternalIRQHandler *h, int idx) { handler = h; handlerIndex = idx; }
+        //! fire a interrupt
+        void fireInterrupt(void) { handler->fireInterrupt(handlerIndex); }
+        //! Reset mode
+        virtual void ResetMode(void) { mode = 0; }
+        //! Handle change of control register
+        virtual void ChangeMode(unsigned char m) { mode = m; }
+        //! does the interrupt source fire again? (for interrupt on level)
+        virtual bool fireAgain(void) { return false; }
+        //! does fire interrupt set the interrupt flag? (level interrupt does this not!)
+        virtual bool mustSetFlagOnFire(void) { return true; }
+        
+        friend class ExternalIRQHandler;
+        
     public:
         ExternalIRQ(IOSpecialReg *ctrl, int ctrlOffset, int ctrlBits);
         
         // from IOSpecialRegClient
         virtual unsigned char set_from_reg(const IOSpecialReg* reg, unsigned char nv);
         virtual unsigned char get_from_client(const IOSpecialReg* reg, unsigned char v);
+        
+};
+
+//! Handler for external IRQ on a single pin, one and 2 bit configuration
+class ExternalIRQSingle: public ExternalIRQ, public HasPinNotifyFunction {
+    
+    protected:
+        bool state; //!< saved state from pin
+        bool twoBitMode; //!< IRQ is controlled by 2 mode bits
+        
+        enum {
+            MODE_LEVEL_LOW = 0, //!< Fire interrupt on low level
+            MODE_EDGE_ALL =  1, //!< Fire interrupt on any logical change
+            MODE_EDGE_FALL = 2, //!< Fire interrupt on falling edge
+            MODE_EDGE_RISE = 3  //!< Fire interrupt on rising edge
+        };
+        
+    public:
+        ExternalIRQSingle(IOSpecialReg *ctrl, int ctrlOffset, int ctrlBits, Pin *pin);
+        
+        // from ExternalIRQ
+        void ChangeMode(unsigned char m);
+        bool fireAgain(void);
+        bool mustSetFlagOnFire(void);
+        
+        // from HasPinNotifyFunction
+        void PinStateHasChanged(Pin *pin);
+        
+};
+
+//! Handler for external IRQ on a single pin, one and 2 bit configuration
+class ExternalIRQPort: public ExternalIRQ, public HasPinNotifyFunction {
+    
+    protected:
+        bool state[8]; //!< saved states from all pins
+        Pin* pins[8]; //!< pins of port for identifying, which bit is changed
+        int portSize; //!< how much pins the port controls
+        
+    public:
+        ExternalIRQPort(IOSpecialReg *ctrl, HWPort *port);
+        
+        // from HasPinNotifyFunction
+        void PinStateHasChanged(Pin *pin);
+        
 };
 
 #endif

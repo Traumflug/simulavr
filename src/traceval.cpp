@@ -72,6 +72,14 @@ void TraceValue::change(unsigned val) {
     }
 }
 
+void TraceValue::change(unsigned val, unsigned mask) {
+    // this is mostly the same as write, but dosn't set WRITE nor _written flag!
+    if (((v & mask) != (val & mask)) || !_written) {
+        f |= CHANGE;
+        v = (v & ~mask) | (val & mask);
+    }
+}
+
 void TraceValue::write(unsigned val) {
     if ((v != val) || !_written) {
         f |= CHANGE;

@@ -44,6 +44,13 @@ AvrDevice_attiny2313::~AvrDevice_attiny2313() {
     delete timer0;
     delete timer01irq;
     delete usart;
+    delete pcmsk_reg;
+    delete mcucr_reg;
+    delete eifr_reg;
+    delete gimsk_reg;
+    delete gpior2_reg;
+    delete gpior1_reg;
+    delete gpior0_reg;
     delete prescaler01;
     delete gtccr_reg;
     delete spmRegister;
@@ -72,6 +79,20 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     
     gtccr_reg = new IOSpecialReg(&coreTraceGroup, "GTCCR");
     prescaler01 = new HWPrescaler(this, "01", gtccr_reg, 0);
+    
+    // TODO: Reset isn't implemented for GPIORegister! But AvrDevice::Reset isn't virtual!
+    gpior0_reg = new GPIORegister(&coreTraceGroup, "GPIOR0");
+    gpior1_reg = new GPIORegister(&coreTraceGroup, "GPIOR1");
+    gpior2_reg = new GPIORegister(&coreTraceGroup, "GPIOR2");
+    
+    gimsk_reg = new IOSpecialReg(&coreTraceGroup, "GIMSK");
+    eifr_reg = new IOSpecialReg(&coreTraceGroup, "EIFR");
+    mcucr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCR");
+    pcmsk_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK");
+    extirq = new ExternalIRQHandler(this, irqSystem, gimsk_reg, eifr_reg);
+    extirq->registerIrq(1, 6, new ExternalIRQSingle(mcucr_reg, 0, 2, GetPin("D2")));
+    extirq->registerIrq(2, 7, new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3")));
+    extirq->registerIrq(11, 5, new ExternalIRQPort(pcmsk_reg, portb));
     
     //wado = new HWWado(this);
 
@@ -113,13 +134,13 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     //rw[0x5e] reserved
     rw[0x5d]= & stack->spl_reg;
     rw[0x5c]= & timer0->ocrb_reg;
-    //rw[0x5b] GIMSK
-    //rw[0x5a] EIFR
+    rw[0x5b]= gimsk_reg;
+    rw[0x5a]= eifr_reg;
     rw[0x59]= & timer01irq->timsk_reg;
     rw[0x58]= & timer01irq->tifr_reg;
     rw[0x57]= & spmRegister->spmcr_reg;
     rw[0x56]= & timer0->ocra_reg;
-    //rw[0x55] MCUCR
+    rw[0x55]= mcucr_reg;
     //rw[0x54] MCUSR
     rw[0x53]= & timer0->tccrb_reg;
     rw[0x52]= & timer0->tcnt_reg;
@@ -134,13 +155,13 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     rw[0x49]= & timer1->ocrb_h_reg;
     rw[0x48]= & timer1->ocrb_l_reg;
     //rw[0x47] reserved
-    rw[0x46] = gtccr_reg;
+    //rw[0x46] CLKPR
     rw[0x45]= & timer1->icr_h_reg;
     rw[0x44]= & timer1->icr_l_reg;
-    //rw[0x43] GTCCR
+    rw[0x43]= gtccr_reg;
     rw[0x42]= & timer1->tccrc_reg;
     //rw[0x41]= & wado->wdtcr_reg;
-    //rw[0x40] PCMSK
+    rw[0x40]= pcmsk_reg;
     //rw[0x3f] reserved
     rw[0x3e]= & eeprom->eearl_reg;
     rw[0x3d]= & eeprom->eedr_reg;
@@ -151,9 +172,9 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     rw[0x38]= & portb->port_reg;
     rw[0x37]= & portb->ddr_reg;
     rw[0x36]= & portb->pin_reg;
-    //rw[0x35] GPIOR2
-    //rw[0x34] GPIOR1
-    //rw[0x33] GPIOR0
+    rw[0x35]= gpior2_reg;
+    rw[0x34]= gpior1_reg;
+    rw[0x33]= gpior0_reg;
     rw[0x32]= & portd->port_reg;
     rw[0x31]= & portd->ddr_reg;
     rw[0x30]= & portd->pin_reg;

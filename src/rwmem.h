@@ -81,6 +81,22 @@ class RWMemoryMember {
         TraceValueRegister *registry;
 };
 
+//! Represents a GPIO register like in Attiny2313
+/*! Allows clean read and write accesses and simply has one stored byte. */
+class GPIORegister: public RWMemoryMember {
+    
+    public:
+        GPIORegister(TraceValueRegister *registry,
+          const std::string &tracename): RWMemoryMember(registry, tracename) { value = 0; }
+        
+    protected:
+        unsigned char get() const { return value; }
+        void set(unsigned char v) { value = v; }
+        
+    private:
+        unsigned char value;
+};
+
 //! One byte in any AVR RAM
 /*! Allows clean read and write accesses and simply has one stored byte. */
 class RAM : public RWMemoryMember {
@@ -252,6 +268,11 @@ class IOSpecialReg: public RWMemoryMember {
         /*! Reflects a value change from hardware (for example timer count occured)
           @param val the new register value */
         void hardwareChange(unsigned char val) { if(tv) tv->change(val); }
+        
+        /*! Reflects a value change from hardware (for example timer count occured), but with bitmask
+          @param val the new register value
+          @param mask the bitmask for val */
+        void hardwareChangeMask(unsigned char val, unsigned char mask) { if(tv) tv->change(val, mask); }
         
     protected:
         std::vector<IOSpecialRegClient*> clients; //!< clients-list with registered clients

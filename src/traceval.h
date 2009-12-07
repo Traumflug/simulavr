@@ -141,6 +141,7 @@ class TraceValue {
         
         //! Log a change on this value
         void change(unsigned val);
+        void change(unsigned val, unsigned mask);
         //! Log a write access on this value
         void write(unsigned val);
         //! Log a read access

@@ -31,6 +31,7 @@
 #include "rwmem.h"
 #include "timerprescaler.h"
 #include "timerirq.h"
+#include "externalirq.h"
 #include "hwtimer.h"
 #include "hwuart.h"
 
@@ -43,6 +44,16 @@ class AvrDevice_attiny2313: public AvrDevice {
         HWPort *portd;                  //!< port D (only 7 bit)
 
         IOSpecialReg *gtccr_reg;        //!< GTCCR IO register
+        GPIORegister *gpior0_reg;       //!< GPIOR0 Register
+        GPIORegister *gpior1_reg;       //!< GPIOR1 Register
+        GPIORegister *gpior2_reg;       //!< GPIOR2 Register
+        
+        ExternalIRQHandler *extirq;     //!< external interrupt support
+        IOSpecialReg *gimsk_reg;        //!< GIMSK IO register
+        IOSpecialReg *eifr_reg;         //!< EIFR IO register
+        IOSpecialReg *mcucr_reg;        //!< MCUCR IO register
+        IOSpecialReg *pcmsk_reg;        //!< PCMSK IO register
+        
         HWPrescaler *prescaler01;       //!< prescaler unit for timer 0 and 1
         ICaptureSource *inputCapture1;  //!< input capture source for timer1
         HWTimer8_2C*   timer0;          //!< timer 0 unit
