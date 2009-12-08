@@ -72,6 +72,7 @@ TimerIRQRegister::TimerIRQRegister(AvrDevice* c,
 {
     timsk_reg.connectSRegClient(this);
     tifr_reg.connectSRegClient(this);
+    bitmask = 0;
     Reset();
 }
 
@@ -81,6 +82,7 @@ void TimerIRQRegister::registerLine(int idx, IRQLine* irq) {
     lines[idx] = irq;
     vector2line[irq->irqvector] = idx;
     name2line[irq->name] = idx;
+    bitmask |= 1 << idx;
 }
 
 IRQLine* TimerIRQRegister::getLine(const std::string& n) {
@@ -113,34 +115,28 @@ void TimerIRQRegister::Reset(void) {
 }
 
 unsigned char TimerIRQRegister::set_from_reg(const IOSpecialReg* reg, unsigned char nv) {
-    if(reg == &timsk_reg)
-        irqmask = nv;
-    else {
-        // FIXME: rewrite necessary, write 1 to ifr will clear interrupt!?
-        /*
-        unsigned char newflags = (irqflags ^ nv) & nv;
-        unsigned char mask = irqmask;
-        for(int i = 0; newflags && i < lines.size(); i++) {
-            // set tracevalue
-            // if ifr and imsk, then fire an interrupt, if this vector is valid
-            if((newflags & 0x1) && (mask & 0x1)) {
-                IRQLine* irq = lines[i];
-                if(irq->irqvector >= 0)
-                    irqsystem->SetIrqFlag(this, irq->irqvector);
-            }
-            newmask >>= 1;
-            newflags >>= 1;
-            mask >>= 1;
+    if(reg == &timsk_reg) {
+        // mask register: trigger interrupt, if mask bit is new set and flag is true
+        int idx = 0;
+        unsigned char m = 1;
+        nv &= bitmask;
+        for(; idx < lines.size(); idx++, m <<= 1) {
+            if(((nv & m) != 0) &&
+               ((irqmask & m) == 0) &&
+               ((irqflags & m) != 0) &&
+               (lines[idx] != NULL))
+                irqsystem->SetIrqFlag(this, lines[idx]->irqvector);
         }
-        */
-        irqflags = nv;
-        
-    }
+        irqmask = nv;
+    } else
+        // reset flag, if written with 1
+        irqflags ^= nv & bitmask & irqflags;
     return nv;
 }
 
 unsigned char TimerIRQRegister::get_from_client(const IOSpecialReg* reg, unsigned char v) {
-    // don't use v in this case
+    // don't use v in this case, all bits under control of TimerIRQRegister
+    // unused bits return 0
     if(reg == &timsk_reg)
         return irqmask;
     else

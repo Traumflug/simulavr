@@ -56,8 +56,6 @@ class IRQLine {
 };
 
 //! Provices flag and mask register for timer interrupts and connects irq lines to irqsystem
-/*! \todo how to handle bits without assigned vector, same for tracevalues on that bits.
-  clear a ifr is to be done with 1! */
 class TimerIRQRegister: public Hardware, public IOSpecialRegClient, public TraceValueRegister {
     
     private:
@@ -68,6 +66,7 @@ class TimerIRQRegister: public Hardware, public IOSpecialRegClient, public Trace
         std::map<int, int> vector2line; //!< mapping IRQ vector to index
         unsigned char irqmask; //!< mask register value;
         unsigned char irqflags; //!< flag register value;
+        unsigned char bitmask; //!< mask for used bits in registers
         
     public:
         IOSpecialReg timsk_reg; //!< the TIMSKx register
