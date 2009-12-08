@@ -92,8 +92,8 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
 
     extirq = new HWMega48ExtIrq(this,
                                 irqSystem, 
-                                PinAtPort(&portd, 0),
-                                PinAtPort(&portd, 1),
+                                PinAtPort(&portd, 2),
+                                PinAtPort(&portd, 3),
                                 1,
                                 2);
 
