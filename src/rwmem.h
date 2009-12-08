@@ -27,10 +27,12 @@
 #ifndef RWMEM
 #define RWMEM
 
-#include "traceval.h"
-#include "avrerror.h"
 #include <string>       // std::string
 #include <vector>
+
+#include "traceval.h"
+#include "avrerror.h"
+#include "hardware.h"
 
 class TraceValue;
 
@@ -83,11 +85,17 @@ class RWMemoryMember {
 
 //! Represents a GPIO register like in Attiny2313
 /*! Allows clean read and write accesses and simply has one stored byte. */
-class GPIORegister: public RWMemoryMember {
+class GPIORegister: public RWMemoryMember, public Hardware {
     
     public:
-        GPIORegister(TraceValueRegister *registry,
-          const std::string &tracename): RWMemoryMember(registry, tracename) { value = 0; }
+        GPIORegister(AvrDevice *core,
+                     TraceValueRegister *registry,
+                     const std::string &tracename):
+            Hardware(core),
+            RWMemoryMember(registry, tracename) { value = 0; }
+        
+        // from Hardware
+        void Reset(void) { value = 0; }
         
     protected:
         unsigned char get() const { return value; }

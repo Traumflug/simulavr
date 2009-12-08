@@ -80,10 +80,9 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     gtccr_reg = new IOSpecialReg(&coreTraceGroup, "GTCCR");
     prescaler01 = new HWPrescaler(this, "01", gtccr_reg, 0);
     
-    // TODO: Reset isn't implemented for GPIORegister! But AvrDevice::Reset isn't virtual!
-    gpior0_reg = new GPIORegister(&coreTraceGroup, "GPIOR0");
-    gpior1_reg = new GPIORegister(&coreTraceGroup, "GPIOR1");
-    gpior2_reg = new GPIORegister(&coreTraceGroup, "GPIOR2");
+    gpior0_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR0");
+    gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
+    gpior2_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR2");
     
     gimsk_reg = new IOSpecialReg(&coreTraceGroup, "GIMSK");
     eifr_reg = new IOSpecialReg(&coreTraceGroup, "EIFR");

@@ -26,10 +26,6 @@
 #include "hardware.h"
 #include "avrdevice.h"
 
-Hardware::Hardware(AvrDevice *core) { core->AddToResetList(this);}
+Hardware::Hardware(AvrDevice *core) { core->AddToResetList(this); }
 
-void Hardware::ClearIrqFlag(unsigned int) {
-}
-
-
-
+// EOF
