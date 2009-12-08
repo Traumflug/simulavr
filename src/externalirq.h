@@ -63,6 +63,8 @@ class ExternalIRQHandler: public Hardware, public IOSpecialRegClient {
         // from Hardware
         virtual void ClearIrqFlag(unsigned int vector);
         virtual void Reset(void);
+        virtual bool IsLevelInterrupt(unsigned int vector);
+        virtual bool LevelInterruptPending(unsigned int vector);
         
         // from IOSpecialRegClient
         virtual unsigned char set_from_reg(const IOSpecialReg* reg, unsigned char nv);

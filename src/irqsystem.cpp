@@ -199,20 +199,30 @@ HWIrqSystem::HWIrqSystem(AvrDevice* _core, int bytes, int tblsize):
 
 //a map is allways sorted, so the priority of the irq vector is known and handled correctly
 unsigned int HWIrqSystem::GetNewPc(unsigned int &actualVector) {
-    unsigned int newPC=0xffffffff;
+    unsigned int newPC = 0xffffffff;
 
     static map<unsigned int, Hardware *>::iterator ii;
     static map<unsigned int, Hardware *>::iterator end;
-    end= irqPartnerList.end();
+    end = irqPartnerList.end();
 
-    for (ii=irqPartnerList.begin(); ii!=end; ii++) {
-        Hardware* second= ii->second;
-        unsigned int first= ii->first;
+    for(ii = irqPartnerList.begin(); ii != end; ii++) {
+        Hardware* second = ii->second;
+        unsigned int first = ii->first;
 
-        second->ClearIrqFlag(first);
-        actualVector=first;
-        return first*(bytesPerVector/2);
-    }       
+        if(second->IsLevelInterrupt(first)) {
+            second->ClearIrqFlag(first);
+            if(second->LevelInterruptPending(first)) {
+                actualVector = first;
+                newPC = first * (bytesPerVector / 2);
+                break;
+            }
+        } else {
+            second->ClearIrqFlag(first);
+            actualVector = first;
+            newPC = first * (bytesPerVector / 2);
+            break;
+        }
+    }
 
     return newPC;
 }

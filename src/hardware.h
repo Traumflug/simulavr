@@ -52,6 +52,12 @@ class Hardware {
           by the AVR core. */
         virtual void ClearIrqFlag(unsigned int vector) {}
         
+        /*! Does the hardware have a level interrupt (triggered otherwise, the default!) */
+        virtual bool IsLevelInterrupt(unsigned int vector) { return false; }
+        
+        /*! Check a level interrupt on the time, where interrupt routine will be called */
+        virtual bool LevelInterruptPending(unsigned int vector) { return false; }
+        
 };
 
 #endif

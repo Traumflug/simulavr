@@ -81,6 +81,18 @@ void ExternalIRQHandler::ClearIrqFlag(unsigned int vector) {
     }
 }
 
+bool ExternalIRQHandler::IsLevelInterrupt(unsigned int vector) {
+    // get index from vector
+    int idx = vector2idx[vector];
+    return !extirqs[idx]->mustSetFlagOnFire();
+}
+
+bool ExternalIRQHandler::LevelInterruptPending(unsigned int vector) {
+    // get index from vector
+    int idx = vector2idx[vector];
+    return extirqs[idx]->fireAgain() && irq_mask & (1 << irqbits[idx]);
+}
+
 void ExternalIRQHandler::Reset(void) {
     irq_mask = 0;
     irq_flag = 0;
