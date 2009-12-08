@@ -163,8 +163,8 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     rw[0x5e]= & stack->sph_reg;
     rw[0x5d]= & stack->spl_reg;
     rw[0x5c]= & timer0->ocra_reg;
-    rw[0x5b]= gifr_reg;
-    rw[0x5a]= gicr_reg;
+    rw[0x5b]= gicr_reg;
+    rw[0x5a]= gifr_reg;
     rw[0x59]= & timer012irq->timsk_reg;
     rw[0x58]= & timer012irq->tifr_reg;
     rw[0x57]= & spmRegister->spmcr_reg;
