@@ -70,7 +70,7 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
 {
     irqSystem = new HWIrqSystem(this, 2, 19); //2 bytes per vector, 19 vectors
     eeprom = new HWEeprom(this, irqSystem, 128, 17, HWEeprom::DEVMODE_EXTENDED); 
-    stack = new HWStack(this, Sram, 0x80);
+    stack = new HWStack(this, Sram, 0x100);
     porta = new HWPort(this, "A", true, 3);
     portb = new HWPort(this, "B", true);
     portd = new HWPort(this, "D", true, 7);
