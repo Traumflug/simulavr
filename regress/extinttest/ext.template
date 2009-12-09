@@ -9,4 +9,6 @@ define compile-and-link
 $(AVR_GCC) $($(basename $(notdir $@))_CCOPTS) -o $@ $^
 endef
 
+include Makefile
+
 # EOF
