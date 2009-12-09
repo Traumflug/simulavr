@@ -1,60 +1,19 @@
 #include <avr/interrupt.h>
 
-#if defined(__AVR_ATmega128__)
-# define FLAGREG EIFR
-# define MASKREG EIMSK
-# if defined(TEST_INT1)
-#   define FLAGBIT _BV(INTF1)
-# else
-#   define FLAGBIT _BV(INTF0)
-# endif
-# define PORTREG PIND
-# define CTRLREG EICRA
-#endif
-
-#if defined(__AVR_ATmega16__)
-# define FLAGREG GIFR
-# define MASKREG GICR
-# if defined(TEST_INT1)
-#   define FLAGBIT _BV(INTF1)
-# else
-#   if defined(TEST_INT2_16)
-#     define FLAGBIT _BV(INTF2)
-#   else
-#     define FLAGBIT _BV(INTF0)
-#   endif
-# endif
-# if defined(TEST_INT2_16)
-#   define PORTREG PINB
-#   define CTRLREG MCUCSR
-# else
-#   define PORTREG PIND
-#   define CTRLREG MCUCR
-# endif
-#endif
-
-#if defined(__AVR_ATmega48__)
-# define FLAGREG EIFR
-# define MASKREG EIMSK
-# if defined(TEST_INT1)
-#   define FLAGBIT _BV(INTF1)
-# else
-#   define FLAGBIT _BV(INTF0)
-# endif
-# define PORTREG PIND
-# define CTRLREG EICRA
-#endif
-
 #if defined(__AVR_ATtiny2313__)
 # define FLAGREG EIFR
 # define MASKREG GIMSK
-# if defined(TEST_INT1)
-#   define FLAGBIT _BV(INTF1)
-# else
-#   define FLAGBIT _BV(INTF0)
-# endif
-# define PORTREG PIND
-# define CTRLREG MCUCR
+# define FLAGBIT _BV(PCIF)
+# define PORTREG PINB
+# define CTRLREG PCMSK
+#endif
+
+#if defined(__AVR_ATmega48__)
+# define FLAGREG PCIFR
+# define MASKREG PCICR
+# define FLAGBIT _BV(PCIF1)
+# define PORTREG PINC
+# define CTRLREG PCMSK1
 #endif
 
 volatile unsigned char cnt_irq = 0;
@@ -62,20 +21,14 @@ volatile unsigned char hs_in = 0;
 volatile unsigned char hs_out = 0;
 volatile unsigned char hs_cmd = 0;
 volatile unsigned char hs_data = 0;
-volatile unsigned char dis_mask = 0;
 
-#if defined(TEST_INT1)
-  ISR(SIG_INTERRUPT1) {
-#else
-# if defined(TEST_INT2_16)
-  ISR(SIG_INTERRUPT2) {
-# else
-  ISR(SIG_INTERRUPT0) {
-# endif
+#if defined(__AVR_ATtiny2313__)
+  ISR(SIG_PIN_CHANGE) {
+#endif
+#if defined(__AVR_ATmega48__)
+  ISR(SIG_PIN_CHANGE1) {
 #endif
   cnt_irq++;
-  if(dis_mask != 0)
-    MASKREG &= ~FLAGBIT;
 }
 
 int main() {

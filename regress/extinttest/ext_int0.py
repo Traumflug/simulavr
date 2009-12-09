@@ -12,21 +12,11 @@ class XPin(pysimulavr.Pin):
     self.__net.Add(self)
     self.__net.Add(dev.GetPin(name))
     
-class TestCase(SimTestCase):
+class TestCaseBase(SimTestCase):
   
-  extpin = {
-    "atmega128":  "D0",
-    "atmega16":   "D2",
-    "atmega48":   "D2",
-    "attiny2313": "D2",
-  }
+  extpin = dict()
   
-  portin = {
-    "atmega128":  0xff,
-    "atmega16":   0xff,
-    "atmega48":   0xff,
-    "attiny2313": 0x7f, # only 7 bit at port D
-  }
+  portin = dict()
   
   ctrlshift = 0
   
@@ -51,6 +41,13 @@ class TestCase(SimTestCase):
     v = self.sim.getByteByName(self.dev, "cnt_irq")
     self.assertEqual(v, val, "irq counter value wrong: got=%d, exp=%d" % (v, val))
     
+  def assertFlagReg(self, state):
+    v = not self.getFlagReg() == 0
+    if state:
+      self.assertTrue(v, "irq flag isn't set")
+    else:
+      self.assertFalse(v, "irq flag is set")
+      
   def setControl(self, ctrl):
     self.handshake(4, ctrl << self.ctrlshift)
     
@@ -76,6 +73,24 @@ class TestCase(SimTestCase):
     else:
       self.sim.setByteByName(self.dev, "dis_mask", 0)
       
+class TestCase(TestCaseBase):
+  
+  extpin = {
+    "atmega128":  "D0",
+    "atmega16":   "D2",
+    "atmega48":   "D2",
+    "attiny2313": "D2",
+  }
+  
+  portin = {
+    "atmega128":  0xff,
+    "atmega16":   0xff,
+    "atmega48":   0xff,
+    "attiny2313": 0x7f, # only 7 bit at port D
+  }
+  
+  ctrlshift = 0
+  
   def test_00(self):
     """check interrupt on rising edge"""
     self.assertDevice()

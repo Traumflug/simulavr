@@ -1,5 +1,4 @@
-from simtestutil import SimTestCase, SimTestLoader
-import pysimulavr
+from simtestutil import SimTestLoader
 
 import ext_int0
 

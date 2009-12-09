@@ -1,5 +1,5 @@
 from unittest import TextTestRunner, TestSuite
-from sys import argv, stderr
+from sys import argv, stderr, exit
 
 from vcdtestutil import VCDTestLoader
 from simtestutil import SimTestLoader
@@ -28,6 +28,10 @@ def getTests(targets):
   
 if __name__ == '__main__':
 
-  TextTestRunner(verbosity=2).run(getTests(argv[1:]))
-
+  res = TextTestRunner(verbosity=2).run(getTests(argv[1:]))
+  if res.wasSuccessful():
+    exit(0)
+  else:
+    exit(1)
+    
 # EOF
