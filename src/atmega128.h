@@ -32,7 +32,7 @@
 #include "timerprescaler.h"
 #include "timerirq.h"
 #include "hwtimer.h"
-#include "hwmegaextirq.h"
+#include "externalirq.h"
 #include "hwuart.h"
 #include "hwspi.h"
 #include "hwad.h"
@@ -52,7 +52,11 @@ class AvrDevice_atmega128: public AvrDevice {
         HWPort *porte;                  //!< port E
         HWPort *portf;                  //!< port F
         HWPort *portg;                  //!< port G
-        HWMegaExtIrq *extirq;           //!< external interrupt unit
+        ExternalIRQHandler *extirq;     //!< external interrupt support
+        IOSpecialReg *eicra_reg;        //!< EICRA IO register
+        IOSpecialReg *eicrb_reg;        //!< EICRB IO register
+        IOSpecialReg *eimsk_reg;        //!< EIMSK IO register
+        IOSpecialReg *eifr_reg;         //!< EIFR IO register
 
         HWAdmux *admux;                 //!< adc multiplexer unit
         HWAd *ad;                       //!< adc unit

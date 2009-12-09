@@ -48,7 +48,16 @@ AvrDevice_atmega668base::~AvrDevice_atmega668base() {
     delete timerIrq1;
     delete timer0;
     delete timerIrq0;
-    delete extirq;
+    delete extirqpc;
+    delete pcmsk2_reg;
+    delete pcmsk1_reg;
+    delete pcmsk0_reg;
+    delete pcifr_reg;
+    delete pcicr_reg;
+    delete extirq01;
+    delete eifr_reg;
+    delete eimsk_reg;
+    delete eicra_reg;
     delete stack;
     delete eeprom;
     delete irqSystem;
@@ -64,9 +73,9 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     aref(),
     adc6(),
     adc7(),
-    portb(this, "B"),
-    portc(this, "C"),
-    portd(this, "D"),
+    portb(this, "B", true),
+    portc(this, "C", true, 7),
+    portd(this, "D", true),
     assr_reg(&coreTraceGroup, "ASSR"),
     gtccr_reg(&coreTraceGroup, "GTCCR"),
     prescaler01(this, "01", &gtccr_reg, 0, 7),
@@ -90,13 +99,23 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     RegisterPin("ADC6", &adc6);
     RegisterPin("ADC7", &adc7);
 
-    extirq = new HWMega48ExtIrq(this,
-                                irqSystem, 
-                                PinAtPort(&portd, 2),
-                                PinAtPort(&portd, 3),
-                                1,
-                                2);
+    eicra_reg = new IOSpecialReg(&coreTraceGroup, "EICRA");
+    eimsk_reg = new IOSpecialReg(&coreTraceGroup, "EIMSK");
+    eifr_reg = new IOSpecialReg(&coreTraceGroup, "EIFR");
+    extirq01 = new ExternalIRQHandler(this, irqSystem, eimsk_reg, eifr_reg);
+    extirq01->registerIrq(1, 0, new ExternalIRQSingle(eicra_reg, 0, 2, GetPin("D2")));
+    extirq01->registerIrq(2, 1, new ExternalIRQSingle(eicra_reg, 2, 2, GetPin("D3")));
 
+    pcicr_reg = new IOSpecialReg(&coreTraceGroup, "PCICR");
+    pcifr_reg = new IOSpecialReg(&coreTraceGroup, "PCIFR");
+    pcmsk0_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK0");
+    pcmsk1_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK1");
+    pcmsk2_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK2");
+    extirqpc = new ExternalIRQHandler(this, irqSystem, pcicr_reg, pcifr_reg);
+    extirqpc->registerIrq(3, 0, new ExternalIRQPort(pcmsk0_reg, &portb));
+    extirqpc->registerIrq(4, 1, new ExternalIRQPort(pcmsk1_reg, &portc));
+    extirqpc->registerIrq(5, 2, new ExternalIRQPort(pcmsk2_reg, &portd));
+    
     timerIrq0 = new TimerIRQRegister(this, irqSystem, 0);
     timerIrq0->registerLine(0, new IRQLine("TOV0",  16));
     timerIrq0->registerLine(1, new IRQLine("OCF0A", 14));
@@ -206,7 +225,12 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x6F]= & timerIrq1->timsk_reg;
     rw[0x6E]= & timerIrq0->timsk_reg;
 
-    rw[0x69]= & extirq->eicra_reg;
+    rw[0x6d]= pcmsk2_reg;
+    rw[0x6c]= pcmsk1_reg;
+    rw[0x6b]= pcmsk0_reg;
+    
+    rw[0x69]= eicra_reg;
+    rw[0x68]= pcicr_reg;
 
     rw[0x5f]= statusRegister;
     rw[0x5e]= & stack->sph_reg;
@@ -227,9 +251,9 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x40]= & eeprom->eedr_reg;
     rw[0x3F]= & eeprom->eecr_reg;
 
-    rw[0x3D]= & extirq->eimsk_reg;
-
-    rw[0x3C]= & extirq->eifr_reg;
+    rw[0x3D]= eimsk_reg;
+    rw[0x3C]= eifr_reg;
+    rw[0x3b]= pcifr_reg;
 
     rw[0x37]= & timerIrq2->tifr_reg;
     rw[0x36]= & timerIrq1->tifr_reg;

@@ -70,11 +70,19 @@ AvrDevice_atmega128::AvrDevice_atmega128():
             PinAtPort(portb, 2), PinAtPort(portb, 3), PinAtPort(portb, 1),
            PinAtPort(portb, 0),/*irqvec*/ 17, true);
 
-    extirq= new HWMegaExtIrq(this, irqSystem, 
-            PinAtPort(portd, 0), PinAtPort(portd, 1), PinAtPort(portd, 2),
-            PinAtPort(portd, 3), PinAtPort(porte, 4), PinAtPort(porte, 5),
-            PinAtPort(porte, 6),PinAtPort(porte, 7),
-            1,2,3,4,5,6,7,8);
+    eicra_reg = new IOSpecialReg(&coreTraceGroup, "EICRA");
+    eicrb_reg = new IOSpecialReg(&coreTraceGroup, "EICRB");
+    eimsk_reg = new IOSpecialReg(&coreTraceGroup, "EIMSK");
+    eifr_reg = new IOSpecialReg(&coreTraceGroup, "EIFR");
+    extirq = new ExternalIRQHandler(this, irqSystem, eimsk_reg, eifr_reg);
+    extirq->registerIrq(1, 0, new ExternalIRQSingle(eicra_reg, 0, 2, GetPin("D0")));
+    extirq->registerIrq(2, 1, new ExternalIRQSingle(eicra_reg, 2, 2, GetPin("D1")));
+    extirq->registerIrq(3, 2, new ExternalIRQSingle(eicra_reg, 4, 2, GetPin("D2")));
+    extirq->registerIrq(4, 3, new ExternalIRQSingle(eicra_reg, 6, 2, GetPin("D3")));
+    extirq->registerIrq(5, 4, new ExternalIRQSingle(eicrb_reg, 0, 2, GetPin("E4")));
+    extirq->registerIrq(6, 5, new ExternalIRQSingle(eicrb_reg, 2, 2, GetPin("E5")));
+    extirq->registerIrq(7, 6, new ExternalIRQSingle(eicrb_reg, 4, 2, GetPin("E6")));
+    extirq->registerIrq(8, 7, new ExternalIRQSingle(eicrb_reg, 6, 2, GetPin("E7")));
   
     sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
     assr_reg = new IOSpecialReg(&coreTraceGroup, "ASSR");
@@ -179,7 +187,7 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     rw[0x79]= & timer1->ocrc_h_reg;
     rw[0x78]= & timer1->ocrc_l_reg;
     
-    rw[0x6a]= & extirq->eicra_reg;
+    rw[0x6a]= eicra_reg;
     
     rw[0x65]= & portg->port_reg;
     rw[0x64]= & portg->ddr_reg;
@@ -194,9 +202,9 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     
     rw[0x5b]= & rampz->rampz_reg;
 
-    rw[0x5a]= & extirq->eicrb_reg;
-    rw[0x59]= & extirq->eimsk_reg;
-    rw[0x58]= & extirq->eifr_reg;
+    rw[0x5a]= eicrb_reg;
+    rw[0x59]= eimsk_reg;
+    rw[0x58]= eifr_reg;
     rw[0x57]= & timer012irq->timsk_reg;
     rw[0x56]= & timer012irq->tifr_reg;
     

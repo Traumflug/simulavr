@@ -26,7 +26,7 @@
 #include "avrdevice.h"
 #include "hardware.h"
 #include "rwmem.h"
-#include "hwmega48extirq.h"
+#include "externalirq.h"
 #include "hwuart.h"
 #include "hwad.h"
 #include "hwport.h"
@@ -51,7 +51,16 @@ class AvrDevice_atmega668base: public AvrDevice {
         IOSpecialReg        assr_reg;    //!< ASSR IO register
         HWPrescaler         prescaler01; //!< prescaler unit for timer 0 and 1
         HWPrescalerAsync    prescaler2;  //!< prescaler unit for timer 2
-        HWMega48ExtIrq*     extirq;      //!< external interrupt unit
+        ExternalIRQHandler* extirq01;    //!< external interrupt support for INT0, INT1
+        IOSpecialReg*       eicra_reg;   //!< EICRA IO register
+        IOSpecialReg*       eimsk_reg;   //!< EIMSK IO register
+        IOSpecialReg*       eifr_reg;    //!< EIFR IO register
+        ExternalIRQHandler* extirqpc;    //!< external interrupt support for PCINT[0-2]
+        IOSpecialReg*       pcicr_reg;   //!< PCICR IO register
+        IOSpecialReg*       pcifr_reg;   //!< PCIFR IO register
+        IOSpecialReg*       pcmsk0_reg;  //!< PCIMSK0 IO register
+        IOSpecialReg*       pcmsk1_reg;  //!< PCIMSK1 IO register
+        IOSpecialReg*       pcmsk2_reg;  //!< PCIMSK2 IO register
         HWAdmux             admux;       //!< adc multiplexer unit
         HWAd*               ad;          //!< adc unit
         HWSpi*              spi;         //!< spi unit
