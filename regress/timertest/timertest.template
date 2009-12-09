@@ -3,7 +3,7 @@
 SIMULAVR=../../src/simulavr$(EXEEXT)
 
 test: %(targets)s
-	$(PYTHON) -m timer_testall $^
+	$(PYTHON) -m regress_unittest $^
 
 %(rules)s
 

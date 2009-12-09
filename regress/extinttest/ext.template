@@ -1,12 +1,12 @@
 # template makefile for external interrupts
 
 test: %(targets)s
-	python -m timer_testall $^
+	$(PYTHON) -m regress_unittest $^
 
 %(rules)s
 
 define compile-and-link
-avr-gcc $($(basename $(notdir $@))_CCOPTS) -o $@ $^
+$(AVR_GCC) $($(basename $(notdir $@))_CCOPTS) -o $@ $^
 endef
 
 # EOF
