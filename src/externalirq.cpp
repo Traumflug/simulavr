@@ -44,6 +44,11 @@ ExternalIRQHandler::ExternalIRQHandler(AvrDevice* c,
     Reset();
 }
 
+ExternalIRQHandler::~ExternalIRQHandler(void) {
+    for(int idx = 0; idx < extirqs.size(); idx++)
+        delete extirqs[idx];
+}
+
 void ExternalIRQHandler::registerIrq(int vector, int irqBit, ExternalIRQ* extirq) {
     // set mask for relevant bits
     reg_mask |= 1 << irqBit;
@@ -208,7 +213,7 @@ bool ExternalIRQSingle::mustSetFlagOnFire(void) {
 ExternalIRQPort::ExternalIRQPort(IOSpecialReg *ctrl, HWPort *port):
     ExternalIRQ(ctrl, 0, port->GetPortSize())
 {
-    int portSize = port->GetPortSize();
+    portSize = port->GetPortSize();
     for(int idx = 0; idx < 8; idx++) {
         if(idx < portSize) {
             Pin *p = &port->GetPin((unsigned char)idx);

@@ -58,6 +58,7 @@ class ExternalIRQHandler: public Hardware, public IOSpecialRegClient {
         
     public:
         ExternalIRQHandler(AvrDevice* core, HWIrqSystem* irqsys, IOSpecialReg *mask, IOSpecialReg *flag);
+        ~ExternalIRQHandler();
         void registerIrq(int vector, int irqBit, ExternalIRQ* extirq);
         
         // from Hardware
