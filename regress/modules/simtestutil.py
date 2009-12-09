@@ -63,6 +63,10 @@ class SimulavrAdapter(object):
     addr = dev.data.GetAddressAtSymbol(label)
     return dev.getRWMem(addr)
     
+  def setByteByName(self, dev, label, value):
+    addr = dev.data.GetAddressAtSymbol(label)
+    dev.setRWMem(addr, value)
+    
 class SimTestLoader(TestLoader):
   
   def __init__(self, elffile):

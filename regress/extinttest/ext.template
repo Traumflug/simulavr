@@ -1,0 +1,12 @@
+# template makefile for external interrupts
+
+test: %(targets)s
+	python -m timer_testall $^
+
+%(rules)s
+
+define compile-and-link
+avr-gcc $($(basename $(notdir $@))_CCOPTS) -o $@ $^
+endef
+
+# EOF
