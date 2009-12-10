@@ -4,7 +4,13 @@
 
 MAINTAINERCLEANFILES = Makefile.in stamp-vti
 
-EXTRA_DIST = timertest.cfg timertest.template
+EXTRA_DIST = timertest.cfg timertest.template timer_16_extn.py timer_16_extp.py \
+    timer_16_icap_n.py timer_16_icap_nc.py timer_16_icap_p.py timer_16_icap_pc.py \
+    timer_16bit.c timer_16bit_ext.c timer_16bit_fastpwm.py timer_16bit_fastpwm.sig \
+    timer_16bit_icap.c timer_16bit_normal.py timer_16bit_normal.sig \
+    timer_16bit_normal_90.sig timer_8bit.c timer_8bit_ctc.c timer_8bit_ctc.py \
+    timer_8bit_ctc.sig timer_8bit_normal.py timer_8bit_normal.sig \
+    timer_8bit_normal_90.sig
 
 export PYTHONPATH=$(srcdir)/../modules:$(srcdir)/../../src
 

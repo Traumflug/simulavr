@@ -19,3 +19,5 @@ simulavr.html
 *.tp
 *.vr
 
+# files created by make
+stamp-vti

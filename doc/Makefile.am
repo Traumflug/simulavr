@@ -5,6 +5,8 @@
 # produce simulavr.pdf and simulavr.info
 info_TEXINFOS = simulavr.texinfo
 
+EXTRA_DIST = $(DX_CONFIG)
+
 if HAVE_TEX
 TEX_FORMATS = pdf
 endif

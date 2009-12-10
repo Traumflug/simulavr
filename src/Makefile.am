@@ -30,7 +30,7 @@ PYTHON_MODUL_LIB=_pysimulavr@PYTHON_MODULE_EXTENSION@
 PYTHON_XTRA_INC=-Ipython
 PYTHON_MODUL_INTERFACE=$(srcdir)/python/pysimulavr.i
 noinst_LTLIBRARIES += lib_pysimulavr.la
-lib_pysimulavr_la_SOURCES=pysimulavr_wrap.cpp
+nodist_lib_pysimulavr_la_SOURCES=pysimulavr_wrap.cpp
 lib_pysimulavr_la_CPPFLAGS=$(PYTHON_CPPFLAGS) $(PYTHON_XTRA_INC)
 lib_pysimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 lib_pysimulavr_la_LIBADD= libsim.la \
@@ -65,7 +65,7 @@ endif
 
 libsim_la_SOURCES = \
   adcpin.cpp application.cpp at4433.cpp at8515.cpp atmega668base.cpp atmega128.cpp \
-  atmega16_32.cpp attiny2313.cpp externalirq.cpp $(FAB_CPP) \
+  atmega16_32.cpp attiny2313.cpp externalirq.cpp \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp flashprog.cpp hardware.cpp helper.cpp cmd/gdbserver.cpp \
   hwacomp.cpp hwad.cpp hweeprom.cpp hwextirq.cpp hwmega48extirq.cpp \
@@ -77,6 +77,8 @@ libsim_la_SOURCES = \
   rwmem.cpp ui/scope.cpp ui/serialrx.cpp ui/serialtx.cpp spisrc.cpp spisink.cpp \
   specialmem.cpp string2.cpp systemclock.cpp traceval.cpp ui/ui.cpp 
 
+nodist_libsim_la_SOURCES =  $(FAB_CPP)
+
 libsim_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 
 nodist_libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
@@ -86,18 +88,21 @@ libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz \
 
 pkginclude_HEADERS = \
   adcpin.h application.h at4433.h at8515.h atmega128.h atmega16_32.h attiny2313.h \
-  atmega668base.h avrdevice.h externalirq.h $(FAB_HEADER) \
-  avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h breakpoint.h \
-  config_deprecated.h decoder.h externaltype.h flash.h flashprog.h \
+  atmega668base.h avrdevice.h externalirq.h hardware.h helper.h global.h \
+  avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h breakpoint.h string2.h \
+  config_deprecated.h decoder.h externaltype.h flash.h flashprog.h hwdecls.h \
   funktor.h hwacomp.h hwad.h hweeprom.h hwextirq.h hwmega48extirq.h \
-  hwmegaextirq.h hwtimer/timerprescaler.h hwtimer/prescalermux.h \
+  hwmegaextirq.h hwtimer/timerprescaler.h hwtimer/prescalermux.h string2_template.h \
   hwtimer/timerirq.h hwpinchange.h hwport.h hwspi.h hwsreg.h hwstack.h \
   hwtimer/icapturesrc.h hwtimer/hwtimer.h hwuart.h hwwado.h ioregs.h \
-  irqsystem.h ui/keyboard.h ui/keynumber_to_scancode.dat ui/lcd.h \
+  irqsystem.h ui/keyboard.h ui/keynumber_to_scancode.dat ui/lcd.h python/pysimulationmember.h \
   memory.h ui/mysocket.h net.h pin.h ui/extpin.h pinatport.h pinnotify.h pinmon.h \
   printable.h rwmem.h ui/scope.h ui/serialrx.h ui/serialtx.h simulationmember.h \
   spisrc.h spisink.h specialmem.h systemclock.h systemclocktypes.h \
-  traceval.h types.h ui/ui.h ui/xcode_to_keynumber.dat
+  traceval.h types.h cmd/dumpargs.h cmd/gdb.h ui/ui.h ui/keytrans.h \
+  ui/xcode_to_keynumber.dat
+
+nodist_pkginclude_HEADERS =  $(FAB_HEADER)
 
 simulavr_SOURCES = cmd/main.cpp cmd/dumpargs.cpp
 simulavr_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) \
@@ -140,11 +145,11 @@ $(srcdir)/ui/keyboard.cpp: $(srcdir)/ui/keytrans.h
 @MAINT@     $(srcdir)/ui/xcode_to_keynumber.dat
 @MAINT@	$(builddir)/kbdgentables $(srcdir)/ui
 
-EXTRA_DIST = simulavr.i python/pysimulavr.i
+EXTRA_DIST = simulavr.i python/pysimulavr.i python/README
 
 MAINTAINERCLEANFILES = ui/keytrans.h
 
-CLEANFILES = simulavr_wrap.cxx $(PYTHON_MODUL_LIB) avr.vpi setup.py \
+CLEANFILES = simulavr_wrap.cxx $(PYTHON_MODUL_LIB) avr.vpi \
              pysimulavr_wrap.cpp pysimulavr_wrap.h pysimulavr.py pysimulavr.pyc
 
 $(FAB_CPP) $(FAB_HEADER): fab/* fab/atmel-xml/*

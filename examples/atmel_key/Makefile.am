@@ -13,9 +13,9 @@ AVR_CFLAGS = $(AVR_CPU_CFLAGS) -I. -DF_CPU=4000000UL \
   -fshort-enums -Wall -Wstrict-prototypes 
 
 EXTRA_DIST = kb.c kb.h main.c pindefs.h scancodes.h serial.c serial.h \
-  StdDefs.c StdDefs.h README Notes.txt
+  StdDefs.c StdDefs.h README Notes.txt atmel_key.tcl
 
-examples_DATA = $(EXAMPLE).elf $(EXTRA_DIST) README
+examples_DATA = $(EXAMPLE).elf $(EXTRA_DIST)
 
 CLEANFILES = $(EXAMPLE).elf kb.o main.o serial.o StdDefs.o
 

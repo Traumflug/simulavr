@@ -2,7 +2,8 @@
 #  $Id$
 #
 
-EXTRA_DIST = avrtest.cfg avrtest.template run_test.sh
+EXTRA_DIST = avrtest.cfg avrtest.template run_test.sh avrtest_help.h \
+    avrtest_help.c test_abort.c test_exit.c test_maxruntime.c
 
 export PYTHONPATH=$(srcdir)/../modules
 

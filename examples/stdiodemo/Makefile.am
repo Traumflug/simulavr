@@ -11,7 +11,8 @@ AVR_CPU_CFLAGS =-mmcu=$(AVR_CPU)
 AVR_CFLAGS = $(AVR_CPU_CFLAGS) -Os -Wall -DF_CPU=3686400UL
 
 EXTRA_DIST = defines.h hd44780.c hd44780.h lcd.c lcd.h stdiodemo.tcl \
-  README stdiodemo.c stdiodemo.dox stdiodemo-setup.jpg uart.c uart.h
+  README stdiodemo.c stdiodemo.dox stdiodemo-setup.jpg uart.c uart.h \
+  checkdebug.gdb
 
 examples_DATA = $(EXAMPLE).elf $(EXTRA_DIST)
 
