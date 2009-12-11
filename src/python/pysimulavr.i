@@ -7,6 +7,7 @@
   #include "systemclock.h"
   #include "hardware.h"
   #include "externaltype.h"
+  #include "irqsystem.h"
   #include "pin.h"
   #include "net.h"
   #include "rwmem.h"
@@ -61,6 +62,7 @@ namespace std {
 %include "externaltype.h"
 %include "pinnotify.h"
 %include "traceval.h"
+%include "irqsystem.h"
 %include "avrdevice.h"
 
 %extend DumpManager {

@@ -37,6 +37,8 @@
 //! global switch to enable irq statistic (default is disabled)
 extern bool enableIRQStatistic;
 
+#ifndef SWIG
+
 class IrqStatisticEntry {
         
     public:
@@ -111,6 +113,8 @@ class IrqStatistic: public Printable {
 
 std::ostream& operator<<(std::ostream &, const IrqStatistic&);
 
+#endif // ifndef SWIG
+
 class HWIrqSystem: public TraceValueRegister {
     
     protected:
@@ -128,16 +132,13 @@ class HWIrqSystem: public TraceValueRegister {
         HWIrqSystem (AvrDevice* _core, int bytes, int tblsize);
 
         unsigned int GetNewPc(unsigned int &vecNo); //if an IRQ occured, we need the new PC,
-        //if PC==0xFFFFFFFF there is no IRQ
-        unsigned int JumpToVector(unsigned int vector) ;
-
-        //void RegisterIrqPartner(Hardware *, unsigned int vector);
         void SetIrqFlag(Hardware *, unsigned int vector);
         void ClearIrqFlag(unsigned int vector);
         void IrqHandlerStarted(unsigned int vector);
         void IrqHandlerFinished(unsigned int vector);
 };
 
+#ifndef SWIG
 
 class IrqFunktor: public Funktor {
     
@@ -154,6 +155,8 @@ class IrqFunktor: public Funktor {
         void operator()() { (irqSystem->*fp)(vectorNo); }
         Funktor* clone() { return new IrqFunktor(*this); }
 };
+
+#endif // ifndef SWIG
 
 #endif
 

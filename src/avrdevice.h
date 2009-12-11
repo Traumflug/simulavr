@@ -123,6 +123,7 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         void Load(const char* n);
         void ReplaceIoRegister(unsigned int offset, RWMemoryMember *);
         bool ReplaceMemRegister(unsigned int offset, RWMemoryMember *);
+        RWMemoryMember *GetMemRegisterInstance(unsigned int offset);
         void RegisterTerminationSymbol(const char *symbol);
 
         Pin *GetPin(const char *name);

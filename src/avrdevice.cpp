@@ -487,6 +487,12 @@ bool AvrDevice::ReplaceMemRegister(unsigned int offset, RWMemoryMember *newMembe
     return false;
 }
 
+RWMemoryMember* AvrDevice::GetMemRegisterInstance(unsigned int offset) {
+    if(offset < totalIoSpace)
+        return rw[offset];
+    return NULL;
+}
+
 void AvrDevice::RegisterTerminationSymbol(const char *symbol) {
     unsigned int epa = Flash->GetAddressAtSymbol(symbol);
     EP.push_back(epa);
