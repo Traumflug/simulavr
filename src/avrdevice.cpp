@@ -33,6 +33,7 @@
 #include "irqsystem.h"  //GetNewPc
 #include "systemclock.h"
 #include "avrerror.h"
+#include "avrmalloc.h"
 
 #include "avrdevice_impl.h"
 
@@ -175,7 +176,31 @@ Pin *AvrDevice::GetPin(const char *name) {
 }
 
 AvrDevice::~AvrDevice() {
+    // unregister device on DumpManager
     dump_manager->unregisterAvrDevice(this);
+    
+    // delete invalid RW memory cells on shadow store + shadow store self
+    unsigned size = totalIoSpace - registerSpaceSize - iRamSize - eRamSize;
+    for(unsigned idx = 0; idx < size; idx++)
+        delete invalidRW[idx];
+    avr_free(invalidRW);
+    
+    // delete Ram cells and registers
+    for(unsigned idx = 0; idx < registerSpaceSize; idx++)
+        delete rw[idx];
+    size = registerSpaceSize + ioSpaceSize + iRamSize + eRamSize;
+    for(unsigned idx = (registerSpaceSize + ioSpaceSize); idx < size; idx++)
+        delete rw[idx];
+    
+    // delete rw and other allocated objects
+    delete Flash;
+    delete Sram;
+    delete ioreg;
+    delete R;
+    delete statusRegister;
+    delete status;
+    avr_free(rw);
+    delete data;
 }
 
 AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
@@ -196,19 +221,17 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     
     trace_direct(&coreTraceGroup, "PC", &PC);
 
-    unsigned int currentOffset = 0;
-
     data = new Data; //only the symbol container
 
     // placeholder for RAMPZ register
     rampz = NULL;
     
-    //memory space for all RW-Memory addresses    
-    rw = (RWMemoryMember**)malloc(sizeof(RWMemoryMember*) * totalIoSpace);
-    if(rw == NULL)
-        avr_error("Not enough memory for RWMemoryMembers in AvrDevice::AvrDevice");
-
-    //the status register is generic to all devices
+    // memory space for all RW-Memory addresses + shadow store for invalid cells
+    unsigned invalidSize = totalIoSpace - registerSpaceSize - IRamSize - ERamSize; 
+    rw = (RWMemoryMember**)avr_malloc(sizeof(RWMemoryMember*) * totalIoSpace);
+    invalidRW = (RWMemoryMember**)avr_malloc(sizeof(RWMemoryMember*) * invalidSize);
+    
+    // the status register is generic to all devices
     status = new HWSreg();
     if(status == NULL)
         avr_error("Not enough memory for HWSreg in AvrDevice::AvrDevice");
@@ -216,29 +239,35 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     if(statusRegister == NULL)
         avr_error("Not enough memory for RWSreg in AvrDevice::AvrDevice");
     
-    //the Registers also generic to all avr devices
+    // the Registers also generic to all avr devices
     R = new MemoryOffsets(0, rw);
     if(R == NULL)
         avr_error("Not enough memory for Register [R] in AvrDevice::AvrDevice");
 
-    //offset for the io-space is 0x20 for all avr devices (behind the register file)
+    // offset for the io-space is 0x20 for all avr devices (behind the register file)
     ioreg = new MemoryOffsets(0x20, rw);
     if(ioreg == NULL)
         avr_error("Not enough memory for IoReg in AvrDevice::AvrDevice");
 
-    //the offset for accessing the sram is allways at 0x00 so we can read with lds also the register file!
+    // the offset for accessing the sram is allways at 0x00 so we can read with
+    // lds also the register file!
     Sram = new MemoryOffsets(0x00, rw);
     if(Sram == NULL)
         avr_error("Not enough memory for Sram in AvrDevice::AvrDevice");
 
-    //create the flash area with specified size
+    // placeholder for SPM register
     spmRegister = NULL;
+    
+    // create the flash area with specified size
     Flash = new AvrFlash(this, flashSize);
     if(Flash == NULL)
         avr_error("Not enough memory for Flash in AvrDevice::AvrDevice");
 
-    //create all registers
-    for(unsigned int ii = 0; ii < registerSpaceSize; ii++ ) {
+    // create all registers
+    unsigned currentOffset = 0;
+    unsigned invalidRWOffset = 0;
+
+    for(unsigned ii = 0; ii < registerSpaceSize; ii++) {
         rw[currentOffset] = new RAM(&coreTraceGroup, "r", ii, registerSpaceSize);
         if(rw[currentOffset] == NULL)
             avr_error("Not enough memory for registers in AvrDevice::AvrDevice");
@@ -249,35 +278,39 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
        make simulavrxx more robust!)  In all well implemented devices, these
        should be overwritten by the particular device type. But accessing such
        a register will at least notify the user that there is an unimplemented
-       feature. */
-    for(unsigned int ii = 0; ii < ioSpaceSize; ii++) {
-        rw[currentOffset] = new InvalidMem(this, currentOffset);
-        if(rw[currentOffset] == NULL)
+       feature or reserved register. */
+    for(unsigned ii = 0; ii < ioSpaceSize; ii++) {
+        invalidRW[invalidRWOffset] = new InvalidMem(this, currentOffset);
+        if(invalidRW[invalidRWOffset] == NULL)
             avr_error("Not enough memory for io space in AvrDevice::AvrDevice");
+        rw[currentOffset] = invalidRW[invalidRWOffset];
         currentOffset++;
+        invalidRWOffset++;
     }
 
     // create the internal ram handlers 
-    for(unsigned int ii = 0; ii < IRamSize; ii++ ) {
+    for(unsigned ii = 0; ii < IRamSize; ii++ ) {
         rw[currentOffset] = new RAM(&coreTraceGroup, "IRAM", ii, IRamSize);
         if(rw[currentOffset] == NULL)
             avr_error("Not enough memory for IRAM in AvrDevice::AvrDevice");
         currentOffset++;
     }
 
-    //create the external ram handlers, TODO: make the configuration from mcucr available here
-    for(unsigned int ii = 0; ii < ERamSize; ii++ ) {
+    // create the external ram handlers, TODO: make the configuration from
+    // mcucr available here
+    for(unsigned ii = 0; ii < ERamSize; ii++ ) {
         rw[currentOffset] = new RAM(&coreTraceGroup, "ERAM", ii, ERamSize);
         if(rw[currentOffset] == NULL)
             avr_error("Not enough memory for io space in AvrDevice::AvrDevice");
         currentOffset++;
     }
 
-    //fill the rest of the adress space with error handlers
-    for(; currentOffset < totalIoSpace; currentOffset++) {
-        rw[currentOffset] = new InvalidMem(this, currentOffset);
-        if(rw[currentOffset] == NULL)
+    // fill the rest of the adress space with error handlers
+    for(; currentOffset < totalIoSpace; currentOffset++, invalidRWOffset++) {
+        invalidRW[invalidRWOffset] = new InvalidMem(this, currentOffset);
+        if(invalidRW[invalidRWOffset] == NULL)
             avr_error("Not enough memory for fill address space in AvrDevice::AvrDevice");
+        rw[currentOffset] = invalidRW[invalidRWOffset];
     }
 
 }
@@ -446,9 +479,30 @@ void AvrDevice::ReplaceIoRegister(unsigned int offset, RWMemoryMember *newMember
     rw[offset] = newMember;
 }
 
+bool AvrDevice::ReplaceMemRegister(unsigned int offset, RWMemoryMember *newMember) {
+    if(offset < totalIoSpace) {
+        rw[offset] = newMember;
+        return true;
+    }
+    return false;
+}
+
 void AvrDevice::RegisterTerminationSymbol(const char *symbol) {
     unsigned int epa = Flash->GetAddressAtSymbol(symbol);
     EP.push_back(epa);
+}
+
+unsigned char AvrDevice::GetRWMem(unsigned addr) {
+    if(addr >= GetMemTotalSize())
+        return 0;
+    return *(rw[addr]);
+}
+
+bool AvrDevice::SetRWMem(unsigned addr, unsigned char val) {
+    if(addr >= GetMemTotalSize())
+        return false;
+    *(rw[addr]) = val;
+    return true;
 }
 
 // EOF

@@ -56,15 +56,19 @@ class HWRampz;
 //! Basic AVR device, contains the core functionality
 class AvrDevice: public SimulationMember, public TraceValueRegister {
     
-    protected:
-        SystemClockOffset clockFreq;
-        std::map < std::string, Pin *> allPins; 
+    private:
+        RWMemoryMember **invalidRW; //!< hold invalid RW memory cells created by device
         const unsigned int ioSpaceSize;
         const unsigned int totalIoSpace;
         const unsigned int registerSpaceSize;
         const unsigned int iRamSize;
         const unsigned int eRamSize;
+        
+    protected:
+        SystemClockOffset clockFreq;
+        std::map < std::string, Pin *> allPins;
         std::string actualFilename;
+        RWMemoryMember **rw; //!< hold the complete space or Data memory included registers
         
         //old static vars for Step()
         int cpuCycles;
@@ -90,7 +94,6 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         MemoryOffsets *Sram;
         MemoryOffsets *R;
         MemoryOffsets *ioreg;
-        RWMemoryMember **rw;
 
         HWStack *stack;
         HWSreg *status;           //!< the status register itself
@@ -102,6 +105,9 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
 
         DumpManager *dump_manager;
     
+        AvrDevice(unsigned int ioSpaceSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int flashSize);
+        virtual ~AvrDevice();
+
         /*! Adds to the list of parts to reset. If already in that list, does
           nothing. */
         void AddToResetList(Hardware *hw);
@@ -116,6 +122,7 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
     
         void Load(const char* n);
         void ReplaceIoRegister(unsigned int offset, RWMemoryMember *);
+        bool ReplaceMemRegister(unsigned int offset, RWMemoryMember *);
         void RegisterTerminationSymbol(const char *symbol);
 
         Pin *GetPin(const char *name);
@@ -123,7 +130,6 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         MemoryOffsets &operator->*(MemoryOffsets *m) { return *m;}
 #endif
 
-        AvrDevice(unsigned int ioSpaceSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int flashSize);
         /*! Steps the AVR core.
           \param untilCoreStepFinished iff true, steps a core step and not a
           single clock cycle. */
@@ -131,8 +137,6 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         void Reset();
         void SetClockFreq(SystemClockOffset f);
         SystemClockOffset GetClockFreq();
-
-        virtual ~AvrDevice();
 
         void RegisterPin(const std::string &name, Pin *p) {
             allPins.insert(std::pair<std::string, Pin*>(name, p));
@@ -154,6 +158,11 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         unsigned int GetMemIRamSize(void) { return iRamSize; }
         //! Get configured external RAM size
         unsigned int GetMemERamSize(void) { return eRamSize; }
+        
+        //! Get a value of RW memory cell
+        unsigned char GetRWMem(unsigned addr);
+        //! Set a value to RW memory cell
+        bool SetRWMem(unsigned addr, unsigned char val);
         
 };
 

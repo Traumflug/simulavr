@@ -75,28 +75,9 @@ namespace std {
 }
 
 %extend AvrDevice {
-  unsigned char getRWMem(unsigned a) {
-    if(a >= $self->GetMemTotalSize())
-      return (unsigned char)0;
-    return (unsigned char)*($self->rw[a]);
-  }
-  bool setRWMem(unsigned a, unsigned char v) {
-    if(a >= $self->GetMemTotalSize())
-      return false;
-    *($self->rw[a]) = v;
-    return true;
-  }
-  bool replaceRWMemCell(unsigned a, RWMemoryMember* c) {
-    if(a >= $self->GetMemTotalSize())
-      return false;
-    $self->rw[a] = c;
-    return true;
-  }
-  RWMemoryMember* getRWMemCell(unsigned a) {
-    if(a >= $self->GetMemTotalSize())
-      return NULL;
-    return $self->rw[a];
-  }
+  // getRWMem and setRWMem are deprecated, don't use it in new code!
+  unsigned char getRWMem(unsigned a) { return $self->GetRWMem(a); }
+  bool setRWMem(unsigned a, unsigned char v) { return $self->SetRWMem(a, v); }
 }
 
 %include "systemclock.h"
