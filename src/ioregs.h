@@ -26,7 +26,6 @@
 #ifndef IOREGS
 #define IOREGS
 
-#include "hwextirq.h"
 #include "traceval.h"
 #include "avrdevice.h"
 
@@ -42,18 +41,5 @@ class HWRampz: public Hardware, public TraceValueRegister {
 
         IOReg<HWRampz> rampz_reg;
 };
-//----------------------------------------------------------------
 
-class HWMcucr: public Hardware, public TraceValueRegister {
-    protected:
-        unsigned char mcucr;
-
-    public:
-        HWMcucr(AvrDevice *core );
-        unsigned char GetMcucr() { return mcucr; }
-        void SetMcucr( unsigned char val) { mcucr=val; }
-        virtual unsigned int CpuCycle();
-
-        IOReg<HWMcucr> mcucr_reg;
-};
 #endif

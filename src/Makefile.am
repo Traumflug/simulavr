@@ -68,8 +68,8 @@ libsim_la_SOURCES = \
   atmega16_32.cpp attiny2313.cpp externalirq.cpp \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp flashprog.cpp hardware.cpp helper.cpp cmd/gdbserver.cpp \
-  hwacomp.cpp hwad.cpp hweeprom.cpp hwextirq.cpp hwmega48extirq.cpp \
-  hwmegaextirq.cpp hwtimer/timerprescaler.cpp hwtimer/prescalermux.cpp \
+  hwacomp.cpp hwad.cpp hweeprom.cpp \
+  hwtimer/timerprescaler.cpp hwtimer/prescalermux.cpp \
   hwtimer/timerirq.cpp hwpinchange.cpp hwport.cpp hwspi.cpp hwsreg.cpp \
   hwtimer/icapturesrc.cpp hwstack.cpp hwtimer/hwtimer.cpp hwuart.cpp hwwado.cpp \
   ioregs.cpp irqsystem.cpp ui/keyboard.cpp ui/lcd.cpp memory.cpp \
@@ -91,8 +91,8 @@ pkginclude_HEADERS = \
   atmega668base.h avrdevice.h externalirq.h hardware.h helper.h global.h \
   avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h breakpoint.h string2.h \
   config_deprecated.h decoder.h externaltype.h flash.h flashprog.h hwdecls.h \
-  funktor.h hwacomp.h hwad.h hweeprom.h hwextirq.h hwmega48extirq.h \
-  hwmegaextirq.h hwtimer/timerprescaler.h hwtimer/prescalermux.h string2_template.h \
+  funktor.h hwacomp.h hwad.h hweeprom.h \
+  hwtimer/timerprescaler.h hwtimer/prescalermux.h string2_template.h \
   hwtimer/timerirq.h hwpinchange.h hwport.h hwspi.h hwsreg.h hwstack.h \
   hwtimer/icapturesrc.h hwtimer/hwtimer.h hwuart.h hwwado.h ioregs.h \
   irqsystem.h ui/keyboard.h ui/keynumber_to_scancode.dat ui/lcd.h python/pysimulationmember.h \

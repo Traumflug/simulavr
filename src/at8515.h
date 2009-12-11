@@ -35,8 +35,6 @@
 #include "externalirq.h"
 #include "hwport.h"
 
-#include "ioregs.h" //only for mcucr here
-
 //! AVRDevice class for AT90S8515
 class AvrDevice_at90s8515: public AvrDevice {
     

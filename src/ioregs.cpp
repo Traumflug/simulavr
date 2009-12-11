@@ -25,8 +25,6 @@
 
 #include "ioregs.h"
 
-unsigned int HWMcucr::CpuCycle(){return 0;}
-
 HWRampz::HWRampz(AvrDevice *core):
     Hardware(core),
     TraceValueRegister(core, "RAMPZ"),
@@ -35,10 +33,4 @@ HWRampz::HWRampz(AvrDevice *core):
     Reset();
 }
 
-HWMcucr::HWMcucr(AvrDevice *core ) :
-    Hardware(core),
-    TraceValueRegister(core, "MCUCR"),
-    mcucr_reg(this, "MCUCR",
-              this, &HWMcucr::GetMcucr, &HWMcucr::SetMcucr) {
-    mcucr=0;
-}
+// EOF

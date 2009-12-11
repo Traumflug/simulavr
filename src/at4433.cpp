@@ -31,7 +31,6 @@
 #include "pinatport.h"
 #include "hwacomp.h"
 #include "hwwado.h"
-#include "ioregs.h" //mcucr
 #include "avrfactory.h"
 #include "hwsreg.h"
 
