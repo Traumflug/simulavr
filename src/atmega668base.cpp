@@ -36,7 +36,6 @@ AVR_REGISTER(atmega168, AvrDevice_atmega168);
 AVR_REGISTER(atmega328, AvrDevice_atmega328);
 
 AvrDevice_atmega668base::~AvrDevice_atmega668base() {
-    delete rw[0x5f]; // RWSreg
     delete usart0;
     delete wado;
     delete spi;

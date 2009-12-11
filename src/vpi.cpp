@@ -272,7 +272,7 @@ static PLI_INT32 avr_get_rw_tf(char *xx) {
 
     AVR_HCHECK();
 
-    VPI_RETURN_INT(*(devices[handle]->rw[address]));
+    VPI_RETURN_INT(devices[handle]->GetRWMem(address));
 }
 
 /*!
@@ -293,7 +293,7 @@ static PLI_INT32 avr_set_rw_tf(char *xx) {
 
     AVR_HCHECK();
 
-    *(devices[handle]->rw[address])=val;
+    devices[handle]->SetRWMem(address, val);
     return 0;
 }
 
