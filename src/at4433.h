@@ -35,7 +35,7 @@ class HWMcucr;
 #include "hwspi.h"
 #include "timerprescaler.h"
 #include "hwtimer.h"
-#include "hwextirq.h"
+#include "externalirq.h"
 
 //! AVRDevice class for AT90S4433
 class AvrDevice_at90s4433: public AvrDevice {
@@ -57,8 +57,10 @@ class AvrDevice_at90s4433: public AvrDevice {
         HWTimer8_0C      *timer0;       //!< timer 0 unit
         ICaptureSource   *inputCapture1; //!< input capture source for timer1
         HWTimer16_1C     *timer1;       //!< timer 1 unit
-        HWMcucr *mcucr;
-        HWExtIrq *extirq;               //!< external interrupt unit
+        ExternalIRQHandler *extirq;     //!< external interrupt support
+        IOSpecialReg *gimsk_reg;        //!< GIMSK IO register
+        IOSpecialReg *gifr_reg;         //!< GIFR IO register
+        IOSpecialReg *mcucr_reg;        //!< MCUCR IO register
         
         AvrDevice_at90s4433();
         ~AvrDevice_at90s4433();

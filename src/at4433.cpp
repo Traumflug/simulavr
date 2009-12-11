@@ -84,19 +84,23 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
                               timer01irq->getLine("ICF1"),
                               inputCapture1);
     
-    extirq= new HWExtIrq( this, irqSystem, PinAtPort(portd, 2), PinAtPort(portd, 3), 1,2);
-    mcucr= new HWMcucr(this); //, irqSystem, PinAtPort(portd, 2), PinAtPort(portd, 3));
+    gimsk_reg = new IOSpecialReg(&coreTraceGroup, "GIMSK");
+    gifr_reg = new IOSpecialReg(&coreTraceGroup, "GIFR");
+    mcucr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCR");
+    extirq = new ExternalIRQHandler(this, irqSystem, gimsk_reg, gifr_reg);
+    extirq->registerIrq(1, 6, new ExternalIRQSingle(mcucr_reg, 0, 2, GetPin("D2")));
+    extirq->registerIrq(2, 7, new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3")));
 
     rw[0x5f]= statusRegister;
     rw[0x5e]= & stack->sph_reg;
     rw[0x5d]= & stack->spl_reg;
     
-    rw[0x5b]= & extirq->gimsk_reg;
-    rw[0x5a]= & extirq->gifr_reg;
+    rw[0x5b]= gimsk_reg;
+    rw[0x5a]= gifr_reg;
     rw[0x59]= & timer01irq->timsk_reg;
     rw[0x58]= & timer01irq->tifr_reg;
 
-    rw[0x55]= & mcucr->mcucr_reg;
+    rw[0x55]= mcucr_reg;
 
     //0x54: MCUSR reset status flag (reset, wado, brown out...) //TODO XXX
 

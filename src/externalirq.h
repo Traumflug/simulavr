@@ -113,6 +113,7 @@ class ExternalIRQSingle: public ExternalIRQ, public HasPinNotifyFunction {
     protected:
         bool state; //!< saved state from pin
         bool twoBitMode; //!< IRQ is controlled by 2 mode bits
+        bool mode8515; //!< at90s8515 don't support MODE_EDGE_ALL
         
         enum {
             MODE_LEVEL_LOW = 0, //!< Fire interrupt on low level
@@ -122,7 +123,7 @@ class ExternalIRQSingle: public ExternalIRQ, public HasPinNotifyFunction {
         };
         
     public:
-        ExternalIRQSingle(IOSpecialReg *ctrl, int ctrlOffset, int ctrlBits, Pin *pin);
+        ExternalIRQSingle(IOSpecialReg *ctrl, int ctrlOffset, int ctrlBits, Pin *pin, bool _8515mode = false);
         
         // from ExternalIRQ
         void ChangeMode(unsigned char m);

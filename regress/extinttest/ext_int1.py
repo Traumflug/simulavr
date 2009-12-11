@@ -9,6 +9,8 @@ class TestCase(ext_int0.TestCase):
     "atmega16":   "D3",
     "atmega48":   "D3",
     "attiny2313": "D3",
+    "at90s8515":  "D3",
+    "at90s4433":  "D3",
   }
   
   ctrlshift = 2

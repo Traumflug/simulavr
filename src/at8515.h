@@ -32,12 +32,12 @@
 #include "hwacomp.h"
 #include "timerprescaler.h"
 #include "hwtimer.h"
-#include "hwextirq.h"
+#include "externalirq.h"
 #include "hwport.h"
 
 #include "ioregs.h" //only for mcucr here
 
-//! AVRDevice class for AT90S4433
+//! AVRDevice class for AT90S8515
 class AvrDevice_at90s8515: public AvrDevice {
     
     private:
@@ -57,8 +57,10 @@ class AvrDevice_at90s8515: public AvrDevice {
         HWTimer8_0C      *timer0;       //!< timer 0 unit
         ICaptureSource   *inputCapture1; //!< input capture source for timer1
         HWTimer16_2C2    *timer1;       //!< timer 1 unit
-        HWMcucr *mcucr;
-        HWExtIrq *extirq;               //!< external interrupt unit
+        ExternalIRQHandler *extirq;     //!< external interrupt support
+        IOSpecialReg *gimsk_reg;        //!< GIMSK IO register
+        IOSpecialReg *gifr_reg;         //!< GIFR IO register
+        IOSpecialReg *mcucr_reg;        //!< MCUCR IO register
         
         AvrDevice_at90s8515();
         ~AvrDevice_at90s8515();

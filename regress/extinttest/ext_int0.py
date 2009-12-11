@@ -80,6 +80,8 @@ class TestCase(TestCaseBase):
     "atmega16":   "D2",
     "atmega48":   "D2",
     "attiny2313": "D2",
+    "at90s8515":  "D2",
+    "at90s4433":  "D2",
   }
   
   portin = {
@@ -87,6 +89,8 @@ class TestCase(TestCaseBase):
     "atmega16":   0xff,
     "atmega48":   0xff,
     "attiny2313": 0x7f, # only 7 bit at port D
+    "at90s8515":  0xff,
+    "at90s4433":  0xff,
   }
   
   ctrlshift = 0
@@ -166,13 +170,19 @@ class TestCase(TestCaseBase):
     # ext pin = low
     p.SetPin("L")
     # init for rising edge
-    self.setControl(1)
+    self.setControl(1) # the warning at this step for at90s8515 is right!
     self.resetFlag()
     self.enableIRQ()
     # counter is 0?
     self.assertCounter(0, 10000)
     # ext pin = high
     p.SetPin("H")
+    # ok, this test can't be successfull for at90s8515, because it dosn't support this mode
+    # so we abort the following steps (quick and dirty, but it works ;-) )
+    if self.processorName == "at90s8515":
+      # counter is 0 again?
+      self.assertCounter(0, 20000)
+      return
     # counter is 1?
     self.assertCounter(1, 20000)
     # ext pin = low

@@ -24,6 +24,7 @@
  */
 
 #include "externalirq.h"
+#include "avrerror.h"
 
 ExternalIRQHandler::ExternalIRQHandler(AvrDevice* c,
                                        HWIrqSystem* irqsys,
@@ -154,11 +155,12 @@ unsigned char ExternalIRQ::get_from_client(const IOSpecialReg* reg, unsigned cha
     return (v & ~mask) | (mode << bitshift);
 }
 
-ExternalIRQSingle::ExternalIRQSingle(IOSpecialReg *ctrl, int ctrlOffset, int ctrlBits, Pin *pin):
+ExternalIRQSingle::ExternalIRQSingle(IOSpecialReg *ctrl, int ctrlOffset, int ctrlBits, Pin *pin, bool _8515mode):
     ExternalIRQ(ctrl, ctrlOffset, ctrlBits)
 {
     state = (bool)*pin;
     twoBitMode = (ctrlBits == 2);
+    mode8515 = _8515mode;
     pin->RegisterCallback(this);
     ResetMode();
 }
@@ -176,6 +178,8 @@ void ExternalIRQSingle::PinStateHasChanged(Pin *pin) {
             break;
         case MODE_EDGE_ALL:
             // interrupt on any logical change
+            if(mode8515)
+                break; // do nothing, because at90s8515 don't support this mode
             if(s != state)
                 fireInterrupt();
             break;
@@ -200,6 +204,8 @@ void ExternalIRQSingle::ChangeMode(unsigned char m) {
         mode = m;
     else
         mode = m + MODE_EDGE_FALL;
+    if(mode8515 && mode == MODE_EDGE_ALL)
+        avr_warning("External irq mode ISCx1:ISCx0 = 0:1 isn't supported here");
 }
 
 bool ExternalIRQSingle::fireAgain(void) {

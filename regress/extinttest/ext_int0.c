@@ -57,6 +57,30 @@
 # define CTRLREG MCUCR
 #endif
 
+#if defined(__AVR_AT90S8515__)
+# define FLAGREG GIFR
+# define MASKREG GIMSK
+# if defined(TEST_INT1)
+#   define FLAGBIT _BV(INTF1)
+# else
+#   define FLAGBIT _BV(INTF0)
+# endif
+# define PORTREG PIND
+# define CTRLREG MCUCR
+#endif
+
+#if defined(__AVR_AT90S4433__)
+# define FLAGREG GIFR
+# define MASKREG GIMSK
+# if defined(TEST_INT1)
+#   define FLAGBIT _BV(INTF1)
+# else
+#   define FLAGBIT _BV(INTF0)
+# endif
+# define PORTREG PIND
+# define CTRLREG MCUCR
+#endif
+
 volatile unsigned char cnt_irq = 0;
 volatile unsigned char hs_in = 0;
 volatile unsigned char hs_out = 0;
