@@ -316,13 +316,13 @@ set global_verbose_on ${verbose}
 
 # Write magic register (only stdout supported)
 if { "${writeToOffset}" != "" } {
-  set writeToPipeInstance [new_RWWriteToPipe ${dev1} ${writeToFile}]
+  set writeToPipeInstance [new_RWWriteToFile ${dev1} "FWRITE" ${writeToFile}]
   AvrDevice_ReplaceIoRegister ${dev1} ${writeToOffset} ${writeToPipeInstance}
 }
 
 # Read magic register (only stdout supported)
 if { "${readFromOffset}" != "" } {
-  set readFromPipeInstance [new_RWReadFromPipe ${dev1} ${readFromFile}]
+  set readFromPipeInstance [new_RWReadFromFile ${dev1} "FREAD" ${readFromFile}]
   AvrDevice_ReplaceIoRegister ${dev1} ${readFromOffset} ${readFromPipeInstance}
 }
 

@@ -26,6 +26,7 @@
 #include "adcpin.h"
 #include "pinmon.h"
 #include "rwmem.h"
+#include "specialmem.h"
 #include "ui/scope.h"
 #include "avrerror.h"
     
@@ -47,6 +48,13 @@ SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %include "ui/ui.h"
 %include "hardware.h"
 %include "pin.h"
+
+%extend Pin {
+    void SetOutState(int s) {
+        $self->outState = (Pin::T_Pinstate)s;
+    }
+}
+
 %include "ui/extpin.h"
 %include "net.h"
 %include "cmd/gdb.h"
@@ -59,6 +67,7 @@ SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %include "adcpin.h"
 %include "pinmon.h"
 %include "rwmem.h"
+%include "specialmem.h"
 %include "ui/scope.h"
 %include "avrerror.h"
 

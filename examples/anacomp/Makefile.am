@@ -10,7 +10,7 @@ PYTHON=@PYTHON@
 AVR_CPU=at90s4433
 AVR_CFLAGS  = -g -O2 -mmcu=$(AVR_CPU)
 
-EXTRA_DIST = main.c checkdebug.py $(EXAMPLE).tcl
+EXTRA_DIST = main.c $(EXAMPLE).tcl
 
 examples_DATA = $(EXAMPLE).elf README Makefile $(EXTRA_DIST)
 
@@ -23,9 +23,6 @@ do: $(EXAMPLE).elf
 dogdb: $(EXAMPLE).elf
 	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE).elf -u \
 	    -s $(srcdir)/$(EXAMPLE).tcl -g
-
-do_python: $(EXAMPLE).elf
-	$(PYTHON) $(srcdir)/checkdebug.py
 
 $(EXAMPLE).elf: main.o
 	$(AVR_GCC) $(AVR_CFLAGS) -o $@ $<
