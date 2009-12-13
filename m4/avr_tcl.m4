@@ -54,6 +54,16 @@ AM_CONDITIONAL([HAVE_TCLSH], [test x$TCL_SHELL != x])
 AC_SUBST([TCL_SHELL])
 test x$TCL_SHELL = x && HAVE_TCL_SHELLS=no
 
+## Test, if we have Itcl package available
+check_itcl_available=no
+if test ! x$TCL_SHELL = x ; then
+  if (echo 'package require Itcl; exit 1;' | $TCL_SHELL); then
+    AC_MSG_WARN([Itcl package not installed, tcl examples with gui will not work])
+  else
+    check_itcl_available=yes
+  fi
+fi
+
 # If they did not want Tcl or it is not installed, do not use it
 if test x"${SIMULAVRXX_USE_TCL}" = x"yes" -a x"${Tcl_h_found}" = x"yes"; then
   build_tcl_libs=yes
@@ -62,4 +72,5 @@ else
 fi
 
 AM_CONDITIONAL([USE_TCL], [test x"${build_tcl_libs}" = x"yes"])
+AM_CONDITIONAL([TCL_ITCL_AVAILABLE], [test x"${check_itcl_available}" = x"yes"])
 ])

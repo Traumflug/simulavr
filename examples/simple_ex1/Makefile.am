@@ -20,12 +20,20 @@ run_sim: $(EXAMPLE)
 	    -W 0x20,- -R 0x22,- -T exit
 
 do:
+if USE_TCL
 	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE) \
 	    -W 0x20,- -R 0x22,- -T exit
+else
+	@echo "Tcl not installed. Example will not run. Sorry!"
+endif
 
 dogdb:
+if USE_TCL
 	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE) \
 	    -W 0x20,- -R 0x22,- -T exit -g
+else
+	@echo "Tcl not installed. Example will not run. Sorry!"
+endif
 
 %.o: $(srcdir)/%.c
 	$(AVR_GCC) $(AVR_CFLAGS) -c -o $@ $<

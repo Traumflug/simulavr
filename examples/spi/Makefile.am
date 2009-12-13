@@ -36,8 +36,6 @@ dogdb: $(EXAMPLE).elf
 do_old:
 	$(TCL_WISH) check.tcl
 
-# WAR: should detect avr-toolset first!
-
 %.o: $(srcdir)/%.cpp
 	$(AVR_GCC) $(AVR_CFLAGS) -c -o $@ $<
 

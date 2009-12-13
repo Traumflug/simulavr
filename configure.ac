@@ -191,7 +191,7 @@ echo "AVR_LIBBFD_LIB=${AVR_LIBBFD_LIB}"
 echo "AVR_LIBIBERTY_LIB=${AVR_LIBIBERTY_LIB}"
 echo "PYTHON=${PYTHON}"
 echo "TCL_WISH=${TCL_WISH}"
+echo "tcl has package Itcl? ${check_itcl_available}"
 echo "build verilog modul avr.vpi = ${AVR_BUILD_VERILOG}"
-
 # EOF
 

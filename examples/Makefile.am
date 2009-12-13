@@ -5,9 +5,9 @@
 
 examplesdir = $(docdir)/examples
 
-SUBDIRS = simple_ex1 anacomp atmel_key atmega128_timer
+SUBDIRS = simple_ex1
 if USE_TCL
-SUBDIRS += anacomp atmega48 spi stdiodemo feedback
+SUBDIRS += anacomp atmega48 spi stdiodemo feedback atmega128_timer atmel_key
 endif
 if PYTHON_USE
 SUBDIRS += python

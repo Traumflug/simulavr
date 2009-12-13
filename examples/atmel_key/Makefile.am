@@ -21,12 +21,20 @@ CLEANFILES = $(EXAMPLE).elf kb.o main.o serial.o StdDefs.o
 
 # Frequency 250 ==> 4.0 MHz
 do: $(EXAMPLE).elf
+if TCL_ITCL_AVAILABLE
 	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE).elf -u -F 250 \
 	    -s $(srcdir)/$(EXAMPLE).tcl
+else
+	@echo "Itcl package not installed. Example will not run. Sorry!"
+endif
 
 dogdb: $(EXAMPLE).elf
+if TCL_ITCL_AVAILABLE
 	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE).elf -u -F 250 \
 	    -s $(srcdir)/$(EXAMPLE).tcl -g
+else
+	@echo "Itcl package not installed. Example will not run. Sorry!"
+endif
 
 $(EXAMPLE).elf: kb.o main.o serial.o StdDefs.o
 	$(AVR_GCC) $(AVR_CPU_CFLAGS) -o $@ $^ -lm

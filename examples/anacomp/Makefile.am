@@ -17,12 +17,20 @@ examples_DATA = $(EXAMPLE).elf README Makefile $(EXTRA_DIST)
 CLEANFILES = $(EXAMPLE).elf trace anacomp.o $(EXAMPLE).lst
 
 do: $(EXAMPLE).elf
+if TCL_ITCL_AVAILABLE
 	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE).elf -u \
 	    -s $(srcdir)/$(EXAMPLE).tcl
+else
+	@echo "Itcl package not installed. Example will not run. Sorry!"
+endif
 
 dogdb: $(EXAMPLE).elf
+if TCL_ITCL_AVAILABLE
 	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE).elf -u \
 	    -s $(srcdir)/$(EXAMPLE).tcl -g
+else
+	@echo "Itcl package not installed. Example will not run. Sorry!"
+endif
 
 $(EXAMPLE).elf: main.o
 	$(AVR_GCC) $(AVR_CFLAGS) -o $@ $<

@@ -20,12 +20,20 @@ CLEANFILES = $(EXAMPLE).elf hd44780.o lcd.o stdiodemo.o uart.o
 
 # Frequency 271 ==> ~3.686400 MHz
 do: $(EXAMPLE).elf
+if TCL_ITCL_AVAILABLE
 	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE).elf -u -F 271 \
 	    -s $(srcdir)/$(EXAMPLE).tcl
+else
+	@echo "Itcl package not installed. Example will not run. Sorry!"
+endif
 
 dogdb: $(EXAMPLE).elf
+if TCL_ITCL_AVAILABLE
 	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE).elf -u -F 271\
 	    -s $(srcdir)/$(EXAMPLE).tcl -g
+else
+	@echo "Itcl package not installed. Example will not run. Sorry!"
+endif
 
 $(EXAMPLE).elf: hd44780.o lcd.o stdiodemo.o uart.o
 	$(AVR_GCC) $(AVR_CFLAGS) -o $@ $^ -lm
