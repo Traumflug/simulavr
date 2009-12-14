@@ -1,14 +1,9 @@
-@c
-@c  $Id$
-@c 
-
 \input texinfo @c -*-texinfo-*-
-
-@include version.texi
-@include config.texi
 
 @c %**start of header
 @setfilename simulavr.info
+@include version.texi
+@include config.texi
 @settitle SimulAVR Documentation @value{VERSION}
 @c %**end of header
 
@@ -898,6 +893,11 @@ Simulavr is designed to interact in a few different ways. These
 examples briefly explain the examples that can be found in the source
 distribution's @file{examples} directory.
 
+There are examples, which use Tcl/Tk. @b{For that you must also install Itcl
+package for your Tcl.} It will be used in all examples with Tcl and a Tk GUI!
+Over that you can find also examples for python interface and for the verilog
+module.
+
 The anacomp example is all we have started with. Anacomp brings up an
 Itcl based GUI which shows two analog input simulations, a comparison
 output value, and a toggle button on bottom. After changing the inputs,
@@ -918,17 +918,15 @@ sources. So stay better close to the example.
 This is Klaus' very nice original example simulation.
 
 After performing the build, go to the @file{examples/anacomp} directory
-and try @code{make dogdb}.
+and try @code{make do} (without gdb) or @code{make dogdb}.
 
 @section Python Example
 @cindex Example, Python
 
-This is Bill's hacked port of Klaus' TCL simulation script to Python. The
-UI is still Itcl based. Eventually it will be updated to also have a
-Python GUI (likely WxPython at first)
-
-After performing the build, go to the @file{examples/anacomp} directory
-and try @code{make do_python}.
+There is a file @file{README} in @file{examples/python} path, which describes
+examples there. You can try it with @code{make run_example}, this will run all
+available examples together. Or try @code{make example1} till @code{make example4}
+to run each example alone.
 
 @section Simple Example
 @cindex Example, Simple
@@ -943,6 +941,9 @@ get you started though.
 
 After performing the build, go to the @file{examples/simple_ex1} directory
 and try @code{make run_sim}. Notice the use of -W, -R and -T flags.
+
+And again you can try @code{make do}, which uses Tcl interface and a Tcl script
+to make the simulation. Results are the same as in @code{make run_sim}!
 
 @section LCD and SerialRx, SerialTx Example
 @cindex Example, LCD and SerialRx/SerialTx
@@ -975,6 +976,7 @@ script you should be able to understand what happens. Please mind the
 different names for the functions SetBaudRate and GetPin for SerialRx
 and SerialTx! Not optimal but that's it at the moment...
 
+And you can try @code{make do} or @code{make dogdb}.
 
 @section Keyboard and SerialRx Example
 @cindex Example, Keyboard and SerialRx
