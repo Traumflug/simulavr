@@ -38,37 +38,72 @@
 
 AVR_REGISTER(atmega128, AvrDevice_atmega128);
 
-AvrDevice_atmega128::~AvrDevice_atmega128() {}
+AvrDevice_atmega128::~AvrDevice_atmega128() {
+    delete timer3;
+    delete inputCapture3;
+    delete timer2;
+    delete timer1;
+    delete inputCapture1;
+    delete timer0;
+    delete timer3irq;
+    delete timer012irq;
+    delete usart1;
+    delete usart0;
+    delete wado;
+    delete prescaler123;
+    delete prescaler0;
+    delete assr_reg;
+    delete sfior_reg;
+    delete extirq;
+    delete eifr_reg;
+    delete eimsk_reg;
+    delete eicrb_reg;
+    delete eicra_reg;
+    delete spi;
+    delete ad;
+    delete admux;
+    delete rampz;
+    delete portg;
+    delete portf;
+    delete porte;
+    delete portd;
+    delete portc;
+    delete portb;
+    delete porta;
+    delete stack;
+    delete eeprom;
+    delete irqSystem;
+}
 
 AvrDevice_atmega128::AvrDevice_atmega128():
     AvrDevice(224, 4096, 0xef00, 256*1024),
     aref()
 {
     irqSystem = new HWIrqSystem(this, 4, 35); //4 bytes per vector, 35 vectors
-        eeprom = new HWEeprom( this, irqSystem, 4096, 22); 
+    eeprom = new HWEeprom( this, irqSystem, 4096, 22); 
     stack = new HWStack(this, Sram, 0x10000);
-    porta= new HWPort(this, "A");
-    portb= new HWPort(this, "B");
-    portc= new HWPort(this, "C");
-    portd= new HWPort(this, "D");
-    porte= new HWPort(this, "E");
-    portf= new HWPort(this, "F");
-    portg= new HWPort(this, "G");
+    porta = new HWPort(this, "A");
+    portb = new HWPort(this, "B");
+    portc = new HWPort(this, "C");
+    portd = new HWPort(this, "D");
+    porte = new HWPort(this, "E");
+    portf = new HWPort(this, "F");
+    portg = new HWPort(this, "G");
 
     RegisterPin("AREF", &aref);
-    rampz= new HWRampz(this);
+    rampz = new HWRampz(this);
 
-    admux= new HWAdmux(this,
+    admux = new HWAdmux(this,
           &portf->GetPin(0), &portf->GetPin(1), &portf->GetPin(2),
           &portf->GetPin(3), &portf->GetPin(4), &portf->GetPin(5),
           &portf->GetPin(6), &portf->GetPin(7));
 
     // vector 21 ADConversion Complete
-    ad= new HWAd(this, admux, irqSystem, aref, 21);
+    ad = new HWAd(this, admux, irqSystem, aref, 21);
 
-    spi= new HWSpi(this, irqSystem,
+    spi = new HWSpi(this, irqSystem,
             PinAtPort(portb, 2), PinAtPort(portb, 3), PinAtPort(portb, 1),
-           PinAtPort(portb, 0),/*irqvec*/ 17, true);
+            PinAtPort(portb, 0),/*irqvec*/ 17, true);
 
     eicra_reg = new IOSpecialReg(&coreTraceGroup, "EICRA");
     eicrb_reg = new IOSpecialReg(&coreTraceGroup, "EICRB");
@@ -86,16 +121,16 @@ AvrDevice_atmega128::AvrDevice_atmega128():
   
     sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
     assr_reg = new IOSpecialReg(&coreTraceGroup, "ASSR");
-    prescaler0=new HWPrescalerAsync(this, "0", PinAtPort(portg, 4), assr_reg, 3, sfior_reg, 1, 7);
-    prescaler123=new HWPrescaler(this, "123", sfior_reg, 0, 7);
+    prescaler0 = new HWPrescalerAsync(this, "0", PinAtPort(portg, 4), assr_reg, 3, sfior_reg, 1, 7);
+    prescaler123 = new HWPrescaler(this, "123", sfior_reg, 0, 7);
     
     wado = new HWWado(this);
 
-    usart0=new HWUsart(this, irqSystem,
-           PinAtPort(porte,1), PinAtPort(porte,0), PinAtPort(porte, 2),
+    usart0 = new HWUsart(this, irqSystem,
+               PinAtPort(porte,1), PinAtPort(porte,0), PinAtPort(porte, 2),
                18, 19, 20, 0);
-    usart1=new HWUsart(this, irqSystem,
-           PinAtPort(portd,3), PinAtPort(portd,2), PinAtPort(portd, 5),
+    usart1 = new HWUsart(this, irqSystem,
+               PinAtPort(portd,3), PinAtPort(portd,2), PinAtPort(portd, 5),
                30, 31, 32, 1);
 
     timer012irq = new TimerIRQRegister(this, irqSystem);

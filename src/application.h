@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,22 +25,21 @@
 
 #ifndef APPLICATION
 #define APPLICATION
-//#include "printable.h"
+
 #include <vector>
+
 class Printable;
 
 class Application {
     protected:
-        static Application *instance;
-	std::vector <Printable*> printable;
-        
+        std::vector <Printable*> printable;
 
     private:
         Application() {} // no way to create an object
 
     public:
         static Application* GetInstance();
-        void RegisterPrintable( Printable *x);
+        void RegisterPrintable(Printable *x);
         void PrintResults();
 };
 

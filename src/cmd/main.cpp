@@ -386,9 +386,8 @@ int main(int argc, char *argv[]) {
         dev1->RegisterTerminationSymbol((*ii).c_str());
     }
     
-    if(userinterface_flag == 1) {
-        ui = new UserInterface(7777); //if not gdb, the ui will be master controller :-)
-    }
+    //if not gdb, the ui will be master controller :-)
+    ui = (userinterface_flag == 1) ? new UserInterface(7777) : NULL;
     
     dev1->SetClockFreq(1000000000 / fcpu); // time base is 1ns!
     
@@ -413,7 +412,10 @@ int main(int argc, char *argv[]) {
     
     dman->stopApplication(); // stop dump session. Close dump files, if necessary
     
-    // delete device
+    // delete ui and device
+    delete ui;
     delete dev1;
+    
+    return 0;
 }
 

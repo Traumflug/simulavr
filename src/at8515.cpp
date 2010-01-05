@@ -157,5 +157,25 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
 }
 
 AvrDevice_at90s8515::~AvrDevice_at90s8515() {
+    delete extirq;
+    delete mcucr_reg;
+    delete gifr_reg;
+    delete gimsk_reg;
+    delete timer1;
+    delete inputCapture1;
+    delete timer0;
+    delete timer01irq;
+    delete prescaler;
+    delete wado;
+    delete acomp;
+    delete uart;
+    delete spi;
+    delete portd;
+    delete portc;
+    delete portb;
+    delete porta;
+    delete stack;
+    delete irqSystem;
+    delete eeprom;
 }
 

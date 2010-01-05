@@ -69,9 +69,7 @@ std::string AvrFactory::supportedDevices() {
 }
 
 AvrFactory& AvrFactory::instance() {
-    static AvrFactory *f;
-    if(!f)
-        f = new AvrFactory();
-    return *f;
+    static AvrFactory f;
+    return f;
 }
 

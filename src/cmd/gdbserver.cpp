@@ -302,6 +302,7 @@ vector<GdbServer*> GdbServer::allGdbServers;
 
 GdbServer::~GdbServer() {
     server->Close();
+    avr_free(last_reply);
     delete server;
 }
 

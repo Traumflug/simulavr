@@ -28,13 +28,9 @@
 using namespace std;
 
 Application* Application::GetInstance() {
-    if (!instance) {
-        instance=new Application();
-    }
-    return instance;
+    static Application instance;
+    return &instance;
 }
-
-Application *Application::instance=0;
 
 void Application::RegisterPrintable(Printable *p) {
     printable.push_back(p);

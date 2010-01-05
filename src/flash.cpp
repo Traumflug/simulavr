@@ -42,7 +42,7 @@ void AvrFlash::Decode(){
         Decode(addr);
 }
 
-AvrFlash::AvrFlash(AvrDevice *c, int _size): Memory(_size), core(c), DecodedMem(size) {
+AvrFlash::AvrFlash(AvrDevice *c, int _size): Memory(_size), core(c), DecodedMem(_size) {
     // initialize memory block
     for(unsigned int tt = 0; tt < size; tt++)
         myMemory[tt] = 0xff;
@@ -50,6 +50,13 @@ AvrFlash::AvrFlash(AvrDevice *c, int _size): Memory(_size), core(c), DecodedMem(
     rww_lock = 0;
     // initialize DecodedMem
     Decode();
+}
+
+AvrFlash::~AvrFlash() {
+    for(unsigned int i = 0; i < size; i++) {
+       if(DecodedMem[i] != NULL)
+          delete DecodedMem[i]; // delete Instruction
+    }
 }
 
 void AvrFlash::WriteMem(unsigned char *src, unsigned int offset, unsigned int secSize) {
@@ -101,7 +108,7 @@ void AvrFlash::Decode(unsigned int addr) {
     word opcode;
 
     opcode = ((MemPtr[addr]) >> 8) + ((MemPtr[addr] & 0xff) << 8);
-    if(DecodedMem[addr] != 0)
+    if(DecodedMem[addr] != NULL)
         delete DecodedMem[addr];                     //delete old Instruction here 
     DecodedMem[addr] = lookup_opcode(opcode, core);  //and set new one
 }

@@ -55,6 +55,7 @@ class AvrFlash: public Memory {
           @param c pointer to connected device
           @param size the memory block size */
         AvrFlash(AvrDevice *c, int size);
+        ~AvrFlash();
         
         void Decode(); /*!< Decode complete memory block */
         
