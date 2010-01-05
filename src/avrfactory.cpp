@@ -39,19 +39,25 @@ AVRDeviceMap devmap;
 
 void AvrFactory::reg(const std::string name,
                      AvrDeviceCreator create) {
-    AVRDeviceMap::iterator i = devmap.find(name);
+    string devname(name);
+    for(unsigned int i = 0; i < devname.size(); i++)
+        devname[i] = tolower(devname[i]);
+    AVRDeviceMap::iterator i = devmap.find(devname);
     if(i == devmap.end())
-        devmap[name] = create;
+        devmap[devname] = create;
     else
-        avr_error("Duplicate device specification: %s", name.c_str());
+        avr_error("Duplicate device specification: %s", devname.c_str());
 }
 
 AvrDevice* AvrFactory::makeDevice(const char *in) {
-    AVRDeviceMap::iterator i = devmap.find(in);
+    string devname(in);
+    for(unsigned int i = 0; i < devname.size(); i++)
+        devname[i] = tolower(devname[i]);
+    AVRDeviceMap::iterator i = devmap.find(devname);
     if(i == devmap.end())
         avr_error("Invalid device specification: %s", in);
 
-    return devmap[in]();
+    return devmap[devname]();
 }
 
 std::string AvrFactory::supportedDevices() {
