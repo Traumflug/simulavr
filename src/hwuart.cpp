@@ -168,9 +168,9 @@ void HWUart::SetUcr(unsigned char val) {
 }
 
 unsigned int HWUart::CpuCycle() {
-    baudCnt++;
-    if (baudCnt== (ubrr+1)) {   //16 times the baud rate!
-        baudCnt=0;
+    baudCnt++; // TODO: this isn't implemented right, baud clock prescaler is a down counter!
+    if(baudCnt >= (ubrr + 1)) {
+        baudCnt = 0;
         CpuCycleRx();
         CpuCycleTx();
     }
@@ -387,8 +387,8 @@ unsigned int HWUart::CpuCycleTx() {
     //unsigned char usr_old=usr;
 
     baudCnt16++;
-    if (baudCnt16==16) { //1 time baud rate - baud rate / 16 here
-        baudCnt16=0;
+    if(baudCnt16 >= 16) { // TODO: this isn't implemented right, baud clock prescaler is a down counter!
+        baudCnt16 = 0;
 
         if (ucr & TXEN ) {  //transmitter enabled
 
@@ -599,17 +599,19 @@ void HWUart::CheckForNewClearIrq(unsigned char val) {
 }
 
 void HWUart::Reset() {
-    udrWrite=0;
-    udrRead=0;
-    usr=UDRE; //UDRE in USR is set 1 on reset
-    ucr=0;
-    ucsrc=UCSZ1|UCSZ0;
-    ubrr=0;
-
+    udrWrite = 0;
+    udrRead = 0;
+    usr = UDRE; //UDRE in USR is set 1 on reset
+    ucr = 0;
+    ucsrc = UCSZ1 | UCSZ0;
+    ubrr = 0;
+    baudCnt = 0;
+    baudCnt16 = 0;
+    
     regSeq = 0;
     
-    rxState=RX_WAIT_FOR_LOWEDGE;
-    txState=TX_FIRST_RUN;
+    rxState = RX_WAIT_FOR_LOWEDGE;
+    txState = TX_FIRST_RUN;
 
     SetFrameLengthFromRegister(); 
 }

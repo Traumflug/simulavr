@@ -34,6 +34,7 @@
 #include "traceval.h"
 
 //! Implements the I/O hardware necessary to do UART transfers.
+/*! \todo Needs rewrite! Only one async mode implemented! */
 class HWUart: public Hardware, public TraceValueRegister {
     
     protected:
