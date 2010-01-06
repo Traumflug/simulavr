@@ -244,7 +244,7 @@ void GdbServerSocketUnix::SetBlockingMode(int mode) {
 
 bool GdbServerSocketUnix::Connect(void) {
     /* accept() needs this set, or it fails (sometimes) */
-    addrLength[0] = sizeof(struct sockaddr *);
+    addrLength[0] = sizeof(struct sockaddr_in);
 
     /* We only want to accept a single connection, thus don't need a loop. */
     /* Wait until we have a connection */
