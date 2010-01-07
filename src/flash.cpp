@@ -102,13 +102,12 @@ void AvrFlash::Decode(unsigned int offset, int secSize) {
 }
 
 void AvrFlash::Decode(unsigned int addr) {
-    addr >>= 1; //PC runs per word
+    unsigned int index = addr >> 1;
+    addr &= ~1;
+    
+    word opcode = (myMemory[addr] << 8) + myMemory[addr + 1];
 
-    word *MemPtr = (word *)(myMemory);
-    word opcode;
-
-    opcode = ((MemPtr[addr]) >> 8) + ((MemPtr[addr] & 0xff) << 8);
-    if(DecodedMem[addr] != NULL)
-        delete DecodedMem[addr];                     //delete old Instruction here 
-    DecodedMem[addr] = lookup_opcode(opcode, core);  //and set new one
+    if(DecodedMem[index] != NULL)
+        delete DecodedMem[index];                     //delete old Instruction here 
+    DecodedMem[index] = lookup_opcode(opcode, core);  //and set new one
 }

@@ -356,15 +356,14 @@ int avr_op_INC::Trace( ) {
 
 int avr_op_JMP::Trace( ) {
     traceOut << "JMP ";
-    int ret=this->operator()();
-    word *MemPtr=(word*)core->Flash->myMemory;
-    word offset=MemPtr[(core->PC)+1];         //this is k!
-    offset=(offset>>8)+((offset&0xff)<<8);
-    traceOut << hex << 2*offset << " ";
+    word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);  //this is k!
+    int ret = this->operator()();
+    traceOut << hex << 2 * offset << " ";
 
     string sym(core->Flash->GetSymbolAtAddress(offset));
     traceOut << sym << " ";
-    for (int len = sym.length(); len<30;len++) { traceOut << " " ; }
+    for(int len = sym.length(); len < 30; len++)
+        traceOut << " " ;
 
     return ret;
 }
@@ -388,11 +387,9 @@ int avr_op_LDI::Trace( ) {
 }
 
 int avr_op_LDS::Trace( ) {
-    word *MemPtr=(word*)core->Flash->myMemory;
-    word offset=MemPtr[(core->PC)+1];         //this is k!
-    offset=(offset>>8)+((offset&0xff)<<8);
+    word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);  //this is k!
     traceOut << "LDS R" << p1 << ", " << hex << "0x" << offset << dec  << " ";
-    int ret=this->operator()();
+    int ret = this->operator()();
     return ret;
 }
 
@@ -668,11 +665,9 @@ int avr_op_STD_Z::Trace( ) {
 }
 
 int avr_op_STS::Trace( ) {
-    word *MemPtr=(word*)core->Flash->myMemory;
-    word offset=MemPtr[(core->PC)+1];         //this is k!
-    offset=(offset>>8)+((offset&0xff)<<8);
+    word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);  //this is k!
     traceOut << "STS " << "0x" << hex << offset << dec  << ", R" << p2 << " ";
-    int ret=this->operator()();
+    int ret = this->operator()();
     return ret;
 }
 
