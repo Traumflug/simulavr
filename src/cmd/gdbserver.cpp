@@ -428,7 +428,7 @@ void GdbServer::gdb_send_reply( const char *reply )
             reply++;
 
             /* must account for "#cc" to be added */
-            if (bytes == (MAX_BUF-3))
+            if (bytes == (sizeof(buf) - 3))
             {
                 /* FIXME: TRoth 2002/02/18 - splitting reply would be better */
                 avr_error( "buffer overflow" );
@@ -515,8 +515,7 @@ void GdbServer::gdb_read_registers( )
 
 /*! GDB is sending values to be written to the registers. Registers are the
 same and in the same order as described in gdb_read_registers() above. */
-void GdbServer::gdb_write_registers( char *pkt )
-{
+void GdbServer::gdb_write_registers(const char *pkt) {
     int   i;
     byte  bval;
     dword val;                  /* ensure it's a 32 bit value */
@@ -575,11 +574,10 @@ to point to stop char when done.
 Use this function to extract a num with an arbitrary num of hex
 digits. This should _not_ be used to extract n digits from a m len string
 of digits (n <= m). */
-int GdbServer::gdb_extract_hex_num( char **pkt, char stop )
-{
+int GdbServer::gdb_extract_hex_num(const char **pkt, char stop) {
     int i = 0;
     int num = 0;
-    char *p = *pkt;
+    const char *p = *pkt;
     int max_shifts = sizeof(int)*2-1; /* max number of nibbles to shift through */
 
     while ( (*p != stop) && (*p != '\0') )
@@ -598,11 +596,10 @@ int GdbServer::gdb_extract_hex_num( char **pkt, char stop )
 
 /*! Read a single register. Packet form: 'pn' where n is a hex number with no
 zero padding. */
-void GdbServer::gdb_read_register( char *pkt )
-{
+void GdbServer::gdb_read_register(const char *pkt) {
     int reg;
 
-    char reply[MAX_BUF];
+    char reply[MAX_BUF + 1];
 
     memset(reply, '\0', sizeof(reply));
 
@@ -611,12 +608,12 @@ void GdbServer::gdb_read_register( char *pkt )
     if ( (reg >= 0) && (reg < 32) )
     {                           /* general regs */
         byte val = (*(core->R))[reg];
-        snprintf( reply, sizeof(reply)-1, "%02x", val );
+        snprintf(reply, sizeof(reply), "%02x", val);
     }
     else if (reg == 32)         /* sreg */
     {
         byte val = *(core->status);
-        snprintf( reply, sizeof(reply)-1, "%02x", val );
+        snprintf(reply, sizeof(reply), "%02x", val);
     }
     else if (reg == 33)         /* SP */
     {
@@ -625,12 +622,12 @@ void GdbServer::gdb_read_register( char *pkt )
         //sph = avr_core_mem_read( core, SPH_ADDR );
         spl=core->stack->GetSpl();
         sph=core->stack->GetSph();
-        snprintf( reply, sizeof(reply)-1, "%02x%02x", spl, sph );
+        snprintf(reply, sizeof(reply), "%02x%02x", spl, sph);
     }
     else if (reg == 34)         /* PC */
     {
         dword val = core->PC * 2;
-        snprintf( reply, sizeof(reply)-1,
+        snprintf(reply, sizeof(reply),
                 "%02x%02x" "%02x%02x", 
                 val & 0xff, (val >> 8) & 0xff,
                 (val >> 16) & 0xff, (val >> 24) & 0xff );
@@ -647,8 +644,7 @@ void GdbServer::gdb_read_register( char *pkt )
 /*! Write a single register. Packet form: 'Pn=r' where n is a hex number with
 no zero padding and r is two hex digits for each byte in register (target
 byte order). */
-void GdbServer::gdb_write_register( char *pkt )
-{
+void GdbServer::gdb_write_register(const char *pkt) {
     int reg;
     int val, hval;
     dword dval;
@@ -717,9 +713,8 @@ void GdbServer::gdb_write_register( char *pkt )
 a_end is first char after addr.
 l_end is first char after len.
 Returns number of characters to advance pkt. */
-int GdbServer::gdb_get_addr_len( char *pkt, char a_end, char l_end, unsigned int *addr, int *len )
-{
-    char *orig_pkt = pkt;
+int GdbServer::gdb_get_addr_len(const char *pkt, char a_end, char l_end, unsigned int *addr, int *len) {
+    const char *orig_pkt = pkt;
 
     *addr = 0;
     *len  = 0;
@@ -740,16 +735,14 @@ int GdbServer::gdb_get_addr_len( char *pkt, char a_end, char l_end, unsigned int
     return (pkt - orig_pkt);
 }
 
-void GdbServer::gdb_read_memory( char *pkt )
-{
-    unsigned int   addr = 0;
+void GdbServer::gdb_read_memory(const char *pkt) {
+    unsigned int addr = 0;
     int   len  = 0;
     byte *buf;
     byte  bval;
     word  wval;
     int   i;
     int   is_odd_addr;
-
 
     pkt += gdb_get_addr_len( pkt, ',', '\0', &addr, &len );
 
@@ -852,9 +845,8 @@ void GdbServer::gdb_read_memory( char *pkt )
     avr_free( buf );
 }
 
-void GdbServer::gdb_write_memory( char *pkt )
-{
-    unsigned int  addr = 0;
+void GdbServer::gdb_write_memory(const char *pkt) {
+    unsigned int addr = 0;
     int  len  = 0;
     byte bval;
     word wval;
@@ -977,8 +969,7 @@ For a software breakpoint, length specifies the size of the instruction to
 be patched. For hardware breakpoints and watchpoints, length specifies the
 memory region to be monitored. To avoid potential problems, the operations
 should be implemented in an idempotent way. -- GDB 5.0 manual. */
-void GdbServer::gdb_break_point( char *pkt )
-{
+void GdbServer::gdb_break_point(const char *pkt) {
     unsigned int addr = 0;
     int len  = 0;
 
@@ -1060,8 +1051,7 @@ Continue with signal command format: "C<sig>;<addr>" or "S<sig>;<addr>"
 
 If addr is given, resume at that address, otherwise, resume at current
 address. */
-int GdbServer::gdb_get_signal( char *pkt )
-{
+int GdbServer::gdb_get_signal(const char *pkt) {
     int signo;
     //char step = *(pkt-1);
 
@@ -1085,6 +1075,7 @@ int GdbServer::gdb_get_signal( char *pkt )
             makes first connection with simulator. */
             core->Reset( );
             gdb_send_reply( "S05" );
+            break;
     }
 
     return signo;
@@ -1093,42 +1084,41 @@ int GdbServer::gdb_get_signal( char *pkt )
 /*! Parse the packet. Assumes that packet is null terminated.
 Return GDB_RET_KILL_REQUEST if packet is 'kill' command,
 GDB_RET_OK otherwise. */
-int GdbServer::gdb_parse_packet( char *pkt )
-{
+int GdbServer::gdb_parse_packet(const char *pkt) {
     switch (*pkt++) {
         case '?':               /* last signal */
-            gdb_send_reply( "S05" ); /* signal # 5 is SIGTRAP */
+            gdb_send_reply("S05"); /* signal # 5 is SIGTRAP */
             break;
 
         case 'g':               /* read registers */
-            gdb_read_registers(  );
+            gdb_read_registers();
             break;
 
         case 'G':               /* write registers */
-            gdb_write_registers(  pkt );
+            gdb_write_registers(pkt);
             break;
 
         case 'p':               /* read a single register */
-            gdb_read_register(  pkt );
+            gdb_read_register(pkt);
             break;
 
         case 'P':               /* write single register */
-            gdb_write_register(  pkt );
+            gdb_write_register(pkt);
             break;
 
         case 'm':               /* read memory */
-            gdb_read_memory(  pkt );
+            gdb_read_memory(pkt);
             break;
 
         case 'M':               /* write memory */
-            gdb_write_memory(  pkt );
+            gdb_write_memory(pkt);
             break;
 
         case 'D':               /* detach the debugger */
         case 'k':               /* kill request */
             /* Reset the simulator since there may be another connection
             before the simulator stops running. */
-            gdb_send_reply(  "OK" );
+            gdb_send_reply("OK");
             return GDB_RET_KILL_REQUEST;
 
         case 'c':               /* continue */
@@ -1155,15 +1145,25 @@ int GdbServer::gdb_parse_packet( char *pkt )
 
         case 'z':               /* remove break/watch point */
         case 'Z':               /* insert break/watch point */
-            gdb_break_point(  pkt );
+            gdb_break_point(pkt);
             break;
 
         case 'q':               /* query requests */
-            gdb_send_reply(  "" );
+            pkt--;
+            if(strcmp(pkt, "qSupported") == 0) {
+                gdb_send_reply("PacketSize=800");
+                return GDB_RET_OK;
+            }
+            if(global_debug_on)
+                fprintf(stderr, "gdb query '%s' not supported\n", pkt);
+            gdb_send_reply("");
             break;
 
         default:
-            gdb_send_reply(  "" );
+            pkt--;
+            if(global_debug_on)
+                fprintf(stderr, "gdb command '%s' not supported\n", pkt);
+            gdb_send_reply("");
     }
 
     return GDB_RET_OK;
@@ -1174,14 +1174,13 @@ outside the realm of packets or prepare a packet for parsing.
 
 Use the static block_on flag to reduce the over head of turning blocking on
 and off every time this function is called. */
-int GdbServer::gdb_pre_parse_packet( int blocking )
-{
-    int  i, res;
+int GdbServer::gdb_pre_parse_packet(int blocking) {
+    int  res;
     int  c;
-    char pkt_buf[MAX_BUF+1];
+    std::string pkt_buf;
     int  cksum, pkt_cksum;
 
-    server->SetBlockingMode( blocking);
+    server->SetBlockingMode(blocking);
 
     /*
     if ( block_on != blocking )
@@ -1193,19 +1192,15 @@ int GdbServer::gdb_pre_parse_packet( int blocking )
     //cout << endl; //trace
     c = server->ReadByte();
 
-    switch (c) {
+    switch(c) {
         case '$':           /* read a packet */
-            /* insure that packet is null terminated. */
-            memset( pkt_buf, 0, sizeof(pkt_buf) );
-
             /* make sure we block on fd */
-            server->SetBlockingMode( GDB_BLOCKING_ON );
+            server->SetBlockingMode(GDB_BLOCKING_ON);
 
-            pkt_cksum = i = 0;
+            pkt_cksum = 0;
             c = server->ReadByte();
-            while ( (c != '#') && (i < MAX_BUF) )
-            {
-                pkt_buf[i++] = c;
+            while(c != '#') {
+                pkt_buf.push_back(c);
                 pkt_cksum += (unsigned char)c;
                 c = server->ReadByte();
             }
@@ -1219,37 +1214,38 @@ int GdbServer::gdb_pre_parse_packet( int blocking )
             matter of sending (Nak) since you don't want to get into an
             infinite loop of (bad cksum, nak, resend, repeat).*/
 
-            if ( (pkt_cksum & 0xff) != cksum )
-                avr_error( "Bad checksum: sent 0x%x <--> computed 0x%x",
-                        cksum, pkt_cksum );
+            if((pkt_cksum & 0xff) != cksum)
+                avr_error("Bad checksum: sent 0x%x <--> computed 0x%x",
+                          cksum, pkt_cksum);
 
-            if (global_debug_on)
-                fprintf( stderr, "Recv: \"$%s#%02x\"\n", pkt_buf, cksum );
+            if(global_debug_on)
+                fprintf(stderr, "Recv: \"$%s#%02x\"\n", pkt_buf.c_str(), cksum);
 
             /* always acknowledge a well formed packet immediately */
-            gdb_send_ack( );
+            gdb_send_ack();
 
-            res = gdb_parse_packet( pkt_buf );
-            if (res < 0 )
+            res = gdb_parse_packet(pkt_buf.c_str());
+            if(res < 0)
                 return res;
 
             break;
 
         case '-':
-            if (global_debug_on)
-                fprintf( stderr, " gdb -> Nak\n" );
-            gdb_send_reply(  gdb_last_reply(NULL) );
+            if(global_debug_on)
+                fprintf(stderr, " gdb -> Nak\n");
+            gdb_send_reply(gdb_last_reply(NULL));
             break;
 
         case '+':
-            if (global_debug_on)
-                fprintf( stderr, " gdb -> Ack\n" );
+            if(global_debug_on)
+                fprintf(stderr, " gdb -> Ack\n");
             break;
 
         case 0x03:
             /* Gdb sends this when the user hits C-c. This is gdb's way of
-            telling the simulator to interrupt what it is doing and return
-            control back to gdb. */
+             * telling the simulator to interrupt what it is doing and return
+             * control back to gdb.
+             */
             return GDB_RET_CTRL_C;
 
         case -1:
@@ -1258,7 +1254,7 @@ int GdbServer::gdb_pre_parse_packet( int blocking )
             break;
 
         default:
-            avr_warning( "Unknown request from gdb: %c (0x%02x)\n", c, c );
+            avr_warning("Unknown request from gdb: %c (0x%02x)\n", c, c);
     }
 
     return GDB_RET_OK;
@@ -1278,7 +1274,7 @@ int GdbServer::gdb_pre_parse_packet( int blocking )
 void GdbServer::Run( )
 {
     int res;
-    char reply[MAX_BUF];
+    char reply[MAX_BUF + 1];
 
     while (1)
     {
@@ -1290,7 +1286,7 @@ void GdbServer::Run( )
 
             case GDB_RET_CTRL_C:
                 gdb_send_ack( );
-                snprintf( reply, MAX_BUF, "S%02x", GDB_SIGINT );
+                snprintf(reply, sizeof(reply), "S%02x", GDB_SIGINT);
                 gdb_send_reply( reply );
                 break;
 
@@ -1357,7 +1353,7 @@ void GdbServer::IdleStep() {
 }
 
 int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *timeToNextStepIn_ns) {
-    char reply[MAX_BUF+1];
+    char reply[MAX_BUF + 1];
     //cout << "Internal Step entered" << endl;
     //cout << "RunMode: " << dec << runMode << endl;
 
@@ -1436,7 +1432,7 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
     {
         //why we send here another reply??? is it not better to send it later
         //the signo is set correct.... TODO
-        snprintf( reply, MAX_BUF, "S%02x", GDB_SIGILL );
+        snprintf(reply, sizeof(reply), "S%02x", GDB_SIGILL);
         gdb_send_reply( reply );
         runMode=GDB_RET_OK;
         SendPosition(GDB_SIGILL);
@@ -1454,14 +1450,14 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
 void GdbServer::SendPosition(int signo) {
     /* Send gdb PC, FP, SP */
     int bytes = 0;
-    char reply[MAX_BUF+1];
+    char reply[MAX_BUF + 1];
 
     int pc = core->PC * 2;
 
-    bytes = snprintf( reply, MAX_BUF, "T%02x", signo );
+    bytes = snprintf(reply, sizeof(reply), "T%02x", signo);
 
     /* SREG, SP & PC */
-    snprintf( reply+bytes, MAX_BUF-bytes,
+    snprintf(reply + bytes, sizeof(reply) - bytes,
             "20:%02x;" "21:%02x%02x;" "22:%02x%02x%02x%02x;",
             ((int)(*(core->status))),
             core->stack->GetSpl(), core->stack->GetSph(),
