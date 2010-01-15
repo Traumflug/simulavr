@@ -220,19 +220,19 @@ AC_DEFUN([AZ_PYTHON_CSPEC],
     AC_ARG_VAR( [PYTHON], [Python Executable Path] )
     if test -n "$PYTHON"
     then
-        az_python_prefix=`${PYTHON} -c "import sys; print sys.prefix"`
+        az_python_prefix=`${PYTHON} -c "import sys; print(sys.prefix)"`
         if test -z "$az_python_prefix"
         then
             AC_MSG_ERROR([Python Prefix is not known])
         fi
-        az_python_execprefix=`${PYTHON} -c "import sys; print sys.exec_prefix"`
-        az_python_version=`$PYTHON -c "import sys; print sys.version[[:3]]"`
+        az_python_execprefix=`${PYTHON} -c "import sys; print(sys.exec_prefix)"`
+        az_python_version=`$PYTHON -c "import sys; print(sys.version[[:3]])"`
         az_python_includespec="-I${az_python_prefix}/include/python${az_python_version}"
         if test x"$python_prefix" != x"$python_execprefix"; then
             az_python_execspec="-I${az_python_execprefix}/include/python${az_python_version}"
             az_python_includespec="${az_python_includespec} $az_python_execspec"
         fi
-        az_python_ccshared=`${PYTHON} -c "import distutils.sysconfig; print distutils.sysconfig.get_config_var('CFLAGSFORSHARED')"`
+        az_python_ccshared=`${PYTHON} -c "import distutils.sysconfig; print(distutils.sysconfig.get_config_var('CFLAGSFORSHARED'))"`
         az_python_cspec="${az_python_ccshared} ${az_python_includespec}"
         AC_SUBST([PYTHON_CSPEC], [${az_python_cspec}])
         AC_MSG_NOTICE([PYTHON_CSPEC=${az_python_cspec}])
@@ -302,7 +302,7 @@ else:
     if strLibFW and (strLibFW != ""):
         strLinkSpec += " -F%s" % (strLibFW)
 strLinkSpec += " %s" % (dictConfig.get('LINKFORSHARED'))
-print strLinkSpec
+print(strLinkSpec)
         ])
         AC_SUBST([PYTHON_LSPEC], [${az_python_output}])
         AC_MSG_NOTICE([PYTHON_LSPEC=${az_python_output}])
@@ -342,8 +342,8 @@ AC_DEFUN([AZ_PYTHON_PREFIX],
     then
         AC_MSG_ERROR([Python Executable Path is not known])
     fi
-    ax_python_prefix=`${PYTHON} -c "import sys; print sys.prefix"`
-    ax_python_execprefix=`${PYTHON} -c "import sys; print sys.exec_prefix"`
+    ax_python_prefix=`${PYTHON} -c "import sys; print(sys.prefix)"`
+    ax_python_execprefix=`${PYTHON} -c "import sys; print(sys.exec_prefix)"`
     AC_SUBST([PYTHON_PREFIX], ["${ax_python_prefix}"])
     AC_SUBST([PYTHON_EXECPREFIX], ["${ax_python_execprefix}"])
 ])
@@ -397,9 +397,12 @@ AC_DEFUN([AZ_PYTHON_VERSION_CHECK],
 import sys, string
 # split strings by '.' and convert to numeric.  Append some zeros
 # because we need at least 4 digits for the hex conversion.
-minver = map(int, string.split('$1', '.')) + [[0, 0, 0]]
+if hasattr(string, 'split'):
+  minver = map(int, string.split('$1', '.')) + [[0, 0, 0]]
+else:
+  minver = list(map(int, '$1'.split('.'))) + [[0, 0, 0]]
 minverhex = 0
-for i in xrange(0, 4): minverhex = (minverhex << 8) + minver[[i]]
+for i in range(0, 4): minverhex = (minverhex << 8) + minver[[i]]
 if sys.hexversion >= minverhex:
     sys.exit( 0 )
 else:
