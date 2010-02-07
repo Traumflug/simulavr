@@ -28,5 +28,5 @@
     rw[$io["SPCR"].addr]=& spi->spcr_reg;
     rw[$io["SPSR"].addr]=& spi->spsr_reg;
     rw[$io["SPDR"].addr]=& spi->spdr_reg;
-#endif						
+#end if						
 }

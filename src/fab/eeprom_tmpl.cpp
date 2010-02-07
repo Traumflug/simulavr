@@ -21,10 +21,10 @@
 	eeprom = new HWMegaEeprom(this, irqSystem, $eeprom_size, $irq_bysrc["EE_RDY"].addr);
 #else
 	eeprom = new HWEeprom(this, irqSystem, $eeprom_size);
-#endif    
+#end if    
 #if "EEAR" in $io
 	rw[$io["EEAR"].addr]= & eeprom->eearl_reg;
 	rw[$io["EEDR"].addr]= & eeprom->eedr_reg;
 	rw[$io["EECR"].addr]= & eeprom->eecr_reg;
-#endif
+#end if
 }

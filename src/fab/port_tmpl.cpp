@@ -24,11 +24,11 @@
 #else
     // output-only port
     port$letter=new HWPort(this, "$Letter", 0xff);
-#endif
+#end if
 ##    
 #if ("PORT"+$Letter) in $io
     rw[$io["PORT"+$Letter].addr]=& port$letter->port_reg;
-#endif
+#end if
 ##    
 ## some ports are output only (e.g. mega103/portc)
 ## some other ports are input only (e.g. mega103/portf)
@@ -38,7 +38,7 @@
     rw[$io["DDR"+$Letter].addr]=& port$letter->ddr_reg;
     #else
     // ^^ input-only port
-    #endif
-  #endif
+    #end if
+  #end if
 
-#endfor
+#end for

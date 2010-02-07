@@ -24,7 +24,7 @@ module $(part)(clk,
 #set onlylast=sorted($io_ports)[-1:][0]
 #for $Letter in $exclast
 	     P$Letter,
-#endfor
+#end for
 	     P$onlylast
 #slurp	     
 	     );
@@ -33,7 +33,7 @@ module $(part)(clk,
 #for $Letter in $io_ports
 ##FIXME: Only specify needed bits!  
    inout [7:0] P$Letter;
-#endfor   
+#end for   
    integer 	handle;
 
    defparam 	core.progfile=progfile;
@@ -44,7 +44,7 @@ module $(part)(clk,
 #set $letter=$Letter.lower
 #for $bit in range(8)
    avr_pin #("$(Letter)$(bit)") p$(letter)$(bit)(P$(Letter)[$(bit)]);
-#endfor   
-#endfor   
+#end for   
+#end for   
 endmodule
 	       

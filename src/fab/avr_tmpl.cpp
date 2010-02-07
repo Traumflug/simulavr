@@ -55,7 +55,7 @@ AVR_$part::AVR_$(part)() : AvrDevice($io_size,
     stack = new HWStack(this, Sram, $stack.ceil);
 #else
     stack = new HWStack(this, new ThreeLevelStack(this), 0x06);
-#endif
+#end if
 
     wado			= new HWWado(this);
     rw[$io["WDTCR"].addr]	= & wado->wdtcr_reg;
@@ -66,10 +66,10 @@ AVR_$part::AVR_$(part)() : AvrDevice($io_size,
 
 #if "SPL" in $io
     rw[$io["SPL"].addr]= & stack->spl_reg;
-#endif
+#end if
 #if "SPH" in $io
     rw[$io["SPH"].addr]= & stack->sph_reg;
-#endif    
+#end if    
     
 
     

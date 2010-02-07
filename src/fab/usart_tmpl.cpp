@@ -34,12 +34,12 @@
 			  $irq_bysrc["USART, RXC"].addr,
 			  $irq_bysrc["USART, UDRE"].addr,
 			  $irq_bysrc["USART, TXC"].addr);
-#endif    
+#end if    
 
 
     rw[$io["UDR"].addr]= & usart->udr_reg;
     rw[$io["UCSRA"].addr]= & usart->usr_reg;
     rw[$io["UCSRB"].addr]= & usart->ucr_reg;
     rw[$io["UBRRL"].addr]= & usart->ubrr_reg;
-#endif						
+#end if						
 }
