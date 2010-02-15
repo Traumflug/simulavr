@@ -111,9 +111,9 @@ simulavr_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) \
 
 if USE_VERILOG
 VPI_LIB=avr.vpi
-libavrvpi_la_SOURCES = vpi.cpp
+libavrvpi_la_SOURCES = vpi.cpp $(libsim_la_SOURCES)
 libavrvpi_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-libavrvpi_la_LIBADD= $(libsim_la_OBJECTS) -lz \
+libavrvpi_la_LIBADD= -lz \
   -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty
 
 $(VPI_LIB): libavrvpi.la
