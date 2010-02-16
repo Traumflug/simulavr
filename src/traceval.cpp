@@ -548,7 +548,7 @@ void DumpManager::unregisterAvrDevice(AvrDevice* dev) {
     vector<AvrDevice*> dl;
     for(vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
         AvrDevice* d = *i;
-        if((unsigned int)d != (unsigned int)dev)
+        if(d != dev)
             dl.push_back(d);
     }
     devices.swap(dl);
