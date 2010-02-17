@@ -35,6 +35,7 @@
 #include "rwmem.h"
 #include "pin.h"
 #include "avrerror.h"
+#include "cmd/dumpargs.h"
 
 static std::vector<AvrDevice*> devices;
 
@@ -333,6 +334,21 @@ static PLI_INT32 avr_trace_tf(char *xx) {
     return 0;
 }
 
+/*! This allows to enable dumping of internal variables in the simulavrxx core
+ * as a Value Change Dump file. The arguments given to this function are
+ * exactly the same as when calling simulavrxx from the command line. */
+static PLI_INT32 avr_dumparg_tf(char *xx) {
+    VPI_BEGIN();
+    VPI_UNPACKI(handle);
+    VPI_UNPACKS(dumparg);
+    VPI_END();
+    AVR_HCHECK();
+    std::vector<std::string> dargs;
+    dargs.push_back(dumparg);
+    SetDumpTraceArgs(dargs, devices[handle]);
+    return 0;
+}
+
 static void register_tasks() {
     VPI_REGISTER_FUNC(avr_create);
     VPI_REGISTER_TASK(avr_reset);
@@ -344,6 +360,7 @@ static void register_tasks() {
     VPI_REGISTER_FUNC(avr_get_rw);
     VPI_REGISTER_TASK(avr_set_rw);
     VPI_REGISTER_TASK(avr_trace);
+    VPI_REGISTER_TASK(avr_dumparg);
 }
 
 /* This is a table of register functions. This table is the external symbol
