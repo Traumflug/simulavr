@@ -224,7 +224,8 @@ int main(int argc, char *argv[]) {
                     exit(1);
                 }
                 if(global_verbose_on)
-                    printf("Running with CPU frequency: %1.4f MHz\n", fcpu/1000000.0);
+                    printf("Running with CPU frequency: %1.4f MHz (%d Hz)\n",
+                           fcpu/1000000.0, fcpu);
                 break;
             
             case 'm':
