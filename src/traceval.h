@@ -125,7 +125,8 @@ class TraceValue {
     
         //! Gives the index of this member in a memory field (or -1)
         int index() const;
-        
+
+        //! Possible access types for a trace value
         enum Atype {
         READ=1, // true if a READ access has been logged
         WRITE=2,

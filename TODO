@@ -5,6 +5,7 @@
 + Host specific issues
   - Cygwin: Basic Simulator Functionality Works.  Need to check Tcl/X.
   - Mingw: Uses BSD sockets.  Need to have WinSock as alternative
+  - check for makeinfo/texi2html program, else a full build will fail!
 
 + Feature parity with avrtest.  Known issues:
   - Verify gcc test suite can be run with avrtest
@@ -106,3 +107,9 @@
 
 + Clean up the private/protected/public declaration scopes
   for the various classes. This is quite inconsistent.
+
++ Tracing/Dumping:
+  Make the device names configurable and not only a simple index into a list.
+  Do not update bxxxx values in trace output.
+  Implement PCb back.
+  Bug, nothing in SREG? Why SREG twice?
