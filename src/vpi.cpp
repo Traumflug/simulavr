@@ -330,6 +330,7 @@ static PLI_INT32 avr_trace_tf(char *xx) {
     for (size_t i=0; i < devices.size(); i++)
         devices[i]->trace_on=0;
     }
+    return 0;
 }
 
 static void register_tasks() {
