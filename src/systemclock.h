@@ -41,7 +41,7 @@ class SystemClock
         SystemClock(const SystemClock &);
 
     protected:
-        SystemClockOffset currentTime;
+        SystemClockOffset currentTime; ///< time in [ns] since start of simulation
         std::vector<SimulationMember*> asyncMembers;
         
     public:

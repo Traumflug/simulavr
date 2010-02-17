@@ -70,7 +70,6 @@ void SystemClock::AddAsyncMember( SimulationMember *dev) {
 
 int SystemClock::Step(bool &untilCoreStepFinished) { //0-> return also if cpu in waitstate 1-> return if cpu is really finished
     int res=0; //returns the state from a core step. Needed by gdb-server to wathc for breakpoints
-    SystemClockOffset nextStepIn_ns;
 
     static vector<SimulationMember*>::iterator ami;
     static vector<SimulationMember*>::iterator amiEnd;
@@ -81,13 +80,11 @@ int SystemClock::Step(bool &untilCoreStepFinished) { //0-> return also if cpu in
         currentTime=begin()->first; 
         erase(begin());
         if (core->trace_on) traceOut << DecLong(currentTime)<<" ";
+        SystemClockOffset nextStepIn_ns = -1;
         res=core->Step(untilCoreStepFinished, &nextStepIn_ns);
         if (nextStepIn_ns==0) { //insert the next step behind the following!
             SystemClock::iterator ii=begin();
-            //ii++;
-            if (ii  != end() ) {
-                nextStepIn_ns=1+ (ii->first); 
-            }
+            nextStepIn_ns = 1 + (ii != end()) ? ii->first : currentTime;
         } else if(nextStepIn_ns>0) {
             nextStepIn_ns+=currentTime;
         }
