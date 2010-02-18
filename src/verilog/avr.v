@@ -106,9 +106,9 @@ module AVRCORE(clk);
    end
 
    always @(posedge clk) begin
-      PCw=$avr_get_pc(handle);
       $avr_set_time($time());
       $avr_tick(handle);      
+      PCw=$avr_get_pc(handle);
    end
    
 endmodule // AVRCORE
