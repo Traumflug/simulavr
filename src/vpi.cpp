@@ -36,6 +36,7 @@
 #include "pin.h"
 #include "avrerror.h"
 #include "cmd/dumpargs.h"
+#include "systemclock.h"
 
 static std::vector<AvrDevice*> devices;
 
@@ -79,6 +80,19 @@ static bool checkHandle(int h) {
     vpi_get_value(name, &value);                \
     }                               \
     int name = value.value.integer;
+
+#define VPI_UNPACKT(name)                   \
+    {                               \
+    vpiHandle name  = vpi_scan(argv);           \
+    if (! name) {                       \
+        vpi_printf("%s: " #name " parameter missing.\n", xx);\
+        vpi_free_object(argv);              \
+        return 0;                       \
+    }                           \
+    value.format = vpiTimeVal;               \
+    vpi_get_value(name, &value);                \
+    }                               \
+    t_vpi_time *name = value.value.time;
 
 #define VPI_RETURN_INT(val)                     \
     value.format = vpiIntVal;                   \
@@ -196,11 +210,26 @@ static PLI_INT32 avr_tick_tf(char *xx) {
     VPI_BEGIN();
     VPI_UNPACKI(handle);
     VPI_END();
-
     AVR_HCHECK();
     
     bool no_hw=false;
-    devices[handle]->Step(no_hw); 
+    devices[handle]->Step(no_hw);
+    return 0;
+}
+
+/*!
+  Set the time in the AVR system, in ns. Used for trace dumps etc.
+  $avr_time(handle)
+*/
+static PLI_INT32 avr_set_time_tf(char *xx) {
+    VPI_BEGIN();
+    VPI_UNPACKT(time);
+    VPI_END();
+
+    // For some weird reason (bug?) the low part is the high longword, really...
+    uint64_t tfull=(time->low)<<32+((uint64_t) time->high);
+    SystemClock::Instance().SetCurrentTime(tfull);
+
     return 0;
 }
 
@@ -337,7 +366,7 @@ static PLI_INT32 avr_trace_tf(char *xx) {
 /*! This allows to enable dumping of internal variables in the simulavrxx core
  * as a Value Change Dump file. The arguments given to this function are
  * exactly the same as when calling simulavrxx from the command line. */
-static PLI_INT32 avr_dumparg_tf(char *xx) {
+static PLI_INT32 avr_dump_arg_tf(char *xx) {
     VPI_BEGIN();
     VPI_UNPACKI(handle);
     VPI_UNPACKS(dumparg);
@@ -349,18 +378,34 @@ static PLI_INT32 avr_dumparg_tf(char *xx) {
     return 0;
 }
 
+/*! Initialize all dumpers and start them. Has to be done before any clock
+ * ticks on any AVR devices, if dumping is used! */
+static PLI_INT32 avr_dump_start_tf(char *xx) {
+    DumpManager::Instance()->start();
+    return 0;
+}
+
+/*! Finishes all dumping processes at the end of the application. */
+static PLI_INT32 avr_dump_stop_tf(char *xx) {
+    DumpManager::Instance()->stopApplication();
+    return 0;
+}
+
 static void register_tasks() {
     VPI_REGISTER_FUNC(avr_create);
     VPI_REGISTER_TASK(avr_reset);
     VPI_REGISTER_TASK(avr_destroy);
     VPI_REGISTER_TASK(avr_tick);
+    VPI_REGISTER_TASK(avr_set_time);
     VPI_REGISTER_FUNC(avr_get_pin);
     VPI_REGISTER_TASK(avr_set_pin);
     VPI_REGISTER_FUNC(avr_get_pc);
     VPI_REGISTER_FUNC(avr_get_rw);
     VPI_REGISTER_TASK(avr_set_rw);
     VPI_REGISTER_TASK(avr_trace);
-    VPI_REGISTER_TASK(avr_dumparg);
+    VPI_REGISTER_TASK(avr_dump_arg);
+    VPI_REGISTER_TASK(avr_dump_start);
+    VPI_REGISTER_TASK(avr_dump_stop);
 }
 
 /* This is a table of register functions. This table is the external symbol
