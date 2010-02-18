@@ -46,6 +46,7 @@ class SystemClock
         
     public:
         SystemClockOffset GetCurrentTime() const { return currentTime; }
+        void SetCurrentTime(SystemClockOffset of) { currentTime= of; }
         void IncrTime(SystemClockOffset of) { currentTime+= of; }
         void Add(SimulationMember *dev);
         void AddAsyncMember(SimulationMember *dev);
