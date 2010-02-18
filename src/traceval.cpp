@@ -726,19 +726,34 @@ TraceSet DumpManager::load(const string &istr) {
     return load(is);
 }
 
-void trace_direct(TraceValueRegister *t, const std::string &name, bool *val) {
-    t->RegisterTraceValue(new TraceValue(1, t->GetTraceValuePrefix() + name, -1, val));
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, bool *val) {
+    TraceValue *tv=new TraceValue(1, t->GetTraceValuePrefix() + name,
+                                  -1, val);
+    t->RegisterTraceValue(tv);
+    return tv;
 }
 
-void trace_direct(TraceValueRegister *t, const std::string &name, uint8_t *val) {
-    t->RegisterTraceValue(new TraceValue(8, t->GetTraceValuePrefix() + name, -1, val));
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint8_t
+*val) {
+    TraceValue* tv=new TraceValue(8, t->GetTraceValuePrefix() + name,
+                                  -1, val);
+    t->RegisterTraceValue(tv);
+    return tv;
 }
 
-void trace_direct(TraceValueRegister *t, const std::string &name, uint16_t *val) {
-    t->RegisterTraceValue(new TraceValue(16, t->GetTraceValuePrefix() + name, -1, val));
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint16_t
+*val) {
+    TraceValue* tv=new TraceValue(16, t->GetTraceValuePrefix() + name,
+                                  -1, val);
+    t->RegisterTraceValue(tv);
+    return tv;
 }
 
-void trace_direct(TraceValueRegister *t, const std::string &name, uint32_t *val) {
-    t->RegisterTraceValue(new TraceValue(32, t->GetTraceValuePrefix() + name, -1, val));
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint32_t
+*val) {
+    TraceValue* tv=new TraceValue(32, t->GetTraceValuePrefix() + name,
+                                  -1, val);
+    t->RegisterTraceValue(tv);
+    return tv;
 }
 

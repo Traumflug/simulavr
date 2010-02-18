@@ -510,15 +510,19 @@ class TraceValueCoreRegister: public TraceValueRegister {
 };
 
 //! Register a directly traced bool value
-void trace_direct(TraceValueRegister *t, const std::string &name, bool *val);
+/*! \return pointer to the new registered TraceValue */
+TraceValue *trace_direct(TraceValueRegister *t, const std::string &name, bool *val);
 
 //! Register a directly traced byte value
-void trace_direct(TraceValueRegister *t, const std::string &name, uint8_t *val);
+/*! \return pointer to the new registered TraceValue */
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint8_t *val);
 
 //! Register a directly traced 16bit word value
-void trace_direct(TraceValueRegister *t, const std::string &name, uint16_t *val);
+/*! \return pointer to the new registered TraceValue */
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint16_t *val);
 
 //! Register a directly traced 32bit word value
-void trace_direct(TraceValueRegister *t, const std::string &name, uint32_t *val);
+/*! \return pointer to the new registered TraceValue */
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint32_t *val);
 
 #endif
