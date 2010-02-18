@@ -288,7 +288,7 @@ static PLI_INT32 avr_get_pc_tf(char *xx) {
 
     AVR_HCHECK();
 
-    VPI_RETURN_INT(devices[handle]->PC);
+    VPI_RETURN_INT(devices[handle]->cPC);
 }
 
 /*!

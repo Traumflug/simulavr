@@ -80,6 +80,11 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         Breakpoints BP;
         Exitpoints EP;
         word PC;
+
+        /*! Current PC value, stays the same for the full time an instruction
+         * is being processed. */
+        word cPC;
+        
         int PC_size;
         AvrFlash *Flash;
         FlashProgramming * spmRegister;
