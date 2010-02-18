@@ -167,7 +167,7 @@ class TraceValue {
         //! Gives the current set of flag readings
         Atype flags() const;
         
-        //! Called for each cycle if this trace value is activated
+        //! Called at least once for each cycle if this trace value is activated
         /*! This may check for updates to an underlying referenced value etc.
           and update the flags accordingly. */
         virtual void cycle();
