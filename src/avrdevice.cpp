@@ -203,6 +203,23 @@ AvrDevice::~AvrDevice() {
     delete data;
 }
 
+/*! To ease debugging, also supply the option to have the PC*2 in the trace
+ * output file. This is also the format the other normal tracing will output
+ * addresses and the format avr-objdump produces disassemblies in. */
+class TwiceTV : public TraceValue {
+public:
+    TwiceTV(const std::string &_name, TraceValue *_ref)
+        : TraceValue(_ref->bits()+1, _name), ref(_ref) {}
+    
+    virtual void cycle() {
+        change(ref->value()*2);
+        set_written();
+    }
+private:
+    TraceValue *ref; // Reference value that will be doubled
+};
+
+    
 AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
                      unsigned int IRamSize,
                      unsigned int ERamSize,
@@ -219,8 +236,9 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     dump_manager = DumpManager::Instance();
     dump_manager->registerAvrDevice(this);
     
-    trace_direct(&coreTraceGroup, "PC", &PC);
-
+    TraceValue* pc_tracer=trace_direct(&coreTraceGroup, "PC", &PC);
+    coreTraceGroup.RegisterTraceValue(new TwiceTV(coreTraceGroup.GetTraceValuePrefix()+"PCb",  pc_tracer));
+    
     data = new Data; //only the symbol container
 
     // placeholder for RAMPZ register
