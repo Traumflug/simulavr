@@ -23,7 +23,13 @@
 /* This has been adapted from the hello_vpi.c example in the Icarus Verilog Source
    Distribution. */
 
+#include "config.h"
+#if HAVE_IVERILOG_VPI_USER_H
+#include  <iverilog/vpi_user.h>
+#else
 #include  <vpi_user.h>
+#endif
+
 #include "avrdevice.h"
 #include "avrfactory.h"
 #include "rwmem.h"

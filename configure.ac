@@ -97,7 +97,7 @@ AM_CONDITIONAL([USE_AVR_CROSS], [test x"${ac_have_avr_cross_tools}" = x"yes"])
 ####
 # support verilog interface to build avr.vpi
 ####
-AC_CHECK_HEADER([vpi_user.h],
+AC_CHECK_HEADERS([vpi_user.h iverilog/vpi_user.h],
     [AC_DEFINE(HAVE_VERILOG, [1], Icarus verilog interface)
         WE_HAVE_VERILOG="yes"],  
     [])
