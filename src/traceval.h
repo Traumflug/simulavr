@@ -25,6 +25,7 @@
 #ifndef traceval_h
 #define traceval_h
 
+#include <stdint.h>
 #include <iostream>
 #include <sstream>
 #include <map>
