@@ -54,6 +54,9 @@ std::ostream &operator << (std::ostream &os, const DecLong &h);
 //! Convert an int into a string
 std::string int2str(int i);
 
+//! Convert int into hex string
+std::string int2hex(int i);
+
 //! Reads one line from a stream.
 std::string readline(std::istream &is);
 

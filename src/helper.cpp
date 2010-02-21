@@ -62,6 +62,12 @@ std::string int2str(int i) {
     return s.str();
 }
 
+std::string int2hex(int i) {
+    stringstream s;
+    s << hex << i;
+    return s.str();
+}
+
 std::string readline(istream &is) {
     std::string out;
     char c=0;

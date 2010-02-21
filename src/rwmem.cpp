@@ -113,7 +113,7 @@ InvalidMem::InvalidMem(AvrDevice* _c, int _a):
     addr(_a) {}
 
 unsigned char InvalidMem::get() const {
-    string s = "Invalid read access to iospace address " + int2str(addr);
+    string s = "Invalid read access to iospace address 0x" + int2hex(addr);
     if(core->abortOnInvalidAccess)
         avr_error(s.c_str());
     avr_warning(s.c_str());
@@ -121,7 +121,8 @@ unsigned char InvalidMem::get() const {
 }
 
 void InvalidMem::set(unsigned char c) {
-    string s = "Invalid write access to iospace address " + int2str(addr) + ", trying to set value=" + int2str(c);
+    string s = "Invalid write access to iospace address 0x" + int2hex(addr) +
+        ", trying to set value= 0x" + int2str(c);
     if(core->abortOnInvalidAccess)
         avr_error(s.c_str());
     avr_warning(s.c_str());
