@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003  Theodore A. Roth, Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003  Theodore A. Roth, Klaus Rudolph      
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -754,8 +754,6 @@ void GdbServer::gdb_read_memory(const char *pkt) {
 
         addr = addr & ~MEM_SPACE_MASK; /* remove the offset bits */
 
-        //avr_warning( "reading of eeprom not yet implemented: 0x%x.\n", addr );
-        //snprintf( (char*)buf, len*2, "E%02x", EIO );
         for ( i=0; i<len; i++ )
         {
             bval = core->eeprom->ReadFromAddress( addr+i );
@@ -865,9 +863,6 @@ void GdbServer::gdb_write_memory(const char *pkt) {
         /* addressing eeprom */
 
         addr = addr & ~MEM_SPACE_MASK; /* remove the offset bits */
-
-        //	avr_warning( "writing of eeprom not yet implemented: 0x%x.\n", addr );
-        //	snprintf( reply, sizeof(reply), "E%02x", EIO );
 
         while (len>0) {
             bval  = hex2nib(*pkt++) << 4;
@@ -1150,10 +1145,21 @@ int GdbServer::gdb_parse_packet(const char *pkt) {
 
         case 'q':               /* query requests */
             pkt--;
-            if(strcmp(pkt, "qSupported") == 0) {
-                gdb_send_reply("PacketSize=800");
+            if(memcmp(pkt, "qSupported", 10) == 0) {
+                gdb_send_reply("PacketSize=800;qXfer:features:read+");
+                return GDB_RET_OK;
+            } else if(memcmp(pkt, "qXfer:features:read:target.xml:", 31) == 0) {
+                // GDB XML target descriptions, since GDB 6.7 (2007-10-10)
+                // see http://sources.redhat.com/gdb/current/onlinedocs/gdb/Target-Descriptions.html
+                gdb_send_reply("l"
+                               "<?xml version=\"1.0\"?>\n"
+                               "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">\n"
+                               "<target version=\"1.0\">\n"
+                               "    <architecture>avr</architecture>\n"
+                               "</target>\n");
                 return GDB_RET_OK;
             }
+            
             if(global_debug_on)
                 fprintf(stderr, "gdb query '%s' not supported\n", pkt);
             gdb_send_reply("");
