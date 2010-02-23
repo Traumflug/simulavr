@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,96 +44,88 @@ SystemClock::SystemClock() {
 
 void SystemClock::SetTraceModeForAllMembers(int trace_on) {
     iterator mi;
-    for (mi=begin(); mi!=end(); mi++) {
-        mi->second->trace_on=trace_on;
-    }
+    for(mi = begin(); mi != end(); mi++)
+        mi->second->trace_on = trace_on;
 } 
 
 
 void SystemClock::Add(SimulationMember *dev) {
-    insert( pair<SystemClockOffset, SimulationMember*>(currentTime,dev));
+    insert(pair<SystemClockOffset, SimulationMember*>(currentTime, dev));
 }
 
-void SystemClock::AddAsyncMember( SimulationMember *dev) {
+void SystemClock::AddAsyncMember(SimulationMember *dev) {
     asyncMembers.push_back(dev);
 }
 
-//TODO
-//In multiple core simulations which uses also gdb with single stepping we need a other solution to fit
-//the time accurate behaviour. Currently on a single step from gdb the simulation runs until the
-//command is completly executed which is not! correct. Some commands need up to 4 cycles and teh actual implementation
-//do up to 4 steps for one step so the other cores run slower then in normal operation. 
-//this is not a problem today because we are not able to run multiple cores with gdb but this will
-//be implementated later.
-//So this version is only made for running the regression tests and stepping in gdb. Normal operation/simulation
-//is not affected.
-
-int SystemClock::Step(bool &untilCoreStepFinished) { //0-> return also if cpu in waitstate 1-> return if cpu is really finished
-    int res=0; //returns the state from a core step. Needed by gdb-server to wathc for breakpoints
-    SystemClockOffset nextStepIn_ns;
+int SystemClock::Step(bool &untilCoreStepFinished) {
+    //0-> return also if cpu in waitstate 1-> return if cpu is really finished
+    int res = 0; // returns the state from a core step. Needed by gdb-server to
+                 // watch for breakpoints
+    SystemClockOffset nextStepIn_ns = -1;
 
     static vector<SimulationMember*>::iterator ami;
     static vector<SimulationMember*>::iterator amiEnd;
 
     SimulationMember *core;
-    if (begin()!=end()) {
-        core=begin()->second;
-        currentTime=begin()->first; 
+    
+    if(begin() != end()) {
+        // take simulation member and current simulation time from time table
+        core = begin()->second;
+        currentTime = begin()->first; 
         erase(begin());
-        if (core->trace_on) traceOut << DecLong(currentTime)<<" ";
-        res=core->Step(untilCoreStepFinished, &nextStepIn_ns);
-        if (nextStepIn_ns==0) { //insert the next step behind the following!
-            SystemClock::iterator ii=begin();
-            //ii++;
-            if (ii  != end() ) {
-                nextStepIn_ns=1+ (ii->first); 
-            }
-        } else if(nextStepIn_ns>0) {
-            nextStepIn_ns+=currentTime;
-        }
-        //erase(begin());
+        
+        if(core->trace_on)
+            traceOut << DecLong(currentTime) << " ";
+        
+        // do a step on simulation member
+        res = core->Step(untilCoreStepFinished, &nextStepIn_ns);
+        
+        
+        if(nextStepIn_ns == 0) { // insert the next step behind the following!
+            SystemClock::iterator ii = begin();
+            nextStepIn_ns = 1 + ((ii != end()) ? ii->first : currentTime);
+        } else if(nextStepIn_ns > 0) // or on offset, given back from Step call
+            nextStepIn_ns += currentTime;
+        // if nextStepIn_ns is < 0, it means, that this simulation member will not
+        // be called anymore!
+        
+        if(nextStepIn_ns > 0)
+            insert(pair<SystemClockOffset, SimulationMember*>(nextStepIn_ns, core));
 
-        //if nextStepIn_ns is < 0 remove the entry from the list and do not reenter it 
-        if (nextStepIn_ns>0) {
-            insert (pair<SystemClockOffset, SimulationMember*>(nextStepIn_ns, core));
-        } 
-
-        amiEnd= asyncMembers.end();
-        for (ami= asyncMembers.begin(); ami!=amiEnd ; ami++) {
-            bool untilCoreStepFinished=false;
-            (*ami)->Step(untilCoreStepFinished,0);
+        // handle async simulation members
+        amiEnd = asyncMembers.end();
+        for(ami = asyncMembers.begin(); ami != amiEnd; ami++) {
+            bool untilCoreStepFinished = false;
+            (*ami)->Step(untilCoreStepFinished, 0);
         }
     }
 
     return res;
 }
 
-void SystemClock::Rescedule( SimulationMember *sm, SystemClockOffset newTime) {
+void SystemClock::Rescedule(SimulationMember *sm, SystemClockOffset newTime) {
     iterator ii;
 
-    for ( ii=begin(); ii!=end(); ii++) {
-        if ( ii->second== sm) {
+    for(ii=begin(); ii != end(); ii++) {
+        if(ii->second == sm) {
             erase(ii); 
             break;
         }
     }
 
-    insert (pair<SystemClockOffset, SimulationMember*>(newTime+currentTime+1, sm));
+    insert(pair<SystemClockOffset, SimulationMember*>(newTime+currentTime+1, sm));
 }
 
+volatile int breakMessage = false;
 
-
-volatile int breakMessage=0;
-
-void OnBreak(int s) 
-{
+void OnBreak(int s) {
     signal(SIGINT, SIG_DFL);
     signal(SIGTERM, SIG_DFL);
-    breakMessage=1;
+    breakMessage = true;
 }
 
 void SystemClock::stop() {
-    breakMessage=true;
+    breakMessage = true;
 }
 
 void SystemClock::ResetClock(void) {
@@ -143,13 +135,14 @@ void SystemClock::ResetClock(void) {
 }
 
 void SystemClock::Endless() {
-    int steps=0;
+    int steps = 0;
+    
     signal(SIGINT, OnBreak);
     signal(SIGTERM, OnBreak);
 
-    while( breakMessage==0) {
+    while(breakMessage == false) {
         steps++;
-        bool untilCoreStepFinished=false;
+        bool untilCoreStepFinished = false;
         Step(untilCoreStepFinished);
     }
 
@@ -160,17 +153,20 @@ void SystemClock::Endless() {
 
 
 void SystemClock::Run(SystemClockOffset maxRunTime) {
-    int steps=0;
+    int steps = 0;
+    
     signal(SIGINT, OnBreak);
     signal(SIGTERM, OnBreak);
 
-    while( breakMessage==0 && (SystemClock::Instance().GetCurrentTime() < maxRunTime)) {
+    while((breakMessage== false) &&
+          (SystemClock::Instance().GetCurrentTime() < maxRunTime)) {
         steps++;
-        bool untilCoreStepFinished=false;
+        bool untilCoreStepFinished =false;
         Step(untilCoreStepFinished);
     }
 
-    cout << endl << "Ran too long.  Terminated after " << maxRunTime << " simulated nanoseconds." << endl;
+    cout << endl << "Ran too long.  Terminated after " << maxRunTime;
+    cout << " simulated nanoseconds." << endl;
 
     Application::GetInstance()->PrintResults();
 }
@@ -183,7 +179,7 @@ int SystemClock::RunTimeRange(SystemClockOffset timeRange) {
     signal(SIGTERM, OnBreak);
     
     timeRange += SystemClock::Instance().GetCurrentTime();
-    while((breakMessage == 0) && (SystemClock::Instance().GetCurrentTime() < timeRange)) {
+    while((breakMessage == false) && (SystemClock::Instance().GetCurrentTime() < timeRange)) {
         untilCoreStepFinished = false;
         res = Step(untilCoreStepFinished);
         if(res != 0)
