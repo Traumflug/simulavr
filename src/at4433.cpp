@@ -42,7 +42,7 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
 
     irqSystem = new HWIrqSystem(this, 2, 14);
     eeprom= new HWEeprom(this, irqSystem, 256, 12); //we use a eeprom with irq here
-    stack = new HWStack(this, Sram, 0x0100);
+    stack = new HWStackSram(this, 8);
 
     portb= new HWPort(this, "B");
     portc= new HWPort(this, "C");
@@ -91,8 +91,8 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
     extirq->registerIrq(2, 7, new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3")));
 
     rw[0x5f]= statusRegister;
-    rw[0x5e]= & stack->sph_reg;
-    rw[0x5d]= & stack->spl_reg;
+    rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
+    rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
     
     rw[0x5b]= gimsk_reg;
     rw[0x5a]= gifr_reg;

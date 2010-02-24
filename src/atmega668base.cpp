@@ -92,7 +92,7 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 26);
 
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 23, HWEeprom::DEVMODE_EXTENDED); 
-    stack = new HWStack(this, Sram, 0x10000);
+    stack = new HWStackSram(this, 16);
 
     RegisterPin("AREF", &aref);
     RegisterPin("ADC6", &adc6);
@@ -232,8 +232,8 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x68]= pcicr_reg;
 
     rw[0x5f]= statusRegister;
-    rw[0x5e]= & stack->sph_reg;
-    rw[0x5d]= & stack->spl_reg;
+    rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
+    rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
 
     rw[0x4E]= & spi->spdr_reg;
     rw[0x4D]= & spi->spsr_reg;

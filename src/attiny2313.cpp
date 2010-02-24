@@ -70,7 +70,7 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
 {
     irqSystem = new HWIrqSystem(this, 2, 19); //2 bytes per vector, 19 vectors
     eeprom = new HWEeprom(this, irqSystem, 128, 17, HWEeprom::DEVMODE_EXTENDED); 
-    stack = new HWStack(this, Sram, 0x100);
+    stack = new HWStackSram(this, 8);
     porta = new HWPort(this, "A", true, 3);
     portb = new HWPort(this, "B", true);
     portd = new HWPort(this, "D", true, 7);
@@ -130,8 +130,8 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
                                inputCapture1);
     
     rw[0x5f]= statusRegister;
-    //rw[0x5e] reserved
-    rw[0x5d]= & stack->spl_reg;
+    rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
+    rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
     rw[0x5c]= & timer0->ocrb_reg;
     rw[0x5b]= gimsk_reg;
     rw[0x5a]= eifr_reg;

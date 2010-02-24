@@ -81,7 +81,7 @@ AvrDevice_atmega128::AvrDevice_atmega128():
 {
     irqSystem = new HWIrqSystem(this, 4, 35); //4 bytes per vector, 35 vectors
     eeprom = new HWEeprom( this, irqSystem, 4096, 22); 
-    stack = new HWStack(this, Sram, 0x10000);
+    stack = new HWStackSram(this, 16);
     porta = new HWPort(this, "A");
     portb = new HWPort(this, "B");
     portc = new HWPort(this, "C");
@@ -232,8 +232,8 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     rw[0x61]= & portf->ddr_reg;
     
     rw[0x5f]= statusRegister;
-    rw[0x5e]= & stack->sph_reg;
-    rw[0x5d]= & stack->spl_reg;
+    rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
+    rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
     
     rw[0x5b]= & rampz->rampz_reg;
 

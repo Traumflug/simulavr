@@ -72,7 +72,8 @@ AvrDevice_atmega16_32::~AvrDevice_atmega16_32() {
 AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
                                              unsigned flash_bytes,
                                              unsigned ee_bytes,
-                                             unsigned nrww_start):
+                                             unsigned nrww_start,
+                                             bool stack11bit):
     AvrDevice(64 ,          // I/O space above General Purpose Registers
               ram_bytes,    // RAM size
               0,            // External RAM size
@@ -80,8 +81,11 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     aref()
 {
     irqSystem = new HWIrqSystem(this, 4, 21); //4 bytes per vector, 21 vectors
-    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 15); 
-    stack = new HWStack(this, Sram, 0x1000);
+    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 15);
+    if(stack11bit)
+      stack = new HWStackSram(this, 11);
+    else
+      stack = new HWStackSram(this, 12);
     porta = new HWPort(this, "A");
     portb = new HWPort(this, "B");
     portc = new HWPort(this, "C");
@@ -160,8 +164,8 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
                              new PinAtPort(portd, 7));
     
     rw[0x5f]= statusRegister;
-    rw[0x5e]= & stack->sph_reg;
-    rw[0x5d]= & stack->spl_reg;
+    rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
+    rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
     rw[0x5c]= & timer0->ocra_reg;
     rw[0x5b]= gicr_reg;
     rw[0x5a]= gifr_reg;

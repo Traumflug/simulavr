@@ -477,14 +477,11 @@ void GdbServer::gdb_read_registers( )
     i++;
 
     /* GDB thinks SP is register number 33 */
-    //val = avr_core_mem_read(core, SPL_ADDR);
-    val=core->stack->GetSpl();
+    val=core->stack->GetStackPointer();
     buf[i*2]   = HEX_DIGIT[(val >> 4) & 0xf];
     buf[i*2+1] = HEX_DIGIT[val & 0xf];
     i++;
-
-    //val = avr_core_mem_read(core, SPH_ADDR);
-    val=core->stack->GetSph();
+    val>>=8;
     buf[i*2]   = HEX_DIGIT[(val >> 4) & 0xf];
     buf[i*2+1] = HEX_DIGIT[val & 0xf];
     i++;
@@ -537,13 +534,11 @@ void GdbServer::gdb_write_registers(const char *pkt) {
     /* GDB thinks SP is register number 33 */
     bval  = hex2nib(*pkt++) << 4;
     bval += hex2nib(*pkt++);
-    //avr_core_mem_write( core, SPL_ADDR, bval );
-    core->stack->SetSpl(bval);
-
-    bval  = hex2nib(*pkt++) << 4;
-    bval += hex2nib(*pkt++);
-    //avr_core_mem_write( core, SPH_ADDR, bval );
-    core->stack->SetSph(bval);
+    val += hex2nib(*pkt++) << 4;
+    val += hex2nib(*pkt++);
+    val <<= 8;
+    val += bval;
+    core->stack->SetStackPointer(val);
 
     /* GDB thinks PC is register number 34.
     GDB stores PC in a 32 bit value (only uses 23 bits though).
@@ -618,10 +613,9 @@ void GdbServer::gdb_read_register(const char *pkt) {
     else if (reg == 33)         /* SP */
     {
         byte spl, sph;
-        //spl = avr_core_mem_read( core, SPL_ADDR );
-        //sph = avr_core_mem_read( core, SPH_ADDR );
-        spl=core->stack->GetSpl();
-        sph=core->stack->GetSph();
+        unsigned long sp = core->stack->GetStackPointer();
+        spl = sp & 0xff;
+        sph = (sp >> 8) & 0xff;
         snprintf(reply, sizeof(reply), "%02x%02x", spl, sph);
     }
     else if (reg == 34)         /* PC */
@@ -674,10 +668,7 @@ void GdbServer::gdb_write_register(const char *pkt) {
         hval  = hex2nib(*pkt++) << 4;
         hval += hex2nib(*pkt++);
 
-        //avr_core_mem_write( core, SPL_ADDR, val & 0xff );
-        //avr_core_mem_write( core, SPH_ADDR, hval & 0xff );
-        core->stack->SetSpl(val&0xff);
-        core->stack->SetSph(hval&0xff);
+        core->stack->SetStackPointer((val & 0xff) + ((hval & 0xff) << 8));
     }
     else if (reg == 34)
     {
@@ -1457,7 +1448,9 @@ void GdbServer::SendPosition(int signo) {
     /* Send gdb PC, FP, SP */
     int bytes = 0;
     char reply[MAX_BUF + 1];
-
+    unsigned long sp = core->stack->GetStackPointer();
+    unsigned int spl = sp & 0xff;
+    unsigned int sph = (sp >> 8) & 0xff;
     int pc = core->PC * 2;
 
     bytes = snprintf(reply, sizeof(reply), "T%02x", signo);
@@ -1466,7 +1459,7 @@ void GdbServer::SendPosition(int signo) {
     snprintf(reply + bytes, sizeof(reply) - bytes,
             "20:%02x;" "21:%02x%02x;" "22:%02x%02x%02x%02x;",
             ((int)(*(core->status))),
-            core->stack->GetSpl(), core->stack->GetSph(),
+            spl, sph,
             pc & 0xff, (pc >> 8) & 0xff, (pc >> 16) & 0xff, (pc >> 24) & 0xff );
 
     gdb_send_reply(reply);

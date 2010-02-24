@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,114 @@
 
 using namespace std;
 
+HWStack::HWStack(AvrDevice *c):
+    core(c) {
+    Reset();
+}
+
+void HWStack::Reset(void) {
+    returnPointList.clear();
+    stackPointer = 0;
+}
+
+void HWStack::CheckReturnPoints() {
+    typedef multimap<unsigned long, Funktor *>::iterator I;
+    pair<I,I> l = returnPointList.equal_range(stackPointer);
+    
+    for(I i = l.first; i != l.second; i++) {
+        (*(i->second))(); //execute Funktor
+        delete i->second; //and delete it
+    }
+    returnPointList.erase(l.first, l.second);
+}
+
+void HWStack::SetReturnPoint(unsigned long stackPointer, Funktor *f) {
+    returnPointList.insert(make_pair(stackPointer, f));
+}
+
+HWStackSram::HWStackSram(AvrDevice *c, int bs, bool initRE):
+    HWStack(c),
+    TraceValueRegister(c, "STACK"),
+    sph_reg(this, "SPH",
+            this, &HWStackSram::GetSph, &HWStackSram::SetSph),
+    spl_reg(this, "SPL",
+            this, &HWStackSram::GetSpl, &HWStackSram::SetSpl),
+    initRAMEND(initRE) {
+    stackCeil = 1 << bs;
+    mem = c->Sram;
+    Reset();
+}
+
+void HWStackSram::Reset() {
+    returnPointList.clear();
+    if(initRAMEND)
+        stackPointer = core->GetMemIRamSize() +
+                       core->GetMemIOSize() +
+                       core->GetMemRegisterSize() - 1;
+    else
+        stackPointer = 0;
+}
+
+void HWStackSram::Push(unsigned char val) {
+    (*mem)[stackPointer] = val;
+    stackPointer--;
+    stackPointer %= stackCeil;
+    if(core->trace_on == 1)
+        traceOut << "SP=0x" << hex << stackPointer << " 0x" << int(val) << dec << " ";
+    CheckReturnPoints();
+}
+
+unsigned char HWStackSram::Pop() {
+    stackPointer++;
+    stackPointer %= stackCeil;
+    if(core->trace_on == 1)
+        traceOut << "SP=0x" << hex << stackPointer << " 0x" << int((*mem)[stackPointer]) << dec << " ";
+    CheckReturnPoints();
+    return (*mem)[stackPointer];
+}
+
+void HWStackSram::PushAddr(unsigned long addr) {
+    // low byte first, then high byte
+    Push(addr & 0xff);
+    Push((addr >> 8) & 0xff);
+}
+
+unsigned long HWStackSram::PopAddr() {
+    // high byte first, then low byte
+    unsigned long val = Pop();
+    val <<= 8;
+    return val + Pop();
+}
+
+void HWStackSram::SetSpl(unsigned char val) {
+    stackPointer &= ~0xff;
+    stackPointer += val;
+    stackPointer %= stackCeil; // zero the not used bits
+    if(core->trace_on == 1)
+        traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
+    CheckReturnPoints();
+}
+
+void HWStackSram::SetSph(unsigned char val) {
+    if(stackCeil <= 0x100)
+        avr_warning("assignment to non existent SPH (value=0x%x)", (unsigned int)val);
+    stackPointer &= ~0xff00;
+    stackPointer += val << 8;
+    stackPointer %= stackCeil; // zero the not used bits
+    if(core->trace_on == 1)
+        traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
+    CheckReturnPoints();
+}
+
+unsigned char HWStackSram::GetSph() {
+    return (stackPointer & 0xff00) >> 8;
+}
+
+unsigned char HWStackSram::GetSpl() {
+    return stackPointer & 0xff;
+}
+
+#if 0
 ThreeLevelStack::ThreeLevelStack(AvrDevice *core) : MemoryOffsets(0, 0) {
     const size_t size = 6;
     rwHandler=(RWMemoryMember**)malloc(sizeof(RWMemoryMember*) * size);
@@ -39,83 +147,6 @@ ThreeLevelStack::ThreeLevelStack(AvrDevice *core) : MemoryOffsets(0, 0) {
 ThreeLevelStack::~ThreeLevelStack() {
     free(rwHandler);
 }
+#endif
 
-HWStack::HWStack(AvrDevice *c, MemoryOffsets *sr, unsigned int ceil):
-    Hardware(c),
-    TraceValueRegister(c, "STACK"),
-    core(c),
-    sph_reg(this, "SPH",
-            this, &HWStack::GetSph, &HWStack::SetSph),
-    spl_reg(this, "SPL",
-            this, &HWStack::GetSpl, &HWStack::SetSpl) {
-    stackCeil=ceil;
-    mem=sr;
-    Reset();
-}
-
-void HWStack::Reset() {
-	stackPointer=0;
-}
-
-void HWStack::CheckBreakPoints() {
-    typedef multimap<unsigned int, Funktor *>::iterator I;
-    pair<I,I> l= breakPointList.equal_range(stackPointer);
-    for (I i=l.first; i!=l.second; i++) {
-        (*(i->second))(); //execute Funktor
-        delete i->second; //and delete it
-    }
-    breakPointList.erase(l.first, l.second);
-}
-
-void HWStack::Push(unsigned char val){
-	(*mem)[stackPointer]=val;
-	stackPointer--;
-	if (stackPointer>0x1000000)
-	    stackPointer=stackCeil-1;
-	if (core->trace_on==1) traceOut << "SP=0x" << hex << stackPointer << " 0x" << int(val) << dec << " ";
-	CheckBreakPoints();
-}
-unsigned char HWStack::Pop(){
-	stackPointer++;
-	stackPointer%=stackCeil;
-	if (core->trace_on==1) traceOut << "SP=0x" << hex << stackPointer << " 0x" << int((*mem)[stackPointer]) << dec << " ";
-	CheckBreakPoints();
-	return (*mem)[stackPointer];
-}
-
-void HWStack::SetSpl(unsigned char val) {
-	stackPointer=stackPointer&0xffff00;
-	stackPointer+=val;
-	stackPointer%=stackCeil;
-	if (core->trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
-    CheckBreakPoints();
-}
-
-void HWStack::SetSph(unsigned char val) {
-    if (stackCeil<=0x100) {
-        cerr << "ASSIGNMENT TO NON-EXISTENT SPH REGISTER -- FROM GCC?\n";
-    } else {
-        stackPointer=stackPointer&0xff00ff;
-        stackPointer+=(val<<8);
-        stackPointer%=stackCeil;
-        if (core->trace_on==1) traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
-        CheckBreakPoints();
-    }
-}
-
-unsigned char HWStack::GetSph() {
-    if (stackCeil<=100) {
-        cerr << "READ FROM NON-EXISTENT SPH REGISTER -- FROM GCC   ?\n";
-    } else {
-        return (stackPointer&0xff00)>>8;
-    }
-}
-
-unsigned char HWStack::GetSpl() {
-	return (stackPointer&0xff);
-}
-
-//Attention! SetBreakPoint must get a copy!! of a Funktor because he selft destroy it after usage!!!
-void HWStack::SetBreakPoint(unsigned int stackPointer, Funktor *f) {
-    breakPointList.insert(make_pair(stackPointer,f));
-}
+/* EOF */

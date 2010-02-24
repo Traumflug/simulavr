@@ -376,8 +376,8 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
 
                     irqSystem->IrqHandlerStarted(actualIrqVector);    //what vector we raise?
                     //Funktor* fkt=new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
-                    stack->SetBreakPoint(stack->GetStackPointer(),
-                                         IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector).clone());
+                    stack->SetReturnPoint(stack->GetStackPointer(),
+                                          IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector).clone());
 
                     //pushing the stack
                     unsigned long val = PC;

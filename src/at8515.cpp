@@ -42,7 +42,7 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
     eeprom= new HWEeprom(this, NULL, 512, 0);
 
     irqSystem = new HWIrqSystem(this, 2, 13);
-    stack = new HWStack(this, Sram, 0x10000);
+    stack = new HWStackSram(this, 16);
     
     porta= new HWPort(this, "A");
     portb= new HWPort(this, "B");
@@ -94,8 +94,8 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
     extirq->registerIrq(2, 7, new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3"), true));
 
     rw[0x5f]= statusRegister;
-    rw[0x5e]= & stack->sph_reg;
-    rw[0x5d]= & stack->spl_reg;
+    rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
+    rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
     // 0x5c reserved
     rw[0x5b]= gimsk_reg;
     rw[0x5a]= gifr_reg;

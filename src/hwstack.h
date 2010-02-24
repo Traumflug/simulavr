@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,14 +27,73 @@
 #define HWSTACK
 
 #include "rwmem.h"
-#include "hardware.h"
 #include "funktor.h"
 #include "avrdevice.h"
 #include "traceval.h"
 
 #include <map>
 
+//! Implements a stack register with stack logic
+class HWStack {
+    
+    protected:
+        AvrDevice *core; //!< Link to device
+        unsigned long stackPointer; //!< current value of stack pointer
+        std::multimap<unsigned long, Funktor*> returnPointList; //!< Maps adresses to listeners for return addresses
 
+        void CheckReturnPoints(); //!< Checks PC to inform listeners, that a special address is arrived
+        
+    public:
+        //! Creates a stack instance
+        HWStack(AvrDevice *core);
+        ~HWStack() {}
+
+        virtual void Push(unsigned char val)=0; //!< Pushs one byte to stack
+        virtual unsigned char Pop()=0; //!< Pops one byte from stack
+        virtual void PushAddr(unsigned long addr)=0; //!< Pushs a address to stack
+        virtual unsigned long PopAddr()=0; //!< Pops a address from stack
+
+        virtual void Reset(); //!< Resets stack pointer and listener table
+
+        //! Returns current stack pointer value
+        unsigned long GetStackPointer() const { return stackPointer; }
+        //! Sets current stack pointer value (used by GDB interface)
+        void SetStackPointer(unsigned long val) { stackPointer = val; }
+        //! Subscribes a Listener for a return address
+        /*! Attention! SetReturnPoint must get a COPY of a Funktor because it
+            self destroy this functor after usage! */
+        void SetReturnPoint(unsigned long stackPointer, Funktor *listener);
+};
+
+//! Implements a stack register with stack logic
+class HWStackSram: public HWStack, public TraceValueRegister {
+    
+    protected:
+        MemoryOffsets *mem;
+        unsigned long stackCeil;
+        bool initRAMEND;
+        
+        void SetSpl(unsigned char);
+        void SetSph(unsigned char);
+        unsigned char GetSpl();
+        unsigned char GetSph();
+        
+    public:
+        //! Creates a stack instance
+        HWStackSram(AvrDevice *core, int bitsize, bool initRAMEND = false);
+
+        virtual void Push(unsigned char val);
+        virtual unsigned char Pop();
+        virtual void PushAddr(unsigned long addr);
+        virtual unsigned long PopAddr();
+
+        virtual void Reset();
+        
+        IOReg<HWStackSram> sph_reg;
+        IOReg<HWStackSram> spl_reg;
+};
+
+#if 0
 /*! Implementation of the special three-level deep hardware stack which is
   not accessible in any memory space on the devices which have this, for
   example the ATTiny15L or the good old AT90S1200. */
@@ -43,35 +102,6 @@ class ThreeLevelStack : public MemoryOffsets {
     ThreeLevelStack(AvrDevice *core);
     ~ThreeLevelStack();
 };
+#endif
 
-
-class HWStack: public Hardware, public TraceValueRegister {
-  protected:
-    AvrDevice *core;
-    MemoryOffsets *mem;
-    unsigned int stackPointer;
-    unsigned int stackCeil;
-	std::multimap<unsigned int , Funktor* > breakPointList; //later the second parameter should be a function Pointer!
-
-  public:
-    /*!Ceil gives the maximum value (+1) for the stack pointer, in smaller devices
-	  there are not all 16 bits available!
-	  Ceil does not need to be a power of two.
-    */
-	HWStack(AvrDevice *core, MemoryOffsets *sr, unsigned int ceil);
-    void Push(unsigned char val);
-    unsigned char Pop();
-
-    void SetSpl(unsigned char);
-    void SetSph(unsigned char);
-    unsigned char GetSpl();
-    unsigned char GetSph();
-    void Reset();
-    ~HWStack() {}
-    unsigned int GetStackPointer() const { return stackPointer; }
-    void SetBreakPoint(unsigned int stackPointer, Funktor *);
-    void CheckBreakPoints();
-    IOReg<HWStack> sph_reg;
-    IOReg<HWStack> spl_reg;
-};
 #endif
