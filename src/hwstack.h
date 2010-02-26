@@ -73,7 +73,7 @@ class HWStack {
         unsigned long GetLowestStackpointer(void) { return lowestStackPointer; }
 };
 
-//! Implements a stack register with stack logic
+//! Implements a stack with stack register using RAM as stackarea
 class HWStackSram: public HWStack, public TraceValueRegister {
     
     protected:
@@ -101,15 +101,22 @@ class HWStackSram: public HWStack, public TraceValueRegister {
         IOReg<HWStackSram> spl_reg;
 };
 
-#if 0
-/*! Implementation of the special three-level deep hardware stack which is
-  not accessible in any memory space on the devices which have this, for
-  example the ATTiny15L or the good old AT90S1200. */
-class ThreeLevelStack : public MemoryOffsets {
-  public:
-    ThreeLevelStack(AvrDevice *core);
-    ~ThreeLevelStack();
+//! Implements a stack with 3 levels deep (used as returnstack by ATtiny15 an other)
+class ThreeLevelStack: public HWStack {
+    
+    protected:
+        unsigned long *stackArea;
+        
+    public:
+        ThreeLevelStack(AvrDevice *core);
+        ~ThreeLevelStack();
+        
+        virtual void Push(unsigned char val);
+        virtual unsigned char Pop();
+        virtual void PushAddr(unsigned long addr);
+        virtual unsigned long PopAddr();
+
+        virtual void Reset();
 };
-#endif
 
 #endif

@@ -25,6 +25,7 @@
 
 #include "hwstack.h"
 #include "avrerror.h"
+#include "avrmalloc.h"
 
 using namespace std;
 
@@ -151,18 +152,53 @@ unsigned char HWStackSram::GetSpl() {
     return stackPointer & 0xff;
 }
 
-#if 0
-ThreeLevelStack::ThreeLevelStack(AvrDevice *core) : MemoryOffsets(0, 0) {
-    const size_t size = 6;
-    rwHandler=(RWMemoryMember**)malloc(sizeof(RWMemoryMember*) * size);
-    for (size_t i=0; i < size; i++) {
-        rwHandler[i]=new RAM(&(core->coreTraceGroup), "STACKAREA", i, size);
-    }
+ThreeLevelStack::ThreeLevelStack(AvrDevice *c):
+    HWStack(c) {
+    stackArea = avr_new(unsigned long, 3);
+    Reset();
 }
 
 ThreeLevelStack::~ThreeLevelStack() {
-    free(rwHandler);
+    avr_free(stackArea);
 }
-#endif
+
+void ThreeLevelStack::Reset(void) {
+    returnPointList.clear();
+    stackPointer = 3;
+    lowestStackPointer = stackPointer;
+}
+
+void ThreeLevelStack::Push(unsigned char val) {
+    avr_error("Push method isn't available on TreeLevelStack");
+}
+
+unsigned char ThreeLevelStack::Pop() {
+    avr_error("Pop method isn't available on TreeLevelStack");
+    return 0;
+}
+
+void ThreeLevelStack::PushAddr(unsigned long addr) {
+    stackArea[2] = stackArea[1];
+    stackArea[1] = stackArea[0];
+    stackArea[0] = addr;
+    if(stackPointer > 0)
+        stackPointer--;
+    if(lowestStackPointer > stackPointer)
+        lowestStackPointer = stackPointer;
+    if(stackPointer == 0)
+        avr_warning("stack overflow");
+}
+
+unsigned long ThreeLevelStack::PopAddr() {
+    unsigned long val = stackArea[0];
+    stackArea[0] = stackArea[1];
+    stackArea[1] = stackArea[2];
+    stackPointer++;
+    if(stackPointer > 3) {
+        stackPointer = 3;
+        avr_warning("stack underflow");
+    }
+    return val;
+}
 
 /* EOF */
