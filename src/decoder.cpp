@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Theodore A. Roth, Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Theodore A. Roth, Klaus Rudolph     
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,9 +31,7 @@
 #include "avrerror.h"
 #include "ioregs.h"
 
-void avr_core_stack_push( AvrDevice *core, int cnt, long val);
-dword avr_core_stack_pop( AvrDevice *core, int cnt); 
-static int n_bit_unsigned_to_signed( unsigned int val, int n );
+static int n_bit_unsigned_to_signed(unsigned int val, int n );
 
 static int get_add_carry( byte res, byte rd, byte rr, int b );
 static int get_add_overflow( byte res, byte rd, byte rr );
@@ -41,6 +39,7 @@ static int get_sub_carry( byte res, byte rd, byte rr, int b );
 static int get_sub_overflow( byte res, byte rd, byte rr );
 static int get_compare_carry( byte res, byte rd, byte rr, int b );
 static int get_compare_overflow( byte res, byte rd, byte rr );
+
 enum decoder_operand_masks {
     /** 2 bit register id  ( R24, R26, R28, R30 ) */
     mask_Rd_2     = 0x0030,
@@ -383,12 +382,11 @@ int avr_op_CALL::operator()()
 {
     word K_lsb = core->Flash->ReadMemWord((core->PC + 1) * 2);
     int k = (KH << 16) + K_lsb;
-    int pc_bytes = core->PC_size;
 
-    avr_core_stack_push(core, pc_bytes, core->PC + 2);
+    core->stack->PushAddr(core->PC + 2);
     core->PC = k - 1;
 
-    return pc_bytes + 2;
+    return core->PC_size + 2;
 }
 
 avr_op_CBI::avr_op_CBI
@@ -581,12 +579,9 @@ avr_op_EICALL:: avr_op_EICALL
 int  avr_op_EICALL::operator()() 
 {
 
-    int pc_bytes = 3;
-
     int new_PC=RL+(RH<<8)+((*(core->ioreg))[EIND]<<16);
-    //avr_warning( "needs serious code review\n" );
 
-    avr_core_stack_push( core, pc_bytes, (core->PC)+1 );
+    core->stack->PushAddr(core->PC + 1);
 
     core->PC=new_PC;
 
@@ -872,11 +867,11 @@ int avr_op_ICALL::operator()()
     /* Z is R31:R30 */
     int new_pc = (Rh << 8) + Rl;
 
-    avr_core_stack_push( core, pc_bytes, pc+1 );
+    core->stack->PushAddr(pc + 1);
 
     core->PC=new_pc-1;
 
-    return pc_bytes+1;
+    return pc_bytes + 1;
 }
 
 
@@ -1569,7 +1564,7 @@ avr_op_POP::avr_op_POP
 int avr_op_POP::operator()() 
 {
 
-    R1= avr_core_stack_pop(core, 1);
+    R1 = core->stack->Pop();
 
     return 2;
 }
@@ -1583,7 +1578,7 @@ avr_op_PUSH::avr_op_PUSH
 int avr_op_PUSH::operator()() 
 {
 
-    avr_core_stack_push( core, 1, R1 );
+    core->stack->Push(R1);
 
     return 2;
 }
@@ -1599,11 +1594,11 @@ int avr_op_RCALL::operator()()
     int pc       = core->PC;
     int pc_bytes = core->PC_size;
 
-    avr_core_stack_push( core, pc_bytes, pc+1 );
+    core->stack->PushAddr(pc + 1);
     core->PC+=K;
     core->PC&=(core->Flash->GetSize()-1)>>1;
 
-    return pc_bytes+1;
+    return pc_bytes + 1;
 }
 
 avr_op_RET::avr_op_RET
@@ -1614,11 +1609,11 @@ avr_op_RET::avr_op_RET
 int avr_op_RET::operator()() 
 {
     int pc_bytes = core->PC_size;
-    int pc       = avr_core_stack_pop( core, pc_bytes );
+    int pc = core->stack->PopAddr();
 
     core->PC=pc-1;
 
-    return pc_bytes+2;
+    return pc_bytes + 2;
 }
 
 avr_op_RETI::avr_op_RETI
@@ -1630,14 +1625,13 @@ avr_op_RETI::avr_op_RETI
 int avr_op_RETI::operator()() 
 {
 
-
     int pc_bytes = core->PC_size;
-    int pc = avr_core_stack_pop( core, pc_bytes );
+    int pc = core->stack->PopAddr();
 
     core->PC=pc-1;
     status->I=1;
 
-    return pc_bytes+2;
+    return pc_bytes + 2;
 }
 
 avr_op_RJMP::avr_op_RJMP
@@ -2361,23 +2355,6 @@ int avr_op_ILLEGAL::operator()()
     avr_error("Simulation terminated! IllegalInstruction executed!");
     return 1;
 }
-
-void avr_core_stack_push( AvrDevice *core, int cnt, long val) {
-    for (int tt=0; tt<cnt; tt++) {
-        core->stack->Push(val&0xff);
-        val>>=8;
-    }
-}
-
-dword avr_core_stack_pop( AvrDevice *core, int cnt) {
-    dword val=0;
-    for (int tt=0; tt<cnt; tt++) {
-        val=val<<8;
-        val+=core->stack->Pop();
-    }
-    return val;
-}
-
 
 static int get_add_carry( byte res, byte rd, byte rr, int b )
 {

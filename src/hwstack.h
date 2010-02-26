@@ -34,11 +34,14 @@
 #include <map>
 
 //! Implements a stack register with stack logic
+/*! This is the base class for all 2 different stack types. It holds the interface
+    for pushing and poping bytes and addresses from stack by core and for interrupt */
 class HWStack {
     
     protected:
         AvrDevice *core; //!< Link to device
         unsigned long stackPointer; //!< current value of stack pointer
+        unsigned long lowestStackPointer; //!< marker: lowest stackpointer used by program
         std::multimap<unsigned long, Funktor*> returnPointList; //!< Maps adresses to listeners for return addresses
 
         void CheckReturnPoints(); //!< Checks PC to inform listeners, that a special address is arrived
@@ -63,6 +66,11 @@ class HWStack {
         /*! Attention! SetReturnPoint must get a COPY of a Funktor because it
             self destroy this functor after usage! */
         void SetReturnPoint(unsigned long stackPointer, Funktor *listener);
+        
+        //! Sets lowest stack marker back to current stackpointer
+        void ResetLowestStackpointer(void) { lowestStackPointer = stackPointer; }
+        //! Gets back the lowest stack pointer (for measuring stack usage)
+        unsigned long GetLowestStackpointer(void) { return lowestStackPointer; }
 };
 
 //! Implements a stack register with stack logic

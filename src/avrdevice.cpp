@@ -381,10 +381,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
 
                     //pushing the stack
                     unsigned long val = PC;
-                    for(int tt = 0; tt < PC_size; tt++) {
-                        stack->Push(val & 0xff);
-                        val >>= 8;
-                    }
+                    stack->PushAddr(val);
                     cpuCycles = 4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
                     status->I = 0; //irq started so remove I-Flag from SREG
 

@@ -36,6 +36,7 @@ HWStack::HWStack(AvrDevice *c):
 void HWStack::Reset(void) {
     returnPointList.clear();
     stackPointer = 0;
+    lowestStackPointer = 0;
 }
 
 void HWStack::CheckReturnPoints() {
@@ -74,6 +75,7 @@ void HWStackSram::Reset() {
                        core->GetMemRegisterSize() - 1;
     else
         stackPointer = 0;
+    lowestStackPointer = stackPointer;
 }
 
 void HWStackSram::Push(unsigned char val) {
@@ -83,6 +85,10 @@ void HWStackSram::Push(unsigned char val) {
     if(core->trace_on == 1)
         traceOut << "SP=0x" << hex << stackPointer << " 0x" << int(val) << dec << " ";
     CheckReturnPoints();
+    
+    // measure stack usage, calculate lowest stack pointer
+    if(lowestStackPointer > stackPointer)
+        lowestStackPointer = stackPointer;
 }
 
 unsigned char HWStackSram::Pop() {
@@ -97,14 +103,24 @@ unsigned char HWStackSram::Pop() {
 void HWStackSram::PushAddr(unsigned long addr) {
     // low byte first, then high byte
     Push(addr & 0xff);
-    Push((addr >> 8) & 0xff);
+    addr >>= 8;
+    Push(addr & 0xff);
+    if(core->PC_size == 3) {
+        addr >>= 8;
+        Push(addr & 0xff);
+    }
 }
 
 unsigned long HWStackSram::PopAddr() {
     // high byte first, then low byte
     unsigned long val = Pop();
     val <<= 8;
-    return val + Pop();
+    val += Pop();
+    if(core->PC_size == 3) {
+        val <<= 8;
+        val += Pop();
+    }
+    return val;
 }
 
 void HWStackSram::SetSpl(unsigned char val) {
