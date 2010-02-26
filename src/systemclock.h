@@ -63,6 +63,9 @@ class SystemClock
     public:
         //! Returns the current simulation time
         SystemClockOffset GetCurrentTime() const { return currentTime; }
+        //! Set the simulation time to a dedicated value
+        /*! Attention! Use this method with care, if you don't want crazy results */
+        void SetCurrentTime(SystemClockOffset of) { currentTime = of; }
         //! Increments the current simulation time with a offset
         /*! Attention! Use this method with care, if you don't want crazy results */
         void IncrTime(SystemClockOffset of) { currentTime += of; }

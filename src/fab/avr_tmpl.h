@@ -35,23 +35,23 @@ class AVR_$(part) : public AvrDevice {
 
 #for $Letter in $io_ports
     HWPort *port$Letter.lower;
-#endfor
+#end for
 
     HWMcucr *mcucr;
 #if $has_prescaler    
     HWPrescaler *prescaler;
-#endif
+#end if
 
 #if $has_timer1
     HWTimer01Irq *timer01irq;
     HWTimer1 *timer1;
-#endif
+#end if
 #if $has_spi
     HWSpi *spi;
-#endif
+#end if
 #if $has_usart
     ## FIXME: USART!=UART!
     HWUart *usart;
-#endif    
+#end if    
 };
 \#endif

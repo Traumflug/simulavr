@@ -47,6 +47,16 @@ AZ_PYTHON_VERSION_ENSURE([2.1.1])
 SWIG_PYTHON
 AM_PATH_PYTHON
 
+###
+# Regression test suite support programs
+##
+# The 'time' command must be installed for the regression test suite,
+# this is different from the built-in 'time' command in bash.
+AC_CHECK_PROG(GNUTIME,time,time,no)
+if test "$GNUTIME" = no ; then
+	AC_MSG_ERROR(Cannot find the GNU 'time' timing tool. This is needed for regression tests.)
+fi
+	
 ####
 # Check about the AVR cross compilation environment, check for libz (only on msys,
 # used automaticaly by libtool!), libbfd and libiberty
@@ -87,7 +97,7 @@ AM_CONDITIONAL([USE_AVR_CROSS], [test x"${ac_have_avr_cross_tools}" = x"yes"])
 ####
 # support verilog interface to build avr.vpi
 ####
-AC_CHECK_HEADER([vpi_user.h],
+AC_CHECK_HEADERS([vpi_user.h iverilog/vpi_user.h],
     [AC_DEFINE(HAVE_VERILOG, [1], Icarus verilog interface)
         WE_HAVE_VERILOG="yes"],  
     [])

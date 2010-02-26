@@ -31,10 +31,10 @@
     timer01irq->TICIE1=$timer1_timsk["TICIE1"];
 #else
     timer01irq->TICIE1=$timer1_timsk["ICIE1"];
-#endif    
+#end if    
 #if "TOIE0" in $timer1_timsk
     timer01irq->TOIE0=$timer1_timsk["TOIE0"];
-#endif    
+#end if    
 
     timer01irq->TOV1=$timer1_tifr["TOV1"];
     timer01irq->OCF1A=$timer1_tifr["OCF1A"];
@@ -42,7 +42,7 @@
     timer01irq->ICF1=$timer1_tifr["ICF1"];
 #if "TOV0" in $timer1_tifr    
     timer01irq->TOV0=$timer1_tifr["TOV0"];
-#endif    
+#end if    
     
     timer1	= new HWTimer1(this,
 			       prescaler,
@@ -63,5 +63,5 @@
 
     rw[$io["ICR1H"].addr]= & timer1->icr1h_reg;
     rw[$io["ICR1L"].addr]= & timer1->icr1l_reg;
-#endif						
+#end if						
 }

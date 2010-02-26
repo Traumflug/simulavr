@@ -25,6 +25,7 @@
 #ifndef traceval_h
 #define traceval_h
 
+#include <stdint.h>
 #include <iostream>
 #include <sstream>
 #include <map>
@@ -124,7 +125,8 @@ class TraceValue {
     
         //! Gives the index of this member in a memory field (or -1)
         int index() const;
-        
+
+        //! Possible access types for a trace value
         enum Atype {
         READ=1, // true if a READ access has been logged
         WRITE=2,
@@ -166,7 +168,7 @@ class TraceValue {
         //! Gives the current set of flag readings
         Atype flags() const;
         
-        //! Called for each cycle if this trace value is activated
+        //! Called at least once for each cycle if this trace value is activated
         /*! This may check for updates to an underlying referenced value etc.
           and update the flags accordingly. */
         virtual void cycle();
@@ -508,15 +510,19 @@ class TraceValueCoreRegister: public TraceValueRegister {
 };
 
 //! Register a directly traced bool value
-void trace_direct(TraceValueRegister *t, const std::string &name, bool *val);
+/*! \return pointer to the new registered TraceValue */
+TraceValue *trace_direct(TraceValueRegister *t, const std::string &name, bool *val);
 
 //! Register a directly traced byte value
-void trace_direct(TraceValueRegister *t, const std::string &name, uint8_t *val);
+/*! \return pointer to the new registered TraceValue */
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint8_t *val);
 
 //! Register a directly traced 16bit word value
-void trace_direct(TraceValueRegister *t, const std::string &name, uint16_t *val);
+/*! \return pointer to the new registered TraceValue */
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint16_t *val);
 
 //! Register a directly traced 32bit word value
-void trace_direct(TraceValueRegister *t, const std::string &name, uint32_t *val);
+/*! \return pointer to the new registered TraceValue */
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint32_t *val);
 
 #endif

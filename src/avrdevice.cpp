@@ -203,6 +203,23 @@ AvrDevice::~AvrDevice() {
     delete data;
 }
 
+/*! To ease debugging, also supply the option to have the PC*2 in the trace
+ * output file. This is also the format the other normal tracing will output
+ * addresses and the format avr-objdump produces disassemblies in. */
+class TwiceTV : public TraceValue {
+public:
+    TwiceTV(const std::string &_name, TraceValue *_ref)
+        : TraceValue(_ref->bits()+1, _name), ref(_ref) {}
+    
+    virtual void cycle() {
+        change(ref->value()*2);
+        set_written();
+    }
+private:
+    TraceValue *ref; // Reference value that will be doubled
+};
+
+    
 AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
                      unsigned int IRamSize,
                      unsigned int ERamSize,
@@ -219,8 +236,9 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     dump_manager = DumpManager::Instance();
     dump_manager->registerAvrDevice(this);
     
-    trace_direct(&coreTraceGroup, "PC", &PC);
-
+    TraceValue* pc_tracer=trace_direct(&coreTraceGroup, "PC", &cPC);
+    coreTraceGroup.RegisterTraceValue(new TwiceTV(coreTraceGroup.GetTraceValuePrefix()+"PCb",  pc_tracer));
+    
     data = new Data; //only the symbol container
 
     // placeholder for RAMPZ register
@@ -322,16 +340,18 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
 
     //    do {
 
+    if (cpuCycles<=0)
+        cPC=PC;
     if(trace_on == 1) {
         traceOut << actualFilename << " ";
-        traceOut << HexShort(PC << 1) << dec << ": ";
+        traceOut << HexShort(cPC << 1) << dec << ": ";
 
-        string sym(Flash->GetSymbolAtAddress(PC));
+        string sym(Flash->GetSymbolAtAddress(cPC));
         traceOut << sym << " ";
         for (int len = sym.length(); len < 30;len++)
             traceOut << " " ;
     }
-
+    
     hwWait = 0;
     vector<Hardware *>::iterator ii;
     vector<Hardware *>::iterator end;
@@ -457,7 +477,7 @@ void AvrDevice::Reset() {
     for(ii= hwResetList.begin(); ii != hwResetList.end(); ii++)
         (*ii)->Reset();
 
-    PC = 0;
+    PC = 0; cPC=0;
     *status = 0;
 
     //init the old static vars from Step()
