@@ -109,7 +109,9 @@
   for the various classes. This is quite inconsistent.
 
 + Tracing/Dumping:
-  Make the device names configurable and not only a simple index into a list.
-  Do not update bxxxx values in trace output.
-  Implement PCb back.
-  Bug, nothing in SREG? Why SREG twice?
+  - Make the device names configurable and not only a simple index into a list.
+    Do not update bxxxx values in trace output.
+  - Implement PCb back.
+  - Bug, nothing in SREG? Why SREG twice?
+  - Have an optional constraint on the number of bits in trace_direct (to e.g.
+    only trace the necessary stack bits).
