@@ -83,6 +83,10 @@ void HWStackSram::Push(unsigned char val) {
     (*mem)[stackPointer] = val;
     stackPointer--;
     stackPointer %= stackCeil;
+
+    spl_reg.hardwareChange(stackPointer & 0x0000ff);
+    sph_reg.hardwareChange((stackPointer & 0x00ff00)>>8);
+    
     if(core->trace_on == 1)
         traceOut << "SP=0x" << hex << stackPointer << " 0x" << int(val) << dec << " ";
     CheckReturnPoints();
@@ -95,6 +99,10 @@ void HWStackSram::Push(unsigned char val) {
 unsigned char HWStackSram::Pop() {
     stackPointer++;
     stackPointer %= stackCeil;
+
+    spl_reg.hardwareChange(stackPointer & 0x0000ff);
+    sph_reg.hardwareChange((stackPointer & 0x00ff00)>>8);
+    
     if(core->trace_on == 1)
         traceOut << "SP=0x" << hex << stackPointer << " 0x" << int((*mem)[stackPointer]) << dec << " ";
     CheckReturnPoints();
@@ -128,6 +136,9 @@ void HWStackSram::SetSpl(unsigned char val) {
     stackPointer &= ~0xff;
     stackPointer += val;
     stackPointer %= stackCeil; // zero the not used bits
+
+    spl_reg.hardwareChange(stackPointer & 0x0000ff);
+    
     if(core->trace_on == 1)
         traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
     CheckReturnPoints();
@@ -139,6 +150,9 @@ void HWStackSram::SetSph(unsigned char val) {
     stackPointer &= ~0xff00;
     stackPointer += val << 8;
     stackPointer %= stackCeil; // zero the not used bits
+
+    sph_reg.hardwareChange((stackPointer & 0x00ff00)>>8);
+
     if(core->trace_on == 1)
         traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
     CheckReturnPoints();
@@ -153,8 +167,10 @@ unsigned char HWStackSram::GetSpl() {
 }
 
 ThreeLevelStack::ThreeLevelStack(AvrDevice *c):
-    HWStack(c) {
+    HWStack(c),
+    TraceValueRegister(c, "STACK") {
     stackArea = avr_new(unsigned long, 3);
+    trace_direct(this, "PTR", &stackPointer);
     Reset();
 }
 

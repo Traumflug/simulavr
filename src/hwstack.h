@@ -40,8 +40,8 @@ class HWStack {
     
     protected:
         AvrDevice *core; //!< Link to device
-        unsigned long stackPointer; //!< current value of stack pointer
-        unsigned long lowestStackPointer; //!< marker: lowest stackpointer used by program
+        uint32_t stackPointer; //!< current value of stack pointer
+        uint32_t lowestStackPointer; //!< marker: lowest stackpointer used by program
         std::multimap<unsigned long, Funktor*> returnPointList; //!< Maps adresses to listeners for return addresses
 
         void CheckReturnPoints(); //!< Checks PC to inform listeners, that a special address is arrived
@@ -102,7 +102,7 @@ class HWStackSram: public HWStack, public TraceValueRegister {
 };
 
 //! Implements a stack with 3 levels deep (used as returnstack by ATtiny15 an other)
-class ThreeLevelStack: public HWStack {
+class ThreeLevelStack: public HWStack, public TraceValueRegister {
     
     protected:
         unsigned long *stackArea;
