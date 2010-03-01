@@ -21,6 +21,7 @@
   #include "avrerror.h"
   #include "pysimulationmember.h"
   #include "hwport.h"
+  #include "hwstack.h"
   
   // to get devices registered (automatically on linux, but necessary on windows)
   #include "atmega128.h"
@@ -94,6 +95,7 @@ namespace std {
 %feature("director") Hardware;
 %include "hardware.h"
 %include "hwport.h"
+%include "hwstack.h"
 
 %feature("director") Pin;
 %include "pin.h"
