@@ -39,43 +39,43 @@
 using namespace std;
 
 int avr_op_ADC::Trace()  {
-    traceOut << "ADC R" << p1 << ", R" << p2 << " ";
+    traceOut << "ADC R" << R1 << ", R" << R2 << " ";
+    int ret = this->operator()();
+    MONSREG;
+    return ret;
+}
+
+int avr_op_ADD::Trace() {
+    traceOut << "ADD R" << R1 << ", R" << R2 << " ";
+    int ret = this->operator()();
+    MONSREG;
+    return ret;
+}
+
+int avr_op_ADIW::Trace() {
+    traceOut << "ADIW R" << Rl << ", " << K << " ";
+    int ret = this->operator()();
+    MONSREG;
+    return ret;
+}
+
+int avr_op_AND::Trace() {
+    traceOut << "AND R" << R1 << ", R" << R2 << " ";
     int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_ADD::Trace( ) {
-    traceOut << "ADD R" << p1 << ", R" << p2 << " ";
+int avr_op_ANDI::Trace() {
+    traceOut << "ANDI R" << R1 << ", " << HexChar(K) << " ";
     int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_ADIW::Trace( ) {
-    traceOut << "ADIW R" << p1 << ", " << p2 << " ";
-    int ret=this->operator()();
-    MONSREG;
-    return ret;
-}
-
-int avr_op_AND::Trace( ) {
-    traceOut << "AND R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
-    MONSREG;
-    return ret;
-}
-
-int avr_op_ANDI::Trace( ) {
-    traceOut << "ANDI R" << p1 << ", " << HexChar(p2) << dec << " ";
-    int ret=this->operator()();
-    MONSREG;
-    return ret;
-}
-
-int avr_op_ASR::Trace( ) {
-    traceOut << "ASR R" << p1 ;
-    int ret=this->operator()();
+int avr_op_ASR::Trace() {
+    traceOut << "ASR R" << R1 ;
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
@@ -91,16 +91,16 @@ const char *opcodes_bclr[8]= {
     "CLI"
 };
 
-int avr_op_BCLR::Trace( ) {
-    traceOut << opcodes_bclr[p1] << " ";
-    int ret=this->operator()();
+int avr_op_BCLR::Trace() {
+    traceOut << opcodes_bclr[Kbit] << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_BLD::Trace( ) {
-    traceOut << "BLD R" << p1 << ", " << p2 << " ";
-    int ret=this->operator()();
+int avr_op_BLD::Trace() {
+    traceOut << "BLD R" << R1 << ", " << Kbit << " ";
+    int ret = this->operator()();
     return ret;
 }
 
@@ -115,13 +115,17 @@ const char *branch_opcodes_clear[8] = {
     "BRID"
 };
 
-int avr_op_BRBC::Trace( ) {
-    traceOut << branch_opcodes_clear[p1] << " ->" << HexShort((core->PC+1+p2)<<1) << dec << " ";
-    int ret=this->operator()();
-
-    string sym(core->Flash->GetSymbolAtAddress(core->PC+1+p2));
-    traceOut << sym << " ";
-    for (int len = sym.length(); len<30;len++) { traceOut << " " ; }
+int avr_op_BRBC::Trace() {
+    traceOut << branch_opcodes_clear[bitmask] << " ->" << HexShort(offset * 2) << " ";
+    unsigned int oldPC = core->PC;
+    int ret = this->operator()();
+    
+    string sym(core->Flash->GetSymbolAtAddress(core->PC * 2));
+    if(oldPC + 1 != core->PC) {
+        traceOut << sym << " ";
+        for(int len = sym.length(); len < 30; len++)
+            traceOut << " ";
+    }
 
     return ret;
 }
@@ -137,13 +141,17 @@ const char *branch_opcodes_set[8] = {
     "BRIE"
 };
 
-int avr_op_BRBS::Trace( ) {
-    traceOut << branch_opcodes_set[p1] << " ->" << HexShort((core->PC+1+p2)<<1) << dec << " ";
+int avr_op_BRBS::Trace() {
+    traceOut << branch_opcodes_set[bitmask] << " ->" << HexShort(offset * 2) << " ";
+    unsigned int oldPC = core->PC;
     int ret=this->operator()();
 
-    string sym(core->Flash->GetSymbolAtAddress(core->PC+1+p2));
-    traceOut << sym << " ";
-    for (int len = sym.length(); len<30;len++) { traceOut << " " ; }
+    string sym(core->Flash->GetSymbolAtAddress(core->PC * 2));
+    if(oldPC + 1 != core->PC) {
+        traceOut << sym << " ";
+        for(int len = sym.length(); len < 30; len++)
+            traceOut << " ";
+    }
 
     return ret;
 }
@@ -159,63 +167,65 @@ const char *opcodes_bset[8]= {
     "SEI"
 };
 
-int avr_op_BSET::Trace( ) {
-    traceOut << opcodes_bset[p1] << " ";
-    int ret=this->operator()();
+int avr_op_BSET::Trace() {
+    traceOut << opcodes_bset[Kbit] << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_BST::Trace( ) {
-    traceOut << "BST R" << p1 << ", " << p2 << " ";
-    int ret=this->operator()();
+int avr_op_BST::Trace() {
+    traceOut << "BST R" << R1 << ", " << Kbit << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_CALL::Trace( ) {
-    traceOut << "CALL " << p1 << " ";
-    int ret=this->operator()();
+int avr_op_CALL::Trace() {
+    word K_lsb = core->Flash->ReadMemWord((core->PC + 1) * 2);
+    int k = (KH << 16) | K_lsb;
+    traceOut << "CALL 0x" << hex << k * 2 << dec << " ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_CBI::Trace( ) {
-    traceOut << "CBI " << HexChar(p1) << dec  << ", " << dec << p2 << " ";
-    int ret=this->operator()();
+int avr_op_CBI::Trace() {
+    traceOut << "CBI " << HexChar(ioreg) << ", " << Kbit << " ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_COM::Trace( ) {
-    traceOut << "COM R" << p1 << " ";
-    int ret=this->operator()();
+int avr_op_COM::Trace() {
+    traceOut << "COM R" << R1 << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_CP::Trace( ) {
-    traceOut << "CP R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_CP::Trace() {
+    traceOut << "CP R" << R1 << ", R" << R2 << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_CPC::Trace( ) {
-    traceOut << "CPC R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_CPC::Trace() {
+    traceOut << "CPC R" << R1 << ", R" << R2 << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_CPI::Trace( ) {
-    traceOut << "CPI R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret=this->operator()();
+int avr_op_CPI::Trace() {
+    traceOut << "CPI R" << R1 << ", " << HexChar(K) << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_CPSE::Trace( ) {
-    traceOut << "CPSE R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_CPSE::Trace() {
+    traceOut << "CPSE R" << R1 << ", R" << R2 << " ";
+    int ret = this->operator()();
     return ret;
 }
 

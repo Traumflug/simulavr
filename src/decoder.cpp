@@ -81,7 +81,7 @@ enum decoder_operand_masks {
     /** 6 bit IO port id */
     mask_A_6      = 0x060F
 };
-/*++++++++++++*/
+
 static int get_rd_2( word opcode );
 static int get_rd_3( word opcode );
 static int get_rd_4( word opcode );
@@ -100,451 +100,372 @@ static int get_q( word opcode );
 static int get_A_5( word opcode );
 static int get_A_6( word opcode );
 
-int funyFunc(int x) { return 0; }
-
-avr_op_ADC::avr_op_ADC(word opcode, AvrDevice *c) : 
-    DecodedInstruction(c, get_rd_5(opcode),get_rr_5(opcode)), R1(((*(c->R))[get_rd_5(opcode)])), R2(((*(c->R))[get_rr_5(opcode)])), 
-    status(core->status)
-{ }
+avr_op_ADC::avr_op_ADC(word opcode, AvrDevice *c): 
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    R2(get_rr_5(opcode)),
+    status(c->status) {}
 
 int avr_op_ADC::operator()() { 
-    unsigned char rd=R1;
-    unsigned char rr=R2;
+    unsigned char rd = core->GetCoreReg(R1);
+    unsigned char rr = core->GetCoreReg(R2);
     unsigned char res = rd + rr + status->C;
 
-    status->H = get_add_carry( res, rd, rr, 3 ) ;
-    status->V = get_add_overflow( res, rd, rr ) ;
-    status->N = ((res >> 7) & 0x1)              ;
-    status->S = (status->N ^ status->V)   ;
-    status->Z = ((res & 0xff) == 0)             ;
-    status->C = get_add_carry( res, rd, rr, 7 ) ;
+    status->H = get_add_carry(res, rd, rr, 3);
+    status->V = get_add_overflow(res, rd, rr);
+    status->N = (res >> 7) & 0x1;
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xff) == 0;
+    status->C = get_add_carry(res, rd, rr, 7);
 
-    R1=res;
+    core->SetCoreReg(R1, res);
 
     return 1;   //used clocks
 }
 
-avr_op_ADD::avr_op_ADD(word opcode, AvrDevice *c) : 
-    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
-    R1(((*(c->R))[get_rd_5(opcode)])),
-    R2(((*(c->R))[get_rr_5(opcode)])), 
-    status(core->status)
-{ }
+avr_op_ADD::avr_op_ADD(word opcode, AvrDevice *c): 
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    R2(get_rr_5(opcode)), 
+    status(c->status) {}
 
 int avr_op_ADD::operator()() { 
-    unsigned char rd=R1;
-    unsigned char rr=R2;
-    unsigned char res = rd + rr ;
+    unsigned char rd = core->GetCoreReg(R1);
+    unsigned char rr = core->GetCoreReg(R2);
+    unsigned char res = rd + rr;
 
-    status->H = get_add_carry( res, rd, rr, 3 ) ;
-    status->V = get_add_overflow( res, rd, rr ) ;
-    status->N = ((res >> 7) & 0x1)              ;
-    status->S = (status->N ^ status->V)   ;
-    status->Z = ((res & 0xff) == 0)             ;
-    status->C = get_add_carry( res, rd, rr, 7 ) ;
+    status->H = get_add_carry(res, rd, rr, 3);
+    status->V = get_add_overflow(res, rd, rr);
+    status->N = (res >> 7) & 0x1;
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xff) == 0;
+    status->C = get_add_carry(res, rd, rr, 7);
 
-    R1=res;
+    core->SetCoreReg(R1, res);
 
     return 1;   //used clocks
 }
 
 avr_op_ADIW::avr_op_ADIW(word opcode, AvrDevice *c): 
-    DecodedInstruction(c, get_K_6(opcode),  get_rd_2(opcode)),
-    Rl( (*(core->R))[get_rd_2(opcode)]),
-    Rh( (*(core->R))[get_rd_2(opcode)+1]),
+    DecodedInstruction(c),
+    Rl(get_rd_2(opcode)),
+    Rh(get_rd_2(opcode) + 1),
     K(get_K_6(opcode)),
     status(c->status) {
     }
 
 int avr_op_ADIW::operator()() {
-    word rd = (Rh << 8) + Rl;
+    word rd = (core->GetCoreReg(Rh) << 8) + core->GetCoreReg(Rl);
     word res = rd + K;
+    unsigned char rdh = core->GetCoreReg(Rh);
 
-    unsigned char rdh= Rh;
 
+    status->V = ~(rdh >> 7 & 0x1) & (res >> 15 & 0x1); 
+    status->N = (res >> 15) & 0x1;
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xffff) == 0;
+    status->C = ~(res >> 15 & 0x1) & (rdh >> 7 & 0x1); 
 
-    status->V = (~(rdh >> 7 & 0x1) & (res >> 15 & 0x1)) ; 
-    status->N = ((res >> 15) & 0x1)                     ;
-    status->S = (status->N ^ status->V)                                 ;
-    status->Z = ((res & 0xffff) == 0)                   ;
-    status->C = (~(res >> 15 & 0x1) & (rdh >> 7 & 0x1)) ; 
-
-    Rl= res &0xff;
-    Rh= res>>8;
+    core->SetCoreReg(Rl, res & 0xff);
+    core->SetCoreReg(Rh, res >> 8);
 
     return 2; 
 }
 
 avr_op_AND::avr_op_AND(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    R2((*(core->R))[get_rr_5(opcode)]),
-    status(core->status) {}
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    R2(get_rr_5(opcode)),
+    status(c->status) {}
 
+int avr_op_AND::operator()() {
+    unsigned char res = core->GetCoreReg(R1) & core->GetCoreReg(R2);
 
-    int avr_op_AND::operator()() {
+    status->V = 0;
+    status->N = (res >> 7) & 0x1; 
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xff) == 0; 
 
-        byte res = R1 & R2;
+    core->SetCoreReg(R1, res);
 
+    return 1; 
+}
 
-        status->V = 0                   ;
-        status->N = ((res >> 7) & 0x1)  ; 
-        status->S = (status->N ^ status->V)             ;
-        status->Z = ((res & 0xff) == 0) ; 
+avr_op_ANDI::avr_op_ANDI(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_4(opcode)),
+    status(c->status),
+    K(get_K_8(opcode)) {}
 
-        R1= res;
+int avr_op_ANDI::operator()() {
+    unsigned char rd = core->GetCoreReg(R1);
+    unsigned char res = rd & K;
 
+    status->V = 0;
+    status->N = (res >> 7) & 0x1; 
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xff) == 0; 
 
-
-        return 1; 
-    }
-
-avr_op_ANDI::avr_op_ANDI
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
-    R1((*(core->R))[get_rd_4(opcode)]),
-    status(core->status) ,
-    K(get_K_8(opcode))
-{}
-
-int avr_op_ANDI::operator()() 
-{
-    byte rd = R1;
-    byte res = rd & K;
-
-    status->V = 0                   ;
-    status->N = ((res >> 7) & 0x1)  ; 
-    status->S = (status->N ^ status->V) ;
-    status->Z = ((res & 0xff) == 0) ; 
-
-    R1=res;
+    core->SetCoreReg(R1, res);
+    
     return 1;
 }
 
-avr_op_ASR::avr_op_ASR
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    status(core->status) 
-{}
+avr_op_ASR::avr_op_ASR(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    status(c->status) {}
 
-int avr_op_ASR::operator()() 
-{
-    byte rd = R1; 
-    byte res = (rd >> 1) + (rd & 0x80);
+int avr_op_ASR::operator()() {
+    unsigned char rd = core->GetCoreReg(R1); 
+    unsigned char res = (rd >> 1) + (rd & 0x80);
 
-    status->N = ((res >> 7) & 0x1) ;
-    status->C = (rd & 0x1) ;
-    status->V = (status->N ^ status->C) ;
-    status->S = (status->N ^ status->V) ;
-    status->Z = ((res & 0xff) == 0) ;
+    status->N = (res >> 7) & 0x1;
+    status->C = rd & 0x1;
+    status->V = status->N ^ status->C;
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xff) == 0;
 
-    R1=res;
-
+    core->SetCoreReg(R1, res);
 
     return 1;
 }
 
 
-avr_op_BCLR::avr_op_BCLR
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_sreg_bit(opcode),0),
-    status(core->status) ,
-    K(~(1<<get_sreg_bit(opcode)))
-{}
+avr_op_BCLR::avr_op_BCLR(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    status(c->status),
+    Kbit(get_sreg_bit(opcode)) {}
 
-int avr_op_BCLR::operator()() 
-{
-    //(*status)&=K;
-    *status= (*status)&K;
+int avr_op_BCLR::operator()() {
+    *status = (*status) & ~(1 << Kbit);
+    
     return 1;
 }
 
-avr_op_BLD::avr_op_BLD
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode), get_reg_bit(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    Kadd(1<<get_reg_bit(opcode)),
-    Kremove(~(1<<get_reg_bit(opcode))),
-    status(core->status) 
-{}
+avr_op_BLD::avr_op_BLD(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    Kbit(get_reg_bit(opcode)),
+    status(c->status) {}
 
-int avr_op_BLD::operator()() 
-{
+int avr_op_BLD::operator()() {
+    unsigned char rd = core->GetCoreReg(R1);
+    int T = status->T;
+    unsigned char res;
 
-
-    byte rd  = R1;
-    int  T   = status->T;
-    byte res;
-
-    if (T == 0)
-        res = rd & Kremove;
+    if(T == 0)
+        res = rd & ~(1 << Kbit);
     else
-        res = rd | Kadd; 
+        res = rd | (1 << Kbit); 
 
-    R1=res;
+    core->SetCoreReg(R1, res);
 
     return 1;
 }
 
-avr_op_BRBC::avr_op_BRBC
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_reg_bit(opcode), n_bit_unsigned_to_signed( get_k_7(opcode), 7 )),
-    status(core->status) ,
-    bitmask(1<<get_reg_bit(opcode)),
-    offset(n_bit_unsigned_to_signed( get_k_7(opcode), 7))
-{}
+avr_op_BRBC::avr_op_BRBC(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    status(c->status),
+    bitmask(1 << get_reg_bit(opcode)),
+    offset(n_bit_unsigned_to_signed(get_k_7(opcode), 7)) {}
 
-int avr_op_BRBC::operator()() 
-{
-
+int avr_op_BRBC::operator()() {
     int clks;
 
-    if  ((bitmask & (*(status)))==0)
-    {
-        core->PC+=offset;
-        clks=2;
-    }
-    else
-    {
-        clks=1;
+    if((bitmask & (*(status))) == 0) {
+        core->PC += offset;
+        clks = 2;
+    } else {
+        clks = 1;
     }
 
     return clks;
 }
 
+avr_op_BRBS::avr_op_BRBS(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    status(c->status),
+    bitmask(1 << get_reg_bit(opcode)),
+    offset(n_bit_unsigned_to_signed(get_k_7(opcode), 7)) {}
 
-avr_op_BRBS::avr_op_BRBS
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_reg_bit(opcode), n_bit_unsigned_to_signed( get_k_7(opcode), 7 )),
-    status(core->status) ,
-    bitmask(1<<get_reg_bit(opcode)),
-    offset(n_bit_unsigned_to_signed( get_k_7(opcode), 7))
-{}
-
-int avr_op_BRBS::operator()()
-{
-
+int avr_op_BRBS::operator()() {
     int clks;
 
-    if  ((bitmask & (*(status)))!=0)
-    {
-        core->PC+=offset;
-        clks=2;
-    }
-    else
-    {
-        clks=1;
+    if((bitmask & (*(status))) != 0) {
+        core->PC += offset;
+        clks = 2;
+    } else {
+        clks = 1;
     }
 
     return clks;
 }
 
-avr_op_BSET::avr_op_BSET
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode), get_reg_bit(opcode)),
-    status(core->status) ,
-    K(1<<get_sreg_bit(opcode))
-{}
+avr_op_BSET::avr_op_BSET(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    status(c->status),
+    Kbit(get_sreg_bit(opcode)) {}
 
-int avr_op_BSET::operator()() 
-{
-
-    *(status)=*(status)|K;
+int avr_op_BSET::operator()() {
+    *(status) = *(status) | 1 << Kbit;
+    
     return 1;
 }
 
-avr_op_BST::avr_op_BST
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode), get_reg_bit(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    status(core->status) ,
-    K(1<<get_reg_bit(opcode))
-{}
+avr_op_BST::avr_op_BST(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    status(c->status),
+    Kbit(get_reg_bit(opcode)) {}
 
-int avr_op_BST::operator()() 
-{
-
-    status->T= ((R1&K)!=0); 
+int avr_op_BST::operator()() {
+    status->T = ((core->GetCoreReg(R1) & (1 << Kbit)) != 0); 
 
     return 1;
 }
 
-
-
-avr_op_CALL::avr_op_CALL
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, 0, 0, true),
-    KH(get_k_22(opcode))
-{}
+avr_op_CALL::avr_op_CALL(word opcode, AvrDevice *c):
+    DecodedInstruction(c, true),
+    KH(get_k_22(opcode)) {}
 
 int avr_op_CALL::operator()() 
 {
     word K_lsb = core->Flash->ReadMemWord((core->PC + 1) * 2);
     int k = (KH << 16) + K_lsb;
-
+    int clkadd = core->flagXMega ? 1 : 2;
+    
     core->stack->PushAddr(core->PC + 2);
     core->PC = k - 1;
 
-    return core->PC_size + 2;
+    return core->PC_size + clkadd;
 }
 
-avr_op_CBI::avr_op_CBI
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_A_5(opcode), get_reg_bit(opcode)),
-    ioreg((*(core->ioreg))[get_A_5(opcode)]),
-    K(~(1<<get_reg_bit(opcode)))
-{}
+avr_op_CBI::avr_op_CBI(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    ioreg(get_A_5(opcode)),
+    Kbit(get_reg_bit(opcode)) {}
 
-int avr_op_CBI::operator()() 
-{
-
-    ioreg=ioreg&K;
-    return 2;
-}
-
-avr_op_COM::avr_op_COM
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    status(core->status) 
-{}
-
-int avr_op_COM::operator()() 
-{
-
-    byte rd  = R1;
-    byte res = 0xff - rd;
-
-
-    status->N = ((res >> 7) & 0x1) ;
-    status->C = 1 ;
-    status->V = 0 ;
-    status->S = (status->N ^ status->V) ;
-    status->Z = ((res & 0xff) == 0) ;
-
-    R1= res;
-
-    return 1;
-}
-
-avr_op_CP::avr_op_CP
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),get_rr_5(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    R2((*(core->R))[get_rr_5(opcode)]),
-    status(core->status) 
-{}
-
-int avr_op_CP::operator()() 
-{
-
-    byte rd  = R1;
-    byte rr  = R2;
-    byte res = rd - rr;
-
-
-    status->H = get_compare_carry( res, rd, rr, 3 ) ;
-    status->V = get_compare_overflow( res, rd, rr ) ;
-    status->N = ((res >> 7) & 0x1);
-    status->S = (status->N ^ status->V);
-    status->Z = ((res & 0xff) == 0) ;
-    status->C = get_compare_carry( res, rd, rr, 7 ) ;
-
-    return 1;
-}
-
-avr_op_CPC::avr_op_CPC
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    R2((*(core->R))[get_rr_5(opcode)]),
-    status(core->status) 
-{}
-
-int avr_op_CPC::operator()() 
-{
-
-    byte rd  = R1;
-    byte rr  = R2;
-    byte res = rd - rr - status->C;
-
-
-    status->H = get_compare_carry( res, rd, rr, 3 ) ;
-    status->V = get_compare_overflow( res, rd, rr ) ;
-    status->N = ((res >> 7) & 0x1) ;
-    status->S = (status->N ^ status->V) ;
-    status->C = get_compare_carry( res, rd, rr, 7 ) ;
-
-    /* Previous value remains unchanged when result is 0; cleared otherwise */
-    bool Z = ((res & 0xff) == 0);
-    bool prev_Z = core->status->Z;
-    status->Z = Z && prev_Z ;
-
-    return 1;
-}
-
-
-avr_op_CPI::avr_op_CPI
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
-    R1((*(core->R))[get_rd_4(opcode)]),
-    status(core->status) ,
-    K(get_K_8(opcode))
-{}
-
-int avr_op_CPI::operator()() 
-{
-
-    byte rd  = R1;
-    byte res = rd - K;
-
-    status->H = get_compare_carry( res, rd, K, 3 ) ;
-    status->V = get_compare_overflow( res, rd, K ) ;
-    status->N = ((res >> 7) & 0x1) ;
-    status->S = (status->N ^ status->V) ;
-    status->Z = ((res & 0xff) == 0) ;
-    status->C = get_compare_carry( res, rd, K, 7 ) ;
-
-    return 1;
-}
-
-avr_op_CPSE::avr_op_CPSE
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    R2((*(core->R))[get_rr_5(opcode)]),
-    status(core->status) 
-{}
-
-int avr_op_CPSE::operator()() 
-{
-
-    int skip;
-
-    byte rd = R1;
-    byte rr = R2;
-    int clks;
-
-    if ( core->Flash->DecodedMem[(core->PC)+1]->IsInstruction2Words() ) {
-        skip = 3;
-    } else {
-        skip = 2;
-    }
-
-    if (rd == rr)
-    {
-        core->PC+=skip-1;
-        clks=skip;
-    }
-    else
-    {
-        clks=1;
-    }
-
+int avr_op_CBI::operator()() {
+    int clks = (core->flagXMega || core->flagTiny10) ? 1 : 2;
+    
+    core->SetIORegBit(ioreg, Kbit, false);
+    
     return clks;
 }
 
+avr_op_COM::avr_op_COM(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    status(c->status) {}
+
+int avr_op_COM::operator()() {
+    byte rd  = core->GetCoreReg(R1);
+    byte res = 0xff - rd;
+
+    status->N = (res >> 7) & 0x1;
+    status->C = 1;
+    status->V = 0;
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xff) == 0;
+
+    core->SetCoreReg(R1, res);
+
+    return 1;
+}
+
+avr_op_CP::avr_op_CP(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    R2(get_rr_5(opcode)),
+    status(c->status) {}
+
+int avr_op_CP::operator()() {
+    byte rd  = core->GetCoreReg(R1);
+    byte rr  = core->GetCoreReg(R2);
+    byte res = rd - rr;
+
+    status->H = get_compare_carry(res, rd, rr, 3);
+    status->V = get_compare_overflow(res, rd, rr);
+    status->N = (res >> 7) & 0x1;
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xff) == 0;
+    status->C = get_compare_carry(res, rd, rr, 7);
+
+    return 1;
+}
+
+avr_op_CPC::avr_op_CPC(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    R2(get_rr_5(opcode)),
+    status(c->status) {}
+
+int avr_op_CPC::operator()() {
+    byte rd  = core->GetCoreReg(R1);
+    byte rr  = core->GetCoreReg(R2);
+    byte res = rd - rr - status->C;
+
+    status->H = get_compare_carry(res, rd, rr, 3);
+    status->V = get_compare_overflow(res, rd, rr);
+    status->N = (res >> 7) & 0x1;
+    status->S = status->N ^ status->V;
+    status->C = get_compare_carry(res, rd, rr, 7);
+
+    /* Previous value remains unchanged when result is 0; cleared otherwise */
+    bool Z = (res & 0xff) == 0;
+    bool prev_Z = status->Z;
+    status->Z = Z && prev_Z;
+
+    return 1;
+}
+
+
+avr_op_CPI::avr_op_CPI(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_4(opcode)),
+    status(c->status),
+    K(get_K_8(opcode)) {}
+
+int avr_op_CPI::operator()() {
+    byte rd  = core->GetCoreReg(R1);
+    byte res = rd - K;
+
+    status->H = get_compare_carry(res, rd, K, 3);
+    status->V = get_compare_overflow(res, rd, K);
+    status->N = (res >> 7) & 0x1;
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xff) == 0;
+    status->C = get_compare_carry(res, rd, K, 7);
+
+    return 1;
+}
+
+avr_op_CPSE::avr_op_CPSE(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    R2(get_rr_5(opcode)),
+    status(c->status) {}
+
+int avr_op_CPSE::operator()() {
+    int skip;
+    byte rd = core->GetCoreReg(R1);
+    byte rr = core->GetCoreReg(R2);
+    int clks;
+
+    if(core->Flash->DecodedMem[core->PC + 1]->IsInstruction2Words())
+        skip = 3;
+    else
+        skip = 2;
+
+    if(rd == rr) {
+        core->PC += skip - 1;
+        clks = skip;
+    } else
+        clks = 1;
+
+    return clks;
+}
 
 avr_op_DEC::avr_op_DEC
 (word opcode, AvrDevice *c):
@@ -2636,8 +2557,16 @@ DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core )
                          /* opcodes with a absolute 22-bit address (k) operand */
                          decode = opcode & ~(mask_k_22);
                          switch ( decode ) {
-                             case 0x940E: return new  avr_op_CALL(opcode, core);        /* 1001 010k kkkk 111k | CALL */
-                             case 0x940C: return new  avr_op_JMP(opcode, core);         /* 1001 010k kkkk 110k | JMP */
+                             case 0x940E:
+                                 if(core->flagJMPInstructions)
+                                     return new avr_op_CALL(opcode, core);              /* 1001 010k kkkk 111k | CALL */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x940C:
+                                 if(core->flagJMPInstructions)
+                                     return new avr_op_JMP(opcode, core);               /* 1001 010k kkkk 110k | JMP */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
                          }
 
                          /* opcode with a sreg bit select (s) operand */
@@ -2652,8 +2581,16 @@ DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core )
                          /* opcodes with a 6-bit constant (K) and a register (Rd) as operands */
                          decode = opcode & ~(mask_K_6 | mask_Rd_2);
                          switch ( decode ) {
-                             case 0x9600: return new  avr_op_ADIW(opcode, core);        /* 1001 0110 KKdd KKKK | ADIW */
-                             case 0x9700: return new  avr_op_SBIW(opcode, core);        /* 1001 0111 KKdd KKKK | SBIW */
+                             case 0x9600:
+                                 if(core->flagIWInstructions)
+                                     return new avr_op_ADIW(opcode, core);              /* 1001 0110 KKdd KKKK | ADIW */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x9700:
+                                 if(core->flagIWInstructions)
+                                     return new avr_op_SBIW(opcode, core);              /* 1001 0111 KKdd KKKK | SBIW */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
                          }
 
                          /* opcodes with a 5-bit IO Addr (A) and register bit number (b) as operands */

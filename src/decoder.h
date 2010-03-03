@@ -27,36 +27,35 @@
 #define DECODER
 
 #include <iostream>
+
 #include "rwmem.h"
 #include "types.h"
-
 #include "avrdevice.h"
 
-
+//! Base class of core instruction
+/*! All instruction are derived from this class */
 class DecodedInstruction {
+    
     protected:
-        AvrDevice *core;
+        AvrDevice *core; //!< Link to device instance
         int p1; //needed for trace
         int p2; //needed for trace
-        bool size2Word;
+        bool size2Word; //!< Flag: true, if instruction has 2 words
 
     public:
         DecodedInstruction(AvrDevice *c, int _p1, int _p2, bool s2w=false): core(c),p1(_p1),p2(_p2),size2Word(s2w) {}
-        virtual int operator()()=0; 
-        virtual int Trace()=0;
+        DecodedInstruction(AvrDevice *c, bool s2w = false): core(c),p1(0),p2(0),size2Word(s2w) {}
         bool IsInstruction2Words() { return size2Word; } 
 
+        virtual int operator()()=0; 
+        virtual int Trace()=0;
         virtual ~DecodedInstruction() {}
 };
 
-DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core );
+//! Translates an opcode to a instance of DecodedInstruction
+DecodedInstruction* lookup_opcode(word opcode, AvrDevice *core);
 
-#ifdef vi_bug
-    }
-#endif
-
-
-class avr_op_ADC:public DecodedInstruction {
+class avr_op_ADC: public DecodedInstruction {
     /*
      * Add with Carry.
      *       
@@ -67,18 +66,17 @@ class avr_op_ADC:public DecodedInstruction {
      * Num Clocks : 1
      */
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &R2;
+        unsigned char R1;
+        unsigned char R2;
         HWSreg *status;
 
     public:
         avr_op_ADC(word opcode, AvrDevice *c);
-
         int operator()();
         int Trace(); 
 }; //end of class 
 
-class avr_op_ADD:public DecodedInstruction {
+class avr_op_ADD: public DecodedInstruction {
     /*
      * Add without Carry.
      *
@@ -89,8 +87,8 @@ class avr_op_ADD:public DecodedInstruction {
      * Num Clocks : 1
      */
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &R2;
+        unsigned char R1;
+        unsigned char R2;
         HWSreg *status;
 
     public:
@@ -102,7 +100,7 @@ class avr_op_ADD:public DecodedInstruction {
 
 
 
-class avr_op_ADIW:public DecodedInstruction
+class avr_op_ADIW: public DecodedInstruction
 {
     /*
      * Add Immediate to Word.
@@ -115,8 +113,8 @@ class avr_op_ADIW:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char Rl;
+        unsigned char Rh;
         unsigned char K;
         HWSreg *status;
 
@@ -126,7 +124,7 @@ class avr_op_ADIW:public DecodedInstruction
         int Trace();
 };
 
-class avr_op_AND:public DecodedInstruction
+class avr_op_AND: public DecodedInstruction
 { 
     /*
      * Logical AND.
@@ -139,18 +137,17 @@ class avr_op_AND:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &R2;
+        unsigned char R1;
+        unsigned char R2;
         HWSreg *status;
 
     public:
         avr_op_AND(word opcode, AvrDevice *c); 
         int operator()();
         int Trace();
-
 };
 
-class avr_op_ANDI:public DecodedInstruction
+class avr_op_ANDI: public DecodedInstruction
 {
     /*
      * Logical AND with Immed.
@@ -163,12 +160,12 @@ class avr_op_ANDI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
         HWSreg *status;
         unsigned char K;
 
     public:
-        avr_op_ANDI (word opcode, AvrDevice *c);
+        avr_op_ANDI(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
@@ -186,16 +183,16 @@ class avr_op_ASR:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
         HWSreg *status;
 
     public:
-        avr_op_ASR (word opcode, AvrDevice *c);
+        avr_op_ASR(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_BCLR:public DecodedInstruction
+class avr_op_BCLR: public DecodedInstruction
 {
     /*
      * Clear a single flag or bit in SREG.
@@ -209,16 +206,16 @@ class avr_op_BCLR:public DecodedInstruction
 
     protected:
         HWSreg *status;
-        unsigned char K;
+        unsigned char Kbit;
 
     public:
-        avr_op_BCLR (word opcode, AvrDevice *c);
+        avr_op_BCLR(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
 
-class avr_op_BLD:public DecodedInstruction
+class avr_op_BLD: public DecodedInstruction
 {
     /* Bit load from T to Register.
      *
@@ -230,18 +227,17 @@ class avr_op_BLD:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        unsigned char Kadd;
-        unsigned char Kremove;
+        unsigned char R1;
+        unsigned char Kbit;
         HWSreg *status;
 
     public:
-        avr_op_BLD (word opcode, AvrDevice *c);
+        avr_op_BLD(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_BRBC:public DecodedInstruction
+class avr_op_BRBC: public DecodedInstruction
 { 
     /*
      * Branch if Status Flag Cleared.
@@ -264,12 +260,12 @@ class avr_op_BRBC:public DecodedInstruction
         signed char offset;
 
     public:
-        avr_op_BRBC (word opcode, AvrDevice *c);
+        avr_op_BRBC(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_BRBS:public DecodedInstruction
+class avr_op_BRBS: public DecodedInstruction
 { 
     /*
      * Branch if Status Flag Set.
@@ -292,12 +288,12 @@ class avr_op_BRBS:public DecodedInstruction
         signed char offset;
 
     public:
-        avr_op_BRBS (word opcode, AvrDevice *c);
+        avr_op_BRBS(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_BSET:public DecodedInstruction
+class avr_op_BSET: public DecodedInstruction
 { 
     /*
      * Set a single flag or bit in SREG.
@@ -311,15 +307,15 @@ class avr_op_BSET:public DecodedInstruction
 
     protected:
         HWSreg *status;
-        unsigned char K;
+        unsigned char Kbit;
 
     public:
-        avr_op_BSET (word opcode, AvrDevice *c);
+        avr_op_BSET(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_BST:public DecodedInstruction
+class avr_op_BST: public DecodedInstruction
 {
     /*
      * Bit Store from Register to T.
@@ -332,18 +328,18 @@ class avr_op_BST:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
         HWSreg *status;
-        unsigned char K;
+        unsigned char Kbit;
 
     public:
-        avr_op_BST (word opcode, AvrDevice *c);
+        avr_op_BST(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 
 };
 
-class avr_op_CALL:public DecodedInstruction
+class avr_op_CALL: public DecodedInstruction
 {
     /*
      * Call Subroutine.
@@ -352,19 +348,19 @@ class avr_op_CALL:public DecodedInstruction
      * Usage      : CALL  k
      * Operation  : PC <- k
      * Flags      : None
-     * Num Clocks : 4 / 5
+     * Num Clocks : 3 / 4 / 5
      */
 
     protected:
         unsigned char KH;
 
     public:
-        avr_op_CALL (word opcode, AvrDevice *c);
+        avr_op_CALL(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_CBI:public DecodedInstruction
+class avr_op_CBI: public DecodedInstruction
 {
     /*
      * Clear Bit in I/O Register.
@@ -373,21 +369,21 @@ class avr_op_CBI:public DecodedInstruction
      * Usage      : CBI  A, b
      * Operation  : I/O(A, b) <- 0
      * Flags      : None
-     * Num Clocks : 2
+     * Num Clocks : 1 / 2
      */
 
     protected:
-        RWMemoryMember &ioreg;
+        unsigned char ioreg;
         HWSreg *status;
-        unsigned char K;
+        unsigned char Kbit;
 
     public:
-        avr_op_CBI (word opcode, AvrDevice *c);
+        avr_op_CBI(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_COM:public DecodedInstruction
+class avr_op_COM: public DecodedInstruction
 {
     /*
      * One's Complement.
@@ -400,16 +396,16 @@ class avr_op_COM:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
         HWSreg *status;
 
     public:
-        avr_op_COM (word opcode, AvrDevice *c);
+        avr_op_COM(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_CP:public DecodedInstruction
+class avr_op_CP: public DecodedInstruction
 {
     /*
      * Compare.
@@ -422,17 +418,17 @@ class avr_op_CP:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &R2;
+        unsigned char R1;
+        unsigned char R2;
         HWSreg *status;
 
     public:
-        avr_op_CP (word opcode, AvrDevice *c);
+        avr_op_CP(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_CPC:public DecodedInstruction
+class avr_op_CPC: public DecodedInstruction
 {
     /*
      * Compare with Carry.
@@ -445,17 +441,17 @@ class avr_op_CPC:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &R2;
+        unsigned char R1;
+        unsigned char R2;
         HWSreg *status;
 
     public:
-        avr_op_CPC (word opcode, AvrDevice *c);
+        avr_op_CPC(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_CPI:public DecodedInstruction
+class avr_op_CPI: public DecodedInstruction
 {
     /*
      * Compare with Immediate.
@@ -468,18 +464,18 @@ class avr_op_CPI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
         HWSreg *status;
         unsigned char K;
 
     public:
-        avr_op_CPI (word opcode, AvrDevice *c);
+        avr_op_CPI(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 
 };
 
-class avr_op_CPSE:public DecodedInstruction
+class avr_op_CPSE: public DecodedInstruction
 {
     /*
      * Compare, Skip if Equal.
@@ -492,12 +488,12 @@ class avr_op_CPSE:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &R2;
+        unsigned char R1;
+        unsigned char R2;
         HWSreg *status;
 
     public:
-        avr_op_CPSE (word opcode, AvrDevice *c);
+        avr_op_CPSE(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
