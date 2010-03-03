@@ -467,60 +467,44 @@ int avr_op_CPSE::operator()() {
     return clks;
 }
 
-avr_op_DEC::avr_op_DEC
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode), 0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    status(core->status) 
-{}
+avr_op_DEC::avr_op_DEC(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    status(c->status) {}
 
-int avr_op_DEC::operator()() 
-{
+int avr_op_DEC::operator()() {
+    byte res = core->GetCoreReg(R1) - 1;
 
-    byte res = R1-1;
+    status->N = (res >> 7) & 0x1;
+    status->V = res == 0x7f;
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xff) == 0;
 
-    status->N = ((res >> 7) & 0x1) ;
-    status->V = (res == 0x7f) ;
-    status->S = (status->N ^ status->V) ;
-    status->Z = ((res & 0xff) == 0) ;
-
-    R1=res;
+    core->SetCoreReg(R1, res);
 
     return 1;
 }
 
-avr_op_EICALL:: avr_op_EICALL
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, 0, 0),
-    RL((*(core->R))[30]),
-    RH((*(core->R))[31]),
-    eind((*(core->ioreg))[EIND])
-{}
+#define EIND 0x10
 
-int  avr_op_EICALL::operator()() 
-{
+avr_op_EICALL:: avr_op_EICALL(word opcode, AvrDevice *c):
+    DecodedInstruction(c) {}
 
-    int new_PC=RL+(RH<<8)+((*(core->ioreg))[EIND]<<16);
+int avr_op_EICALL::operator()() {
+    unsigned new_PC = core->GetRegZ() + (core->eind->GetRegVal() << 16);
 
     core->stack->PushAddr(core->PC + 1);
 
-    core->PC=new_PC;
+    core->PC = new_PC;
 
-    return 4;
+    return core->flagXMega ? 3 : 4;
 }
 
-avr_op_EIJMP::avr_op_EIJMP
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, 0,0),
-    RL((*(core->R))[30]),
-    RH((*(core->R))[31]),
-    eind((*(core->ioreg))[EIND])
-{}
+avr_op_EIJMP::avr_op_EIJMP(word opcode, AvrDevice *c):
+    DecodedInstruction(c) {}
 
-int avr_op_EIJMP::operator()() 
-{
-
-    core->PC = ((eind & 0x3f) << 16) + (RH << 8)+ RL;
+int avr_op_EIJMP::operator()() {
+    core->PC = (core->eind->GetRegVal() << 16) + core->GetRegZ();
 
     return 2;
 }
@@ -541,8 +525,8 @@ int avr_op_ELPM_Z::operator()()
 
     unsigned char rampz = 0;
     if(core->rampz != NULL)
-        rampz = core->rampz->GetRampz();
-    Z = ((rampz & 0x3f) << 16) +
+        rampz = core->rampz->GetRegVal();
+    Z = (rampz << 16) +
         (ZH << 8) +
         ZL;
 
@@ -571,8 +555,8 @@ int avr_op_ELPM_Z_incr::operator()()
 
     unsigned char rampz = 0;
     if(core->rampz != NULL)
-        rampz = core->rampz->GetRampz();
-    Z = ((rampz & 0x3f) << 16) +
+        rampz = core->rampz->GetRegVal();
+    Z = (rampz << 16) +
         (ZH << 8) +
         ZL;
 
@@ -584,7 +568,7 @@ int avr_op_ELPM_Z_incr::operator()()
     /* post increment Z */
     Z += 1;
     if(core->rampz != NULL)
-        core->rampz->SetRampz((Z >> 16) & 0x3f);
+        core->rampz->SetRegVal(Z >> 16);
     ZL=Z&0xff;
     ZH=(Z>>8)&0xff;
 
@@ -608,8 +592,8 @@ int avr_op_ELPM::operator()()
 
     unsigned char rampz = 0;
     if(core->rampz != NULL)
-        rampz = core->rampz->GetRampz();
-    Z = ((rampz & 0x3f) << 16) +
+        rampz = core->rampz->GetRegVal();
+    Z = (rampz << 16) +
         (ZH << 8) +
         ZL;
 
@@ -662,7 +646,7 @@ int avr_op_ESPM::operator()()
     unsigned char xaddr = 0;
     int cycles = 1;
     if(core->rampz != NULL)
-        xaddr = core->rampz->GetRampz();
+        xaddr = core->rampz->GetRegVal();
     if(core->spmRegister != NULL) {
         unsigned int Z = R30 + (R31 << 8);
         unsigned int D = R0 + (R1 << 8);
@@ -672,7 +656,7 @@ int avr_op_ESPM::operator()()
         R30 = Z & 0xff;
         R31 = (Z >> 8) & 0xff;
         if(core->rampz != NULL)
-            core->rampz->SetRampz((Z >> 16) & 0x3f);
+            core->rampz->SetRegVal(Z >> 16);
     }
     return cycles;
 }
@@ -1886,7 +1870,7 @@ int avr_op_SPM::operator()()
     unsigned char xaddr = 0;
     int cycles = 1;
     if(core->rampz != NULL)
-        xaddr = core->rampz->GetRampz();
+        xaddr = core->rampz->GetRegVal();
     if(core->spmRegister != NULL) {
         unsigned int Z = R30 + (R31 << 8);
         unsigned int D = R0 + (R1 << 8);
@@ -2451,12 +2435,28 @@ DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core )
 
     switch (opcode) {
         /* opcodes with no operands */
-        case 0x9519: return new  avr_op_EICALL(opcode, core);              /* 1001 0101 0001 1001 | EICALL */
-        case 0x9419: return new  avr_op_EIJMP(opcode, core);               /* 1001 0100 0001 1001 | EIJMP */
+        case 0x9519:
+            if(core->flagEIJMPInstructions)
+                return new avr_op_EICALL(opcode, core);                    /* 1001 0101 0001 1001 | EICALL */
+            else
+                return new avr_op_ILLEGAL(opcode, core);
+        case 0x9419:
+            if(core->flagEIJMPInstructions)
+                return new avr_op_EIJMP(opcode, core);                     /* 1001 0100 0001 1001 | EIJMP */
+            else
+                return new avr_op_ILLEGAL(opcode, core);
         case 0x95D8: return new  avr_op_ELPM(opcode, core);                /* 1001 0101 1101 1000 | ELPM */
         case 0x95F8: return new  avr_op_ESPM(opcode, core);                /* 1001 0101 1111 1000 | ESPM */
-        case 0x9509: return new  avr_op_ICALL(opcode, core);               /* 1001 0101 0000 1001 | ICALL */
-        case 0x9409: return new  avr_op_IJMP(opcode, core);                /* 1001 0100 0000 1001 | IJMP */
+        case 0x9509:
+            if(core->flagIJMPInstructions)
+                return new avr_op_ICALL(opcode, core);                     /* 1001 0101 0000 1001 | ICALL */
+            else
+                return new avr_op_ILLEGAL(opcode, core);
+        case 0x9409:
+            if(core->flagIJMPInstructions)
+                return new avr_op_IJMP(opcode, core);                      /* 1001 0100 0000 1001 | IJMP */
+            else
+                return new avr_op_ILLEGAL(opcode, core);
         case 0x95C8: return new  avr_op_LPM(opcode, core);                 /* 1001 0101 1100 1000 | LPM */
         case 0x0000: return new  avr_op_NOP(opcode, core);                 /* 0000 0000 0000 0000 | NOP */
         case 0x9508: return new  avr_op_RET(opcode, core);                 /* 1001 0101 0000 1000 | RET */

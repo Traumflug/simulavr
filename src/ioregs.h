@@ -29,17 +29,19 @@
 #include "traceval.h"
 #include "avrdevice.h"
 
-class HWRampz: public Hardware, public TraceValueRegister {
-    protected:
-        unsigned char rampz;
+class AddressExtensionRegister: public Hardware, public TraceValueRegister {
+  
+    private:
+        unsigned char reg_val;
+        unsigned char reg_mask;
 
     public:
-        HWRampz(AvrDevice *core);
-        void Reset(){rampz=0;}
-        unsigned char GetRampz() { return rampz; }
-        void SetRampz(unsigned char val) { rampz=val; }
+        AddressExtensionRegister(AvrDevice *core, const std::string &regname, unsigned bitsize);
+        void Reset() { reg_val = 0; }
+        unsigned char GetRegVal() { return reg_val; }
+        void SetRegVal(unsigned char val) { reg_val = val & reg_mask; }
 
-        IOReg<HWRampz> rampz_reg;
+        IOReg<AddressExtensionRegister> ext_reg;
 };
 
 #endif

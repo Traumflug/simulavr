@@ -25,11 +25,14 @@
 
 #include "ioregs.h"
 
-HWRampz::HWRampz(AvrDevice *core):
+AddressExtensionRegister::AddressExtensionRegister(AvrDevice *core,
+                                                   const std::string &regname,
+                                                   unsigned bitsize):
     Hardware(core),
-    TraceValueRegister(core, "RAMPZ"),
-    rampz_reg(this, "RAMPZ",
-              this, &HWRampz::GetRampz, &HWRampz::SetRampz) {
+    TraceValueRegister(core, regname),
+    ext_reg(this, regname,
+            this, &AddressExtensionRegister::GetRegVal, &AddressExtensionRegister::SetRegVal),
+    reg_mask((1 << bitsize) - 1) {
     Reset();
 }
 

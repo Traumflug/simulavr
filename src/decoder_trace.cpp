@@ -229,22 +229,22 @@ int avr_op_CPSE::Trace() {
     return ret;
 }
 
-int avr_op_DEC::Trace( ) {
-    traceOut << "DEC R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret=this->operator()();
+int avr_op_DEC::Trace() {
+    traceOut << "DEC R" << R1 << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_EICALL::Trace( ) {
-    traceOut << "EICALL " ;
-    int ret=this->operator()();
+int avr_op_EICALL::Trace() {
+    traceOut << "EICALL ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_EIJMP::Trace( ) {
-    traceOut << "EIJMP " ;
-    int ret=this->operator()();
+int avr_op_EIJMP::Trace() {
+    traceOut << "EIJMP ";
+    int ret = this->operator()();
     return ret;
 }
 
@@ -254,8 +254,8 @@ int avr_op_ELPM_Z::Trace( ) {
 
     unsigned char rampz = 0;
     if(core->rampz != NULL)
-        rampz = core->rampz->GetRampz();
-    unsigned int Z = ((rampz & 0x3f) << 16) +
+        rampz = core->rampz->GetRegVal();
+    unsigned int Z = (rampz << 16) +
         (((*(core->R))[31]) << 8) + 
         (*(core->R))[30];
 
@@ -272,8 +272,8 @@ int avr_op_ELPM_Z_incr::Trace( ) {
 
     unsigned char rampz = 0;
     if(core->rampz != NULL)
-        rampz = core->rampz->GetRampz();
-    unsigned int Z = ((rampz & 0x3f) << 16) +
+        rampz = core->rampz->GetRegVal();
+    unsigned int Z = (rampz << 16) +
         (((*(core->R))[31]) << 8) + 
         (*(core->R))[30];
 
@@ -292,8 +292,8 @@ int avr_op_ELPM::Trace( ) {
 
     unsigned char rampz = 0;
     if(core->rampz != NULL)
-        rampz = core->rampz->GetRampz();
-    unsigned int Z = ((rampz & 0x3f) << 16) +
+        rampz = core->rampz->GetRegVal();
+    unsigned int Z = (rampz << 16) +
         (((*(core->R))[31]) << 8) + 
         (*(core->R))[30];
 

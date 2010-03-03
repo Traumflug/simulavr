@@ -91,7 +91,7 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     portg = new HWPort(this, "G");
 
     RegisterPin("AREF", &aref);
-    rampz = new HWRampz(this);
+    rampz = new AddressExtensionRegister(this, "RAMPZ", 1);
 
     admux = new HWAdmux(this,
           &portf->GetPin(0), &portf->GetPin(1), &portf->GetPin(2),
@@ -235,7 +235,7 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
     
-    rw[0x5b]= & rampz->rampz_reg;
+    rw[0x5b]= & rampz->ext_reg;
 
     rw[0x5a]= eicrb_reg;
     rw[0x59]= eimsk_reg;

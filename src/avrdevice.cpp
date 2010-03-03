@@ -234,6 +234,8 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     ioSpaceSize(_ioSpaceSize),
     flagIWInstructions(true),
     flagJMPInstructions(true),
+    flagIJMPInstructions(true),
+    flagEIJMPInstructions(false),
     flagTiny10(false),
     flagXMega(false)
 {
@@ -245,8 +247,9 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     
     data = new Data; //only the symbol container
 
-    // placeholder for RAMPZ register
+    // placeholder for RAMPZ and EIND register
     rampz = NULL;
+    eind = NULL;
     
     // memory space for all RW-Memory addresses + shadow store for invalid cells
     unsigned invalidSize = totalIoSpace - registerSpaceSize - IRamSize - ERamSize; 

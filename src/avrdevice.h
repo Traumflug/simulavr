@@ -51,7 +51,7 @@ class MemoryOffsets;
 class RWMemoryMember;
 class Hardware;
 class DumpManager;
-class HWRampz;
+class AddressExtensionRegister;
 
 //! Basic AVR device, contains the core functionality
 class AvrDevice: public SimulationMember, public TraceValueRegister {
@@ -91,12 +91,15 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         HWEeprom *eeprom;
         Data *data;
         HWIrqSystem *irqSystem;
-        HWRampz *rampz;
+        AddressExtensionRegister *rampz; //!< RAMPZ address extension register
+        AddressExtensionRegister *eind; //!< EIND address extension register
         bool abortOnInvalidAccess; //!< Flag, that simulation abort if an invalid access occured, default is false
         TraceValueCoreRegister coreTraceGroup;
 
         bool flagIWInstructions; //!< ADIW and SBIW instructions are available (not on most tiny's!)
         bool flagJMPInstructions; //!< CALL and JMP instructions are available (only on devices with bigger flash)
+        bool flagIJMPInstructions; //!< ICALL and IJMP instructions are available (not on attiny1x devices)
+        bool flagEIJMPInstructions; //!< EICALL and EIJMP instructions are available (only on some devices with bigger flash)
         bool flagTiny10; //!< core is a tiny4/5/9/10, change used clocks on some instructions
         bool flagXMega; //!< core is a XMEGA device, change used clocks on some instructions
         

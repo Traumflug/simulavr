@@ -498,7 +498,7 @@ class avr_op_CPSE: public DecodedInstruction
         int Trace();
 };
 
-class avr_op_DEC:public DecodedInstruction
+class avr_op_DEC: public DecodedInstruction
 {
     /*
      * Decrement.
@@ -511,16 +511,16 @@ class avr_op_DEC:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
         HWSreg *status;
 
     public:
-        avr_op_DEC (word opcode, AvrDevice *c);
+        avr_op_DEC(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_EICALL:public DecodedInstruction
+class avr_op_EICALL: public DecodedInstruction
 { 
     /*
      * Extended Indirect Call to (Z).
@@ -531,20 +531,14 @@ class avr_op_EICALL:public DecodedInstruction
      * Flags      : None
      * Num Clocks : 4
      */
-#define EIND 0x10 //TODO
-
-    protected:
-        RWMemoryMember &RL;
-        RWMemoryMember &RH;
-        RWMemoryMember &eind;
 
     public:
-        avr_op_EICALL (word opcode, AvrDevice *c);
+        avr_op_EICALL(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_EIJMP:public DecodedInstruction
+class avr_op_EIJMP: public DecodedInstruction
 {
     /*
      * Extended Indirect Jmp to (Z).
@@ -556,13 +550,8 @@ class avr_op_EIJMP:public DecodedInstruction
      * Num Clocks : 2
      */
 
-    protected:
-        RWMemoryMember &RL;
-        RWMemoryMember &RH;
-        RWMemoryMember &eind;
-
     public:
-        avr_op_EIJMP (word opcode, AvrDevice *c);
+        avr_op_EIJMP(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
