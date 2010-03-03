@@ -89,8 +89,9 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
           &adc6,
           &adc7)
 { 
+    flagJMPInstructions = (flash_bytes > 8U * 1024U) ? true : false;
     irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 26);
-
+    
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 23, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 16);
 

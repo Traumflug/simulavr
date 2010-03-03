@@ -231,7 +231,11 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     registerSpaceSize(32),
     iRamSize(IRamSize),
     eRamSize(ERamSize),
-    ioSpaceSize(_ioSpaceSize)
+    ioSpaceSize(_ioSpaceSize),
+    flagIWInstructions(true),
+    flagJMPInstructions(true),
+    flagTiny10(false),
+    flagXMega(false)
 {
     dump_manager = DumpManager::Instance();
     dump_manager->registerAvrDevice(this);
@@ -526,6 +530,59 @@ bool AvrDevice::SetRWMem(unsigned addr, unsigned char val) {
         return false;
     *(rw[addr]) = val;
     return true;
+}
+
+unsigned char AvrDevice::GetCoreReg(unsigned addr) {
+    if(addr >= registerSpaceSize)
+        return 0;
+    return *(rw[addr]);
+}
+
+bool AvrDevice::SetCoreReg(unsigned addr, unsigned char val) {
+    if(addr >= registerSpaceSize)
+        return false;
+    *(rw[addr]) = val;
+    return true;
+}
+
+unsigned char AvrDevice::GetIOReg(unsigned addr) {
+    if(addr >= ioSpaceSize)
+        return 0;
+    return *(rw[addr + registerSpaceSize]);
+}
+
+bool AvrDevice::SetIOReg(unsigned addr, unsigned char val) {
+    if(addr >= ioSpaceSize)
+        return false;
+    *(rw[addr + registerSpaceSize]) = val;
+    return true;
+}
+
+bool AvrDevice::SetIORegBit(unsigned addr, unsigned bitaddr, bool bval) {
+    if(addr >= 0x20)
+        return false;
+    unsigned char val = *(rw[addr + registerSpaceSize]);
+    if(bval)
+      val |= 1 << bitaddr;
+    else
+      val &= ~(1 << bitaddr);
+    *(rw[addr + registerSpaceSize]) = val;
+    return true;
+}
+
+unsigned AvrDevice::GetRegX(void) {
+    // R27:R26
+    return (*(rw[27]) << 8) + *(rw[26]);
+}
+
+unsigned AvrDevice::GetRegY(void) {
+    // R29:R28
+    return (*(rw[29]) << 8) + *(rw[28]);
+}
+
+unsigned AvrDevice::GetRegZ(void) {
+    // R31:R30
+    return (*(rw[31]) << 8) + *(rw[30]);
 }
 
 // EOF

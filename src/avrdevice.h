@@ -95,7 +95,11 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         bool abortOnInvalidAccess; //!< Flag, that simulation abort if an invalid access occured, default is false
         TraceValueCoreRegister coreTraceGroup;
 
-        //RWMemory *rwmem;
+        bool flagIWInstructions; //!< ADIW and SBIW instructions are available (not on most tiny's!)
+        bool flagJMPInstructions; //!< CALL and JMP instructions are available (only on devices with bigger flash)
+        bool flagTiny10; //!< core is a tiny4/5/9/10, change used clocks on some instructions
+        bool flagXMega; //!< core is a XMEGA device, change used clocks on some instructions
+        
         MemoryOffsets *Sram;
         MemoryOffsets *R;
         MemoryOffsets *ioreg;
@@ -169,7 +173,26 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         unsigned char GetRWMem(unsigned addr);
         //! Set a value to RW memory cell
         bool SetRWMem(unsigned addr, unsigned char val);
-        
+        //! Get a value from core register
+        unsigned char GetCoreReg(unsigned addr);
+        //! Set a value to core register
+        bool SetCoreReg(unsigned addr, unsigned char val);
+        //! Get a value from IO register (without offset of 0x20!)
+        unsigned char GetIOReg(unsigned addr);
+        //! Set a value to IO register (without offset of 0x20!)
+        bool SetIOReg(unsigned addr, unsigned char val);
+        //! Set a bit value to lower IO register (without offset of 0x20!)
+        /*! \todo Have to be reimplemented, if IO bit set feature is implemented.
+            Compare differences in datasheets, for example ATMega16 and ATMega48,
+            on CBI and SBI usage at IO registers, which have special behaviour, if
+            bit will be set to 1 */
+        bool SetIORegBit(unsigned addr, unsigned bitaddr, bool val);
+        //! Get value of X register (16bit)
+        unsigned GetRegX(void);
+        //! Get value of Y register (16bit)
+        unsigned GetRegY(void);
+        //! Get value of Z register (16bit)
+        unsigned GetRegZ(void);
 };
 
 #endif

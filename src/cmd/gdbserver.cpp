@@ -465,7 +465,7 @@ void GdbServer::gdb_read_registers( )
     /* 32 gen purpose working registers */
     for ( i=0; i<32; i++ )
     {
-        val = (*(core->R))[i];
+        val = core->GetCoreReg(i);
         buf[i*2]   = HEX_DIGIT[(val >> 4) & 0xf];
         buf[i*2+1] = HEX_DIGIT[val & 0xf];
     }
@@ -522,7 +522,7 @@ void GdbServer::gdb_write_registers(const char *pkt) {
     {
         bval  = hex2nib(*pkt++) << 4;
         bval += hex2nib(*pkt++);
-        (*(core->R))[i]=bval;
+        core->SetCoreReg(i, bval);
 
     }
 
@@ -602,7 +602,7 @@ void GdbServer::gdb_read_register(const char *pkt) {
 
     if ( (reg >= 0) && (reg < 32) )
     {                           /* general regs */
-        byte val = (*(core->R))[reg];
+        byte val = core->GetCoreReg(reg);
         snprintf(reply, sizeof(reply), "%02x", val);
     }
     else if (reg == 32)         /* sreg */
@@ -658,9 +658,7 @@ void GdbServer::gdb_write_register(const char *pkt) {
             *(core->status)=val&0xff;
         }
         else
-        {
-            (*(core->R))[reg]=val&0xff;
-        }
+            core->SetCoreReg(reg, val & 0xff);
     }
     else if (reg == 33)
     {
@@ -774,7 +772,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
         {
             for ( i=0; i<len; i++ )
             {
-                bval = (*(core->Sram))[addr+i];
+                bval = core->GetRWMem(addr + i);
                 buf[i*2]   = HEX_DIGIT[bval >> 4];
                 buf[i*2+1] = HEX_DIGIT[bval & 0xf];
             }
@@ -886,7 +884,7 @@ void GdbServer::gdb_write_memory(const char *pkt) {
             {
                 bval  = hex2nib(*pkt++) << 4;
                 bval += hex2nib(*pkt++);
-                (*(core->Sram))[i]=bval;
+                core->SetRWMem(i, bval);
             }
         }
     }

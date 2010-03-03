@@ -68,6 +68,7 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
               0,            // External RAM size
               2 * 1024)     // Flash Size
 {
+    flagJMPInstructions = false;
     irqSystem = new HWIrqSystem(this, 2, 19); //2 bytes per vector, 19 vectors
     eeprom = new HWEeprom(this, irqSystem, 128, 17, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 8);
