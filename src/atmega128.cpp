@@ -79,6 +79,7 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     AvrDevice(224, 4096, 0xef00, 256*1024),
     aref()
 {
+    flagELPMInstructions = true;
     irqSystem = new HWIrqSystem(this, 4, 35); //4 bytes per vector, 35 vectors
     eeprom = new HWEeprom( this, irqSystem, 4096, 22); 
     stack = new HWStackSram(this, 16);

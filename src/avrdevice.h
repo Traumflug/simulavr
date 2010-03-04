@@ -100,7 +100,10 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         bool flagJMPInstructions; //!< CALL and JMP instructions are available (only on devices with bigger flash)
         bool flagIJMPInstructions; //!< ICALL and IJMP instructions are available (not on attiny1x devices)
         bool flagEIJMPInstructions; //!< EICALL and EIJMP instructions are available (only on some devices with bigger flash)
-        bool flagTiny10; //!< core is a tiny4/5/9/10, change used clocks on some instructions
+        bool flagLPMInstructions; //!< LPM and SPM instructions are available (not on some tiny devices)
+        bool flagELPMInstructions; //!< ELPM instructions are available (only on devices with bigger flash)
+        bool flagMULInstructions; //!< (F)MULxx instructions are available
+        bool flagTiny10; //!< core is a tiny4/5/9/10, change used clocks on some instructions and disables LPM instruction
         bool flagXMega; //!< core is a XMEGA device, change used clocks on some instructions
         
         MemoryOffsets *Sram;

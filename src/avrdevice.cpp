@@ -236,6 +236,9 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     flagJMPInstructions(true),
     flagIJMPInstructions(true),
     flagEIJMPInstructions(false),
+    flagLPMInstructions(true),
+    flagELPMInstructions(false),
+    flagMULInstructions(true),
     flagTiny10(false),
     flagXMega(false)
 {

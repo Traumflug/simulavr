@@ -248,127 +248,111 @@ int avr_op_EIJMP::Trace() {
     return ret;
 }
 
-int avr_op_ELPM_Z::Trace( ) {
-    traceOut << "ELPM R" << p1 << ", Z " ;
-    int ret=this->operator()();
+int avr_op_ELPM_Z::Trace() {
+    traceOut << "ELPM R" << R1 << ", Z " ;
+    int ret = this->operator()();
 
     unsigned char rampz = 0;
     if(core->rampz != NULL)
         rampz = core->rampz->GetRegVal();
-    unsigned int Z = (rampz << 16) +
-        (((*(core->R))[31]) << 8) + 
-        (*(core->R))[30];
+    unsigned int Z = (rampz << 16) + core->GetRegZ();
 
-    unsigned int flash_addr = Z;// / 2;
-
-    traceOut << " Flash[0x"<<hex<< (unsigned int) flash_addr<<"] ";
+    traceOut << " Flash[0x" << hex << Z << dec << "] ";
 
     return ret;
 }
 
-int avr_op_ELPM_Z_incr::Trace( ) {
-    traceOut << "ELPM R" << p1 << ", Z+ ";
-    int ret=this->operator()();
-
+int avr_op_ELPM_Z_incr::Trace() {
+    traceOut << "ELPM R" << R1 << ", Z+ ";
     unsigned char rampz = 0;
     if(core->rampz != NULL)
         rampz = core->rampz->GetRegVal();
-    unsigned int Z = (rampz << 16) +
-        (((*(core->R))[31]) << 8) + 
-        (*(core->R))[30];
+    unsigned int Z = (rampz << 16) + core->GetRegZ();
+    int ret = this->operator()();
 
-    unsigned int flash_addr = Z; // / 2;
-
-    traceOut << " Flash[0x"<<hex<< (unsigned int) flash_addr<<"] ";
-
-
+    traceOut << " Flash[0x" << hex << Z << dec << "] ";
 
     return ret;
 }
 
-int avr_op_ELPM::Trace( ) {
+int avr_op_ELPM::Trace() {
     traceOut << "ELPM ";
-    int ret=this->operator()();
+    int ret = this->operator()();
 
     unsigned char rampz = 0;
     if(core->rampz != NULL)
         rampz = core->rampz->GetRegVal();
-    unsigned int Z = (rampz << 16) +
-        (((*(core->R))[31]) << 8) + 
-        (*(core->R))[30];
+    unsigned int Z = (rampz << 16) + core->GetRegZ();
 
-    unsigned int flash_addr = Z; // / 2;
-
-    traceOut << " Flash[0x"<<hex<< (unsigned int) flash_addr<<"] ";
-
+    traceOut << " Flash[0x" << hex << Z << dec << "] ";
 
     return ret;
 }
 
-int avr_op_EOR::Trace( ) {
-    traceOut << "EOR R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_EOR::Trace() {
+    traceOut << "EOR R" << R1 << ", R" << R2 << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_ESPM::Trace( ) {
+int avr_op_ESPM::Trace() {
     traceOut << "SPM Z+ ";
-    int ret=this->operator()();
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_FMUL::Trace( ) {
-    traceOut << "FMUL R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_FMUL::Trace() {
+    traceOut << "FMUL R" << Rd << ", R" << Rr << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_FMULS::Trace( ) {
-    traceOut << "FMULS R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_FMULS::Trace() {
+    traceOut << "FMULS R" << Rd << ", R" << Rr << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_FMULSU::Trace( ) {
-    traceOut << "FMULSU R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_FMULSU::Trace() {
+    traceOut << "FMULSU R" << Rd << ", R" << Rr << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_ICALL::Trace( ) {
-    traceOut << "ICALL " ;
-    int ret=this->operator()();
+int avr_op_ICALL::Trace() {
+    traceOut << "ICALL Z " ;
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_IJMP::Trace( ) {
-    traceOut << "IJMP " ;
-    int ret=this->operator()();
+int avr_op_IJMP::Trace() {
+    traceOut << "IJMP Z " ;
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_IN::Trace( ) {
-    traceOut << "IN R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret=this->operator()();
+int avr_op_IN::Trace() {
+    traceOut << "IN R" << R1 << ", " << HexChar(ioreg) << " ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_INC::Trace( ) {
-    traceOut << "INC R" << p1 << " ";
-    int ret=this->operator()();
+int avr_op_INC::Trace() {
+    traceOut << "INC R" << R1 << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_JMP::Trace( ) {
+int avr_op_JMP::Trace() {
     traceOut << "JMP ";
     word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);  //this is k!
     int ret = this->operator()();
-    traceOut << hex << 2 * offset << " ";
+    traceOut << hex << 2 * offset << dec << " ";
 
     string sym(core->Flash->GetSymbolAtAddress(offset));
     traceOut << sym << " ";

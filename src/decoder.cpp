@@ -485,9 +485,7 @@ int avr_op_DEC::operator()() {
     return 1;
 }
 
-#define EIND 0x10
-
-avr_op_EICALL:: avr_op_EICALL(word opcode, AvrDevice *c):
+avr_op_EICALL::avr_op_EICALL(word opcode, AvrDevice *c):
     DecodedInstruction(c) {}
 
 int avr_op_EICALL::operator()() {
@@ -509,341 +507,238 @@ int avr_op_EIJMP::operator()() {
     return 2;
 }
 
-avr_op_ELPM_Z::avr_op_ELPM_Z
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    ZL((*(core->R))[30]),
-    ZH((*(core->R))[31])
-{}
+avr_op_ELPM_Z::avr_op_ELPM_Z(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)) {}
 
-int avr_op_ELPM_Z::operator()() 
-{
-
-    int Z, flash_addr;
-    word data;
-
+int avr_op_ELPM_Z::operator()() {
+    unsigned int Z;
     unsigned char rampz = 0;
+
     if(core->rampz != NULL)
         rampz = core->rampz->GetRegVal();
-    Z = (rampz << 16) +
-        (ZH << 8) +
-        ZL;
+    Z = (rampz << 16) + core->GetRegZ();
 
-
-    flash_addr = Z ^ 0x0001;
-    data = core->Flash->ReadMem(flash_addr);
-    R1=data;
+    core->SetCoreReg(R1, core->Flash->ReadMem(Z ^ 0x1));
 
     return 3;
 }
 
-avr_op_ELPM_Z_incr::avr_op_ELPM_Z_incr
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    ZL((*(core->R))[30]),
-    ZH((*(core->R))[31])
-{}
+avr_op_ELPM_Z_incr::avr_op_ELPM_Z_incr(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)) {}
 
-int avr_op_ELPM_Z_incr::operator()() 
-{
-
-
-    int Z, flash_addr;
-    word data;
-
+int avr_op_ELPM_Z_incr::operator()() {
+    unsigned int Z;
     unsigned char rampz = 0;
+
     if(core->rampz != NULL)
         rampz = core->rampz->GetRegVal();
-    Z = (rampz << 16) +
-        (ZH << 8) +
-        ZL;
+    Z = (rampz << 16) + core->GetRegZ();
 
-    flash_addr = Z ^ 0x0001;
-
-    data = core->Flash->ReadMem(flash_addr);
-    R1=data;
+    core->SetCoreReg(R1, core->Flash->ReadMem(Z ^ 0x1));
 
     /* post increment Z */
-    Z += 1;
+    Z++;
     if(core->rampz != NULL)
         core->rampz->SetRegVal(Z >> 16);
-    ZL=Z&0xff;
-    ZH=(Z>>8)&0xff;
+    core->SetCoreReg(30, Z & 0xff);
+    core->SetCoreReg(31, (Z >> 8) & 0xff);
 
     return 3;
 }
 
+avr_op_ELPM::avr_op_ELPM(word opcode, AvrDevice *c):
+    DecodedInstruction(c) {}
 
-avr_op_ELPM::avr_op_ELPM
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, 0,0),
-    R0((*(core->R))[0]),
-    ZL((*(core->R))[30]),
-    ZH((*(core->R))[31])
-{}
-
-int avr_op_ELPM::operator()() 
-{
-
+int avr_op_ELPM::operator()() {
     int Z, flash_addr;
     word data;
-
     unsigned char rampz = 0;
+
     if(core->rampz != NULL)
         rampz = core->rampz->GetRegVal();
-    Z = (rampz << 16) +
-        (ZH << 8) +
-        ZL;
+    Z = (rampz << 16) + core->GetRegZ();
 
-    flash_addr = Z ^ 0x0001;
-
-    data = core->Flash->ReadMem(flash_addr);
-    R0=data;
+    core->SetCoreReg(0, core->Flash->ReadMem(Z ^ 0x1));
+    
     return 3;
 }
 
+avr_op_EOR::avr_op_EOR(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    R2(get_rr_5(opcode)),
+    status(c->status) {}
 
-avr_op_EOR::avr_op_EOR
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    R2((*(core->R))[get_rr_5(opcode)]),
-    status(core->status) 
-{}
-
-int avr_op_EOR::operator()() 
-{
-
-    byte rd = R1; 
-    byte rr = R2;
-
+int avr_op_EOR::operator()() {
+    byte rd = core->GetCoreReg(R1); 
+    byte rr = core->GetCoreReg(R2);
     byte res = rd ^ rr;
 
+    status->V = 0;
+    status->N = (res >> 7) & 0x1;
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xff) == 0;
 
-    status->V = 0 ;
-    status->N = ((res >> 7) & 0x1) ;
-    status->S = (status->N ^ status->V) ;
-    status->Z = ((res & 0xff) == 0 ) ;
-
-    R1=res;
+    core->SetCoreReg(R1, res);
 
     return 1;
 }
 
-avr_op_ESPM::avr_op_ESPM
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, 0, 0),
-    R0((*(core->R))[0]),
-    R1((*(core->R))[1]),
-    R30((*(core->R))[30]),
-    R31((*(core->R))[31])
-{}
+avr_op_ESPM::avr_op_ESPM(word opcode, AvrDevice *c):
+    DecodedInstruction(c) {}
 
-int avr_op_ESPM::operator()()
-{
+int avr_op_ESPM::operator()() {
     unsigned char xaddr = 0;
     int cycles = 1;
     if(core->rampz != NULL)
         xaddr = core->rampz->GetRegVal();
     if(core->spmRegister != NULL) {
-        unsigned int Z = R30 + (R31 << 8);
-        unsigned int D = R0 + (R1 << 8);
+        unsigned int Z = core->GetRegZ();
+        unsigned int D = core->GetCoreReg(0) + (core->GetCoreReg(1) << 8);
         cycles += core->spmRegister->SPM_action(D, xaddr, Z);
         // increment Z register
         Z++;
-        R30 = Z & 0xff;
-        R31 = (Z >> 8) & 0xff;
+        core->SetCoreReg(30, Z & 0xff);
+        core->SetCoreReg(31, (Z >> 8) & 0xff);
         if(core->rampz != NULL)
             core->rampz->SetRegVal(Z >> 16);
     }
     return cycles;
 }
 
+avr_op_FMUL::avr_op_FMUL(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    Rd(get_rd_3(opcode)),
+    Rr(get_rr_3(opcode)),
+    status(c->status) {}
 
-
-avr_op_FMUL::avr_op_FMUL
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_3(opcode), get_rr_3(opcode)),
-    R0((*(core->R))[0]),
-    R1((*(core->R))[1]),
-    Rd((*(core->R))[get_rd_3(opcode)]),
-    Rr((*(core->R))[get_rr_3(opcode)]),
-    status(core->status) ,
-    K(get_K_6(opcode))
-{}
-
-int avr_op_FMUL::operator()() 
-{
-
-    byte rd =  Rd;
-    byte rr =  Rr;
+int avr_op_FMUL::operator()() {
+    byte rd = core->GetCoreReg(Rd);
+    byte rr = core->GetCoreReg(Rr);
 
     word resp = rd * rr;
     word res = resp << 1;
 
-
-    status->Z=((res & 0xffff) == 0) ;
-    status->C=((resp >> 15) & 0x1) ;
-
+    status->Z = (res & 0xffff) == 0;
+    status->C= (resp >> 15) & 0x1;
 
     /* result goes in R1:R0 */
-    R0=res&0xff;
-    R1=res>>8;
+    core->SetCoreReg(0, res & 0xff);
+    core->SetCoreReg(1, (res >> 8) & 0xff);
 
     return 2;
 }
 
 
-avr_op_FMULS::avr_op_FMULS
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_3(opcode), get_rr_3(opcode)),
-    R0((*(core->R))[0]),
-    R1((*(core->R))[1]),
-    Rd((*(core->R))[get_rd_3(opcode)]),
-    Rr((*(core->R))[get_rr_3(opcode)]),
-    status(core->status) 
-{}
+avr_op_FMULS::avr_op_FMULS(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    Rd(get_rd_3(opcode)),
+    Rr(get_rr_3(opcode)),
+    status(c->status) {}
 
-int avr_op_FMULS::operator()() 
-{
-
-    sbyte rd = Rd; 
-    sbyte rr = Rr;
+int avr_op_FMULS::operator()() {
+    sbyte rd = core->GetCoreReg(Rd); 
+    sbyte rr = core->GetCoreReg(Rr);
 
     word resp = rd * rr;
     word res = resp << 1;
 
-
-    status->Z = ((res & 0xffff) == 0) ;
-    status->C = ((resp >> 15) & 0x1) ;
+    status->Z = (res & 0xffff) == 0;
+    status->C = (resp >> 15) & 0x1;
 
     /* result goes in R1:R0 */
-    R0= res& 0xff;
-    R1= res>>8;
+    core->SetCoreReg(0, res & 0xff);
+    core->SetCoreReg(1, (res >> 8) & 0xff);
 
     return 2;
 }
 
 
-avr_op_FMULSU::avr_op_FMULSU
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_3(opcode), get_rr_3(opcode)),
+avr_op_FMULSU::avr_op_FMULSU(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    Rd(get_rd_3(opcode)),
+    Rr(get_rr_3(opcode)),
+    status(c->status) {}
 
-    R0((*(core->R))[0]),
-    R1((*(core->R))[1]),
-    Rd((*(core->R))[get_rd_3(opcode)]),
-    Rr((*(core->R))[get_rr_3(opcode)]),
-    status(core->status) 
-{}
-
-int avr_op_FMULSU::operator()() 
-{
-
-    sbyte rd = Rd;
-    byte rr = Rr;
+int avr_op_FMULSU::operator()() {
+    sbyte rd = core->GetCoreReg(Rd);
+    byte rr = core->GetCoreReg(Rr);
 
     word resp = rd * rr;
     word res = resp << 1;
 
+    status->Z = (res & 0xffff) == 0;
+    status->C = (resp >> 15) & 0x1;
 
-    status->Z=((res & 0xffff) == 0) ;
-    status->C=((resp >> 15) & 0x1) ;
-    R0= res& 0xff;
-    R1= res>>8;
-
+    /* result goes in R1:R0 */
+    core->SetCoreReg(0, res & 0xff);
+    core->SetCoreReg(1, (res >> 8) & 0xff);
     return 2;
 }
 
-avr_op_ICALL::avr_op_ICALL
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, 0,0),
-    Rl((*(core->R))[30]),
-    Rh((*(core->R))[31]),
-    pc_bytes((c->PC_size) )
-{}
+avr_op_ICALL::avr_op_ICALL(word opcode, AvrDevice *c):
+    DecodedInstruction(c) {}
 
-int avr_op_ICALL::operator()() 
-{
-
-    int pc = core->PC;
-
+int avr_op_ICALL::operator()() {
+    unsigned int pc = core->PC;
     /* Z is R31:R30 */
-    int new_pc = (Rh << 8) + Rl;
+    unsigned int new_pc = core->GetRegZ();
 
     core->stack->PushAddr(pc + 1);
 
-    core->PC=new_pc-1;
+    core->PC = new_pc - 1;
 
-    return pc_bytes + 1;
+    return core->PC_size + core->flagXMega ? 0 : 1;
 }
 
+avr_op_IJMP::avr_op_IJMP(word opcode, AvrDevice *c):
+    DecodedInstruction(c) {}
 
-avr_op_IJMP::avr_op_IJMP
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, 0,0),
-    Rl((*(core->R))[30]),
-    Rh((*(core->R))[31])
-{}
-
-int avr_op_IJMP::operator()() 
-{
-
-    int new_pc = (Rh << 8) + Rl;
-    core->PC=new_pc-1;
+int avr_op_IJMP::operator()() {
+    int new_pc = core->GetRegZ();
+    
+    core->PC = new_pc - 1;
 
     return 2;
 }
 
+avr_op_IN::avr_op_IN(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    ioreg(get_A_6(opcode)) {}
 
-avr_op_IN::avr_op_IN
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode), get_A_6(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    ioreg((*(core->ioreg))[get_A_6(opcode)])
-{}
-
-int avr_op_IN::operator()() 
-{
-
-    R1=ioreg;
+int avr_op_IN::operator()() {
+    core->SetCoreReg(R1, core->GetIOReg(ioreg));
 
     return 1;
 }
 
-avr_op_INC::avr_op_INC
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    status(core->status) 
-{}
+avr_op_INC::avr_op_INC(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    status(c->status) {}
 
-int avr_op_INC::operator()() 
-{
-
-    byte rd  = R1;
+int avr_op_INC::operator()() {
+    byte rd  = core->GetCoreReg(R1);
     byte res = rd + 1;
 
-    status->N = ((res >> 7) & 0x1) ;
-    status->V = (rd == 0x7f) ;
-    status->S = (status->N ^ status->V) ;
-    status->Z = ((res & 0xff) == 0) ;
+    status->N = (res >> 7) & 0x1;
+    status->V = rd == 0x7f;
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xff) == 0;
 
-    R1=res;
-
+    core->SetCoreReg(R1, res);
 
     return 1;
 }
 
-avr_op_JMP::avr_op_JMP
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_k_22(opcode), 0, true),
-    K(get_k_22(opcode))
-{}
+avr_op_JMP::avr_op_JMP(word opcode, AvrDevice *c):
+    DecodedInstruction(c, true),
+    K(get_k_22(opcode)) {}
 
-int avr_op_JMP::operator()() 
-{
+int avr_op_JMP::operator()() {
     word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);
     core->PC = K + offset - 1;
     return 3;
@@ -2445,8 +2340,16 @@ DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core )
                 return new avr_op_EIJMP(opcode, core);                     /* 1001 0100 0001 1001 | EIJMP */
             else
                 return new avr_op_ILLEGAL(opcode, core);
-        case 0x95D8: return new  avr_op_ELPM(opcode, core);                /* 1001 0101 1101 1000 | ELPM */
-        case 0x95F8: return new  avr_op_ESPM(opcode, core);                /* 1001 0101 1111 1000 | ESPM */
+        case 0x95D8:
+            if(core->flagELPMInstructions)
+                return new avr_op_ELPM(opcode, core);                      /* 1001 0101 1101 1000 | ELPM */
+            else
+                return new avr_op_ILLEGAL(opcode, core);
+        case 0x95F8:
+            if(core->flagLPMInstructions)
+                return new avr_op_ESPM(opcode, core);                      /* 1001 0101 1111 1000 | ESPM */
+            else
+                return new avr_op_ILLEGAL(opcode, core);
         case 0x9509:
             if(core->flagIJMPInstructions)
                 return new avr_op_ICALL(opcode, core);                     /* 1001 0101 0000 1001 | ICALL */
@@ -2457,12 +2360,21 @@ DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core )
                 return new avr_op_IJMP(opcode, core);                      /* 1001 0100 0000 1001 | IJMP */
             else
                 return new avr_op_ILLEGAL(opcode, core);
-        case 0x95C8: return new  avr_op_LPM(opcode, core);                 /* 1001 0101 1100 1000 | LPM */
+        case 0x95C8:
+            if(!core->flagTiny10)
+                /* except tiny10, all devices provide LPM instruction! */
+                return new avr_op_LPM(opcode, core);                       /* 1001 0101 1100 1000 | LPM */
+            else
+                return new avr_op_ILLEGAL(opcode, core);
         case 0x0000: return new  avr_op_NOP(opcode, core);                 /* 0000 0000 0000 0000 | NOP */
         case 0x9508: return new  avr_op_RET(opcode, core);                 /* 1001 0101 0000 1000 | RET */
         case 0x9518: return new  avr_op_RETI(opcode, core);                /* 1001 0101 0001 1000 | RETI */
         case 0x9588: return new  avr_op_SLEEP(opcode, core);               /* 1001 0101 1000 1000 | SLEEP */
-        case 0x95E8: return new  avr_op_SPM(opcode, core);                 /* 1001 0101 1110 1000 | SPM */
+        case 0x95E8:
+            if(core->flagLPMInstructions)
+                return new avr_op_SPM(opcode, core);                       /* 1001 0101 1110 1000 | SPM */
+            else
+                return new avr_op_ILLEGAL(opcode, core);
         case 0x95A8: return new  avr_op_WDR(opcode, core);                 /* 1001 0101 1010 1000 | WDR */
         default:
                      {
@@ -2477,7 +2389,11 @@ DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core )
                              case 0x1000: return new  avr_op_CPSE(opcode, core);        /* 0001 00rd dddd rrrr | CPSE */
                              case 0x2400: return new  avr_op_EOR(opcode, core);         /* 0010 01rd dddd rrrr | EOR or CLR */
                              case 0x2C00: return new  avr_op_MOV(opcode, core);         /* 0010 11rd dddd rrrr | MOV */
-                             case 0x9C00: return new  avr_op_MUL(opcode, core);         /* 1001 11rd dddd rrrr | MUL */
+                             case 0x9C00:
+                                 if(core->flagMULInstructions)
+                                     return new avr_op_MUL(opcode, core);               /* 1001 11rd dddd rrrr | MUL */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
                              case 0x2800: return new  avr_op_OR(opcode, core);          /* 0010 10rd dddd rrrr | OR */
                              case 0x0800: return new  avr_op_SBC(opcode, core);         /* 0000 10rd dddd rrrr | SBC */
                              case 0x1800: return new  avr_op_SUB(opcode, core);         /* 0001 10rd dddd rrrr | SUB */
@@ -2489,8 +2405,16 @@ DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core )
                              case 0x9405: return new  avr_op_ASR(opcode, core);         /* 1001 010d dddd 0101 | ASR */
                              case 0x9400: return new  avr_op_COM(opcode, core);         /* 1001 010d dddd 0000 | COM */
                              case 0x940A: return new  avr_op_DEC(opcode, core);         /* 1001 010d dddd 1010 | DEC */
-                             case 0x9006: return new  avr_op_ELPM_Z(opcode, core);      /* 1001 000d dddd 0110 | ELPM */
-                             case 0x9007: return new  avr_op_ELPM_Z_incr(opcode, core); /* 1001 000d dddd 0111 | ELPM */
+                             case 0x9006:
+                                 if(core->flagELPMInstructions)
+                                     return new avr_op_ELPM_Z(opcode, core);            /* 1001 000d dddd 0110 | ELPM */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x9007:
+                                 if(core->flagELPMInstructions)
+                                     return new avr_op_ELPM_Z_incr(opcode, core);       /* 1001 000d dddd 0111 | ELPM */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
                              case 0x9403: return new  avr_op_INC(opcode, core);         /* 1001 010d dddd 0011 | INC */
                              case 0x9000: return new  avr_op_LDS(opcode, core);         /* 1001 000d dddd 0000 | LDS */
                              case 0x900C: return new  avr_op_LD_X(opcode, core);        /* 1001 000d dddd 1100 | LD */
@@ -2500,8 +2424,16 @@ DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core )
                              case 0x9009: return new  avr_op_LD_Y_incr(opcode, core);   /* 1001 000d dddd 1001 | LD */
                              case 0x9002: return new  avr_op_LD_Z_decr(opcode, core);   /* 1001 000d dddd 0010 | LD */
                              case 0x9001: return new  avr_op_LD_Z_incr(opcode, core);   /* 1001 000d dddd 0001 | LD */
-                             case 0x9004: return new  avr_op_LPM_Z(opcode, core);       /* 1001 000d dddd 0100 | LPM */
-                             case 0x9005: return new  avr_op_LPM_Z_incr(opcode, core);  /* 1001 000d dddd 0101 | LPM */
+                             case 0x9004:
+                                 if(core->flagLPMInstructions)
+                                     return new avr_op_LPM_Z(opcode, core);             /* 1001 000d dddd 0100 | LPM */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x9005:
+                                 if(core->flagLPMInstructions)
+                                     return new avr_op_LPM_Z_incr(opcode, core);        /* 1001 000d dddd 0101 | LPM */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
                              case 0x9406: return new  avr_op_LSR(opcode, core);         /* 1001 010d dddd 0110 | LSR */
                              case 0x9401: return new  avr_op_NEG(opcode, core);         /* 1001 010d dddd 0001 | NEG */
                              case 0x900F: return new  avr_op_POP(opcode, core);         /* 1001 000d dddd 1111 | POP */
@@ -2620,16 +2552,36 @@ DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core )
                          decode = opcode & ~(mask_Rd_4 | mask_Rr_4);
                          switch ( decode ) {
                              case 0x0100: return new  avr_op_MOVW(opcode, core);        /* 0000 0001 dddd rrrr | MOVW */
-                             case 0x0200: return new  avr_op_MULS(opcode, core);        /* 0000 0010 dddd rrrr | MULS */
+                             case 0x0200:
+                                 if(core->flagMULInstructions)
+                                     return new avr_op_MULS(opcode, core);              /* 0000 0010 dddd rrrr | MULS */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
                          }
 
                          /* opcodes with two 3-bit register (Rd and Rr) operands */
                          decode = opcode & ~(mask_Rd_3 | mask_Rr_3);
                          switch ( decode ) {
-                             case 0x0300: return new  avr_op_MULSU(opcode, core);       /* 0000 0011 0ddd 0rrr | MULSU */
-                             case 0x0308: return new  avr_op_FMUL(opcode, core);        /* 0000 0011 0ddd 1rrr | FMUL */
-                             case 0x0380: return new  avr_op_FMULS(opcode, core);       /* 0000 0011 1ddd 0rrr | FMULS */
-                             case 0x0388: return new  avr_op_FMULSU(opcode, core);      /* 0000 0011 1ddd 1rrr | FMULSU */
+                             case 0x0300:
+                                 if(core->flagMULInstructions)
+                                     return new avr_op_MULSU(opcode, core);             /* 0000 0011 0ddd 0rrr | MULSU */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x0308:
+                                 if(core->flagMULInstructions)
+                                     return new avr_op_FMUL(opcode, core);              /* 0000 0011 0ddd 1rrr | FMUL */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x0380:
+                                 if(core->flagMULInstructions)
+                                     return new avr_op_FMULS(opcode, core);             /* 0000 0011 1ddd 0rrr | FMULS */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x0388:
+                                 if(core->flagMULInstructions)
+                                     return new avr_op_FMULSU(opcode, core);            /* 0000 0011 1ddd 1rrr | FMULSU */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
                          }
 
                      } /* default */
