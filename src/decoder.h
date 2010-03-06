@@ -818,7 +818,7 @@ class avr_op_JMP: public DecodedInstruction
      * Flags      : None
      * Num Clocks : 3
      */
-    //TODO we must read a second word from flash (wuerg!)
+    
     protected:
         unsigned int K;
 
@@ -828,7 +828,7 @@ class avr_op_JMP: public DecodedInstruction
         int Trace();
 };
 
-class avr_op_LDD_Y:public DecodedInstruction
+class avr_op_LDD_Y: public DecodedInstruction
 {
     /*
      * Load Indirect with Displacement using index Y.
@@ -841,18 +841,16 @@ class avr_op_LDD_Y:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
-        RWMemoryMember &Rd;
+        unsigned char Rd;
         unsigned char K;
 
     public:
-        avr_op_LDD_Y (word opcode, AvrDevice *c);
+        avr_op_LDD_Y(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_LDD_Z:public DecodedInstruction
+class avr_op_LDD_Z: public DecodedInstruction
 {
     /*
      * Load Indirect with Displacement using index Z.
@@ -865,18 +863,16 @@ class avr_op_LDD_Z:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rd;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char Rd;
         unsigned char K;
 
     public:
-        avr_op_LDD_Z (word opcode, AvrDevice *c);
+        avr_op_LDD_Z(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_LDI:public DecodedInstruction
+class avr_op_LDI: public DecodedInstruction
 {
     /*
      * Load Immediate.
@@ -889,18 +885,16 @@ class avr_op_LDI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
         unsigned char K;
 
     public:
         avr_op_LDI(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
-}; //end of class 
+};
 
-
-
-class avr_op_LDS:public DecodedInstruction
+class avr_op_LDS: public DecodedInstruction
 {
     /*
      * Load Direct from data space.
@@ -913,15 +907,15 @@ class avr_op_LDS:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
 
     public:
-        avr_op_LDS (word opcode, AvrDevice *c);
+        avr_op_LDS(word opcode, AvrDevice *c);
         int operator()();
-        int Trace();  //TODO, read sram as reference also! read second word!!!
+        int Trace();
 };
 
-class avr_op_LD_X:public DecodedInstruction
+class avr_op_LD_X: public DecodedInstruction
 {
     /*
      * Load Indirect using index X.
@@ -934,19 +928,15 @@ class avr_op_LD_X:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
-        RWMemoryMember &Rd;
-        HWSreg *status;
-        unsigned char K;
+        unsigned char Rd;
 
     public:
-        avr_op_LD_X (word opcode, AvrDevice *c);
+        avr_op_LD_X(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_LD_X_decr:public DecodedInstruction
+class avr_op_LD_X_decr: public DecodedInstruction
 {
     /*
      * Load Indirect and Pre-Decrement using index X.
@@ -959,19 +949,15 @@ class avr_op_LD_X_decr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rd;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
-        HWSreg *status;
-        unsigned char K;
+        unsigned char Rd;
 
     public:
-        avr_op_LD_X_decr (word opcode, AvrDevice *c);
+        avr_op_LD_X_decr(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_LD_X_incr:public DecodedInstruction
+class avr_op_LD_X_incr: public DecodedInstruction
 {
     /*
      * Load Indirect and Post-Increment using index X.
@@ -984,19 +970,15 @@ class avr_op_LD_X_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rd;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
-        HWSreg *status;
-        unsigned char K;
+        unsigned char Rd;
 
     public:
-        avr_op_LD_X_incr (word opcode, AvrDevice *c);
+        avr_op_LD_X_incr(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_LD_Y_decr:public DecodedInstruction
+class avr_op_LD_Y_decr: public DecodedInstruction
 {
     /*
      * Load Indirect and PreDecrement using index Y.
@@ -1010,17 +992,15 @@ class avr_op_LD_Y_decr:public DecodedInstruction
 
 
     protected:
-        RWMemoryMember &Rd;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char Rd;
 
     public:
-        avr_op_LD_Y_decr (word opcode, AvrDevice *c);
+        avr_op_LD_Y_decr(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_LD_Y_incr:public DecodedInstruction
+class avr_op_LD_Y_incr: public DecodedInstruction
 {
     /*
      * Load Indirect and Post-Increment using index Y.
@@ -1033,17 +1013,15 @@ class avr_op_LD_Y_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rd;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char Rd;
 
     public:
-        avr_op_LD_Y_incr (word opcode, AvrDevice *c);
+        avr_op_LD_Y_incr(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_LD_Z_incr:public DecodedInstruction
+class avr_op_LD_Z_incr: public DecodedInstruction
 {
     /*
      * Load Indirect and Post-Increment using index Z.
@@ -1056,19 +1034,15 @@ class avr_op_LD_Z_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rd;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char Rd;
 
     public:
-        avr_op_LD_Z_incr (word opcode, AvrDevice *c);
+        avr_op_LD_Z_incr(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-
-
-class avr_op_LD_Z_decr:public DecodedInstruction
+class avr_op_LD_Z_decr: public DecodedInstruction
 {
     /*
      * Load Indirect and Pre-Decrement using index Z.
@@ -1081,17 +1055,15 @@ class avr_op_LD_Z_decr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rd;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char Rd;
 
     public:
-        avr_op_LD_Z_decr (word opcode, AvrDevice *c);
+        avr_op_LD_Z_decr(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_LPM_Z:public DecodedInstruction
+class avr_op_LPM_Z: public DecodedInstruction
 {
     /*
      * Load Program Memory.
@@ -1104,17 +1076,15 @@ class avr_op_LPM_Z:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rd;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char Rd;
 
     public:
-        avr_op_LPM_Z (word opcode, AvrDevice *c);
+        avr_op_LPM_Z(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_LPM:public DecodedInstruction
+class avr_op_LPM: public DecodedInstruction
 {
     /* Load Program Memory.
      *
@@ -1128,21 +1098,13 @@ class avr_op_LPM:public DecodedInstruction
      */
     //return avr_op_LPM_Z:public DecodedInstruction
 
-
-
-    /* Z is R31:R30 */
-    protected:
-        RWMemoryMember &R0;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
-
     public:
-        avr_op_LPM (word opcode, AvrDevice *c);
+        avr_op_LPM(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_LPM_Z_incr:public DecodedInstruction
+class avr_op_LPM_Z_incr: public DecodedInstruction
 {
     /*
      * Load Program Memory and Post-Incr.
@@ -1155,17 +1117,15 @@ class avr_op_LPM_Z_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rd;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char Rd;
 
     public:
-        avr_op_LPM_Z_incr (word opcode, AvrDevice *c);
+        avr_op_LPM_Z_incr(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_LSR:public DecodedInstruction
+class avr_op_LSR: public DecodedInstruction
 {
     /*
      * Logical Shift Right.
@@ -1178,16 +1138,16 @@ class avr_op_LSR:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rd;
+        unsigned char Rd;
         HWSreg *status;
 
     public:
-        avr_op_LSR (word opcode, AvrDevice *c);
+        avr_op_LSR(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_MOV:public DecodedInstruction
+class avr_op_MOV: public DecodedInstruction
 {
     /* Copy Register.
      *
@@ -1199,16 +1159,16 @@ class avr_op_MOV:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &R2;
+        unsigned char R1;
+        unsigned char R2;
 
     public:
-        avr_op_MOV (word opcode, AvrDevice *c);
+        avr_op_MOV(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_MOVW:public DecodedInstruction
+class avr_op_MOVW: public DecodedInstruction
 {
     /*
      *Copy Register Pair.
@@ -1221,22 +1181,17 @@ class avr_op_MOVW:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rdl;
-        RWMemoryMember &Rdh;
-        RWMemoryMember &Rsl;
-        RWMemoryMember &Rsh;
+        unsigned char Rd;
+        unsigned char Rs;
         HWSreg *status;
-        unsigned char K;
 
     public:
-        avr_op_MOVW (word opcode, AvrDevice *c);
+        avr_op_MOVW(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-
-
-class avr_op_MUL:public DecodedInstruction
+class avr_op_MUL: public DecodedInstruction
 {
     /*
      * Mult Unsigned.
@@ -1249,20 +1204,17 @@ class avr_op_MUL:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R0;
-        RWMemoryMember &R1;
-        RWMemoryMember &Rd;
-        RWMemoryMember &Rr;
+        unsigned char Rd;
+        unsigned char Rr;
         HWSreg *status;
-        unsigned char K;
 
     public:
-        avr_op_MUL (word opcode, AvrDevice *c);
+        avr_op_MUL(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_MULS:public DecodedInstruction
+class avr_op_MULS: public DecodedInstruction
 {
     /*
      * Mult Signed.
@@ -1275,20 +1227,17 @@ class avr_op_MULS:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rd;
-        RWMemoryMember &Rr;
-        RWMemoryMember &R0;
-        RWMemoryMember &R1;
+        unsigned char Rd;
+        unsigned char Rr;
         HWSreg *status;
-        unsigned char K;
 
     public:
-        avr_op_MULS (word opcode, AvrDevice *c);
+        avr_op_MULS(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_MULSU:public DecodedInstruction
+class avr_op_MULSU: public DecodedInstruction
 {
     /*
      * Mult Signed with Unsigned.
@@ -1304,19 +1253,17 @@ class avr_op_MULSU:public DecodedInstruction
 
 
     protected:
-        RWMemoryMember &Rd;
-        RWMemoryMember &Rr;
-        RWMemoryMember &R0;
-        RWMemoryMember &R1;
+        unsigned char Rd;
+        unsigned char Rr;
         HWSreg *status;
 
     public:
-        avr_op_MULSU (word opcode, AvrDevice *c);
+        avr_op_MULSU(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_NEG:public DecodedInstruction
+class avr_op_NEG: public DecodedInstruction
 {
     /*
      * Two's Complement.
@@ -1329,16 +1276,16 @@ class avr_op_NEG:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rd;
+        unsigned char Rd;
         HWSreg *status;
 
     public:
-        avr_op_NEG (word opcode, AvrDevice *c);
+        avr_op_NEG(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_NOP:public DecodedInstruction
+class avr_op_NOP: public DecodedInstruction
 {
     /*
      * No Operation.
@@ -1352,7 +1299,7 @@ class avr_op_NOP:public DecodedInstruction
 
 
     public:
-        avr_op_NOP (word opcode, AvrDevice *c);
+        avr_op_NOP(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
@@ -1370,18 +1317,17 @@ class avr_op_OR:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rd;
-        RWMemoryMember &Rr;
+        unsigned char Rd;
+        unsigned char Rr;
         HWSreg *status;
-        unsigned char K;
 
     public:
-        avr_op_OR (word opcode, AvrDevice *c);
+        avr_op_OR(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_ORI:public DecodedInstruction
+class avr_op_ORI: public DecodedInstruction
 {
     /*
      * Logical OR with Immed.
@@ -1394,17 +1340,17 @@ class avr_op_ORI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
         HWSreg *status;
         unsigned char K;
 
     public:
-        avr_op_ORI (word opcode, AvrDevice *c);
+        avr_op_ORI(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_OUT:public DecodedInstruction
+class avr_op_OUT: public DecodedInstruction
 {
     /*
      * Out To I/O Location.
@@ -1417,16 +1363,16 @@ class avr_op_OUT:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &ioreg;
-        RWMemoryMember &R1;
+        unsigned char ioreg;
+        unsigned char R1;
 
     public:
-        avr_op_OUT (word opcode, AvrDevice *c);
+        avr_op_OUT(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_POP:public DecodedInstruction
+class avr_op_POP: public DecodedInstruction
 {
     /*
      * Pop Register from Stack.
@@ -1439,15 +1385,15 @@ class avr_op_POP:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
 
     public:
-        avr_op_POP (word opcode, AvrDevice *c);
+        avr_op_POP(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_PUSH:public DecodedInstruction
+class avr_op_PUSH: public DecodedInstruction
 {
     /*
      * Push Register on Stack.
@@ -1460,10 +1406,10 @@ class avr_op_PUSH:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
 
     public:
-        avr_op_PUSH (word opcode, AvrDevice *c);
+        avr_op_PUSH(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };

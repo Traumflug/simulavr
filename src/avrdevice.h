@@ -103,7 +103,9 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         bool flagLPMInstructions; //!< LPM and SPM instructions are available (not on some tiny devices)
         bool flagELPMInstructions; //!< ELPM instructions are available (only on devices with bigger flash)
         bool flagMULInstructions; //!< (F)MULxx instructions are available
-        bool flagTiny10; //!< core is a tiny4/5/9/10, change used clocks on some instructions and disables LPM instruction
+        bool flagMOVWInstruction; //!< MOVW instruction is available
+        bool flagTiny10; //!< core is a tiny4/5/9/10, change used clocks on some instructions and disables instructions
+        bool flagTiny1x; //!< core is a tiny1x (but not tiny10!), change used clocks on some instructions and disables instructions
         bool flagXMega; //!< core is a XMEGA device, change used clocks on some instructions
         
         MemoryOffsets *Sram;

@@ -362,193 +362,190 @@ int avr_op_JMP::Trace() {
     return ret;
 }
 
-int avr_op_LDD_Y::Trace( ) {
-    traceOut << "LD R" << p1 << ", Y+"<<p2;
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_LDD_Z::Trace( ) {
-    traceOut << "LDD R" << p1 << ", Z ";
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_LDI::Trace( ) {
-    traceOut << "LDI R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_LDS::Trace( ) {
-    word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);  //this is k!
-    traceOut << "LDS R" << p1 << ", " << hex << "0x" << offset << dec  << " ";
+int avr_op_LDD_Y::Trace() {
+    traceOut << "LDD R" << Rd << ", Y+" << K;
     int ret = this->operator()();
     return ret;
 }
 
-int avr_op_LD_X::Trace( ) {
-    traceOut << "LD R" << p1 << ", X ";
-    int ret=this->operator()();
+int avr_op_LDD_Z::Trace() {
+    traceOut << "LDD R" << Rd << ", Z+" << K;
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_LD_X_decr::Trace( ) {
-    traceOut << "LD R" << p1 << ", -X ";
-    int ret=this->operator()();
+int avr_op_LDI::Trace() {
+    traceOut << "LDI R" << R1 << ", " << HexChar(K) << " ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_LD_X_incr::Trace( ) {
-    traceOut << "LD R" << p1 << ", X+ ";
-    int ret=this->operator()();
+int avr_op_LDS::Trace() {
+    word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);  //this is k!
+    traceOut << "LDS R" << R1 << ", " << hex << "0x" << offset << dec  << " ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_LD_Y_decr::Trace( ) {
-    traceOut << "LD R" << p1 << ", -Y ";
-    int ret=this->operator()();
+int avr_op_LD_X::Trace() {
+    traceOut << "LD R" << Rd << ", X ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_LD_Y_incr::Trace( ) {
-    traceOut << "LD R" << p1 << ", Y+ " ;
-    int ret=this->operator()();
+int avr_op_LD_X_decr::Trace() {
+    traceOut << "LD R" << Rd << ", -X ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_LD_Z_incr::Trace( ) {
-    traceOut << "LD R" << p1 << ", Z+ ";
-    int ret=this->operator()();
+int avr_op_LD_X_incr::Trace() {
+    traceOut << "LD R" << Rd << ", X+ ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_LD_Z_decr::Trace( ) {
-    traceOut << "LD R" << p1 << ", -Z";
-    int ret=this->operator()();
+int avr_op_LD_Y_decr::Trace() {
+    traceOut << "LD R" << Rd << ", -Y ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_LPM_Z::Trace( ) {
-    traceOut << "LPM_Z ";
-    int ret=this->operator()();
+int avr_op_LD_Y_incr::Trace() {
+    traceOut << "LD R" << Rd << ", Y+ " ;
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_LD_Z_incr::Trace() {
+    traceOut << "LD R" << Rd << ", Z+ ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_LD_Z_decr::Trace() {
+    traceOut << "LD R" << Rd << ", -Z";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_LPM_Z::Trace() {
+    traceOut << "LPM R" << Rd << ", Z ";
+    int ret = this->operator()();
 
     /* Z is R31:R30 */
-    int Z = ((*(core->R))[ 31] << 8) + (*(core->R))[ 30];
-    //string sym(core->Flash->GetSymbolAtAddressLpm(Z));
+    unsigned int Z = core->GetRegZ();
     string sym(core->Flash->GetSymbolAtAddress(Z));
-    traceOut << "FLASH[" << hex << Z << "," << sym << "] ";
-
+    traceOut << "FLASH[" << hex << Z << dec << "," << sym << "] ";
 
     return ret;
 }
 
-int avr_op_LPM::Trace( ) {
+int avr_op_LPM::Trace() {
     traceOut << "LPM R0, Z "; 
-    int ret=this->operator()();
+    int ret = this->operator()();
 
     /* Z is R31:R30 */
-    int Z = ((*(core->R))[ 31] << 8) + (*(core->R))[ 30];
-    //string sym(core->Flash->GetSymbolAtAddressLpm(Z));
+    unsigned int Z = core->GetRegZ();
     string sym(core->Flash->GetSymbolAtAddress(Z));
-    traceOut << "FLASH[" << hex << Z << "," << sym << "] ";
+    traceOut << "FLASH[" << hex << Z << dec << "," << sym << "] ";
 
     return ret;
 }
 
-int avr_op_LPM_Z_incr::Trace( ) {
-    traceOut << "LPM R" << p1 << ", Z+ " ;
-    int ret=this->operator()();
+int avr_op_LPM_Z_incr::Trace() {
+    traceOut << "LPM R" << Rd << ", Z+ " ;
     /* Z is R31:R30 */
-    int Z = ((*(core->R))[ 31] << 8) + (*(core->R))[ 30];
-    //string sym(core->Flash->GetSymbolAtAddressLpm(Z));
+    unsigned int Z = core->GetRegZ();
+    int ret = this->operator()();
+    
     string sym(core->Flash->GetSymbolAtAddress(Z));
-    traceOut << "FLASH[" << hex << Z << "," << sym << "] ";
+    traceOut << "FLASH[" << hex << Z << dec << "," << sym << "] ";
     return ret;
 }
 
-int avr_op_LSR::Trace( ) {
-    traceOut << "LSR R" << p1 << " ";
-    int ret=this->operator()();
+int avr_op_LSR::Trace() {
+    traceOut << "LSR R" << Rd << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_MOV::Trace( ) {
-    traceOut << "MOV R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_MOV::Trace() {
+    traceOut << "MOV R" << R1 << ", R" << R2 << " ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_MOVW::Trace( ) {
-    traceOut << "MOVW R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_MOVW::Trace() {
+    traceOut << "MOVW R" << Rd << ", R" << Rs << " ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_MUL::Trace( ) {
-    traceOut << "MUL R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_MUL::Trace() {
+    traceOut << "MUL R" << Rd << ", R" << Rr << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_MULS::Trace( ) {
-    traceOut << "MULS R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_MULS::Trace() {
+    traceOut << "MULS R" << Rd << ", R" << Rr << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_MULSU::Trace( ) {
-    traceOut << "MULSU R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_MULSU::Trace() {
+    traceOut << "MULSU R" << Rd << ", R" << Rr << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_NEG::Trace( ) {
-    traceOut << "NEG R" << p1 <<" ";
-    int ret=this->operator()();
+int avr_op_NEG::Trace() {
+    traceOut << "NEG R" << Rd <<" ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_NOP::Trace( ) {
+int avr_op_NOP::Trace() {
     traceOut << "NOP ";
-    int ret=this->operator()();
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_OR::Trace( ) {
-    traceOut << "OR R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_OR::Trace() {
+    traceOut << "OR R" << Rd << ", R" << Rr << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_ORI::Trace( ) {
-    traceOut << "ORI R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret=this->operator()();
+int avr_op_ORI::Trace() {
+    traceOut << "ORI R" << R1 << ", " << HexChar(K) << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_OUT::Trace( ) {
-    traceOut << "OUT " << HexChar(p1) << dec  << ", R" << p2 << " ";
-    int ret=this->operator()();
+int avr_op_OUT::Trace() {
+    traceOut << "OUT " << HexChar(ioreg) << ", R" << R1 << " ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_POP::Trace( ) {
-    traceOut << "POP R" << p1 << " ";
-    int ret=this->operator()();
+int avr_op_POP::Trace() {
+    traceOut << "POP R" << R1 << " ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_PUSH::Trace( ) {
-    traceOut << "PUSH R" << p1 << " ";
-    int ret=this->operator()();
+int avr_op_PUSH::Trace() {
+    traceOut << "PUSH R" << R1 << " ";
+    int ret = this->operator()();
     return ret;
 }
 
