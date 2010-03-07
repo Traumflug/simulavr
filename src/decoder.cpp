@@ -1164,349 +1164,263 @@ int avr_op_PUSH::operator()() {
     return core->flagXMega ? 1 : 2;
 }
 
-avr_op_RCALL::avr_op_RCALL
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, n_bit_unsigned_to_signed( get_k_12(opcode), 12 ),0),
-    K(n_bit_unsigned_to_signed( get_k_12(opcode), 12 ))
-{}
+avr_op_RCALL::avr_op_RCALL(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    K(n_bit_unsigned_to_signed(get_k_12(opcode), 12)) {}
 
-int avr_op_RCALL::operator()() 
-{
-    int pc       = core->PC;
-    int pc_bytes = core->PC_size;
+int avr_op_RCALL::operator()() {
+    core->stack->PushAddr(core->PC + 1);
+    core->PC += K;
+    core->PC &= (core->Flash->GetSize() - 1) >> 1;
 
-    core->stack->PushAddr(pc + 1);
-    core->PC+=K;
-    core->PC&=(core->Flash->GetSize()-1)>>1;
-
-    return pc_bytes + 1;
+    if(core->flagTiny10)
+        return 4;
+    return core->PC_size + (core->flagXMega ? 0 : 1);
+    
 }
 
-avr_op_RET::avr_op_RET
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, 0,0)
-{}
+avr_op_RET::avr_op_RET(word opcode, AvrDevice *c):
+    DecodedInstruction(c) {}
 
-int avr_op_RET::operator()() 
-{
-    int pc_bytes = core->PC_size;
-    int pc = core->stack->PopAddr();
+int avr_op_RET::operator()() {
+    core->PC = core->stack->PopAddr() - 1;
 
-    core->PC=pc-1;
-
-    return pc_bytes + 2;
+    return core->PC_size + 2;
 }
 
-avr_op_RETI::avr_op_RETI
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, 0,0),
-    status(core->status) 
-{}
+avr_op_RETI::avr_op_RETI(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    status(c->status) {}
 
-int avr_op_RETI::operator()() 
-{
+int avr_op_RETI::operator()() {
+    core->PC = core->stack->PopAddr() - 1;
+    status->I = 1;
 
-    int pc_bytes = core->PC_size;
-    int pc = core->stack->PopAddr();
-
-    core->PC=pc-1;
-    status->I=1;
-
-    return pc_bytes + 2;
+    return core->PC_size + 2;
 }
 
-avr_op_RJMP::avr_op_RJMP
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, n_bit_unsigned_to_signed( get_k_12(opcode), 12 ),0),
-    K(n_bit_unsigned_to_signed( get_k_12(opcode), 12 ))
-{}
+avr_op_RJMP::avr_op_RJMP(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    K(n_bit_unsigned_to_signed(get_k_12(opcode), 12)) {}
 
-int avr_op_RJMP::operator()() 
-{
-
-    core->PC+=K;
-    core->PC&=(core->Flash->GetSize()-1)>>1;
+int avr_op_RJMP::operator()() {
+    core->PC += K;
+    core->PC &= (core->Flash->GetSize() - 1) >> 1;
 
     return 2;
 }
 
+avr_op_ROR::avr_op_ROR(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    status(c->status) {}
 
+int avr_op_ROR::operator()() {
+    byte rd = core->GetCoreReg(R1);
 
-avr_op_ROR::avr_op_ROR
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    status(core->status) 
-{}
+    byte res = (rd >> 1) | ((status->C << 7) & 0x80);
 
-int avr_op_ROR::operator()() 
-{
+    status->C = rd & 0x1;
+    status->N = (res >> 7) & 0x1;
+    status->V = status->N ^ status->C;
+    status->S = status->N ^ status->V;
+    status->Z = res == 0;
 
-
-    byte rd = R1;
-
-    byte res = (rd >> 1) | ((( status->C ) << 7) & 0x80);
-
-
-    status->C = (rd & 0x1) ;
-    status->N = ((res >> 7) & 0x1) ;
-    status->V = (status->N ^ status->C) ;
-    status->S = (status->N ^ status->V) ;
-    status->Z = (res == 0) ;
-
-    R1=res;
+    core->SetCoreReg(R1, res);
 
     return 1;
 }
 
 
-avr_op_SBC::avr_op_SBC
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    R2((*(core->R))[get_rr_5(opcode)]),
-    status(core->status) 
-{}
+avr_op_SBC::avr_op_SBC(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    R2(get_rr_5(opcode)),
+    status(c->status) {}
 
-int avr_op_SBC::operator()() 
-{
+int avr_op_SBC::operator()() {
+    byte rd = core->GetCoreReg(R1);
+    byte rr = core->GetCoreReg(R2);
 
-    byte rd = R1;
-    byte rr = R2;
+    byte res = rd - rr - status->C;
 
-    byte res = rd - rr - ( status->C );
+    status->H = get_sub_carry(res, rd, rr, 3);
+    status->V = get_sub_overflow(res, rd, rr);
+    status->N = (res >> 7) & 0x1;
+    status->S = status->N ^ status->V;
+    status->C = get_sub_carry(res, rd, rr, 7);
 
+    if((res & 0xff) != 0)
+        status->Z = 0;
 
-    status->H = (get_sub_carry( res, rd, rr, 3 )) ;
-    status->V = (get_sub_overflow( res, rd, rr )) ;
-    status->N = ((res >> 7) & 0x1) ;
-    status->S = (status->N ^ status->V) ;
-    status->C = (get_sub_carry( res, rd, rr, 7 )) ;
-
-    if ((res & 0xff) != 0)
-        status->Z = (0) ;
-
-    R1=res;
+    core->SetCoreReg(R1, res);
 
     return 1;
 }
 
-avr_op_SBCI::avr_op_SBCI
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
-    R1((*(core->R))[get_rd_4(opcode)]),
-    status(core->status) ,
-    K(get_K_8(opcode))
-{}
+avr_op_SBCI::avr_op_SBCI(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_4(opcode)),
+    status(c->status),
+    K(get_K_8(opcode)) {}
 
-int avr_op_SBCI::operator()() 
-{
+int avr_op_SBCI::operator()() {
+    byte rd = core->GetCoreReg(R1);
 
-    byte rd = R1;
+    byte res = rd - K - status->C;
 
-    byte res = rd - K - ( status->C );
+    status->H = get_sub_carry(res, rd, K, 3);
+    status->V = get_sub_overflow(res, rd, K);
+    status->N = (res >> 7) & 0x1;
+    status->S = status->N ^ status->V;
+    status->C = get_sub_carry(res, rd, K, 7);
 
+    if((res & 0xff) != 0)
+        status->Z = 0;
 
-    status->H = (get_sub_carry( res, rd, K, 3 )) ;
-    status->V = (get_sub_overflow( res, rd, K )) ;
-    status->N = ((res >> 7) & 0x1) ;
-    status->S = (status->N ^ status->V) ;
-    status->C = (get_sub_carry( res, rd, K, 7 )) ;
-
-    if ((res & 0xff) != 0)
-        status->Z = 0 ;
-
-    R1=res;
+    core->SetCoreReg(R1, res);
 
     return 1;
 }
 
+avr_op_SBI::avr_op_SBI(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    ioreg(get_A_5(opcode)),
+    Kbit(get_reg_bit(opcode)) {}
 
-avr_op_SBI::avr_op_SBI
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_A_5(opcode), get_reg_bit(opcode)),
-    ioreg((*(core->ioreg))[get_A_5(opcode)]),
-    K(1<<get_reg_bit(opcode))
-{}
-
-int avr_op_SBI::operator()() 
-{
-
-    ioreg=ioreg|  K ;
-
-    return 2;
-}
-
-
-avr_op_SBIC::avr_op_SBIC
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_A_5(opcode), get_reg_bit(opcode)),
-    ioreg((*(core->ioreg))[get_A_5(opcode)]),
-    K(1<<get_reg_bit(opcode))
-{}
-
-int avr_op_SBIC::operator()() 
-{
-
-    int skip;
-
-    int clks;
-
-
-    if ( core->Flash->DecodedMem[core->PC+1]->IsInstruction2Words() ) skip = 3;
-    else skip = 2;
-
-    if (( ioreg&K  ) == 0)
-    {
-        core->PC+=skip-1;
-        clks=skip;
-    }
-    else
-    {
-        clks=1;
-    }
-
+int avr_op_SBI::operator()() {
+    int clks = (core->flagXMega || core->flagTiny10) ? 1 : 2;
+    
+    core->SetIORegBit(ioreg, Kbit, true);
+    
     return clks;
 }
 
-avr_op_SBIS::avr_op_SBIS
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_A_5(opcode), get_reg_bit(opcode)),
-    ioreg((*(core->ioreg))[get_A_5(opcode)]),
-    K(1<<get_reg_bit(opcode))
-{}
+avr_op_SBIC::avr_op_SBIC(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    ioreg(get_A_5(opcode)),
+    Kbit(get_reg_bit(opcode)) {}
 
-int avr_op_SBIS::operator()() 
-{
+int avr_op_SBIC::operator()() {
+    int skip, clks;
 
-    int skip;
-
-    int clks;
-
-    if ( core->Flash->DecodedMem[core->PC+1]->IsInstruction2Words() )
+    if(core->Flash->DecodedMem[core->PC + 1]->IsInstruction2Words())
         skip = 3;
     else
         skip = 2;
 
-    if ( (ioreg&K ) != 0)
-    {
-        core->PC+=skip-1;
-        clks=skip;
-    }
-    else
-    {
-        clks=1;
-    }
+    if((core->GetIOReg(ioreg) & (1 << Kbit)) == 0) {
+        core->PC += skip - 1;
+        clks = skip;
+    } else
+        clks = 1;
 
+    if(core->flagXMega)
+        clks++;
+    
+    return clks;
+}
+
+avr_op_SBIS::avr_op_SBIS(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    ioreg(get_A_5(opcode)),
+    Kbit(get_reg_bit(opcode)) {}
+
+int avr_op_SBIS::operator()() {
+    int skip, clks;
+
+    if(core->Flash->DecodedMem[core->PC + 1]->IsInstruction2Words())
+        skip = 3;
+    else
+        skip = 2;
+
+    if((core->GetIOReg(ioreg) & (1 << Kbit)) != 0) {
+        core->PC += skip - 1;
+        clks = skip;
+    } else
+        clks = 1;
+
+    if(core->flagXMega)
+        clks++;
+    
     return clks;
 }
 
 
-avr_op_SBIW::avr_op_SBIW
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_2(opcode), get_K_6(opcode)),
-    Rl((*(core->R))[get_rd_2(opcode)]),
-    Rh((*(core->R))[get_rd_2(opcode)+1]),
-    status(core->status) ,
-    K(get_K_6(opcode))
-{}
+avr_op_SBIW::avr_op_SBIW(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_2(opcode)),
+    status(c->status),
+    K(get_K_6(opcode)) {}
 
-int avr_op_SBIW::operator()() 
-{
-
-    byte rdl = Rl;
-    byte rdh = Rh;
+int avr_op_SBIW::operator()() {
+    byte rdl = core->GetCoreReg(R1);
+    byte rdh = core->GetCoreReg(R1 + 1);
 
     word rd = (rdh << 8) + rdl;
-
     word res = rd - K;
 
+    status->V = (rdh >> 7 & 0x1) & ~(res >> 15 & 0x1);
+    status->N = (res >> 15) & 0x1;
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xffff) == 0;
+    status->C = (res >> 15 & 0x1) & ~(rdh >> 7 & 0x1);
 
-    status->V = ((rdh >> 7 & 0x1) & ~(res >> 15 & 0x1)) ;
-    status->N = ((res >> 15) & 0x1) ;
-    status->S = (status->N ^ status->V) ;
-    status->Z = ((res & 0xffff) == 0) ;
-    status->C = ((res >> 15 & 0x1) & ~(rdh >> 7 & 0x1)) ;
-
-    Rl=res&0xff;
-    Rh=res>>8;
+    core->SetCoreReg(R1, res & 0xff);
+    core->SetCoreReg(R1 + 1, (res >> 8) & 0xff);
 
     return 2;
 }
 
+avr_op_SBRC::avr_op_SBRC(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    Kbit(get_reg_bit(opcode)) {}
 
-avr_op_SBRC::avr_op_SBRC
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode), get_reg_bit(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    K(1<<get_reg_bit(opcode))
-{}
+int avr_op_SBRC::operator()() {
+    int skip, clks;
 
-int avr_op_SBRC::operator()() 
-{
-    int skip;
-    int clks;
-
-    if ( core->Flash->DecodedMem[(core->PC)+1]->IsInstruction2Words() )
+    if(core->Flash->DecodedMem[core->PC + 1]->IsInstruction2Words())
         skip = 3;
     else
         skip = 2;
 
-    if ((R1 & K ) == 0)
-    {
-        core->PC+=skip-1;
-        clks=skip;
-    }
-    else
-    {
-        clks=1;
-    }
+    if((core->GetCoreReg(R1) & (1 << Kbit)) == 0) {
+        core->PC += skip - 1;
+        clks = skip;
+    } else
+        clks = 1;
 
     return clks;
 }
 
-avr_op_SBRS::avr_op_SBRS
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c,  get_rd_5(opcode), get_reg_bit(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    K(1<<get_reg_bit(opcode))
-{}
+avr_op_SBRS::avr_op_SBRS(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    Kbit(get_reg_bit(opcode)) {}
 
-int avr_op_SBRS::operator()() 
-{
+int avr_op_SBRS::operator()() {
+    int skip, clks;
 
-    int skip;
-    int clks;
-
-
-    if ( core->Flash->DecodedMem[core->PC+1]->IsInstruction2Words() )
+    if(core->Flash->DecodedMem[core->PC + 1]->IsInstruction2Words())
         skip = 3;
     else
         skip = 2;
 
-    if ((R1 & K ) != 0) 
-    {
-        core->PC+=skip-1;
-        clks=skip;
-    }
-    else
-    {
-        clks=1;
-    }
+    if((core->GetCoreReg(R1) & (1 << Kbit)) != 0) {
+        core->PC += skip - 1;
+        clks = skip;
+    } else
+        clks = 1;
 
     return clks;
 }
 
-avr_op_SLEEP::avr_op_SLEEP
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, 0,0)
-{}
+avr_op_SLEEP::avr_op_SLEEP(word opcode, AvrDevice *c):
+    DecodedInstruction(c) {}
 
-int avr_op_SLEEP::operator()() 
-{
-
-
-#ifdef LLL  //TODO
+int avr_op_SLEEP::operator()() {
+#if 0  //TODO
     MCUCR *mcucr = (MCUCR *)avr_core_get_vdev_by_name( core, "MCUCR" );
 
     if (mcucr == NULL)
@@ -1526,415 +1440,261 @@ int avr_op_SLEEP::operator()()
             avr_core_set_sleep_mode( core, SLEEP_MODE_PWR_DOWN);
         }
     }
-
 #endif
-
-    return 0;
+    return 1;
 }
 
-avr_op_SPM::avr_op_SPM
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c,0,0),
-    R0((*(core->R))[0]),
-    R1((*(core->R))[1]),
-    R30((*(core->R))[30]),
-    R31((*(core->R))[31])
-{}
+avr_op_SPM::avr_op_SPM(word opcode, AvrDevice *c):
+    DecodedInstruction(c) {}
 
-int avr_op_SPM::operator()() 
-{
+int avr_op_SPM::operator()() {
     unsigned char xaddr = 0;
     int cycles = 1;
     if(core->rampz != NULL)
         xaddr = core->rampz->GetRegVal();
     if(core->spmRegister != NULL) {
-        unsigned int Z = R30 + (R31 << 8);
-        unsigned int D = R0 + (R1 << 8);
+        unsigned int Z = core->GetRegZ();
+        unsigned int D = core->GetCoreReg(0) + (core->GetCoreReg(1) << 8);
         cycles += core->spmRegister->SPM_action(D, xaddr, Z);
     }
     return cycles;
 }
 
-avr_op_STD_Y::avr_op_STD_Y
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_q(opcode), get_rd_5(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    Rl((*(core->R))[28]),
-    Rh((*(core->R))[29]),
-    K(get_q(opcode))
-{}
+avr_op_STD_Y::avr_op_STD_Y(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    K(get_q(opcode)) {}
 
-int avr_op_STD_Y::operator()() 
-{
-
-    //int Rd = get_rd_5(opcode);
-    //int q  = get_q(opcode);
-    //int q=p1;
-
+int avr_op_STD_Y::operator()() {
     /* Y is R29:R28 */
-    int Y = ( Rh << 8 )  + Rl;
+    unsigned int Y = core->GetRegY();
 
-    (*(core->Sram))[Y+K]= R1 ;
+    core->SetRWMem(Y + K, core->GetCoreReg(R1));
 
-    //avr_core_PC_incr( core, 1 );
-    //avr_core_inst_CKS_set( core, 2 );
-
-    return 2;
+    return (K == 0 && (core->flagXMega || core->flagTiny10)) ? 1 : 2;
 }
 
+avr_op_STD_Z::avr_op_STD_Z(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    K(get_q(opcode)) {}
 
-avr_op_STD_Z::avr_op_STD_Z
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_q(opcode), get_rd_5(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    Rl((*(core->R))[30]),
-    Rh((*(core->R))[31]),
-    K(get_q(opcode))
-{}
-
-int avr_op_STD_Z::operator()() 
-{
-
-    int Z;
-
-    //int Rd = get_rd_5(opcode);
-
+int avr_op_STD_Z::operator()() {
     /* Z is R31:R30 */
-    Z = (Rh << 8 ) + Rl;
+    int Z = core->GetRegZ();
 
-    //avr_core_mem_write( core, Z+q, (*(core->R))[ Rd] );
-    (*(core->Sram))[Z+K]=R1;
+    core->SetRWMem(Z + K, core->GetCoreReg(R1));
 
-    //avr_core_PC_incr( core, 1 );
-    //avr_core_inst_CKS_set( core, 2 );
-
-    return 2;
+    return (K == 0 && (core->flagXMega || core->flagTiny10)) ? 1 : 2;
 }
 
+avr_op_STS::avr_op_STS(word opcode, AvrDevice *c):
+    DecodedInstruction(c, true),
+    R1(get_rd_5(opcode)) {}
 
-avr_op_STS::avr_op_STS
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0, true),
-    R1((*(core->R))[get_rd_5(opcode)])
-{}
-
-int avr_op_STS::operator()() 
-{
+int avr_op_STS::operator()() {
     /* Get data at k in current data segment and put into Rd */
     word k = core->Flash->ReadMemWord((core->PC + 1) * 2);
 
-    (*(core->Sram))[k] = R1;
+    core->SetRWMem(k, core->GetCoreReg(R1));
     core->PC++;
 
     return 2;
 }
 
-avr_op_ST_X::avr_op_ST_X
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    Rl((*(core->R))[26]),
-    Rh((*(core->R))[27])
-{}
+avr_op_ST_X::avr_op_ST_X(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)) {}
 
-int avr_op_ST_X::operator()() 
-{
-
-    word X;
-
-    //int Rd = get_rd_5(opcode);
-
+int avr_op_ST_X::operator()() {
     /* X is R27:R26 */
-    //X = ((*(core->R))[ 27] << 8) + (*(core->R))[ 26];
-    X = (Rh << 8 ) + Rl;
+    word X = core->GetRegX();
+    
+    core->SetRWMem(X, core->GetCoreReg(R1));
 
-    //avr_core_mem_write( core, X, (*(core->R))[ Rd] );
-    (*(core->Sram))[X]=R1;
-
-
-    //avr_core_PC_incr( core, 1 );
-    //avr_core_inst_CKS_set( core, 2 );
-
-    return 2;
+    return (core->flagXMega || core->flagTiny10) ? 1 : 2;
 }
 
+avr_op_ST_X_decr::avr_op_ST_X_decr(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)) {}
 
-avr_op_ST_X_decr::avr_op_ST_X_decr
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    Rl((*(core->R))[26]),
-    Rh((*(core->R))[27])
-{}
-
-int avr_op_ST_X_decr::operator()() 
-{
-
-    word X;
-
-
-    //TODO
-    //if ( (Rd == 26) || (Rd == 27) )
-    //  avr_error( "Results of operation are undefined: 0x%04x", opcode );
-
+int avr_op_ST_X_decr::operator()() {
     /* X is R27:R26 */
-    X = (Rh << 8 ) + Rl ;
-
+    word X = core->GetRegX();
+ 
     /* Perform pre-decrement */
-    X -= 1;
-    Rl=X & 0xff;
-    Rh=X >> 8;
-
-    (*(core->Sram))[X]=R1;
+    X--;
+    core->SetCoreReg(26, X & 0xff);
+    core->SetCoreReg(27, (X >> 8) & 0xff);
+    core->SetRWMem(X, core->GetCoreReg(R1));
 
     return 2;
 }
 
-avr_op_ST_X_incr::avr_op_ST_X_incr
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    Rl((*(core->R))[26]),
-    Rh((*(core->R))[27])
-{}
+avr_op_ST_X_incr::avr_op_ST_X_incr(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)) {}
 
-int avr_op_ST_X_incr::operator()() 
-{
-
-    word X;
-
+int avr_op_ST_X_incr::operator()() {
     /* X is R27:R26 */
-    X = ( Rh << 8 ) + Rl;
+    word X = core->GetRegX();
 
-    (*(core->Sram))[X]=R1;
+    core->SetRWMem(X, core->GetCoreReg(R1));
 
     /* Perform post-increment */
-    X += 1;
-    Rl=X&0xff;
-    Rh=X>>8;
+    X++;
+    core->SetCoreReg(26, X & 0xff);
+    core->SetCoreReg(27, (X >> 8) & 0xff);
 
-    return 2;
+    return (core->flagXMega || core->flagTiny10) ? 1 : 2;
 }
 
-avr_op_ST_Y_decr::avr_op_ST_Y_decr
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    Rl((*(core->R))[28]),
-    Rh((*(core->R))[29])
-{}
+avr_op_ST_Y_decr::avr_op_ST_Y_decr(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)) {}
 
-int avr_op_ST_Y_decr::operator()() 
-{
-
-    //TODO
-    //if ( (Rd == 28) || (Rd == 29) )
-    //  avr_error( "Results of operation are undefined: 0x%04x", opcode );
-
+int avr_op_ST_Y_decr::operator()() {
     /* Y is R29:R28 */
-    unsigned int Y = (Rh << 8 ) + Rl;
-
+    word Y = core->GetRegY();
+ 
     /* Perform pre-decrement */
-    Y -= 1;
-    Rl=Y&0xff;
-    Rh=Y>>8;
-
-    (*(core->Sram))[Y]=R1;
-
+    Y--;
+    core->SetCoreReg(28, Y & 0xff);
+    core->SetCoreReg(29, (Y >> 8) & 0xff);
+    core->SetRWMem(Y, core->GetCoreReg(R1));
 
     return 2;
 }
 
-avr_op_ST_Y_incr::avr_op_ST_Y_incr
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    Rl((*(core->R))[28]),
-    Rh((*(core->R))[29])
-{}
+avr_op_ST_Y_incr::avr_op_ST_Y_incr(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)) {}
 
-int avr_op_ST_Y_incr::operator()() 
-{
-
-    word Y;
-
-    //TODO
-    //if ( (Rd == 28) || (Rd == 29) )
-    //  avr_error( "Results of operation are undefined: 0x%04x", opcode );
-
+int avr_op_ST_Y_incr::operator()() {
     /* Y is R29:R28 */
-    Y = (Rh << 8 ) + Rl;
+    word Y = core->GetRegY();
 
-    (*(core->Sram))[Y]=R1;
+    core->SetRWMem(Y, core->GetCoreReg(R1));
 
     /* Perform post-increment */
-    Y += 1;
-    Rl=Y&0xff;
-    Rh=Y>>8;
+    Y++;
+    core->SetCoreReg(28, Y & 0xff);
+    core->SetCoreReg(29, (Y >> 8) & 0xff);
 
-    return 2;
+    return (core->flagXMega || core->flagTiny10) ? 1 : 2;
 }
 
-avr_op_ST_Z_decr::avr_op_ST_Z_decr
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0 ),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    Rl((*(core->R))[30]),
-    Rh((*(core->R))[31])
-{}
+avr_op_ST_Z_decr::avr_op_ST_Z_decr(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)) {}
 
-int avr_op_ST_Z_decr::operator()() 
-{
-
-    word Z;
-
-
-    //TODO
-    //if ( (Rd == 30) || (Rd == 31) )
-    //  avr_error( "Results of operation are undefined: 0x%04x", opcode );
-
+int avr_op_ST_Z_decr::operator()() {
     /* Z is R31:R30 */
-    Z = ( Rh << 8) + Rl;
-
+    word Z = core->GetRegZ();
+ 
     /* Perform pre-decrement */
-    Z -= 1;
-    Rl=Z&0xff;
-    Rh=Z>>8;
-
-    (*(core->Sram))[Z]=R1;
+    Z--;
+    core->SetCoreReg(30, Z & 0xff);
+    core->SetCoreReg(31, (Z >> 8) & 0xff);
+    core->SetRWMem(Z, core->GetCoreReg(R1));
 
     return 2;
 }
 
+avr_op_ST_Z_incr::avr_op_ST_Z_incr(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)) {}
 
-avr_op_ST_Z_incr::avr_op_ST_Z_incr
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    Rl((*(core->R))[30]),
-    Rh((*(core->R))[31])
-{}
-
-int avr_op_ST_Z_incr::operator()() 
-{
-
-    word Z;
-
-
-    //TODO
-    //if ( (Rd == 30) || (Rd == 31) )
-    //  avr_error( "Results of operation are undefined: 0x%04x", opcode );
-
+int avr_op_ST_Z_incr::operator()() {
     /* Z is R31:R30 */
-    Z = ( Rh << 8 ) + Rl;
+    word Z = core->GetRegZ();
 
-    (*(core->Sram))[Z]=R1;
+    core->SetRWMem(Z, core->GetCoreReg(R1));
 
     /* Perform post-increment */
-    Z += 1;
-    Rl=Z&0xff;
-    Rh=Z>>8;
+    Z++;
+    core->SetCoreReg(30, Z & 0xff);
+    core->SetCoreReg(31, (Z >> 8) & 0xff);
 
-    return 2;
+    return (core->flagXMega || core->flagTiny10) ? 1 : 2;
 }
 
-avr_op_SUB::avr_op_SUB
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode), get_rr_5(opcode)),
-    R1((*(core->R))[get_rd_5(opcode)]),
-    R2((*(core->R))[get_rr_5(opcode)]),
-    status(core->status) 
-{}
+avr_op_SUB::avr_op_SUB(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)),
+    R2(get_rr_5(opcode)),
+    status(c->status) {}
 
-int avr_op_SUB::operator()() 
-{
-
-    byte rd = R1;
-    byte rr = R2;
+int avr_op_SUB::operator()() {
+    byte rd = core->GetCoreReg(R1);
+    byte rr = core->GetCoreReg(R2);
 
     byte res = rd - rr;
 
-    status->H = (get_sub_carry( res, rd, rr, 3 )) ;
-    status->V = (get_sub_overflow( res, rd, rr )) ;
-    status->N = ((res >> 7) & 0x1) ;
-    status->S = (status->N ^ status->V) ;
-    status->Z = ((res & 0xff) == 0) ;
-    status->C = (get_sub_carry( res, rd, rr, 7 )) ;
-    R1=res;
+    status->H = get_sub_carry(res, rd, rr, 3);
+    status->V = get_sub_overflow(res, rd, rr);
+    status->N = (res >> 7) & 0x1;
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xff) == 0;
+    status->C = get_sub_carry(res, rd, rr, 7);
+    
+    core->SetCoreReg(R1, res);
 
     return 1;
 }
 
+avr_op_SUBI::avr_op_SUBI(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_4(opcode)),
+    status(c->status),
+    K(get_K_8(opcode)) {}
 
-
-avr_op_SUBI::avr_op_SUBI
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_4(opcode), get_K_8(opcode)),
-    R1((*(core->R))[get_rd_4(opcode)]),
-    status(core->status) ,
-    K(get_K_8(opcode))
-{}
-
-int avr_op_SUBI::operator()() 
-{
-
-    byte rd = R1;
-
+int avr_op_SUBI::operator()() {
+    byte rd = core->GetCoreReg(R1);
     byte res = rd - K;
 
+    status->H = get_sub_carry(res, rd, K, 3);
+    status->V = get_sub_overflow(res, rd, K);
+    status->N = (res >> 7) & 0x1;
+    status->S = status->N ^ status->V;
+    status->Z = (res & 0xff) == 0;
+    status->C = get_sub_carry(res, rd, K, 7);
 
-    status->H = (get_sub_carry( res, rd, K, 3 )) ;
-    status->V = (get_sub_overflow( res, rd, K )) ;
-    status->N = ((res >> 7) & 0x1) ;
-    status->S = (status->N ^ status->V) ;
-    status->Z = ((res & 0xff) == 0) ;
-    status->C = (get_sub_carry( res, rd, K, 7 )) ;
-
-    R1= res;
-
-    return 1;
-}
-
-avr_op_SWAP::avr_op_SWAP
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, get_rd_5(opcode),0),
-    R1((*(core->R))[get_rd_5(opcode)])
-{}
-
-int avr_op_SWAP::operator()() 
-{
-
-
-    byte rd = R1;
-
-    R1= ((rd << 4) & 0xf0) | ((rd >> 4) & 0x0f) ;
-
+    core->SetCoreReg(R1, res);
 
     return 1;
 }
 
-avr_op_WDR::avr_op_WDR
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, 0,0)
-{}
+avr_op_SWAP::avr_op_SWAP(word opcode, AvrDevice *c):
+    DecodedInstruction(c),
+    R1(get_rd_5(opcode)) {}
 
-int avr_op_WDR::operator()() 
-{
+int avr_op_SWAP::operator()() {
+    byte rd = core->GetCoreReg(R1);
+    byte res = ((rd << 4) & 0xf0) | ((rd >> 4) & 0x0f);
 
-    core->wado->Wdr();
+    core->SetCoreReg(R1, res);
+    
+    return 1;
+}
+
+avr_op_WDR::avr_op_WDR(word opcode, AvrDevice *c):
+    DecodedInstruction(c) {}
+
+int avr_op_WDR::operator()() {
+    if(core->wado != NULL)
+        core->wado->Wdr();
 
     return 1;
 }
 
-avr_op_ILLEGAL::avr_op_ILLEGAL
-(word opcode, AvrDevice *c):
-    DecodedInstruction(c, 0,0)
-{}
+avr_op_ILLEGAL::avr_op_ILLEGAL(word opcode, AvrDevice *c):
+    DecodedInstruction(c) {}
 
-int avr_op_ILLEGAL::operator()() 
-{
+int avr_op_ILLEGAL::operator()() {
     avr_error("Simulation terminated! IllegalInstruction executed!");
-    return 1;
+    return 0;
 }
 
 static int get_add_carry( byte res, byte rd, byte rr, int b )
@@ -1999,7 +1759,7 @@ static int n_bit_unsigned_to_signed( unsigned int val, int n )
     return -1 * ((~val & mask) + 1);
 }
 
-
+/* Get register R24, 26, 28 or 30 - for ADIW and few other */
 static int get_rd_2( word opcode )
 {
     int reg = ((opcode & mask_Rd_2) >> 4) & 0x3;
@@ -2251,17 +2011,57 @@ DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core )
                                      return new avr_op_ILLEGAL(opcode, core);
                              case 0x9406: return new  avr_op_LSR(opcode, core);         /* 1001 010d dddd 0110 | LSR */
                              case 0x9401: return new  avr_op_NEG(opcode, core);         /* 1001 010d dddd 0001 | NEG */
-                             case 0x900F: return new  avr_op_POP(opcode, core);         /* 1001 000d dddd 1111 | POP */
-                             case 0x920F: return new  avr_op_PUSH(opcode, core);        /* 1001 001d dddd 1111 | PUSH */
+                             case 0x900F:
+                                 if(!core->flagTiny1x)
+                                     return new avr_op_POP(opcode, core);               /* 1001 000d dddd 1111 | POP */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x920F:
+                                 if(!core->flagTiny1x)
+                                     return new avr_op_PUSH(opcode, core);              /* 1001 001d dddd 1111 | PUSH */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
                              case 0x9407: return new  avr_op_ROR(opcode, core);         /* 1001 010d dddd 0111 | ROR */
                              case 0x9200: return new  avr_op_STS(opcode, core);         /* 1001 001d dddd 0000 | STS */
-                             case 0x920C: return new  avr_op_ST_X(opcode, core);        /* 1001 001d dddd 1100 | ST */
-                             case 0x920E: return new  avr_op_ST_X_decr(opcode, core);   /* 1001 001d dddd 1110 | ST */
-                             case 0x920D: return new  avr_op_ST_X_incr(opcode, core);   /* 1001 001d dddd 1101 | ST */
-                             case 0x920A: return new  avr_op_ST_Y_decr(opcode, core);   /* 1001 001d dddd 1010 | ST */
-                             case 0x9209: return new  avr_op_ST_Y_incr(opcode, core);   /* 1001 001d dddd 1001 | ST */
-                             case 0x9202: return new  avr_op_ST_Z_decr(opcode, core);   /* 1001 001d dddd 0010 | ST */
-                             case 0x9201: return new  avr_op_ST_Z_incr(opcode, core);   /* 1001 001d dddd 0001 | ST */
+                             case 0x920C:
+                                 if(!core->flagTiny1x)
+                                     return new avr_op_ST_X(opcode, core);              /* 1001 001d dddd 1100 | ST */
+                             case 0x920E:
+                                 if(!core->flagTiny1x)
+                                     return new avr_op_ST_X_decr(opcode, core);         /* 1001 001d dddd 1110 | ST */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x920D:
+                                 if(!core->flagTiny1x)
+                                     return new avr_op_ST_X_incr(opcode, core);         /* 1001 001d dddd 1101 | ST */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x8208:
+                                 if(!core->flagTiny1x)
+                                     return new avr_op_STD_Y(opcode, core);             /* 1000 001d dddd 1000 | ST */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x920A:
+                                 if(!core->flagTiny1x)
+                                     return new avr_op_ST_Y_decr(opcode, core);         /* 1001 001d dddd 1010 | ST */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x9209:
+                                 if(!core->flagTiny1x)
+                                     return new avr_op_ST_Y_incr(opcode, core);         /* 1001 001d dddd 1001 | ST */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x8200: return new  avr_op_STD_Z(opcode, core);       /* 1000 001d dddd 0000 | ST */
+                             case 0x9202:
+                                 if(!core->flagTiny1x)
+                                     return new avr_op_ST_Z_decr(opcode, core);         /* 1001 001d dddd 0010 | ST */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
+                             case 0x9201:
+                                 if(!core->flagTiny1x)
+                                     return new avr_op_ST_Z_incr(opcode, core);         /* 1001 001d dddd 0001 | ST */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
                              case 0x9402: return new  avr_op_SWAP(opcode, core);        /* 1001 010d dddd 0010 | SWAP */
                          }
 

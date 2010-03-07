@@ -549,191 +549,191 @@ int avr_op_PUSH::Trace() {
     return ret;
 }
 
-int avr_op_RCALL::Trace( ) {
-    traceOut << "RCALL " << hex << ((core->PC+p1+1)<<1) << dec  << " ";
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_RET::Trace( ) {
-    traceOut << "RET " ;
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_RETI::Trace( ) {
-    traceOut << "RETI ";
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_RJMP::Trace( ) {
-    traceOut << "RJMP " << hex << ((core->PC+p1+1)<<1) << dec  << " ";
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_ROR::Trace( ) {
-    traceOut << "ROR R" << p1 << " ";
-    int ret=this->operator()();
-    MONSREG;
-    return ret;
-}
-
-int avr_op_SBC::Trace( ) {
-    traceOut << "SBC R" << p1 << ", R" << p2 << " ";
-    int ret=this->operator()();
-    MONSREG;
-    return ret;
-}
-
-int avr_op_SBCI::Trace( ) {
-    traceOut << "SBCI R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret=this->operator()();
-    MONSREG;
-    return ret;
-}
-
-int avr_op_SBI::Trace( ) {
-    traceOut << "SBI " << HexChar(p1) << dec  << ", " << dec << p2 << " ";
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_SBIC::Trace( ) {
-    traceOut << "SBIC " << HexChar(p1) << dec  << ", " << dec << p2 << " ";
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_SBIS::Trace( ) {
-    traceOut << "SBIS " << HexChar(p1) << dec  << ", " << dec << p2 << " ";
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_SBIW::Trace( ) {
-    traceOut << "SBIW R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret=this->operator()();
-    MONSREG;
-    return ret;
-}
-
-int avr_op_SBRC::Trace( ) {
-    traceOut << "SBRC R" << p1 << ", " << p2 << " ";
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_SBRS::Trace( ) {
-    traceOut << "SBRS R" << p1 << ", " << p2 << " ";
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_SLEEP::Trace( ) {
-    traceOut << "SLEEP " ;
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_SPM::Trace( ) {
-    traceOut << "SPM " ;
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_STD_Y::Trace( ) {
-    traceOut << "STD Y+"<<p1 <<", R" << p2 << " ";
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_STD_Z::Trace( ) {
-    traceOut << "STD Z, R" << p1 << " ";
-    int ret=this->operator()();
-    return ret;
-}
-
-int avr_op_STS::Trace( ) {
-    word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);  //this is k!
-    traceOut << "STS " << "0x" << hex << offset << dec  << ", R" << p2 << " ";
+int avr_op_RCALL::Trace() {
+    traceOut << "RCALL " << hex << ((core->PC + K + 1) << 1) << dec << " ";
     int ret = this->operator()();
     return ret;
 }
 
-int avr_op_ST_X::Trace( ) {
-    traceOut << "ST X, R" << p1 << " ";
-    int ret=this->operator()();
+int avr_op_RET::Trace() {
+    traceOut << "RET " ;
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_ST_X_decr::Trace( ) {
-    traceOut << "ST -X, R" << p1 << " ";
-    int ret=this->operator()();
+int avr_op_RETI::Trace() {
+    traceOut << "RETI ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_ST_X_incr::Trace( ) {
-    traceOut << "ST X+, R" << p1 << " ";
-    int ret=this->operator()();
+int avr_op_RJMP::Trace() {
+    traceOut << "RJMP " << hex << ((core->PC + K + 1) << 1) << dec << " ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_ST_Y_decr::Trace( ) {
-    traceOut << "ST -Y, R" << p1 << " ";
-    int ret=this->operator()();
+int avr_op_ROR::Trace() {
+    traceOut << "ROR R" << R1 << " ";
+    int ret = this->operator()();
+    MONSREG;
     return ret;
 }
 
-int avr_op_ST_Y_incr::Trace( ) {
-    traceOut << "ST Y+, R" << p1 << " ";
-    int ret=this->operator()();
+int avr_op_SBC::Trace() {
+    traceOut << "SBC R" << R1 << ", R" << R2 << " ";
+    int ret = this->operator()();
+    MONSREG;
     return ret;
 }
 
-int avr_op_ST_Z_decr::Trace( ) {
-    traceOut << "ST -Z, R" << p1 << " ";
-    int ret=this->operator()();
+int avr_op_SBCI::Trace() {
+    traceOut << "SBCI R" << R1 << ", " << HexChar(K) << " ";
+    int ret = this->operator()();
+    MONSREG;
     return ret;
 }
 
-int avr_op_ST_Z_incr::Trace( ) {
-    traceOut << "ST Z+, R" << p1 << " ";
-    int ret=this->operator()();
+int avr_op_SBI::Trace() {
+    traceOut << "SBI " << HexChar(ioreg) << ", " << Kbit << " ";
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_SUB::Trace( ) {
-    traceOut << "SUB R" << p1 << ", R" << p2 << " ";
+int avr_op_SBIC::Trace() {
+    traceOut << "SBIC " << HexChar(ioreg) << ", " << Kbit << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_SBIS::Trace() {
+    traceOut << "SBIS " << HexChar(ioreg) << ", " << Kbit << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_SBIW::Trace( ) {
+    traceOut << "SBIW R" << R1 << ", " << HexChar(K) << " ";
     int ret=this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_SUBI::Trace( ) {
-    traceOut << "SUBI R" << p1 << ", " << HexChar(p2) << dec  << " ";
-    int ret=this->operator()();
+int avr_op_SBRC::Trace() {
+    traceOut << "SBRC R" << R1 << ", " << Kbit << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_SBRS::Trace() {
+    traceOut << "SBRS R" << R1 << ", " << Kbit << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_SLEEP::Trace() {
+    traceOut << "SLEEP " ;
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_SPM::Trace() {
+    traceOut << "SPM " ;
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_STD_Y::Trace() {
+    traceOut << "STD Y+" << K << ", R" << R1 << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_STD_Z::Trace() {
+    traceOut << "STD Z+" << K << ", R" << R1 << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_STS::Trace() {
+    word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);  //this is k!
+    traceOut << "STS " << "0x" << hex << offset << dec << ", R" << R1 << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_ST_X::Trace() {
+    traceOut << "ST X, R" << R1 << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_ST_X_decr::Trace() {
+    traceOut << "ST -X, R" << R1 << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_ST_X_incr::Trace() {
+    traceOut << "ST X+, R" << R1 << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_ST_Y_decr::Trace() {
+    traceOut << "ST -Y, R" << R1 << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_ST_Y_incr::Trace() {
+    traceOut << "ST Y+, R" << R1 << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_ST_Z_decr::Trace() {
+    traceOut << "ST -Z, R" << R1 << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_ST_Z_incr::Trace() {
+    traceOut << "ST Z+, R" << R1 << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_SUB::Trace() {
+    traceOut << "SUB R" << R1 << ", R" << R2 << " ";
+    int ret = this->operator()();
     MONSREG;
     return ret;
 }
 
-int avr_op_SWAP::Trace( ) {
-    traceOut << "SWAP R" << p1 << " ";
-    int ret=this->operator()();
+int avr_op_SUBI::Trace() {
+    traceOut << "SUBI R" << R1 << ", " << HexChar(K) << " ";
+    int ret = this->operator()();
+    MONSREG;
     return ret;
 }
 
-int avr_op_WDR::Trace( ) {
+int avr_op_SWAP::Trace() {
+    traceOut << "SWAP R" << R1 << " ";
+    int ret = this->operator()();
+    return ret;
+}
+
+int avr_op_WDR::Trace() {
     traceOut << "WDR ";
-    int ret=this->operator()();
+    int ret = this->operator()();
     return ret;
 }
 
-int avr_op_ILLEGAL::Trace( ) {
+int avr_op_ILLEGAL::Trace() {
     traceOut << "Invalid Instruction! ";
-    int ret=this->operator()();
+    int ret = this->operator()();
     return ret;
 }
 
-
+/* EOF */

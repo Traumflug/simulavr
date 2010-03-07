@@ -38,18 +38,19 @@ class DecodedInstruction {
     
     protected:
         AvrDevice *core; //!< Link to device instance
-        int p1; //needed for trace
-        int p2; //needed for trace
         bool size2Word; //!< Flag: true, if instruction has 2 words
 
     public:
-        DecodedInstruction(AvrDevice *c, int _p1, int _p2, bool s2w=false): core(c),p1(_p1),p2(_p2),size2Word(s2w) {}
-        DecodedInstruction(AvrDevice *c, bool s2w = false): core(c),p1(0),p2(0),size2Word(s2w) {}
+        DecodedInstruction(AvrDevice *c, bool s2w = false): core(c), size2Word(s2w) {}
+        virtual ~DecodedInstruction() {}
+
+        //! Returns true, if instruction need 2 words (4byte)
         bool IsInstruction2Words() { return size2Word; } 
 
-        virtual int operator()()=0; 
-        virtual int Trace()=0;
-        virtual ~DecodedInstruction() {}
+        //! Performs instruction
+        virtual int operator()() = 0;
+        //! Performs instruction and write out instruction mnemonic for trace
+        virtual int Trace() = 0;
 };
 
 //! Translates an opcode to a instance of DecodedInstruction
@@ -1414,7 +1415,7 @@ class avr_op_PUSH: public DecodedInstruction
         int Trace();
 };
 
-class avr_op_RCALL:public DecodedInstruction
+class avr_op_RCALL: public DecodedInstruction
 {
     /*
      * Relative Call Subroutine.
@@ -1430,12 +1431,12 @@ class avr_op_RCALL:public DecodedInstruction
         signed int K;
 
     public:
-        avr_op_RCALL (word opcode, AvrDevice *c);
+        avr_op_RCALL(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_RET:public DecodedInstruction
+class avr_op_RET: public DecodedInstruction
 {
     /*
      * Subroutine Return.
@@ -1448,12 +1449,12 @@ class avr_op_RET:public DecodedInstruction
      */
 
     public:
-        avr_op_RET (word opcode, AvrDevice *c);
+        avr_op_RET(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_RETI:public DecodedInstruction
+class avr_op_RETI: public DecodedInstruction
 {
     /*
      * Interrupt Return.
@@ -1469,12 +1470,12 @@ class avr_op_RETI:public DecodedInstruction
         HWSreg *status;
 
     public:
-        avr_op_RETI (word opcode, AvrDevice *c);
+        avr_op_RETI(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_RJMP:public DecodedInstruction
+class avr_op_RJMP: public DecodedInstruction
 {
     /*
      * Relative Jump.
@@ -1490,12 +1491,12 @@ class avr_op_RJMP:public DecodedInstruction
         signed int K;
 
     public:
-        avr_op_RJMP (word opcode, AvrDevice *c);
+        avr_op_RJMP(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_ROR:public DecodedInstruction
+class avr_op_ROR: public DecodedInstruction
 {
     /*
      * Rotate Right Though Carry.
@@ -1508,16 +1509,16 @@ class avr_op_ROR:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
         HWSreg *status;
 
     public:
-        avr_op_ROR (word opcode, AvrDevice *c);
+        avr_op_ROR(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_SBC:public DecodedInstruction
+class avr_op_SBC: public DecodedInstruction
 {
     /*
      * Subtract with Carry.
@@ -1530,17 +1531,17 @@ class avr_op_SBC:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &R2;
+        unsigned char R1;
+        unsigned char R2;
         HWSreg *status;
 
     public:
-        avr_op_SBC (word opcode, AvrDevice *c);
+        avr_op_SBC(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_SBCI:public DecodedInstruction
+class avr_op_SBCI: public DecodedInstruction
 {
     /*
      * Subtract Immediate with Carry.
@@ -1553,17 +1554,17 @@ class avr_op_SBCI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
         HWSreg *status;
         unsigned char K;
 
     public:
-        avr_op_SBCI (word opcode, AvrDevice *c);
+        avr_op_SBCI(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_SBI:public DecodedInstruction
+class avr_op_SBI: public DecodedInstruction
 {
     /*
      * Set Bit in I/O Register.
@@ -1576,16 +1577,16 @@ class avr_op_SBI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &ioreg;
-        unsigned char K;
+        unsigned char ioreg;
+        unsigned char Kbit;
 
     public:
-        avr_op_SBI (word opcode, AvrDevice *c);
+        avr_op_SBI(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_SBIC:public DecodedInstruction
+class avr_op_SBIC: public DecodedInstruction
 {
     /*
      * Skip if Bit in I/O Reg Cleared.
@@ -1598,16 +1599,16 @@ class avr_op_SBIC:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &ioreg;
-        unsigned char K;
+        unsigned char ioreg;
+        unsigned char Kbit;
 
     public:
-        avr_op_SBIC (word opcode, AvrDevice *c);
+        avr_op_SBIC(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_SBIS:public DecodedInstruction
+class avr_op_SBIS: public DecodedInstruction
 {
     /*
      * Skip if Bit in I/O Reg Set.
@@ -1620,16 +1621,16 @@ class avr_op_SBIS:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &ioreg;
-        unsigned char K;
+        unsigned char ioreg;
+        unsigned char Kbit;
 
     public:
-        avr_op_SBIS (word opcode, AvrDevice *c);
+        avr_op_SBIS(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_SBIW:public DecodedInstruction
+class avr_op_SBIW: public DecodedInstruction
 {
     /*
      * Subtract Immed from Word.
@@ -1642,18 +1643,17 @@ class avr_op_SBIW:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char R1;
         HWSreg *status;
         unsigned char K;
 
     public:
-        avr_op_SBIW (word opcode, AvrDevice *c);
+        avr_op_SBIW(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_SBRC:public DecodedInstruction
+class avr_op_SBRC: public DecodedInstruction
 {
     /*
      * Skip if Bit in Reg Cleared.
@@ -1666,16 +1666,16 @@ class avr_op_SBRC:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        unsigned char K;
+        unsigned char R1;
+        unsigned char Kbit;
 
     public:
-        avr_op_SBRC (word opcode, AvrDevice *c);
+        avr_op_SBRC(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_SBRS:public DecodedInstruction
+class avr_op_SBRS: public DecodedInstruction
 {
     /*
      * Skip if Bit in Reg Set.
@@ -1688,16 +1688,17 @@ class avr_op_SBRS:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        unsigned char K;
+        unsigned char R1;
+        unsigned char Kbit;
 
     public:
-        avr_op_SBRS (word opcode, AvrDevice *c);
+        avr_op_SBRS(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_SLEEP:public DecodedInstruction
+/*! \todo SLEEP instruction not implemented */
+class avr_op_SLEEP: public DecodedInstruction
 {
     /*
      * Sleep.
@@ -1713,12 +1714,12 @@ class avr_op_SLEEP:public DecodedInstruction
 
 
     public:
-        avr_op_SLEEP (word opcode, AvrDevice *c);
+        avr_op_SLEEP(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_SPM:public DecodedInstruction
+class avr_op_SPM: public DecodedInstruction
 {
     /*
      * Store Program Memory.
@@ -1730,19 +1731,13 @@ class avr_op_SPM:public DecodedInstruction
      * Num Clocks : -
      */
 
-    protected:
-        RWMemoryMember &R0;
-        RWMemoryMember &R1;
-        RWMemoryMember &R30;
-        RWMemoryMember &R31;
-
     public:
-        avr_op_SPM (word opcode, AvrDevice *c);
+        avr_op_SPM(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_STD_Y:public DecodedInstruction
+class avr_op_STD_Y: public DecodedInstruction
 {
     /*
      * Store Indirect with Displacement.
@@ -1755,18 +1750,16 @@ class avr_op_STD_Y:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char R1;
         unsigned char K;
 
     public:
-        avr_op_STD_Y (word opcode, AvrDevice *c);
+        avr_op_STD_Y(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_STD_Z:public DecodedInstruction
+class avr_op_STD_Z: public DecodedInstruction
 {
     /*
      * Store Indirect with Displacement.
@@ -1779,18 +1772,16 @@ class avr_op_STD_Z:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char R1;
         unsigned char K;
 
     public:
-        avr_op_STD_Z (word opcode, AvrDevice *c);
+        avr_op_STD_Z(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_STS:public DecodedInstruction
+class avr_op_STS: public DecodedInstruction
 {
     /*
      * Store Direct to data space.
@@ -1803,15 +1794,15 @@ class avr_op_STS:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
 
     public:
-        avr_op_STS (word opcode, AvrDevice *c);
+        avr_op_STS(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_ST_X:public DecodedInstruction
+class avr_op_ST_X: public DecodedInstruction
 {
     /*
      * Store Indirect using index X.
@@ -1824,17 +1815,15 @@ class avr_op_ST_X:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char R1;
 
     public:
-        avr_op_ST_X (word opcode, AvrDevice *c);
+        avr_op_ST_X(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_ST_X_decr:public DecodedInstruction
+class avr_op_ST_X_decr: public DecodedInstruction
 {
     /*
      * Store Indirect and Pre-Decrement using index X.
@@ -1847,17 +1836,15 @@ class avr_op_ST_X_decr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char R1;
 
     public:
-        avr_op_ST_X_decr (word opcode, AvrDevice *c);
+        avr_op_ST_X_decr(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_ST_X_incr:public DecodedInstruction
+class avr_op_ST_X_incr: public DecodedInstruction
 {
     /*
      * Store Indirect and Post-Increment using index X.
@@ -1870,17 +1857,15 @@ class avr_op_ST_X_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char R1;
 
     public:
-        avr_op_ST_X_incr (word opcode, AvrDevice *c);
+        avr_op_ST_X_incr(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_ST_Y_decr:public DecodedInstruction
+class avr_op_ST_Y_decr: public DecodedInstruction
 {
     /*
      * Store Indirect and Pre-Decrement using index Y.
@@ -1893,17 +1878,15 @@ class avr_op_ST_Y_decr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char R1;
 
     public:
-        avr_op_ST_Y_decr (word opcode, AvrDevice *c);
+        avr_op_ST_Y_decr(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_ST_Y_incr:public DecodedInstruction
+class avr_op_ST_Y_incr: public DecodedInstruction
 {
     /*
      * Store Indirect and Post-Increment using index Y.
@@ -1916,17 +1899,15 @@ class avr_op_ST_Y_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char R1;
 
     public:
-        avr_op_ST_Y_incr (word opcode, AvrDevice *c);
+        avr_op_ST_Y_incr(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_ST_Z_decr:public DecodedInstruction
+class avr_op_ST_Z_decr: public DecodedInstruction
 {
     /*
      * Store Indirect and Pre-Decrement using index Z.
@@ -1939,17 +1920,15 @@ class avr_op_ST_Z_decr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char R1;
 
     public:
-        avr_op_ST_Z_decr (word opcode, AvrDevice *c);
+        avr_op_ST_Z_decr(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_ST_Z_incr:public DecodedInstruction
+class avr_op_ST_Z_incr: public DecodedInstruction
 {
     /*
      * Store Indirect and Post-Increment using index Z.
@@ -1962,17 +1941,15 @@ class avr_op_ST_Z_incr:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &Rl;
-        RWMemoryMember &Rh;
+        unsigned char R1;
 
     public:
-        avr_op_ST_Z_incr (word opcode, AvrDevice *c);
+        avr_op_ST_Z_incr(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_SUB:public DecodedInstruction
+class avr_op_SUB: public DecodedInstruction
 {
     /*
      * Subtract without Carry.
@@ -1985,17 +1962,17 @@ class avr_op_SUB:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
-        RWMemoryMember &R2;
+        unsigned char R1;
+        unsigned char R2;
         HWSreg *status;
 
     public:
-        avr_op_SUB (word opcode, AvrDevice *c);
+        avr_op_SUB(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_SUBI:public DecodedInstruction
+class avr_op_SUBI: public DecodedInstruction
 { 
     /*
      * Subtract Immediate.
@@ -2008,17 +1985,17 @@ class avr_op_SUBI:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
         HWSreg *status;
         unsigned char K;
 
     public:
-        avr_op_SUBI (word opcode, AvrDevice *c);
+        avr_op_SUBI(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_SWAP:public DecodedInstruction
+class avr_op_SWAP: public DecodedInstruction
 {
     /*
      * Swap Nibbles.
@@ -2031,15 +2008,15 @@ class avr_op_SWAP:public DecodedInstruction
      */
 
     protected:
-        RWMemoryMember &R1;
+        unsigned char R1;
 
     public:
-        avr_op_SWAP (word opcode, AvrDevice *c);
+        avr_op_SWAP(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
-class avr_op_WDR:public DecodedInstruction
+class avr_op_WDR: public DecodedInstruction
 { 
     /* 
      * Watchdog Reset.
@@ -2054,19 +2031,19 @@ class avr_op_WDR:public DecodedInstruction
      */
 
     public:
-        avr_op_WDR (word opcode, AvrDevice *c);
+        avr_op_WDR(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
 
 
 
-class avr_op_ILLEGAL:public DecodedInstruction
+class avr_op_ILLEGAL: public DecodedInstruction
 { 
     //illegal instruction
 
     public:
-        avr_op_ILLEGAL (word opcode, AvrDevice *c);
+        avr_op_ILLEGAL(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
 };
