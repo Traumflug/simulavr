@@ -41,6 +41,7 @@ class AvrFlash: public Memory {
         AvrDevice *core; //!< ptr to connected device core
         std::vector <DecodedInstruction*> DecodedMem; //!< list of decoded ops
         unsigned int rww_lock; //!< RWW flash lock address, the area below is locked
+        bool flashLoaded; //!< Flag, true if there was a write to Flash after constructor call (program load)
         
         friend int avr_op_CPSE::operator()();
         friend int avr_op_SBIC::operator()();
@@ -74,6 +75,15 @@ class AvrFlash: public Memory {
           @param secSize count of available data (bytes) in src */
         void WriteMem(unsigned char* src, unsigned int offset, unsigned int secSize);
         
+        /*! Write data byte to memory block (Attention! Dosn't decode written content!)
+          @param src byte data
+          @param offset data offset in memory block, beginning from start of THIS memory block! */
+        void WriteMemByte(unsigned char val, unsigned int offset);
+        
+        /*! Return flashLoaded value
+          @return true, if flash was written after initialisation, means program was loaded */
+        bool IsProgramLoaded(void) { return flashLoaded; }
+        
         /*! Returns true, if lock is set for address
           @param addr address to check
           @return true, if address is locked, false, if not */
@@ -91,9 +101,19 @@ class AvrFlash: public Memory {
         /*! Returns byte at flash address
           @param offset data offset in memory block, beginning from start of THIS memory block!
           @return byte at offset */
+        unsigned char ReadMemRaw(unsigned int offset) { return myMemory[offset]; }
+        
+        /*! Returns byte at flash address (respects RWW lock)
+          @param offset data offset in memory block, beginning from start of THIS memory block!
+          @return byte at offset */
         unsigned char ReadMem(unsigned int offset);
         
         /*! Returns word at flash address
+          @param offset data offset in memory block, beginning from start of THIS memory block!
+          @return word at offset */
+        unsigned int ReadMemRawWord(unsigned int offset) { return (myMemory[offset] << 8) + myMemory[offset + 1]; }
+        
+        /*! Returns word at flash address (respects RWW lock)
           @param offset data offset in memory block, beginning from start of THIS memory block!
           @return word at offset */
         unsigned int ReadMemWord(unsigned int offset);

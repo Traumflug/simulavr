@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph   
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,11 @@ void AvrFlash::Decode(){
         Decode(addr);
 }
 
-AvrFlash::AvrFlash(AvrDevice *c, int _size): Memory(_size), core(c), DecodedMem(_size) {
+AvrFlash::AvrFlash(AvrDevice *c, int _size):
+    Memory(_size),
+    core(c),
+    DecodedMem(_size),
+    flashLoaded(false) {
     // initialize memory block
     for(unsigned int tt = 0; tt < size; tt++)
         myMemory[tt] = 0xff;
@@ -72,6 +76,12 @@ void AvrFlash::WriteMem(unsigned char *src, unsigned int offset, unsigned int se
         } 
     }
     Decode(offset, secSize);
+    flashLoaded = true;
+}
+
+void AvrFlash::WriteMemByte(unsigned char val, unsigned int offset) {
+    *(myMemory + offset) = val;
+    flashLoaded = true;
 }
 
 DecodedInstruction* AvrFlash::GetInstruction(unsigned int pc) {

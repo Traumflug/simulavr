@@ -152,6 +152,7 @@ class GdbServer: public SimulationMember {
         const char* gdb_last_reply(const char *reply);
         void gdb_send_ack();
         void gdb_send_reply(const char *reply);
+        void gdb_send_hex_reply(const char *reply, const char *reply_to_encode);
         void gdb_read_registers();
         void gdb_write_registers(const char *pkt);
         int gdb_extract_hex_num(const char **pkt, char stop);

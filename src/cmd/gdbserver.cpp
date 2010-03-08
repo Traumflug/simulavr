@@ -307,28 +307,28 @@ GdbServer::~GdbServer() {
 }
 
 word GdbServer::avr_core_flash_read(int addr) {
-    return (core->Flash->myMemory[addr*2]<<8)+core->Flash->myMemory[addr*2+1];
+    return core->Flash->ReadMemRawWord(addr);
 }
 
 void GdbServer::avr_core_flash_write(int addr, word val) {
-    if ((addr*2+1)>= (int)core->Flash->GetSize())
+    if(((addr * 2) + 1) >= (int)core->Flash->GetSize())
         avr_error("try to write in flash after last valid address!");
-    core->Flash->myMemory[addr*2+1]=val&0xff;
-    core->Flash->myMemory[addr*2]=val>>8;
-    core->Flash->Decode(addr*2);
+    core->Flash->WriteMemByte(val & 0xff, (addr * 2) + 1);
+    core->Flash->WriteMemByte((val >> 8) & 0xff, addr * 2);
+    core->Flash->Decode(addr * 2);
 }
 
-void GdbServer::avr_core_flash_write_hi8( int addr, byte val) {
-    if ((addr*2)>= (int)core->Flash->GetSize())
+void GdbServer::avr_core_flash_write_hi8(int addr, byte val) {
+    if((addr * 2) >= (int)core->Flash->GetSize())
         avr_error("try to write in flash after last valid address! (hi8)");
-    core->Flash->myMemory[addr*2]=val;
+    core->Flash->WriteMemByte(val, addr * 2);
     core->Flash->Decode();
 }
 
-void GdbServer::avr_core_flash_write_lo8( int addr, byte val) {
-    if ((addr*2+1)>= (int)core->Flash->GetSize())
+void GdbServer::avr_core_flash_write_lo8(int addr, byte val) {
+    if(((addr * 2) + 1) >= (int)core->Flash->GetSize())
         avr_error("try to write in flash after last valid address! (lo8)");
-    core->Flash->myMemory[addr*2+1]=val;
+    core->Flash->WriteMemByte(val, (addr * 2) + 1);
     core->Flash->Decode();
 }
 
@@ -444,6 +444,18 @@ void GdbServer::gdb_send_reply( const char *reply )
 
         server->Write( buf, bytes );
     }
+}
+
+void GdbServer::gdb_send_hex_reply(const char *reply, const char *reply_to_encode)
+{
+    std::string result = reply;
+    for(int i = 0; reply_to_encode[i] != '\0'; i++) {
+        byte val = reply_to_encode[i];
+        result += HEX_DIGIT[(val >> 4) & 0xf];
+        result += HEX_DIGIT[val & 0xf];
+    }
+
+    gdb_send_reply(result.c_str());
 }
 
 /*! GDB needs the 32 8-bit, gpw registers (r00 - r31), the 
@@ -1106,6 +1118,11 @@ int GdbServer::gdb_parse_packet(const char *pkt) {
             return GDB_RET_KILL_REQUEST;
 
         case 'c':               /* continue */
+            if(!core->Flash->IsProgramLoaded()) {
+                gdb_send_hex_reply("O", "No program to simulate. Use 'load' to upload it.\n");
+                SendPosition(GDB_SIGHUP);
+                return GDB_RET_OK;
+            }
             return GDB_RET_CONTINUE;
             break;
 
@@ -1118,12 +1135,16 @@ int GdbServer::gdb_parse_packet(const char *pkt) {
             return GDB_RET_CONTINUE;
             break;
 
-        case 's':               /* step */
-            return GDB_RET_SINGLE_STEP;
-            break;
-
         case 'S':               /* step with signal */
             gdb_get_signal(pkt);
+            // no break!
+        case 's':               /* step */
+            if(!core->Flash->IsProgramLoaded()) {
+                gdb_send_hex_reply("O", "No program to simulate. Use 'load' to upload it.\n");
+                // No SIGTRAP when GDB does "Single stepping until exit from function __vectors"
+                SendPosition(GDB_SIGHUP);
+                return GDB_RET_OK;
+            }
             return GDB_RET_SINGLE_STEP;
             break;
 
