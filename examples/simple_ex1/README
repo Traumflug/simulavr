@@ -2,7 +2,7 @@ To run examples in this directory:
 
 - as standalone simulation:
 
-  > simulavr --device at90s8515 -f fred.elf -W 0x20,- -R 0x22,- -T exit
+  > avrs --device at90s8515 -f fred.elf -W 0x20,- -R 0x22,- -T exit
   
 - with tcl interface, but also standalone:
 

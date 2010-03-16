@@ -16,7 +16,7 @@ CLEANFILES = $(EXAMPLE) fred.o
 EXTRA_DIST = fred.c
 
 run_sim: $(EXAMPLE)
-	../../src/simulavr --device $(AVR_CPU) -f $(EXAMPLE) \
+	../../src/avrs --device $(AVR_CPU) -f $(EXAMPLE) \
 	    -W 0x20,- -R 0x22,- -T exit
 
 do:

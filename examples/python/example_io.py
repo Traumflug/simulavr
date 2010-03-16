@@ -2,22 +2,22 @@
 from sys import argv
 from os.path import splitext, basename
 
-import pysimulavr
+import pyavrs
 from ex_utils import SimulavrAdapter
 
-class XPin(pysimulavr.Pin):
+class XPin(pyavrs.Pin):
   
   def __init__(self, dev, name, state = None):
-    pysimulavr.Pin.__init__(self)
+    pyavrs.Pin.__init__(self)
     self.name = name
     if state is not None: self.SetPin(state)
     # hold the connecting net here, it have not be destroyed, if we leave this method
-    self.__net = pysimulavr.Net()
+    self.__net = pyavrs.Net()
     self.__net.Add(self)
     self.__net.Add(dev.GetPin(name))
     
   def SetInState(self, pin):
-    pysimulavr.Pin.SetInState(self, pin)
+    pyavrs.Pin.SetInState(self, pin)
     print "%s='%s' (t=%dns)" % (self.name, pin.toChar(), sim.getCurrentTime())
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 README
 ------
 
-This are some examples to demonstrate usage of pysimulavr. You can run all
+This are some examples to demonstrate usage of pyavrs. You can run all
 examples together::
 
   > make example
@@ -13,9 +13,9 @@ It's written as a unittest. You can start it by::
 
   > make example1
   
-So you can see, how easy it's to write unittests for simulavr or also for your
-avr code. But you can use pysimulavr also for other things, look at example.py
-how to use pysimulavr.
+So you can see, how easy it's to write unittests for avrs or also for your
+avr code. But you can use pyavrs also for other things, look at example.py
+how to use pyavrs.
 
 example2
 ========
