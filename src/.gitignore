@@ -9,20 +9,20 @@ Makefile
 config.h
 
 # files created by make
-simulavr
-simulavr.exe
+avrs
+avrs.exe
 stamp-h1
 .deps
 .libs
 *.la
 simulavr_wrap.cxx
-pysimulavr_wrap.*
-_pysimulavr.so
-_pysimulavr.pyd
-pysimulavr.py
-pysimulavr.pyc
+pyavrs_wrap.*
+_pyavrs.so
+_pyavrs.pyd
+pyavrs.py
+pyavrs.pyc
 setup.py
 # files created by running setup.py
-pysimulavr.egg-info
+pyavrs.egg-info
 build
 dist

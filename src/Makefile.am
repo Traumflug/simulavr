@@ -10,7 +10,7 @@ PYTHON_CPPFLAGS=@PYTHON_CPPFLAGS@
 AM_CXXFLAGS=-I$(AVR_LIBBFD_INC)
 CXXFLAGS=-g -O2 -Icmd -Iui -Ihwtimer
 
-bin_PROGRAMS    = simulavr
+bin_PROGRAMS    = avrs
 @MAINT@ noinst_PROGRAMS = kbdgentables
 
 lib_LTLIBRARIES = 
@@ -26,26 +26,26 @@ lib_LTLIBRARIES += libsimulavr.la
 endif
 
 if PYTHON_USE
-PYTHON_MODUL_LIB=_pysimulavr@PYTHON_MODULE_EXTENSION@
+PYTHON_MODUL_LIB=_pyavrs@PYTHON_MODULE_EXTENSION@
 PYTHON_XTRA_INC=-Ipython
-PYTHON_MODUL_INTERFACE=$(srcdir)/python/pysimulavr.i
-noinst_LTLIBRARIES += lib_pysimulavr.la
-nodist_lib_pysimulavr_la_SOURCES=pysimulavr_wrap.cpp
-lib_pysimulavr_la_CPPFLAGS=$(PYTHON_CPPFLAGS) $(PYTHON_XTRA_INC)
-lib_pysimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-lib_pysimulavr_la_LIBADD= libsim.la \
+PYTHON_MODUL_INTERFACE=$(srcdir)/python/pyavrs.i
+noinst_LTLIBRARIES += lib_pyavrs.la
+nodist_lib_pyavrs_la_SOURCES=pyavrs_wrap.cpp
+lib_pyavrs_la_CPPFLAGS=$(PYTHON_CPPFLAGS) $(PYTHON_XTRA_INC)
+lib_pyavrs_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
+lib_pyavrs_la_LIBADD= libsim.la \
   -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty
 
-pysimulavr_wrap.cpp: $(PYTHON_MODUL_INTERFACE)
+pyavrs_wrap.cpp: $(PYTHON_MODUL_INTERFACE)
 	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_XTRA_INC) -o $@ $?
 
-$(PYTHON_MODUL_LIB): lib_pysimulavr.la
+$(PYTHON_MODUL_LIB): lib_pyavrs.la
 if SYS_MINGW
 	$(CXX) -shared -o $(PYTHON_MODUL_LIB) \
-		$(addprefix .libs/,$(lib_pysimulavr_la_OBJECTS:.lo=.o)) .libs/libsim.a \
+		$(addprefix .libs/,$(lib_pyavrs_la_OBJECTS:.lo=.o)) .libs/libsim.a \
 		-lstdc++ -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty $(PYTHON_LDFLAGS)
 else
-	cp .libs/lib_pysimulavr.so $(PYTHON_MODUL_LIB)
+	cp .libs/lib_pyavrs.so $(PYTHON_MODUL_LIB)
 endif
 
 endif
@@ -104,8 +104,8 @@ pkginclude_HEADERS = \
 
 nodist_pkginclude_HEADERS =  $(FAB_HEADER)
 
-simulavr_SOURCES = cmd/main.cpp cmd/dumpargs.cpp
-simulavr_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) \
+avrs_SOURCES = cmd/main.cpp cmd/dumpargs.cpp
+avrs_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) \
   -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty \
   $(LIBWSOCK_FLAGS)
 
@@ -147,12 +147,12 @@ $(srcdir)/ui/keyboard.cpp: $(srcdir)/ui/keytrans.h
 @MAINT@     $(srcdir)/ui/xcode_to_keynumber.dat
 @MAINT@	$(builddir)/kbdgentables $(srcdir)/ui
 
-EXTRA_DIST = simulavr.i python/pysimulavr.i python/README
+EXTRA_DIST = simulavr.i python/pyavrs.i python/README
 
 MAINTAINERCLEANFILES = ui/keytrans.h
 
 CLEANFILES = simulavr_wrap.cxx $(PYTHON_MODUL_LIB) avr.vpi \
-             pysimulavr_wrap.cpp pysimulavr_wrap.h pysimulavr.py pysimulavr.pyc
+             pyavrs_wrap.cpp pyavrs_wrap.h pyavrs.py pyavrs.pyc
 
 $(FAB_CPP) $(FAB_HEADER): fab/* fab/atmel-xml/*
 	cd fab; ./avr-fab.py

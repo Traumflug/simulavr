@@ -14,7 +14,7 @@ test -z "$srcdir" && srcdir=.
 progname=`basename $0`
 top_srcdir=`dirname $0`
 
-PROJECT=simulavrxx
+PROJECT=avrs
 
 test -d src || {
     echo "You must run this script in the top-level $PROJECT directory"

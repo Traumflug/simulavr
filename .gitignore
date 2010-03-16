@@ -3,6 +3,7 @@
 *.lo
 avr.vpi
 *.in
+avrs-*.tar.gz
 aclocal.m4
 autom4te.cache
 configure

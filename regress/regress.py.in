@@ -48,7 +48,7 @@ regressdir = os.getcwd()
 os.chdir(srcdir)
 
 # default path to simulator
-sim_path = regressdir+'/../src/simulavr'
+sim_path = regressdir+'/../src/avrs'
 
 # Add modules dir to module search path
 sys.path.append('modules')
@@ -176,12 +176,12 @@ Usage: regress.py [options] [[test_]dir] [[test_]module[.py]] [[test_]case]
 
 Options:
   -h, --help      : print this message and exit
-  -s, --sim=<sim> : path to simulavr executable
+  -s, --sim=<sim> : path to avrs executable
       --stall     : stall the regression engine when done
 """
 	sys.exit(1)
 
-def run_simulator(prog, port=1212, dev="at90s8515"):
+def run_simulator(prog, port=1212, dev="atmega128"):
 	"""Attempt to start up a simulator and return pid.
 	"""
 

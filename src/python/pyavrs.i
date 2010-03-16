@@ -1,4 +1,4 @@
-%module(directors="1") pysimulavr
+%module(directors="1") pyavrs
 
 %{
 

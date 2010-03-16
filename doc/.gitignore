@@ -5,9 +5,9 @@ config.texi
 
 # files created by make
 doxygen-doc
-simulavr.info
-simulavr.pdf
-simulavr.html
+avrs.info
+avrs.pdf
+avrs.html
 *.aux
 *.cp
 *.cps

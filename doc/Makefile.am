@@ -2,8 +2,8 @@
 # $Id$
 #
 
-# produce simulavr.pdf and simulavr.info
-info_TEXINFOS = simulavr.texinfo
+# produce avrs.pdf and avrs.info
+info_TEXINFOS = avrs.texinfo
 
 EXTRA_DIST = $(DX_CONFIG)
 
@@ -133,7 +133,7 @@ install-doxygen: doxygen-doc
 
 endif DX_COND_doc
 
-CLEANFILES = simulavr.info stamp-vti $(DX_CLEANFILES)
+CLEANFILES = avrs.info stamp-vti $(DX_CLEANFILES)
 
 all-am: $(TEX_FORMATS) info
 
