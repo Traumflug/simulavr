@@ -2,6 +2,8 @@
 #  $Id$
 #
 
+SUBDIRS = hwtimer cmd ui
+
 AVR_LIBBFD_LIB=@AVR_LIBBFD_LIB@
 AVR_LIBBFD_INC=@AVR_LIBBFD_INC@
 SWIG=@SWIG@
@@ -91,16 +93,11 @@ pkginclude_HEADERS = \
   atmega668base.h avrdevice.h externalirq.h hardware.h helper.h global.h \
   avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h breakpoint.h string2.h \
   config_deprecated.h decoder.h externaltype.h flash.h flashprog.h hwdecls.h \
-  funktor.h hwacomp.h hwad.h hweeprom.h \
-  hwtimer/timerprescaler.h hwtimer/prescalermux.h string2_template.h \
-  hwtimer/timerirq.h hwpinchange.h hwport.h hwspi.h hwsreg.h hwstack.h \
-  hwtimer/icapturesrc.h hwtimer/hwtimer.h hwuart.h hwwado.h ioregs.h \
-  irqsystem.h ui/keyboard.h ui/keynumber_to_scancode.dat ui/lcd.h python/pysimulationmember.h \
-  memory.h ui/mysocket.h net.h pin.h ui/extpin.h pinatport.h pinnotify.h pinmon.h \
-  printable.h rwmem.h ui/scope.h ui/serialrx.h ui/serialtx.h simulationmember.h \
-  spisrc.h spisink.h specialmem.h systemclock.h systemclocktypes.h \
-  traceval.h types.h cmd/dumpargs.h cmd/gdb.h ui/ui.h ui/keytrans.h \
-  ui/xcode_to_keynumber.dat
+  funktor.h hwacomp.h hwad.h hweeprom.h string2_template.h hwpinchange.h \
+  hwport.h hwspi.h hwsreg.h hwstack.h hwuart.h hwwado.h ioregs.h irqsystem.h \
+  memory.h net.h pin.h pinatport.h pinnotify.h pinmon.h printable.h rwmem.h \
+  simulationmember.h spisrc.h spisink.h specialmem.h systemclock.h \
+  systemclocktypes.h traceval.h types.h
 
 nodist_pkginclude_HEADERS =  $(FAB_HEADER)
 

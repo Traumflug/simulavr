@@ -1,7 +1,7 @@
 \input texinfo @c -*-texinfo-*-
 
 @c %**start of header
-@setfilename simulavr.info
+@setfilename avrs.info
 @include version.texi
 @include config.texi
 @settitle SimulAVR Documentation @value{VERSION}

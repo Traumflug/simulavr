@@ -145,8 +145,8 @@ AC_CONFIG_FILES(
   [regress/regress.py],
   [chmod +x regress/regress.py])
 AC_CONFIG_FILES([
-  Makefile src/Makefile src/setup.py
-  doc/Makefile doc/config.texi
+  Makefile src/Makefile src/hwtimer/Makefile src/cmd/Makefile src/ui/Makefile
+  src/setup.py doc/Makefile doc/config.texi
   regress/Makefile regress/modules/Makefile regress/test_opcodes/Makefile
   regress/avrtest/Makefile regress/timertest/Makefile regress/extinttest/Makefile
   examples/verilog/Makefile examples/Makefile examples/anacomp/Makefile
