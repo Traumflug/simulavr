@@ -9,5 +9,5 @@ AC_ARG_ENABLE(tcl,
   yes) SIMULAVRXX_USE_TCL=yes ;;
   no) SIMULAVRXX_USE_TCL=no ;;
   *)  AC_MSG_ERROR(bad value ${enableval} for enable-tcl option) ;;
-esac],[SIMULAVRXX_USE_TCL=no]) 
+esac],[SIMULAVRXX_USE_TCL=yes]) 
 ])
