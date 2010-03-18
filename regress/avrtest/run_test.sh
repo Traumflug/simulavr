@@ -13,14 +13,17 @@ shift 4
 
 # run simulavr, this uses all other arguments
 echo "$*"
-/usr/bin/time -f "$TARGET %U" -o ${REPORT_FILE}.time $* > ${REPORT_FILE}.stdout 2> ${REPORT_FILE}.stderr
+if [ ${GNUTIME} = yes ]; then
+  TIME_CMD=/usr/bin/time
+else
+  # bash builtin time command!
+  TIME_CMD=time
+fi
+(${TIME_CMD} -p $*) > ${REPORT_FILE}.stdout 2> ${REPORT_FILE}.stderr
 RESULT=$?
 
 # write report
-tail -n 1 ${REPORT_FILE}.time > ${REPORT_FILE}
-echo "" >> ${REPORT_FILE}.stderr
-echo "time:" >> ${REPORT_FILE}.stderr
-cat ${REPORT_FILE}.time >> ${REPORT_FILE}.stderr
+echo "${TARGET} `tail -n 2 ${REPORT_FILE}.stderr | head -1 | cut "-d " -f 2`" > ${REPORT_FILE}
 
 # write output
 echo "stdout:" > $OUTPUT_FILE
@@ -39,7 +42,7 @@ if [ ! $RESULT = $EXPECTED_RESULT ]; then
   cat $OUTPUT_FILE
   RES=1
 fi
-rm -f ${REPORT_FILE}.stdout ${REPORT_FILE}.stderr ${REPORT_FILE}.time
+rm -f ${REPORT_FILE}.stdout ${REPORT_FILE}.stderr
 exit $RES
 
 # EOF

@@ -50,13 +50,10 @@ AM_PATH_PYTHON
 ###
 # Regression test suite support programs
 ##
-# The 'time' command must be installed for the regression test suite,
-# this is different from the built-in 'time' command in bash.
-AC_CHECK_PROG(GNUTIME,time,time,no)
-if test "$GNUTIME" = no ; then
-	AC_MSG_ERROR(Cannot find the GNU 'time' timing tool. This is needed for regression tests.)
-fi
-	
+# If 'time' command is installed, we want to use it for the regression test suite,
+# it's behavior this is different from the built-in 'time' command in bash.
+AC_CHECK_PROG(GNUTIME,time,yes,no)
+  
 ####
 # Check about the AVR cross compilation environment, check for libz (only on msys,
 # used automaticaly by libtool!), libbfd and libiberty

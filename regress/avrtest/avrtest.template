@@ -10,7 +10,7 @@ test: %(targets)s
 
 %(rules)s
 
-%%.report: %%.elf $(SIMULAVR)
+%%.report: %%.elf $(AVRS)
 	@./run_test.sh $@ $($(basename $(notdir $@))_SHELLOPTS) $< -- $(AVRS) $($(basename $(notdir $@))_SIMOPTS) -f $<
 
 define compile-and-link
