@@ -133,6 +133,27 @@ install-doxygen: doxygen-doc
 
 endif DX_COND_doc
 
+# Rules for generating doc with Sphinx
+SPHINX_BUILDDIR = $(srcdir)/doc_build
+SPHINXOPTS = -d $(SPHINX_BUILDDIR)/doctrees -D latex_paper_size=a4
+SPHINXBUILD = @PYTHON@ -c "import sys;from pkg_resources import load_entry_point;sys.exit(load_entry_point('Sphinx', 'console_scripts', 'sphinx-build')())"
+
+sphinx-html:
+if PYTHON_USE
+	$(SPHINXBUILD) -b html $(SPHINXOPTS) . $(SPHINX_BUILDDIR)/html
+else
+	@echo "  Can't build documentation with Sphinx, python not configured!"
+endif
+
+sphinx-pdf:
+if PYTHON_USE
+	$(SPHINXBUILD) -b pdf $(SPHINXOPTS) . $(SPHINX_BUILDDIR)/pdf
+else
+	@echo "  Can't build documentation with Sphinx, python not configured!"
+endif
+
+sphinx-doc: sphinx-html sphinx-pdf
+
 CLEANFILES = avrs.info stamp-vti $(DX_CLEANFILES)
 
 all-am: $(TEX_FORMATS) info

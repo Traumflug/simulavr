@@ -24,6 +24,13 @@ else
 	@echo "doxygen documentation not available! Sorry."
 endif
 
+sphinx-doc:
+if PYTHON_USE
+	$(MAKE) -C doc sphinx-doc
+else
+	@echo "  Can't build documentation with Sphinx, python not configured!"
+endif
+
 install-doxygen:
 if DX_COND_doc
 	$(MAKE) -C doc install-doxygen
@@ -38,5 +45,5 @@ else
 	@echo "install vpi module not available! Sorry."
 endif
 
-.PHONY: doxygen-doc install-doxygen install-vpi
+.PHONY: doxygen-doc sphinx-doc install-doxygen install-vpi
 
