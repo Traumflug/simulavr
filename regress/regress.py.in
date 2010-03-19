@@ -26,6 +26,7 @@
 # # @configure_input@
 
 import os, os.path, sys, fnmatch, glob
+import subprocess
 
 # Check the python version
 _v = sys.version_info
@@ -81,7 +82,7 @@ def run_tests(target, tdir=None, tmodule=None, tname=None):
   num_passes = 0
   num_fails  = 0
 
-  start_time = os.times()[4]
+  start_time = sum(os.times()[:2])
 
   if tdir is None:
     test_dirs = glob.glob('test_*')
@@ -157,7 +158,7 @@ def run_tests(target, tdir=None, tmodule=None, tname=None):
     # remove test_dir from the module search path
     sys.path.remove(test_dir)
 
-  elapsed = os.times()[4] - start_time
+  elapsed = sum(os.times()[:2]) - start_time
 
   print 
   print 'Ran %d tests in %.3f seconds [%0.3f tests/second].' % \
@@ -190,23 +191,14 @@ def run_simulator(prog, port=1212, dev="atmega128"):
     print >> sys.stderr, '%s does not exist' %(prog)
     sys.exit(1)
 
-  pid = os.fork()
-  if pid == 0: # child process
-    sys.stdout.close()
-    sys.stderr.close()
+  out = os.open(regressdir+'/sim.out', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0644)
+  err = os.open(regressdir+'/sim.err', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0644)
+  p = subprocess.Popen((prog, '-g', '-G', '-d', dev, '-p', str(port)),
+                       shell = False,
+                       stdout = out,
+                       stderr = err)
 
-    out = os.open(regressdir+'/sim.out', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0644)
-    os.dup2(out, 1)
-    os.close(out)
-
-    err = os.open(regressdir+'/sim.err', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0644)
-    os.dup2(err, 2)
-    os.close(err)
-    
-    os.execlp( prog, prog, '-g', '-G', '-d', dev, '-p', str(port) )
-    assert 0, 'error starting program' # should never get here.
-
-  return pid
+  return p
   
 if __name__ == '__main__':
   import getopt, time, socket, signal
@@ -231,7 +223,7 @@ if __name__ == '__main__':
   if len(args) > 3:
     usage()
     
-  sim_pid = run_simulator(sim_path)
+  sim_p = run_simulator(sim_path)
 
   # Open a connection to the target
   tries = 5
@@ -259,7 +251,6 @@ if __name__ == '__main__':
       raw_input('hit enter to quit...')
 
     # make sure that the simulator has quit
-    os.kill(sim_pid, signal.SIGINT)
-    os.waitpid(sim_pid, os.WNOHANG)
-  
+    sim_p.wait()
+    
   sys.exit( status )

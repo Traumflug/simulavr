@@ -32,6 +32,7 @@ using namespace std;
 #include <unistd.h>
 #include <fcntl.h>
 #include <time.h>
+#include <signal.h>
 
 #include "avrmalloc.h"
 #include "avrerror.h"
@@ -279,10 +280,10 @@ void GdbServerSocketUnix::CloseConnection(void) {
 GdbServer::GdbServer(AvrDevice *c, int _port, int debug, int _waitForGdbConnection):
     core(c),
     global_debug_on(debug),
-    waitForGdbConnection(_waitForGdbConnection)
+    waitForGdbConnection(_waitForGdbConnection),
+    exitOnKillRequest(false)
 {
     last_reply = NULL; //init static var for last_reply()
-    block_on = 1;      //init static var for pre_parse_packet()
     runMode = GDB_RET_NOTHING_RECEIVED;
     lastCoreStepFinished = true;
     connState = false;
@@ -1115,6 +1116,8 @@ int GdbServer::gdb_parse_packet(const char *pkt) {
             /* Reset the simulator since there may be another connection
             before the simulator stops running. */
             gdb_send_reply("OK");
+            if(exitOnKillRequest)
+                raise(SIGINT);
             return GDB_RET_KILL_REQUEST;
 
         case 'c':               /* continue */
@@ -1130,6 +1133,7 @@ int GdbServer::gdb_parse_packet(const char *pkt) {
             if(GDB_SIGHUP==gdb_get_signal(pkt)) { //very special solution only for regression testing woth
                                               //old scripts from old simulavr! Continue means not continue
                                               //if signal is SIGHUP :-(, so we do nothing then!
+                exitOnKillRequest = true;
                 return GDB_RET_OK;
             }
             return GDB_RET_CONTINUE;
@@ -1198,14 +1202,6 @@ int GdbServer::gdb_pre_parse_packet(int blocking) {
 
     server->SetBlockingMode(blocking);
 
-    /*
-    if ( block_on != blocking )
-    {
-    server->SetBlockingMode( blocking );
-    block_on = blocking;
-    }
-    */
-    //cout << endl; //trace
     c = server->ReadByte();
 
     switch(c) {

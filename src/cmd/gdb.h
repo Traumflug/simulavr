@@ -121,21 +121,20 @@ class GdbServer: public SimulationMember {
         GdbServerSocket *server; //!< the server socket wrapper
         bool connState; //!< result of server->Connect()
 
-        time_t oldTime;     //remember when we have tried to open a tcp connection
-                            //last time. Only one try per second
+        /*! remember when we have tried to open a tcp connection last time. Only
+        one try per second */
+        time_t oldTime;     
  
-        int global_debug_on;    //debugging the debugger
+        int global_debug_on;    //!< debugging the debugger interface
         int waitForGdbConnection;
+        bool exitOnKillRequest; //!< flag for regression test to shutdown simulator on kill request from gdb
         int runMode;
-        //bool untilCoreStepFinished; //we must ever run until a complete step, taht is requred by
-                                    //gdb, but we should never ask gdb for enything until the step really done
         bool lastCoreStepFinished;
 
         //old function local static vars, must move to class, no way to handle
         //method local static vars.
         char *last_reply;  //used in last_reply();
         char buf[MAX_BUF]; //used in send_reply();
-        int block_on;      //used in pre_parse_packet();
 
 
         word avr_core_flash_read(int addr) ;

@@ -3,7 +3,11 @@
 # get filename for report
 REPORT_FILE=$1
 OUTPUT_FILE=`basename $1 .report`.output
-EXPECTED_RESULT=$2
+if [ `uname -o` = "Msys" ]; then
+  EXPECTED_RESULT=`echo "$2" | cut -d, -f 2`
+else
+  EXPECTED_RESULT=`echo "$2" | cut -d, -f 1`
+fi
 TARGET=$3
 if [ ! "$4" = "--" ]; then
   echo "error: argument error, \$4 has to be '--'!"
@@ -14,13 +18,13 @@ shift 4
 # run simulavr, this uses all other arguments
 echo "$*"
 if [ ${GNUTIME} = yes ]; then
-  TIME_CMD=/usr/bin/time
+  (/usr/bin/time -p $*) > ${REPORT_FILE}.stdout 2> ${REPORT_FILE}.stderr
+  RESULT=$?
 else
   # bash builtin time command!
-  TIME_CMD=time
+  (time -p $*) > ${REPORT_FILE}.stdout 2> ${REPORT_FILE}.stderr
+  RESULT=$?
 fi
-(${TIME_CMD} -p $*) > ${REPORT_FILE}.stdout 2> ${REPORT_FILE}.stderr
-RESULT=$?
 
 # write report
 echo "${TARGET} `tail -n 2 ${REPORT_FILE}.stderr | head -1 | cut "-d " -f 2`" > ${REPORT_FILE}
@@ -35,7 +39,7 @@ echo "" >> $OUTPUT_FILE
 
 # give back exit code
 RES=0
-if [ ! $RESULT = $EXPECTED_RESULT ]; then
+if [ ! "$RESULT" = "$EXPECTED_RESULT" ]; then
   echo ""
   echo "error: return code from avrs = $RESULT, expected = $EXPECTED_RESULT!"
   echo ""
