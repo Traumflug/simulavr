@@ -2,17 +2,17 @@
 from sys import argv
 from os.path import splitext, basename
 
-import pyavrs
+import pysimulavr
 from ex_utils import SimulavrAdapter
 
-class XPin(pyavrs.Pin):
+class XPin(pysimulavr.Pin):
   
   def __init__(self, name):
-    pyavrs.Pin.__init__(self)
+    pysimulavr.Pin.__init__(self)
     self.name = name
     
   def SetInState(self, pin):
-    pyavrs.Pin.SetInState(self, pin)
+    pysimulavr.Pin.SetInState(self, pin)
     print "%s set to '%s' (t=%dns)" % (self.name, pin.toChar(), sim.getCurrentTime())
 
 if __name__ == "__main__":
@@ -37,7 +37,7 @@ if __name__ == "__main__":
   # watch out, that this Net instance will not be deleted until simulation is
   # done (for example, if you create this in a subfunction and do not save
   # this instance too, before you leave this subfunction)
-  net = pyavrs.Net()
+  net = pysimulavr.Net()
   net.Add(xpin)
   net.Add(dev.GetPin("A0"))
     

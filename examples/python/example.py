@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
-# Python test script as demonstration of using pyavrs in unit tests
+# Python test script as demonstration of using pysimulavr in unit tests
 from unittest import TestSuite, TextTestRunner, TestCase, defaultTestLoader
 from sys import argv
 
-import pyavrs
+import pysimulavr
 from ex_utils import SimulavrAdapter
 
 class TestBaseClass(TestCase, SimulavrAdapter):

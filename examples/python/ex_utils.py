@@ -1,14 +1,14 @@
 # Python Script
-import pyavrs
+import pysimulavr
 
 class SimulavrAdapter(object):
   
   DEFAULT_CLOCK_SETTING = 250 # 250ns or 4MHz
   
   def loadDevice(self, t, e):
-    self.__sc = pyavrs.SystemClock.Instance()
+    self.__sc = pysimulavr.SystemClock.Instance()
     self.__sc.ResetClock()
-    dev = pyavrs.AvrFactory.instance().makeDevice(t)
+    dev = pysimulavr.AvrFactory.instance().makeDevice(t)
     dev.Load(e)
     dev.SetClockFreq(self.DEFAULT_CLOCK_SETTING)
     self.__sc.Add(dev)
@@ -32,21 +32,21 @@ class SimulavrAdapter(object):
     return self.__sc.GetCurrentTime()
     
   def getAllRegisteredTraceValues(self):
-    os = pyavrs.ostringstream()
-    pyavrs.DumpManager.Instance().save(os)
+    os = pysimulavr.ostringstream()
+    pysimulavr.DumpManager.Instance().save(os)
     return filter(None, [i.strip() for i in os.str().split("\n")])
 
   def dmanSingleDeviceApplication(self):
-    pyavrs.DumpManager.Instance().SetSingleDeviceApp()
+    pysimulavr.DumpManager.Instance().SetSingleDeviceApp()
     
   def dmanStart(self):
-    pyavrs.DumpManager.Instance().start()
+    pysimulavr.DumpManager.Instance().start()
   
   def dmanStop(self):
-    pyavrs.DumpManager.Instance().stopApplication()
+    pysimulavr.DumpManager.Instance().stopApplication()
   
   def setVCDDump(self, vcdname, signals, rstrobe = False, wstrobe = False):
-    dman = pyavrs.DumpManager.Instance()
+    dman = pysimulavr.DumpManager.Instance()
     sigs = ["+ " + i for i in signals]
     dman.addDumpVCD(vcdname, "\n".join(sigs), "ns", rstrobe, wstrobe)
     
