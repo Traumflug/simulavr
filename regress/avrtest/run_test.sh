@@ -41,7 +41,7 @@ echo "" >> $OUTPUT_FILE
 RES=0
 if [ ! "$RESULT" = "$EXPECTED_RESULT" ]; then
   echo ""
-  echo "error: return code from avrs = $RESULT, expected = $EXPECTED_RESULT!"
+  echo "error: return code from simulavr = $RESULT, expected = $EXPECTED_RESULT!"
   echo ""
   cat $OUTPUT_FILE
   RES=1

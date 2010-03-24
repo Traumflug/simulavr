@@ -2,8 +2,8 @@
 # $Id$
 #
 
-# produce avrs.pdf and avrs.info
-info_TEXINFOS = avrs.texinfo
+# produce simulavr.pdf and simulavr.info
+info_TEXINFOS = simulavr.texinfo
 
 EXTRA_DIST = $(DX_CONFIG)
 
@@ -154,7 +154,7 @@ endif
 
 sphinx-doc: sphinx-html sphinx-pdf
 
-CLEANFILES = avrs.info stamp-vti $(DX_CLEANFILES)
+CLEANFILES = simulavr.info stamp-vti $(DX_CLEANFILES)
 
 all-am: $(TEX_FORMATS) info
 

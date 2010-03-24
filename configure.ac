@@ -5,7 +5,7 @@
 ####
 # common initialisation of autotools
 ####
-AC_INIT([avrs], [0.10rc1], [avrs-develop@lists.sourceforge.net])
+AC_INIT([SimulAVR], [0.9git], [simulavr-devel@nongnu.org])
 AM_INIT_AUTOMAKE([1.10 -Wall -Werror foreign])
 AC_PREREQ([2.61])
 AC_CONFIG_MACRO_DIR([m4])
@@ -117,7 +117,7 @@ AM_CONDITIONAL([HAVE_TEX], [test x"${TEX}" != x"no"])
 DX_DOXYGEN_FEATURE(OFF)
 DX_PDF_FEATURE(OFF)
 DX_PS_FEATURE(OFF)
-DX_INIT_DOXYGEN([avrs], [avrs.doxy], )
+DX_INIT_DOXYGEN([Simulavr], [simulavr.doxy], )
 
 ####
 # definitions for distcheck
@@ -172,6 +172,11 @@ if test x"${build_tcl_libs}" = x"yes" -a x"${HAVE_TCL}" != x"no" ; then
   AC_CONFIG_FILES(
     [examples/atmega48/check.tcl],
     [chmod +x examples/atmega48/check.tcl])
+else
+  AC_MSG_WARN([])
+  AC_MSG_WARN([Tcl Development Kit Not Installed])
+  AC_MSG_WARN([Not building Tcl interface or examples])
+  AC_MSG_WARN([])
 fi
 
 ####
@@ -193,12 +198,6 @@ echo "PYTHON=${PYTHON}"
 if test x"${build_tcl_libs}" = x"yes" -a x"${HAVE_TCL}" != x"no" ; then
   echo "TCL_WISH=${TCL_WISH}"
   echo "tcl has package Itcl? ${check_itcl_available}"
-  echo "**********************************************"
-  echo "* Attention! TCL interface is deprecated!    *"
-  echo "* Read announcements on mailing list. If you *"
-  echo "* want to maintain it, please make a post on *"
-  echo "* mailing list with that.                    *"
-  echo "**********************************************"
 fi
 echo "build verilog modul avr.vpi = ${AVR_BUILD_VERILOG}"
 # EOF

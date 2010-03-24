@@ -8,12 +8,12 @@ except:
   
 from distutils.sysconfig import get_python_lib
 
-setup(name = 'pyavrs',
+setup(name = 'pysimulavr',
       version = "@PACKAGE_VERSION@",
-      py_modules = ["pyavrs"],
-      data_files = [(get_python_lib(), ["_pyavrs@PYTHON_MODULE_EXTENSION@"])],
+      py_modules = ["pysimulavr"],
+      data_files = [(get_python_lib(), ["_pysimulavr@PYTHON_MODULE_EXTENSION@"])],
       author="Klaus Rudolph & others",
-      author_email="<avrs-develop@lists.sourceforge.net>",
+      author_email="<simulavr-devel@nongnu.org>",
       license="GPL",
-      description="python modul for avrs")
+      description="python modul for simulavr")
 # EOF

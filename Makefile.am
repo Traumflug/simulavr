@@ -15,7 +15,7 @@ EXTRA_DIST = bootstrap make_tarball README.gdb SUPPORT \
  
 doc_DATA = README README.gdb SUPPORT TODO AUTHORS ChangeLog COPYING INSTALL NEWS
 
-CLEANFILES = avrs-$(PACKAGE_VERSION).tar.gz
+CLEANFILES = simulavr-$(PACKAGE_VERSION).tar.gz
 
 doxygen-doc:
 if DX_COND_doc

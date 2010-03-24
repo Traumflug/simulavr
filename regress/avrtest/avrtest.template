@@ -1,6 +1,6 @@
 # template makefile for timertests
 
-AVRS=../../src/avrs$(EXEEXT)
+SIMULAVR=../../src/simulavr$(EXEEXT)
 
 test: %(targets)s
 	@echo "##################################################################"
@@ -10,8 +10,8 @@ test: %(targets)s
 
 %(rules)s
 
-%%.report: %%.elf $(AVRS)
-	@./run_test.sh $@ $($(basename $(notdir $@))_SHELLOPTS) $< -- $(AVRS) $($(basename $(notdir $@))_SIMOPTS) -f $<
+%%.report: %%.elf $(SIMULAVR)
+	@./run_test.sh $@ $($(basename $(notdir $@))_SHELLOPTS) $< -- $(SIMULAVR) $($(basename $(notdir $@))_SIMOPTS) -f $<
 
 define compile-and-link
 $(AVR_GCC) $($(basename $(notdir $@))_CCOPTS) -o $@ $^

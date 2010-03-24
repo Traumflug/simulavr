@@ -1,14 +1,14 @@
 from simtestutil import SimTestCase, SimTestLoader
-import pyavrs
+import pysimulavr
 
-class XPin(pyavrs.Pin):
+class XPin(pysimulavr.Pin):
   
   def __init__(self, dev, sim, name):
-    pyavrs.Pin.__init__(self)
+    pysimulavr.Pin.__init__(self)
     self.ct = sim.getCurrentTime
     self.name = name
     # hold the connecting net here, must not be destroyed till deleting XPin
-    self.__net = pyavrs.Net()
+    self.__net = pysimulavr.Net()
     self.__net.Add(self)
     self.__net.Add(dev.GetPin(name))
     
