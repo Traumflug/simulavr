@@ -1,12 +1,6 @@
 Graphic User Interface with TCL
 ===============================
 
-.. warning::
-
-  The TCL interface is deprecated! If you want to use it **and** be able
-  to maintain and develop it, please send a message to mailing list. Otherwise
-  TCL interface will be removed in one of the next releases!
-  
 To adjust reader's expectations about simulavr let's start with some
 design goals. The main design goals are:
 
