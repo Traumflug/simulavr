@@ -35,7 +35,7 @@ CPU Limitations
 This chapters describes an overview of limitations for simulavr. Specific 
 limitations see below.  This chapter focuses only on the Mega128 CPU.
 
-The following hardware is **not** simulated by avrs:
+The following hardware is **not** simulated by simulavr:
 
 * TWI Serial Interface
 * Analog to Digital Converter Subsystem

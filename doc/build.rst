@@ -6,9 +6,9 @@ Building and Installing
   Examples in this chapter refer to a version 0.10, please replace this with your
   current version!
   
-avrs uses GNU auto tools. This means that, given a tarball, for
+simulavr uses GNU auto tools. This means that, given a tarball, for
 version 0.10, for example, you should be able to use the following
-steps to build and install avrs::
+steps to build and install simulavr::
 
   tar zxvf simulavr-0.10.tar.gz
   cd simulavr-0.10
@@ -16,12 +16,12 @@ steps to build and install avrs::
   make
   make install
 
-This will build ``avrs`` and, if switched on by configure options,
-some extension modules and libraries. It installs avrs itself, libraries and
-some examples and the ``avrs.info`` in documentation directory
+This will build ``simulavr`` and, if switched on by configure options,
+some extension modules and libraries. It installs simulavr itself, libraries and
+some examples and the ``simulavr.info`` in documentation directory
 ``$prefix/share/doc/simulavr``.
 
-If you want to install ``avrs.pdf`` too, you can do that after the normal
+If you want to install ``simulavr.pdf`` too, you can do that after the normal
 installation::
 
   make install-pdf
@@ -56,7 +56,7 @@ For more possibilities on installing python interface, please see python
 documentation (distutils package) and documentation for setuptools python
 package.
 
-avrs does rely on a few other GNU tools. In particular, it relies
+simulavr does rely on a few other GNU tools. In particular, it relies
 on libbfd from binutils, and by libbfd's dependency, it also relies on
 libiberty.
 
@@ -72,7 +72,7 @@ install AVR tools to ``/home/user/install``::
      --prefix=/home/user/install --target=avr
   make && make install
 
-Then I configure/install avrs as follows::
+Then I configure/install simulavr as follows::
 
   tar zxvf simulavr-@value{VERSION}.tar.gz
   cd simulavr-@value{VERSION}
@@ -80,7 +80,7 @@ Then I configure/install avrs as follows::
   make
   make install
 
-Ideally this is all you should need to build/install avrs. Below are some
+Ideally this is all you should need to build/install simulavr. Below are some
 of the configure options.
 
 ``--prefix``
@@ -145,10 +145,10 @@ of the configure options.
 There are more options for running ``./configure``. To find out, what's
 possible, see autotools documentation or try ``./configure --help``.
 
-**A few words about libbfd and libiberty:** avrs dosn't use any AVR specific
+**A few words about libbfd and libiberty:** simulavr dosn't use any AVR specific
 things from libbfd, so it should be possible to use the system libbfd (and
 libiberty). But I have seen cases, where building simulavr against this system
-libbfd was successfull and running avrs with a AVR elf file end in a
+libbfd was successfull and running simulavr with a AVR elf file end in a
 segmentation fault. Then it's necessary to use a special AVR binutils build.
 
 How to build simulavr on MingW/Windows

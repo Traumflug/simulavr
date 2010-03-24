@@ -91,14 +91,14 @@ For more details see the example in the directory simple_ex1.
 Using with avr-gdb
 ------------------
 
-Using the simulator with avr-gdb is very simple. Start avrs with::
+Using the simulator with avr-gdb is very simple. Start simulavr with::
 
-  avrs -g
+  simulavr -g
 
 Now simulavr opens a socket on port 1212. If you need another port
 give the port number with::
 
-  avrs -p5566
+  simulavr -p5566
 
 which will start simulavr with avr-gdb socket at port 5566.
 
@@ -124,7 +124,7 @@ start in avr-gdb mode and give no file to execute ``-f filename``
 you will run into an ``"Illegal Instruction"``.  The reason
 is that simulavr runs immediately with an empty flash. But avr-gdb
 is not connected and could stop the core. Solution: Please start with
-``avrs -g -f <filename>``. The problem will be fixed later.
+``simulavr -g -f <filename>``. The problem will be fixed later.
 It doesn't matter whether the filename of the simulavr command line
 is identical to the filename of avr-gdb file command.  The avr-gdb
 downloads the file itself to the simulator.  And after downloading the

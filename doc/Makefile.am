@@ -137,6 +137,7 @@ endif DX_COND_doc
 SPHINX_BUILDDIR = $(srcdir)/doc_build
 SPHINXOPTS = -d $(SPHINX_BUILDDIR)/doctrees -D latex_paper_size=a4
 SPHINXBUILD = @PYTHON@ -c "import sys;from pkg_resources import load_entry_point;sys.exit(load_entry_point('Sphinx', 'console_scripts', 'sphinx-build')())"
+SPHINX_CLEANFILES = $(srcdir)/doc_build
 
 sphinx-html:
 if PYTHON_USE
@@ -154,7 +155,7 @@ endif
 
 sphinx-doc: sphinx-html sphinx-pdf
 
-CLEANFILES = simulavr.info stamp-vti $(DX_CLEANFILES)
+CLEANFILES = simulavr.info stamp-vti $(DX_CLEANFILES) $(SPHINX_CLEANFILES)
 
 all-am: $(TEX_FORMATS) info
 

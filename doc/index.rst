@@ -1,11 +1,11 @@
-avrs - an AVR simulation framework
-==================================
+Simulavr - an AVR simulation framework
+======================================
 
-A simulator for the Atmel AVR family of microcontrollers. For avrs version
+A simulator for the Atmel AVR family of microcontrollers. For simulavr version
 |version|, |today| by Theodore A. Roth, Klaus Rudolph and others.
 
-Send bugs and comments on avrs mailinglist avrs-develop@lists.sourceforge.net.
-Project homepage is available at http://avrs.sourceforge.net.
+Send bugs and comments on simulavr mailinglist simulavr-devel@nongnu.org.
+Project homepage is available at http://savannah.nongnu.org/projects/simulavr.
 
 Copyright
 =========
