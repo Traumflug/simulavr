@@ -2,6 +2,7 @@
 
 # files created by configure
 config.texi
+conf.py
 
 # files created by make
 doc_build

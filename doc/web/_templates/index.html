@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% set title = 'Overview' %}
+{% block body %}
+  <h1>Welcome</h1>
+
+  <p>
+    The SimulAVR program is a simulator for the
+    <a href="http://www.atmel.com/products/AVR/">Atmel AVR family</a>
+    of microcontrollers. (ATtiny and ATmega) SimulAVR can be used either
+    standalone or as a remote target for avr-gdb. There is a python- and TCL
+    interface. When used in gdbserver mode, the simulator is used as a
+    back-end so that avr-gdb can be used as a source level debugger for AVR
+    programs.</p>
+
+  <p>
+    SimulAVR started out as a C based project written by Theodore Roth in 2001.
+    Klaus Rudolph started then in 2004 to rewrite the hardware simulation part
+    in C++. Only the instruction decoder and the avr-gdb interface are mostly
+    copied from the original simulavr sources. This C++ based version was known
+    as simulavrxx until it became feature compatibile with the old simulavr
+    code, then it renamed back to simulavr.</p>
+    
+  <h1>More informations ...</h1>
+  
+  <p>
+    The project is hosted at <a href="http://savannah.gnu.org/projects/simulavr">
+    http://savannah.gnu.org/projects/simulavr</a> (homepage:
+    <a href="http://www.nongnu.org/simulavr">http://www.nongnu.org/simulavr</a>)
+    .</p>
+  
+  <p>
+    Simulavr is published unter GPLv2 license. For authors and contributors see
+    copyright chapter in documentation.</p>
+  
+  <p>
+    We have a <a href="http://lists.nongnu.org/mailman/listinfo/simulavr-devel">
+    development mailing list</a>
+    (<a href="http://lists.gnu.org/pipermail/simulavr-devel">see archive</a>) and
+    a <a href="https://savannah.nongnu.org/bugs/?group=simulavr">bug tracker</a>
+    for the communication with developers.<p>
+  
+  <p>
+    Please read more <a href="{{ pathto('contents') }}">about activities,
+    plans, releases, download</a> and so one.</p>
+  
+  <p>
+    We hold also the "old" code and releases from simulavr and simulavrxx for
+    maintenance and for comparison reasons. There is some maintenance for the
+    "old" C based simulavr, especially to support projects, which use simulavr.
+    <b>But we recommend to use the new simulavr version soon!</b></p>
+  
+{% endblock %}

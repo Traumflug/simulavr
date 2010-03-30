@@ -124,6 +124,7 @@ case ${mode} in
     find . -name '.libs' -print | xargs rm -rf
     find . -name 'stamp-h.in' | xargs rm -rf
     find . -name 'autom4te*.cache' | xargs rm -rf
+    find doc -name 'conf.py' | xargs rm -rf
     ;;
 
   *)

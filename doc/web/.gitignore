@@ -1,0 +1,8 @@
+# files to ignore by git
+
+# files created by configure
+conf.py
+
+# files created by make
+web_build
+

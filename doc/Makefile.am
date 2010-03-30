@@ -2,6 +2,8 @@
 # $Id$
 #
 
+SUBDIRS = web
+
 # produce simulavr.pdf and simulavr.info
 info_TEXINFOS = simulavr.texinfo
 
@@ -137,7 +139,7 @@ endif DX_COND_doc
 SPHINX_BUILDDIR = $(srcdir)/doc_build
 SPHINXOPTS = -d $(SPHINX_BUILDDIR)/doctrees -D latex_paper_size=a4
 SPHINXBUILD = @PYTHON@ -c "import sys;from pkg_resources import load_entry_point;sys.exit(load_entry_point('Sphinx', 'console_scripts', 'sphinx-build')())"
-SPHINX_CLEANFILES = $(srcdir)/doc_build
+SPHINX_CLEANFILES = -r $(srcdir)/doc_build
 
 sphinx-html:
 if PYTHON_USE

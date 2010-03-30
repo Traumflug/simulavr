@@ -31,6 +31,13 @@ else
 	@echo "  Can't build documentation with Sphinx, python not configured!"
 endif
 
+web-html:
+if PYTHON_USE
+	$(MAKE) -C doc/web web-html
+else
+	@echo "  Can't build web site with Sphinx, python not configured!"
+endif
+
 install-doxygen:
 if DX_COND_doc
 	$(MAKE) -C doc install-doxygen

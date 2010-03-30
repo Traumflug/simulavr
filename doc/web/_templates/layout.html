@@ -1,0 +1,12 @@
+{% extends "!layout.html" %}
+
+{% block rootrellink %}
+        <li><a href="http://www.nongnu.org/simulavr">Simulavr home</a>&nbsp;|&nbsp;</li>
+        <li><a href="{{ pathto('contents') }}">Read more ...</a>&raquo;</li>
+{% endblock %}
+
+{% block header %}
+<div style="background-color: white; text-align: center; padding: 20px 20px 20px 20px">
+<img src="{{ pathto("_static/simulavr.png", 1) }}" alt="Simulavr logo" />
+</div>
+{% endblock %}
