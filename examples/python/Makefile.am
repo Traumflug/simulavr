@@ -43,7 +43,21 @@ $(EXAMPLE4): ex_pinout.c
 example4: $(EXAMPLE4)
 	PYTHONPATH=../../src @PYTHON@ ex_pinout.py $(AVR_CPU):$<
 
-run_example: example1 example2 example3 example4
+# example5: multicore example with 2 ATmega16
+EXAMPLE5A = multicore_a.elf
+EXAMPLE5B = multicore_b.elf
+EX5_CFLAGS = -g -O2 -mmcu=atmega16
+
+$(EXAMPLE5A): multicore.c
+	$(AVR_GCC) $(EX5_CFLAGS) -DDUAL_A=1 -o $@ $<
+
+$(EXAMPLE5B): multicore.c
+	$(AVR_GCC) $(EX5_CFLAGS) -DDUAL_B=1 -o $@ $<
+
+example5: $(EXAMPLE5A) $(EXAMPLE5B)
+	PYTHONPATH=../../src @PYTHON@ multicore.py
+
+run_example: example1 example2 example3 example4 example5
 
 else
 
@@ -60,11 +74,15 @@ run_example:
 endif
 
 
-EXTRA_DIST = example.c example.py example_pin.py example_io.c example_io.py ex_utils.py ex_pinout.py ex_pinout.c README
+EXTRA_DIST = example.c example.py example_pin.py example_io.c example_io.py \
+             ex_utils.py ex_pinout.py ex_pinout.c multicore.c multicore.py \
+             README
 
-examples_DATA = $(EXAMPLE1) $(EXAMPLE3) $(EXAMPLE4) $(EXTRA_DIST) README Makefile
+examples_DATA = $(EXAMPLE1) $(EXAMPLE3) $(EXAMPLE4) $(EXAMPLE5A) $(EXAMPLE5B) \
+                $(EXTRA_DIST) README Makefile
 
-CLEANFILES = $(EXAMPLE1) $(EXAMPLE3) $(EXAMPLE4) ex_utils.pyc ex_pinout.vcd
+CLEANFILES = $(EXAMPLE1) $(EXAMPLE3) $(EXAMPLE4) $(EXAMPLE5A) $(EXAMPLE5B) \
+             ex_utils.pyc ex_pinout.vcd
 
 example: run_example
 

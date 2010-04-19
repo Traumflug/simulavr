@@ -48,4 +48,33 @@ IRQ.VECTOR9 shows when and how long the ISR was running! You can start it by::
 
   > make example4
   
+example5
+========
+
+This example demonstrates using python interface for multicore simulation. We
+simulate 2 ATmega16 cores::
+
+  +----------+             +----------+
+  | Core A   | PB3     PD2 | Core B   |
+  | 4MHz     |------>------| 10MHz    |
+  |          |             |          |
+  +----------+             +----------+
+  
+Core A runs as a 250Hz clock generator on pin B3. B3 from core A is conected with
+pin D2 on core B. Core B counts now all rising edges on pin D2 and measures the
+time distance between 2 events with timer T0.
+
+This example shows:
+
+- how to use python interface
+- how it is possible to run a multicore simulation, in this example also with
+  different clock sources for the cores
+- how to connect pins between cores
+- how to access global variables, how to get address for a global variable and
+  how to read RAM values from a address
+  
+You can start it by::
+
+  > make example5
+  
 *EOF*
