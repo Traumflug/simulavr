@@ -1,6 +1,10 @@
 #!/bin/bash
 
-BUILDDIR=./web_build/html
+THIS=`dirname $0`
+pushd $THIS > /dev/null
+THIS=`pwd`
+popd > /dev/null
+BUILDDIR=$THIS/../web_build/html
 
 failure() {
   echo "error: $1. Abort!" && exit 1
@@ -34,9 +38,6 @@ popd > /dev/null
 if [ ! -d $BUILDDIR ]; then
   failure "web site not built, run 'make web-html' before"
 fi
-pushd $BUILDDIR > /dev/null
-BUILDDIR=`pwd`
-popd > /dev/null
 TMPDIR=`dirname $BUILDDIR`
 
 # set language to built in default (english)

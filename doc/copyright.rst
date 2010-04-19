@@ -1,12 +1,3 @@
-Simulavr - an AVR simulation framework
-======================================
-
-A simulator for the Atmel AVR family of microcontrollers. For simulavr version
-|version|, |today| by Theodore A. Roth, Klaus Rudolph and others.
-
-Send bugs and comments on simulavr mailinglist simulavr-devel@nongnu.org.
-Project homepage is available at http://savannah.nongnu.org/projects/simulavr.
-
 Copyright
 =========
 
@@ -16,7 +7,7 @@ Authors:
 * 2004 Theodore A. Roth, Klaus Rudolph
 * 2005 Klaus Rudolph
 * 2008 Knut Schwichtenberg
-* 2009 Joel Sherrill, Michael Hennebry, Onno Kortmann, Thomas Klepp
+* 2009 Joel Sherrill, Onno Kortmann, Thomas Klepp
 * 2010 Thomas Klepp
 
 Permission is granted to make and distribute verbatim copies of
@@ -32,27 +23,4 @@ Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions,
 except that this permission notice may be stated in a translation approved
 by the Free Software Foundation.
-
-Contents
-========
-
-.. toctree::
-   :maxdepth: 2
-
-   intro
-   usage
-   tclgui
-   build
-   verilog
-   examples
-   platform
-   limitations
-   helpwanted
-   
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 

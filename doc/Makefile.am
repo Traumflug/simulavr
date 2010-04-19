@@ -157,7 +157,19 @@ endif
 
 sphinx-doc: sphinx-html sphinx-pdf
 
-CLEANFILES = simulavr.info stamp-vti $(DX_CLEANFILES) $(SPHINX_CLEANFILES)
+# Rules for generating web site with Sphinx
+WEBSITE_BUILDDIR = $(srcdir)/web_build
+WEBSITEOPTS = -E -c web -d $(WEBSITE_BUILDDIR)/doctrees
+WEBSITE_CLEANFILES = -r $(srcdir)/web_build
+
+web-html:
+if PYTHON_USE
+	$(SPHINXBUILD) -b html $(WEBSITEOPTS) . $(WEBSITE_BUILDDIR)/html
+else
+	@echo "  Can't build web site with Sphinx, python not configured!"
+endif
+
+CLEANFILES = simulavr.info stamp-vti $(DX_CLEANFILES) $(SPHINX_CLEANFILES) $(WEBSITE_CLEANFILES)
 
 all-am: $(TEX_FORMATS) info
 

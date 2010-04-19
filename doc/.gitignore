@@ -6,6 +6,7 @@ conf.py
 
 # files created by make
 doc_build
+web_build
 doxygen-doc
 simulavr.info
 simulavr.pdf

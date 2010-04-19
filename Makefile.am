@@ -33,7 +33,7 @@ endif
 
 web-html:
 if PYTHON_USE
-	$(MAKE) -C doc/web web-html
+	$(MAKE) -C doc web-html
 else
 	@echo "  Can't build web site with Sphinx, python not configured!"
 endif

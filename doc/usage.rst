@@ -1,82 +1,84 @@
 Usage
 =====
 
-Invoking
---------
+Invoke simulavr::
+  
+  > simulavr {options}
+  
+Common options
+--------------
 
-The following options are only valid for the command-line version of simulavr:
+``-v, --version``
+  show the software version of simulavr
+  
+``-V, --verbose``
+  output some hints to console
+  
+``-h, --help``
+  show commandline help for simulavr and what devices are supported
+  
+Simulation options
+------------------
 
-``-d -device <device name>``
+``-d <device name>, --device <device name>``
   tell simulavr, what type of device it has to simulate.The following devices
   are supported: at90s8515, at90s4433, atmega128, atmega48, atmega88, atmega168,
   atmega328, attiny2313. **To find out, which devices are supported with your
   current installation, use the help option!**
   
-``-f --file <name>``
+``-f <name>, --file <name>``
   load ELF-file <name> for simulation in simulated target.
   
-``-F --cpufrequency <value>``
-  set the CPU frequence to <Hz>
+``-F <value>, --cpufrequency <value>``
+  set the CPU frequence to <Hz>. Default is 4MHz.
   
-``-g --gdbserver``
+``-t <file name>, --trace <file name>``
+  enable trace outputs into <file name>
+  
+``-s, --irqstatistic``
+  Writes IRQ statistic to stdout at the end of simulation.
+  
+GDB options
+-----------
+
+``-g, --gdbserver``
   running as avr-gdb-server
   
 ``-G``
-  running as avr-gdb-server and write debug info for avr-gdb-connection
+  running as avr-gdb-server and write debug info for avr-gdb-connection to stdout.
+  Use it alternative to option ``-g``. **This is only useful, if you want to see,
+  what data is sent from gdb to simulavr and back!**
   
-``-n --nogdbwait``
-  do not wait for avr-gdb connection
+``-n, --nogdbwait``
+  do not wait for avr-gdb connection. Default is to wait for gdb connection, if
+  option ``-g`` or ``-G`` is given.
   
+``-p <port>``
+  change <port> for avr-gdb server to port. Default is port 1212.
+  
+Control options
+---------------
+
 ``-m  <nanoseconds>``
   maximum run time of <nanoseconds>
   
-``-p  <port>``
-  change <port> for avr-gdb server to port
-  
-``-R --readfrompipe <offset>,<file>``
+``-R <offset>,<file>, --readfrompipe <offset>,<file>``
   add a special pipe register to device at IO-offset and opens <file>
   for reading
   
-``-t --trace <file name>``
-  enable trace outputs into <file name>
-  
-``-T --terminate <label> or <address>``
+``-T <label or address>, --terminate <label or address>``
   stops simulation if PC runs on <label> or <address>. If this parameter
   is omitted, simulavr has to be terminated manually.
   For <label> you can use any label listed in the map-file of the linker -
   no matter if it is ever reached or not.
   
-``-u``
-  run with user interface for external pin handling at port 7777. This
-  does not open any graphics but activates the interface to communicate
-  with the environment simulation.
-  
-``-v --version``
-  show the software version of simulavr
-  
-``-V --verbose``
-  output some hints to console
-  
-``-W --writetopipe <offset>,<file>``
+``-W <offset>,<file>, --writetopipe <offset>,<file>``
   add a special pipe register to device at IO-Offset and opens <file> for writing
   
-``-s --irqstatistic``
-  Writes IRQ statistic to stdout at the end of simulation.
-  
-``-o <filename|->``
-  Writes all available VCD trace sources for a device to <filename> or to stdout,
-  if <-> is given.
-  
-``-c <trace-params>``
-  Enable a trace dump, for valid <trace-params> see below.
-  
-``-h --help``
-  show commandline help for simulavr and what devices are supported
-  
-``-a --writetoabort <offset>``
+``-a <offset>, --writetoabort <offset>``
   add a special register to device at IO-Offset which aborts simulation
   
-``-e --writetoexit <offset>``
+``-e <offset>, --writetoexit <offset>``
   add a special register to device at IO-Offset which exits simulation (if you
   write to this IO-Offset, then the written value will be given back as exit value
   of the simulator!)
@@ -86,10 +88,29 @@ an address within the address space of the AVR to an input or output
 pipe. This is a simple way to create a "printf"- debugger, e.g. after
 leaving the debugging phase and running the AVR-Software in the simulator or to
 abort/exit a simulation on a specified situation inside of your program.
-For more details see the example in the directory simple_ex1.
+For more details see the example in the directory :file:`examples/simple_ex1` or
+:ref:`here <intro-simple-ex>`.
 
-Using with avr-gdb
-------------------
+VCD trace options
+-----------------
+
+``-o <filename|->``
+  Writes all available VCD trace sources for a device to <filename> or to stdout,
+  if <-> is given.
+  
+``-c <trace-params>``
+  Enable a trace dump, for valid <trace-params> see below.
+  
+Special options
+---------------
+
+``-u``
+  run with user interface for external pin handling at port 7777. This
+  does not open any graphics but activates the interface to communicate
+  with the TCL environment simulation.
+  
+Examples
+--------
 
 Using the simulator with avr-gdb is very simple. Start simulavr with::
 
@@ -118,6 +139,7 @@ In the comandline of ddd or avr-gdb you can now enter your debug commands::
   step
   step
   ....
+  quit
 
 **Attention:** In the actual implementation there is a known bug: If you
 start in avr-gdb mode and give no file to execute ``-f filename``
@@ -127,11 +149,8 @@ is not connected and could stop the core. Solution: Please start with
 ``simulavr -g -f <filename>``. The problem will be fixed later.
 It doesn't matter whether the filename of the simulavr command line
 is identical to the filename of avr-gdb file command.  The avr-gdb
-downloads the file itself to the simulator.  And after downloading the
+downloads the file itself to the simulator. And after downloading the
 core of simulavr will be reset complete, so there is not a real problem.
-
-Connecting multiple devices via multiple sockets is discussed in the
-scripting section.
 
 Tracing
 -------
@@ -142,7 +161,7 @@ simulator.  To enable the trace feature you have simply to add the
 the simulator has debug information the trace output will also contain
 the label information of the ELF-file. This information is printed for
 all variables in flash, RAM, ext-RAM and also for all known hardware
-registers.  Also all code labels will be written to the trace output.
+registers. Also all code labels will be written to the trace output.
 
 What is written to trace output::
   
