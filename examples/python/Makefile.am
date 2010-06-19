@@ -75,8 +75,7 @@ endif
 
 
 EXTRA_DIST = example.c example.py example_pin.py example_io.c example_io.py \
-             ex_utils.py ex_pinout.py ex_pinout.c multicore.c multicore.py \
-             README
+             ex_utils.py ex_pinout.py ex_pinout.c multicore.c multicore.py
 
 examples_DATA = $(EXAMPLE1) $(EXAMPLE3) $(EXAMPLE4) $(EXAMPLE5A) $(EXAMPLE5B) \
                 $(EXTRA_DIST) README Makefile
