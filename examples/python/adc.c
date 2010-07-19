@@ -28,7 +28,8 @@ int main(void)
           (1 << ADEN) /* ADC Enable */
         | (1 << ADSC) /* ADC Start Conversion */
         | (1 << ADIE) /* ADC Interrupt Enable */
-        | (1<< ADPS2) /* ADPS2...ADPS0 ADC Prescaler Select Bits = 1 0 0, Bei 1MHz, Faktor 16 = 62,5kHz, 16us */
+        | (1<< ADPS2) /* ADPS2...ADPS0 ADC Prescaler Select Bits = 1 0 0, on 4MHz,
+                         factor 16 = 4µs adc clock, conversion time x13 = 52µs normally */
         ;
     ADMUX = /* ADC Multiplexer Select Register */
         /* REFS1...REFS0 (ReferenceSelection Bits) = 0 --> Externes AREF */        

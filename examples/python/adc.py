@@ -1,6 +1,5 @@
 # Python Script
 from sys import argv
-from os.path import splitext, basename
 
 import pysimulavr
 from ex_utils import SimulavrAdapter
@@ -25,10 +24,11 @@ if __name__ == "__main__":
   sim = SimulavrAdapter()
   sim.dmanSingleDeviceApplication()
   dev = sim.loadDevice(proc, elffile)
-  print "value 'adc_value'=%d" % sim.getWordByName(dev, "adc_value")
+  #dev.SetClockFreq(250) # clock frequency is 4MHz by default
+  print "before simulation start:"
+  print "  value 'adc_value'=%d (before init)" % sim.getWordByName(dev, "adc_value")
   
   a0 = XPin(dev, "A0", 'a')
-  A0 = dev.GetPin("A0")
   aref = XPin(dev, "AREF", 'a')
   
   INT_MAX = 2**31 - 1
@@ -38,12 +38,26 @@ if __name__ == "__main__":
   sim.dmanStart()
   print "simulation start: (t=%dns)" % sim.getCurrentTime()
   a0.SetAnalog(123)
-  #a0.SetAnalog(int(0.1 * 2**31))
-  sim.doRun(sim.getCurrentTime() + 500000)
-  print "simulation end: (t=%dns)" % sim.getCurrentTime()  
-  print "conversions: %d" % sim.getWordByName(dev, "conversions")
   
-  print "adc_value=%d" % sim.getWordByName(dev, "adc_value")
+  print "run till main function ..."
+  bpaddr = dev.Flash.GetAddressAtSymbol("main")
+  dev.BP.AddBreakpoint(bpaddr)
+  sim.doRun(30000)
+  if not dev.PC == bpaddr:
+      print "error: main function not arrived!"
+  dev.BP.RemoveBreakpoint(bpaddr)
+  print "simulation main entrance: (t=%dns)" % sim.getCurrentTime()
+  print "  value 'adc_value'=%d (after init)" % sim.getWordByName(dev, "adc_value")
+  
+  sim.doRun(sim.getCurrentTime() + 120000)
+  print "simulation break: (t=%dns)" % sim.getCurrentTime()  
+  print "  value 'conversions'=%d" % sim.getWordByName(dev, "conversions")
+  print "  value 'adc_value'=%d (simulation break)" % sim.getWordByName(dev, "adc_value")
+  
+  sim.doRun(sim.getCurrentTime() + 330000)
+  print "simulation end: (t=%dns)" % sim.getCurrentTime()  
+  print "  value 'conversions'=%d" % sim.getWordByName(dev, "conversions")
+  print "  value 'adc_value'=%d (simulation end)" % sim.getWordByName(dev, "adc_value")
   
   sim.dmanStop()
   del dev

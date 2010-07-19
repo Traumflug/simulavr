@@ -241,7 +241,7 @@ Pin& Pin::operator= (char c) {
     return *this;
 }
 
-Pin& Pin::setAnalog(int value) {
+Pin& Pin::SetAnalog(int value) {
     //outState = ANALOG;
     analogValue = value;
 
