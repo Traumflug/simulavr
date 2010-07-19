@@ -95,6 +95,7 @@ class Pin {
         virtual void UnRegisterNet(Net *n); //!< deletes Net instance registration for pin
         virtual Pin GetPin(void) { return *this;} //!< "cast method" to get back a Pin instance
         int GetAnalog(void) const; //!< Returns analog input value of pin
+        Pin& setAnalog(int value);  //!< Sets the pin to an analog value
         void RegisterCallback(HasPinNotifyFunction *); //!< register a listener for input value change
         //! Update input values from output values
         /*! If there is no connection to other pins, then it will reflect the own

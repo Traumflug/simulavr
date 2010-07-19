@@ -172,8 +172,8 @@ Pin::operator char() const {
         case TRISTATE: return 't';
         case PULLDOWN: return 'l';
         case LOW: return 'L';
-        case ANALOG: return 'A';
-        case ANALOG_SHORTED: return 'a';
+        case ANALOG: return 'a';
+        case ANALOG_SHORTED: return 'A';
     }
     return 'S'; //only default, should never be reached
 }
@@ -235,6 +235,15 @@ Pin& Pin::operator= (char c) {
             analogValue = 0;
             break;
     }
+
+    CalcPin();
+
+    return *this;
+}
+
+Pin& Pin::setAnalog(int value) {
+    //outState = ANALOG;
+    analogValue = value;
 
     CalcPin();
 

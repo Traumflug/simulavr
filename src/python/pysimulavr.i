@@ -108,6 +108,9 @@ namespace std {
   void SetPin(const char c) {
     *$self = c;
   }
+  void SetAnalog(int value) {
+    $self->setAnalog(value);
+  }
 }
 
 %include "net.h"
