@@ -380,6 +380,8 @@ const char* GdbServer::gdb_last_reply( const char *reply )
             return last_reply;
     }
 
+	if(last_reply == reply)
+		return reply;  // we must not delete the reply
     avr_free( last_reply );
     last_reply = avr_strdup( reply );
 
