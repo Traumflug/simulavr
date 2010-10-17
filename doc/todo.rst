@@ -49,13 +49,12 @@ Known issues:
 
   - AT90S2313 \-
   - AT90S4414 - essentially AT90S8515 w/less memory so easy
-  - ATmega8 - could be built based on the existing AT90S4433 code
   - AT90S1200 - different, can be ignored as obsolete
   - ATmega103 - can be ignored as obsolete
   - range of AT43USBxxx controllers - can be ignored as replaced (sorta)
     by the AT90USB* / ATmega???U? devices.
     
-- simulavr has a core dump feature
+- old simulavr has a core dump feature
   
 Configure issues
 ----------------

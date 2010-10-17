@@ -21,10 +21,11 @@ Simulation options
 ------------------
 
 ``-d <device name>, --device <device name>``
-  tell simulavr, what type of device it has to simulate.The following devices
+  tell simulavr, what type of device it has to simulate. The following devices
   are supported: at90s8515, at90s4433, atmega128, atmega48, atmega88, atmega168,
-  atmega328, attiny2313. **To find out, which devices are supported with your
-  current installation, use the help option!**
+  atmega8, atmega16, atmega32, atmega328, attiny2313.
+  To find out, which devices are supported with your current installation, use
+  the --help option.
   
 ``-f <name>, --file <name>``
   load ELF-file <name> for simulation in simulated target.
