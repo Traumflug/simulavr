@@ -71,8 +71,7 @@ class AvrDevice_atmega16_32: public AvrDevice {
         AvrDevice_atmega16_32(unsigned ram_bytes,
                               unsigned flash_bytes,
                               unsigned ee_bytes,
-                              unsigned nrww_start,
-                              bool stack11bit);
+                              unsigned nrww_start);
         ~AvrDevice_atmega16_32(); 
 };
 
@@ -80,14 +79,14 @@ class AvrDevice_atmega16_32: public AvrDevice {
 class AvrDevice_atmega16: public AvrDevice_atmega16_32 {
     public:
         //! Creates the device for ATMega16, see AvrDevice_atmega16_32.
-        AvrDevice_atmega16() : AvrDevice_atmega16_32(1024, 16 * 1024, 512, 0x1c00, true) {}
+        AvrDevice_atmega16();
 };
 
 //! AVR device class for ATMega32, see AvrDevice_atmega16_32.
 class AvrDevice_atmega32: public AvrDevice_atmega16_32 {
     public:
         //! Creates the device for ATMega32, see AvrDevice_atmega16_32.
-        AvrDevice_atmega32() : AvrDevice_atmega16_32(2 * 1024, 32 * 1024, 1024, 0x3800, false) {}
+        AvrDevice_atmega32();
 };
 
 #endif

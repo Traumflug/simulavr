@@ -72,8 +72,7 @@ AvrDevice_atmega16_32::~AvrDevice_atmega16_32() {
 AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
                                              unsigned flash_bytes,
                                              unsigned ee_bytes,
-                                             unsigned nrww_start,
-                                             bool stack11bit):
+                                             unsigned nrww_start):
     AvrDevice(64 ,          // I/O space above General Purpose Registers
               ram_bytes,    // RAM size
               0,            // External RAM size
@@ -81,13 +80,8 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     aref()
 {
     irqSystem = new HWIrqSystem(this, 4, 21); //4 bytes per vector, 21 vectors
-    if(stack11bit) {
-      eeprom = new HWEeprom(this, irqSystem, ee_bytes, 15);
-      stack = new HWStackSram(this, 11);
-    } else {
-      eeprom = new HWEeprom(this, irqSystem, ee_bytes, 17);
-      stack = new HWStackSram(this, 12);
-	}
+    eeprom = NULL;  // initialized by children
+    stack = NULL;  // initialized by children
     porta = new HWPort(this, "A");
     portb = new HWPort(this, "B");
     portc = new HWPort(this, "C");
@@ -231,6 +225,19 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     //rw[0x20] TWBR
     
     Reset();
+}
+
+AvrDevice_atmega16::AvrDevice_atmega16()
+    : AvrDevice_atmega16_32(1024, 16 * 1024, 512, 0x1c00)
+{
+    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 15);
+    stack = new HWStackSram(this, 11);
+}
+AvrDevice_atmega32::AvrDevice_atmega32()
+    : AvrDevice_atmega16_32(2 * 1024, 32 * 1024, 1024, 0x3800)
+{
+    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 17);
+    stack = new HWStackSram(this, 12);
 }
 
 /* EOF */
