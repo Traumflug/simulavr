@@ -119,7 +119,7 @@ class HWIrqSystem: public TraceValueRegister {
     
     protected:
         int bytesPerVector;
-        int vectorTableSize;
+        int vectorTableSize; ///< number of entries supported by the device, not bytes
         HWSreg *status;
         std::vector<TraceValue*> irqTrace;
         
