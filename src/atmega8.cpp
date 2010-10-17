@@ -42,7 +42,7 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
 			8 * 1024), // Flash Size
 	aref()
 {
-	irqSystem = new HWIrqSystem(this, 4, 19); //4 bytes per vector, 19 vectors
+	irqSystem = new HWIrqSystem(this, 2, 19); //2 bytes per vector, 19 vectors
 	eeprom = new HWEeprom(this, irqSystem, 512, 15);
 	stack = new HWStackSram(this, 11); // Stack Pointer data space used 11 Bit wide.
 	portb = new HWPort(this, "B");
@@ -50,7 +50,7 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
 	portd = new HWPort(this, "D");
 
 	spmRegister = new FlashProgramming(this, // defined device
-			64, // 32 Pages each 2 Byte
+			32, // 32 words per page * 2 bytes per page * 128 pages = 8192 Bytes
 			0xC000, // No Read-While-Write section starts at 0xC00
 			FlashProgramming::SPM_MEGA_MODE); //
 
@@ -180,8 +180,8 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
 			new PinAtPort(portb, 3)); // OC2
 
 	rw[0x5f] = statusRegister;
-	rw[0x5e] = &((HWStackSram *) stack)->sph_reg;
-	rw[0x5d] = &((HWStackSram *) stack)->spl_reg;
+	rw[0x5e] = &stack->sph_reg;
+	rw[0x5d] = &stack->spl_reg;
 //	rw[0x5c] Reserved
 	rw[0x5b] = gicr_reg;
 	rw[0x5a] = gifr_reg;
