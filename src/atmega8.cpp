@@ -44,7 +44,8 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
 {
 	irqSystem = new HWIrqSystem(this, 2, 19); //2 bytes per vector, 19 vectors
 	eeprom = new HWEeprom(this, irqSystem, 512, 15);
-	stack = new HWStackSram(this, 11); // Stack Pointer data space used 11 Bit wide.
+	HWStackSram * stack_ram = new HWStackSram(this, 11); // Stack Pointer data space used 11 Bit wide.
+	stack = stack_ram;
 	portb = new HWPort(this, "B");
 	portc = new HWPort(this, "C");
 	portd = new HWPort(this, "D");
@@ -180,8 +181,8 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
 			new PinAtPort(portb, 3)); // OC2
 
 	rw[0x5f] = statusRegister;
-	rw[0x5e] = &stack->sph_reg;
-	rw[0x5d] = &stack->spl_reg;
+	rw[0x5e] = &stack_ram->sph_reg;
+	rw[0x5d] = &stack_ram->spl_reg;
 //	rw[0x5c] Reserved
 	rw[0x5b] = gicr_reg;
 	rw[0x5a] = gifr_reg;

@@ -230,13 +230,13 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
 AvrDevice_atmega16::AvrDevice_atmega16()
     : AvrDevice_atmega16_32(1024, 16 * 1024, 512, 0x1c00)
 {
-    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 15);
+    eeprom = new HWEeprom(this, irqSystem, 512, 15);
     stack = new HWStackSram(this, 11);
 }
 AvrDevice_atmega32::AvrDevice_atmega32()
     : AvrDevice_atmega16_32(2 * 1024, 32 * 1024, 1024, 0x3800)
 {
-    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 17);
+    eeprom = new HWEeprom(this, irqSystem, 1024, 17);
     stack = new HWStackSram(this, 12);
 }
 
