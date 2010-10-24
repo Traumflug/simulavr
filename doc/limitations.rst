@@ -23,7 +23,7 @@ simulavr. Specific limitations see below.
   like IO-network, some analogue components as well as SPI, ...
   There is neither a fully description for the environment available nor
   comprehensive examples around.
-* simulavr makes no validation if the current assembler statement
+* simulavr does not verify if the current instruction
   is available for the selected CPU (e.g. MUL for Tiny,...)
 * The current version of simulavr is not validated against the
   avr-gcc regression tests.
@@ -37,10 +37,11 @@ limitations see below.  This chapter focuses only on the Mega128 CPU.
 
 The following hardware is **not** simulated by simulavr:
 
-* TWI Serial Interface
-* Analog to Digital Converter Subsystem
+* TWI/I2C Serial Interface
+* Analog to Digital Converter Subsystem (Really? What about src/hwad.h file?)
+* Analog comparator in some devices (ATmega16/ATmega32)
 * Boot Loader Support (incl. Fuses)
-* Real Time Clock
+* Timer 1 external crystal support (for Real Time Clock)
 * Watchdog Timer
 * Sleep-command
 * Reset-pin is not available
