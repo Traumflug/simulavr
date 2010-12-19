@@ -67,6 +67,7 @@ endif
 
 libsim_la_SOURCES = \
   adcpin.cpp application.cpp at4433.cpp at8515.cpp atmega668base.cpp atmega128.cpp \
+  at90canbase.cpp\
   atmega16_32.cpp attiny2313.cpp externalirq.cpp \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp flashprog.cpp hardware.cpp helper.cpp cmd/gdbserver.cpp \
