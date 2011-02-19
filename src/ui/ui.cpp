@@ -23,8 +23,6 @@
  *  $Id$
  */
 
-using namespace std;
-
 #include <time.h>
 #include "externaltype.h"
 #include "ui.h"
@@ -32,6 +30,9 @@ using namespace std;
 #include "pin.h"
 #include "systemclock.h"
 #include "avrerror.h"
+#include <sstream>
+
+using namespace std;
 
 UserInterface::UserInterface(int port, bool _withUpdateControl): Socket(port), updateOn(1), pollFreq(100000)  {
     if (_withUpdateControl) {
@@ -41,9 +42,7 @@ UserInterface::UserInterface(int port, bool _withUpdateControl): Socket(port), u
         os << "create UpdateControl dummy dummy " << endl; 
         Write(os.str());
         AddExternalType("UpdateControl", this);
-
     }
-
 }
 
 UserInterface::~UserInterface() {
