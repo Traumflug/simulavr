@@ -48,20 +48,18 @@ class ScopePin : public Pin {
         }
 };
 
-//attention! vector<> must be initialized with any size, else it crashes! This is a bug in the lib!
-Scope::Scope( UserInterface *u, const string & n, unsigned int cnt, const char *baseWindow): ui(u), name(n), vecPin(100), lastVal(100), noOfChannels(cnt) {
-
+Scope::Scope( UserInterface *u, const string & n, unsigned int cnt, const char *baseWindow)
+	: ui(u), name(n), vecPin(cnt), lastVal(cnt), noOfChannels(cnt)
+{
     for (unsigned int tt=0; tt< cnt; tt++) {
         vecPin[tt]=new ScopePin(this, tt);
         lastVal[tt]=0;
     }
 
-    //  setup the corrosponding ui in tcl from here
+    //  setup the corresponding ui in tcl from here
     ostringstream os;
     os << "create Scope " << name  << " "<<baseWindow <<" " <<  noOfChannels << endl;
     ui->Write(os.str());
-
-
 }
 
 Scope::~Scope() {}
