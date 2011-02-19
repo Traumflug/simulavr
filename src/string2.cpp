@@ -38,7 +38,7 @@
 #define STRING_TO_TYPE unsigned char
 #define STRING_TO_NAME StringToUnsignedChar
 #define STRING_TO_METHOD strtoul
-#define STRING_TO_MAX ULONG_MAX
+#define STRING_TO_MAX 255
 #include "string2_template.h"
 
 /*

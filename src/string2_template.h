@@ -51,7 +51,7 @@ bool STRING_TO_NAME (
   int              base
 )
 {
-  STRING_TO_TYPE  result;
+  unsigned long long result;
   char           *end;
 
   if ( !n )
@@ -77,13 +77,17 @@ bool STRING_TO_NAME (
   if ( (result == LONG_MAX) && (errno == ERANGE))
     return false;
 
+  /* does not fit into target type */
+  if ( result > STRING_TO_MAX )
+	  return false;
+
 #ifdef STRING_TO_MIN
   /* there was an underflow */
   if ( (result == STRING_TO_MIN) && (errno == ERANGE))
     return false;
 #endif
 
-  *n = result;
+  *n = (STRING_TO_TYPE) result;
   return true;
 }
 
