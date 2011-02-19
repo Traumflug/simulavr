@@ -129,6 +129,8 @@ void SystemConsoleHandler::vfmessage(const char *file, int line, const char *fmt
     va_start(ap, fmt);
     vsnprintf(messageStringBuffer, sizeof(messageStringBuffer), mfmt, ap);
     va_end(ap);
+    if(fmt[strlen(fmt) - 1] != '\n')
+        *wrnStream << std::endl;
     *msgStream << messageStringBuffer;
 }
 
@@ -139,6 +141,8 @@ void SystemConsoleHandler::vfwarning(const char *file, int line, const char *fmt
     vsnprintf(messageStringBuffer, sizeof(messageStringBuffer), mfmt, ap);
     va_end(ap);
     *wrnStream << messageStringBuffer;
+    if(fmt[strlen(fmt) - 1] != '\n')
+        *wrnStream << std::endl;
     wrnStream->flush();
 }
 
@@ -149,6 +153,8 @@ void SystemConsoleHandler::vferror(const char *file, int line, const char *fmt, 
     vsnprintf(messageStringBuffer, sizeof(messageStringBuffer), mfmt, ap);
     va_end(ap);
     *wrnStream << messageStringBuffer;
+    if(fmt[strlen(fmt) - 1] != '\n')
+        *wrnStream << std::endl;
     wrnStream->flush();
 }
 
