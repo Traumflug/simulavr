@@ -23,6 +23,7 @@
  *  $Id$
  */
 
+#include <assert.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -96,6 +97,8 @@ unsigned char AvrFlash::ReadMem(unsigned int offset) {
 }
 
 unsigned int AvrFlash::ReadMemWord(unsigned int offset) {
+    // example: "lds r24, 0x013B" is 91 80 01 3b, we return 0x013B.
+    assert(offset < size);  // in bytes
     if(IsRWWLock(offset)) {
         avr_warning("flash is locked (RWW lock)");
         return 0;
