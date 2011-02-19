@@ -552,13 +552,11 @@ avr_op_ELPM::avr_op_ELPM(word opcode, AvrDevice *c):
     DecodedInstruction(c) {}
 
 int avr_op_ELPM::operator()() {
-    int Z, flash_addr;
-    word data;
     unsigned char rampz = 0;
 
     if(core->rampz != NULL)
         rampz = core->rampz->GetRegVal();
-    Z = (rampz << 16) + core->GetRegZ();
+    unsigned Z = (rampz << 16) + core->GetRegZ();
 
     core->SetCoreReg(0, core->Flash->ReadMem(Z ^ 0x1));
     
