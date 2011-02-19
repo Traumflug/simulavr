@@ -65,7 +65,7 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         const unsigned int eRamSize;
         
     protected:
-        SystemClockOffset clockFreq;
+        SystemClockOffset clockFreq;  ///< Period of a tick (1/F_OSC) in [ns]
         std::map < std::string, Pin *> allPins;
         std::string actualFilename;
         RWMemoryMember **rw; //!< hold the complete space or Data memory included registers
