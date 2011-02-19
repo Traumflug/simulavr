@@ -549,7 +549,7 @@ void GdbServer::gdb_write_registers(const char *pkt) {
     /* GDB thinks SP is register number 33 */
     bval  = hex2nib(*pkt++) << 4;
     bval += hex2nib(*pkt++);
-    val += hex2nib(*pkt++) << 4;
+    val = hex2nib(*pkt++) << 4;
     val += hex2nib(*pkt++);
     val <<= 8;
     val += bval;
@@ -1312,7 +1312,6 @@ void GdbServer::Run( )
 
 //! try to open a new connection to gdb
 void GdbServer::TryConnectGdb() {
-    int i;
     time_t newTime = time(NULL);
 
     if(oldTime != newTime) {
