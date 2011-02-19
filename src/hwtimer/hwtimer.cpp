@@ -359,7 +359,7 @@ void BasicTimerUnit::WGMfunc_fastpwm(CEtype event) {
                     timerCapture->fireInterrupt();
             }
             // process compare output unit
-            for(int i; i < OCRIDX_maxUnits; i++)
+            for(int i = 0; i < OCRIDX_maxUnits; i++)
                 SetPWMCompareOutput(i, true);
             // reset counter
             vtcnt = limit_bottom;
@@ -367,7 +367,7 @@ void BasicTimerUnit::WGMfunc_fastpwm(CEtype event) {
             
         case EVT_BOTTOM_REACHED:
             // update OC registers
-            for(int i; i < OCRIDX_maxUnits; i++) {
+            for(int i = 0; i < OCRIDX_maxUnits; i++) {
                 if(i == OCRIDX_A) {
                     if(wgm == WGM_FASTPWM_8BIT)
                         // mask to 0xff
@@ -426,7 +426,7 @@ void BasicTimerUnit::WGMfunc_pcpwm(CEtype event) {
                     timerCapture->fireInterrupt();
             }
             // update OC registers
-            for(int i; i < OCRIDX_maxUnits; i++) {
+            for(int i = 0; i < OCRIDX_maxUnits; i++) {
                 if(i == OCRIDX_A) {
                     if(wgm == WGM_PCPWM_8BIT)
                         // mask to 0xff
@@ -501,7 +501,7 @@ void BasicTimerUnit::WGMfunc_pfcpwm(CEtype event) {
             // fire overflow interrupt
             timerOverflow->fireInterrupt();
             // update OC registers
-            for(int i; i < OCRIDX_maxUnits; i++) {
+            for(int i = 0; i < OCRIDX_maxUnits; i++) {
                 if(i == OCRIDX_A) {
                     if(wgm == WGM_PFCPWM_OCRA)
                         // set new top value
