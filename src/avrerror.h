@@ -28,6 +28,14 @@
 
 #include <iostream>
 
+#ifdef _MSC_VER
+#define ATTRIBUTE_NORETURN __declspec(noreturn)
+#define ATTRIBUTE_PRINTF(string_arg, first_arg)
+#else
+#define ATTRIBUTE_NORETURN __attribute__((noreturn))
+#define ATTRIBUTE_PRINTF(string_arg, first_arg) __attribute__ ((format (printf, string_arg, first_arg)))
+#endif
+
 //! Class, that handle messages to console and also exit/abort calls
 class SystemConsoleHandler {
     
@@ -59,17 +67,24 @@ class SystemConsoleHandler {
         void TraceNextLine(void);
         
         //! Format and send a message to message stream (default stdout)
-        void vfmessage(const char *file, int line, const char *fmt, ...);
+        void vfmessage(const char *file, int line, const char *fmt, ...)
+            ATTRIBUTE_PRINTF(4, 5);
         //! Format and send a warning message to warning stream (default stderr)
-        void vfwarning(const char *file, int line, const char *fmt, ...);
+        void vfwarning(const char *file, int line, const char *fmt, ...)
+            ATTRIBUTE_PRINTF(4, 5);
         //! Format and send a error message to warning stream (default stderr)
-        void vferror(const char *file, int line, const char *fmt, ...);
+        void vferror(const char *file, int line, const char *fmt, ...)
+            ATTRIBUTE_PRINTF(4, 5);
         //! Format and send a error message to stderr and call exit or raise a exception
-        void vffatal(const char *file, int line, const char *fmt, ...);
+        ATTRIBUTE_NORETURN
+        void vffatal(const char *file, int line, const char *fmt, ...)
+            ATTRIBUTE_PRINTF(4, 5);
         
-        //! Aborts application: uses abort or exeption depending on useExitAndAbort
+        //! Aborts application: uses abort or exception depending on useExitAndAbort
+		ATTRIBUTE_NORETURN
         void AbortApplication(int code);
-        //! Exits application: uses exit or exeption depending on useExitAndAbort
+        //! Exits application: uses exit or exception depending on useExitAndAbort
+		ATTRIBUTE_NORETURN
         void ExitApplication(int code);
         
     protected:
