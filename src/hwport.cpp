@@ -132,12 +132,12 @@ void HWPort::CalcOutputs(void) { //Calculate the new output value to be transmit
 } //end of Calc()
 
 string HWPort::GetPortString(void) {
-    char dummy[portSize + 1];
+    string dummy;
+    dummy.resize(portSize);
     for(int tt = 0; tt < portSize; tt++)
-        dummy[portSize - 1 - tt] = p[tt];
+        dummy[portSize - 1 - tt] = p[tt];  // calls Pin::operator char()
 
-    dummy[portSize] = '\0';
-    return string(dummy);
+    return dummy;
 }
 
 void HWPort::SetPin(unsigned char val) {
