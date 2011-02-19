@@ -804,7 +804,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
 
         if (is_odd_addr)
         {
-            bval = avr_core_flash_read( addr/2 ) >> 8;
+            bval = avr_core_flash_read( addr ) >> 8;
             buf[i++] = HEX_DIGIT[bval >> 4];
             buf[i++] = HEX_DIGIT[bval & 0xf];
             addr++;
@@ -813,7 +813,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
 
         while (len > 1)
         {
-            wval = avr_core_flash_read( addr/2 );
+            wval = avr_core_flash_read( addr );
 
             bval = wval & 0xff;
             buf[i++] = HEX_DIGIT[bval >> 4];
@@ -829,7 +829,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
 
         if (len == 1)
         {
-            bval = avr_core_flash_read( addr/2 ) & 0xff;
+            bval = avr_core_flash_read( addr ) & 0xff;
             buf[i++] = HEX_DIGIT[bval >> 4];
             buf[i++] = HEX_DIGIT[bval & 0xf];
         }
