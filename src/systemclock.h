@@ -57,7 +57,7 @@ class SystemClock
         SystemClock(const SystemClock &); //!< Do not this constructor from application code!
 
     protected:
-        SystemClockOffset currentTime; //!< THE current simulation time
+        SystemClockOffset currentTime;  //!< time in [ns] since start of simulation
         std::vector<SimulationMember*> asyncMembers; //!< List of asynchron working simulation members, will be called every step!
         
     public:
