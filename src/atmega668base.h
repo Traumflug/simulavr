@@ -31,8 +31,8 @@
 #include "hwad.h"
 #include "hwport.h"
 #include "hwspi.h"
-#include "timerprescaler.h"
-#include "hwtimer.h"
+#include "hwtimer/timerprescaler.h"
+#include "hwtimer/hwtimer.h"
 
 /*! AVRDevice class for ATMega48/88/168/328
   \todo This device isn't completely implemented. There is no

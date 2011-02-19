@@ -23,11 +23,11 @@
  *  $Id$
  */
 
-#include "hardware.h"
-#include "avrdevice.h"
+#include "../hardware.h"
+#include "../avrdevice.h"
 #include "timerprescaler.h"
 #include "hwtimer.h"
-#include "helper.h"
+#include "../helper.h"
 
 using namespace std;
 

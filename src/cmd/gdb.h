@@ -29,7 +29,7 @@
 
 #include "config.h"
 
-#ifdef HAVE_SYS_MINGW
+#if defined(HAVE_SYS_MINGW) || defined(_MSC_VER)
 #   include <winsock2.h>
 #   include <sys/types.h>
 #else
@@ -66,7 +66,7 @@ class GdbServerSocket {
         virtual void CloseConnection(void)=0;
 };
 
-#ifdef HAVE_SYS_MINGW
+#if defined(HAVE_SYS_MINGW) || defined(_MSC_VER)
 
 //! Interface implementation for server socket wrapper on MingW systems (windows)
 class GdbServerSocketMingW: public GdbServerSocket {

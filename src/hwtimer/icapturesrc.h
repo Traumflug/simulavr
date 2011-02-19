@@ -26,7 +26,7 @@
 #ifndef ICAPTURESRC
 #define ICAPTURESRC
 
-#include "pinatport.h"
+#include "../pinatport.h"
 
 //! Class, which provides input capture source for 16bit timers
 class ICaptureSource {

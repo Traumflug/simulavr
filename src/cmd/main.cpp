@@ -31,7 +31,12 @@ using namespace std;
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
+#ifndef _MSC_VER
+#  include <getopt.h>
+#else
+#  include "../getopt/getopt.h"
+#  define VERSION "(git-snapshot)"
+#endif
 
 #include "config.h"
 
@@ -40,12 +45,12 @@ using namespace std;
 #include "avrdevice.h"
 #include "avrfactory.h"
 #include "gdb.h"
-#include "ui.h"
+#include "ui/ui.h"
 #include "systemclock.h"
-#include "lcd.h"
-#include "keyboard.h"
+#include "ui/lcd.h"
+#include "ui/keyboard.h"
 #include "traceval.h"
-#include "scope.h"
+#include "ui/scope.h"
 #include "string2.h"
 #include "helper.h"
 #include "specialmem.h"

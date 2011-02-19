@@ -27,6 +27,11 @@
 #include <stdlib.h>
 #include <limits.h>
 
+#ifdef _MSC_VER
+#  define strtoll _strtoi64
+#  define strtoull _strtoui64
+#endif
+
 /*
  *  Instantiate an error checking wrapper for strtol (unsigned char)
  */

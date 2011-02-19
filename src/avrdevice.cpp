@@ -23,8 +23,12 @@
  *  $Id$
  */
 
-#include "config.h"
-#include "bfd.h"
+#ifndef _MSC_VER
+#   include "config.h"
+#   include "bfd.h"
+#else
+//#   include "C:\cygwin\usr\include\bfd.h"  // binutils, /usr/include/bfd.h
+#endif
 
 #include "avrdevice.h"
 #include "traceval.h"
@@ -34,6 +38,7 @@
 #include "systemclock.h"
 #include "avrerror.h"
 #include "avrmalloc.h"
+#include <assert.h>
 
 #include "avrdevice_impl.h"
 
@@ -59,6 +64,10 @@ void AvrDevice::RemoveFromCycleList(Hardware *hw) {
 void AvrDevice::Load(const char* fname) {
     actualFilename = fname;
 
+#ifdef _MSC_VER
+    fprintf(stderr, "Fatal: BDF library is not supported on MS Windows\n");
+    assert(false);  // TODO: Port BDF library to MS Windows
+#else
     bfd *abfd;
     asection *sec;
 
@@ -154,6 +163,7 @@ void AvrDevice::Load(const char* fname) {
     }
 
     bfd_close(abfd);
+#endif
 }
 
 #ifdef VI_BUG

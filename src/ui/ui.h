@@ -29,11 +29,11 @@
 #include <map>
 #include <sstream>
 
-#include "systemclocktypes.h"
-#include "simulationmember.h"
+#include "../systemclocktypes.h"
+#include "../simulationmember.h"
 #include "mysocket.h"
-#include "pin.h"
-#include "externaltype.h"
+#include "../pin.h"
+#include "../externaltype.h"
 
 class UserInterface: public SimulationMember, public Socket, public ExternalType {
     protected:

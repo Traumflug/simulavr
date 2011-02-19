@@ -31,10 +31,10 @@
 #include <string>
 #include <vector>
 
-#include "systemclocktypes.h"
-#include "simulationmember.h"
+#include "../systemclocktypes.h"
+#include "../simulationmember.h"
 #include "ui.h"
-#include "pin.h"
+#include "../pin.h"
 
 
 class Scope : public SimulationMember {

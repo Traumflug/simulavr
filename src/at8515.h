@@ -30,8 +30,8 @@
 #include "hwspi.h"
 #include "hwuart.h"
 #include "hwacomp.h"
-#include "timerprescaler.h"
-#include "hwtimer.h"
+#include "hwtimer/timerprescaler.h"
+#include "hwtimer/hwtimer.h"
 #include "externalirq.h"
 #include "hwport.h"
 

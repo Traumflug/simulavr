@@ -32,8 +32,8 @@
 #include "hwacomp.h"
 #include "hwport.h"
 #include "hwspi.h"
-#include "timerprescaler.h"
-#include "hwtimer.h"
+#include "hwtimer/timerprescaler.h"
+#include "hwtimer/hwtimer.h"
 #include "ioregs.h" //only for rampz here
 
 #include <memory>

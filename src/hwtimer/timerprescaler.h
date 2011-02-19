@@ -26,10 +26,10 @@
 #ifndef TIMERPRESCALER
 #define TIMERPRESCALER
 
-#include "hardware.h"
-#include "avrdevice.h"
-#include "rwmem.h"
-#include "pinatport.h"
+#include "../hardware.h"
+#include "../avrdevice.h"
+#include "../rwmem.h"
+#include "../pinatport.h"
 
 //! Prescaler unit for support timers with clock
 /*! This is a prescaler unit without external clock input, features reset and

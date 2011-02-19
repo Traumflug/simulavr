@@ -29,7 +29,9 @@ using namespace std;
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <time.h>
 #include <signal.h>
@@ -45,6 +47,10 @@ using namespace std;
 #include "avrdevice.h"
 #include "avrdevice_impl.h"
 #include "gdb.h"
+
+#ifdef _MSC_VER
+#  define snprintf _snprintf
+#endif
 
 #ifndef DOXYGEN /* have doxygen system ignore this. */
 enum {
@@ -68,7 +74,7 @@ enum {
 };
 #endif /* not DOXYGEN */
 
-#ifdef HAVE_SYS_MINGW
+#if defined(HAVE_SYS_MINGW) || defined(_MSC_VER)
 
 int GdbServerSocketMingW::socketCount = 0;
 
@@ -288,7 +294,7 @@ GdbServer::GdbServer(AvrDevice *c, int _port, int debug, int _waitForGdbConnecti
     lastCoreStepFinished = true;
     connState = false;
 
-#ifdef HAVE_SYS_MINGW
+#if defined(HAVE_SYS_MINGW) || defined(_MSC_VER)
     server = new GdbServerSocketMingW(_port);
 #else
     server = new GdbServerSocketUnix(_port);

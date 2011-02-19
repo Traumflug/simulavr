@@ -27,7 +27,7 @@
 #include <sstream>
 #include <stdlib.h>
 
-#include "avrerror.h"
+#include "../avrerror.h"
 #include "ui.h"   
 using namespace std;
 

@@ -33,8 +33,8 @@ class HWMcucr;
 #include "hwad.h"
 #include "hwport.h"
 #include "hwspi.h"
-#include "timerprescaler.h"
-#include "hwtimer.h"
+#include "hwtimer/timerprescaler.h"
+#include "hwtimer/hwtimer.h"
 #include "externalirq.h"
 
 //! AVRDevice class for AT90S4433

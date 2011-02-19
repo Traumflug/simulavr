@@ -38,7 +38,7 @@
 class Memory {
     protected:
       
-        unsigned int size; /*!< allocated size of memory block */
+        unsigned int size; /*!< allocated size (in bytes) of myMemory */
         
     public:
 

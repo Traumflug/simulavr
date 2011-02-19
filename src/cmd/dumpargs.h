@@ -29,8 +29,8 @@
 #include <iostream>
 #include <vector>
 
-#include "avrdevice.h"
-#include "traceval.h"
+#include "../avrdevice.h"
+#include "../traceval.h"
 
 //! Parse given trace options and open Dumper
 extern void SetDumpTraceArgs(const std::vector<std::string> &traceopts, AvrDevice *dev);

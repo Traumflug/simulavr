@@ -42,6 +42,10 @@
 #include "avrerror.h"
 #include "helper.h"
 
+#ifdef _MSC_VER
+#  define snprintf _snprintf
+#endif
+
 SystemConsoleHandler::SystemConsoleHandler() {
     useExitAndAbort = true;
     nullStream = new std::ostream(0);

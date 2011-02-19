@@ -33,10 +33,11 @@
 #include <string>
 #include "config.h"
 
-#ifdef HAVE_SYS_MINGW
+#if defined(_MSC_VER) || defined(HAVE_SYS_MINGW)
 
 #include <winsock2.h>
 #include <sys/types.h>
+#define ssize_t size_t
 
 class Socket {
     

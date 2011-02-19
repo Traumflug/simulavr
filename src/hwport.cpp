@@ -29,6 +29,7 @@ using namespace std;
 #include "hwport.h"
 #include "avrdevice.h"
 #include "avrerror.h"
+#include <assert.h>
 
 HWPort::HWPort(AvrDevice *core, const string &name, bool portToggle, int size):
     Hardware(core),
@@ -134,6 +135,7 @@ void HWPort::CalcOutputs(void) { //Calculate the new output value to be transmit
 string HWPort::GetPortString(void) {
     string dummy;
     dummy.resize(portSize);
+    assert(portSize < sizeof(p)/sizeof(p[0]));
     for(int tt = 0; tt < portSize; tt++)
         dummy[portSize - 1 - tt] = p[tt];  // calls Pin::operator char()
 

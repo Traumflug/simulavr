@@ -3,6 +3,8 @@
 *.lo
 avr.vpi
 *.in
+Debug/
+Release/
 simulavr-*.tar.gz
 aclocal.m4
 autom4te.cache

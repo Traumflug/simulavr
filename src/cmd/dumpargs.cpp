@@ -28,8 +28,8 @@
 #include <stdlib.h>
 
 #include "dumpargs.h"
-#include "helper.h"
-#include "avrerror.h"
+#include "../helper.h"
+#include "../avrerror.h"
 
 using namespace std;
  

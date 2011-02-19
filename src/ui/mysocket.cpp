@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#ifdef HAVE_SYS_MINGW
+#if defined(_MSC_VER) || defined(HAVE_SYS_MINGW)
 
 int Socket::socketCount = 0;
 
