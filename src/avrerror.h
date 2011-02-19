@@ -105,12 +105,9 @@ extern int global_verbose_on;
 //! Helper function for writing trace (trace IO access)
 void trioaccess(const char *t, unsigned char val);
 
-/* FIXME: TRoth 2002-02-23 : '## args' is gcc specific. If porting to another
-   compiler, this will have to be handled. Although, I believe the C99
-   standard added this to precompiler. */
-#define avr_message(fmt, args...) sysConHandler.vfmessage(__FILE__, __LINE__, fmt, ## args)
-#define avr_warning(fmt, args...) sysConHandler.vfwarning(__FILE__, __LINE__, fmt, ## args)
-#define avr_failure(fmt, args...) sysConHandler.vferror(__FILE__, __LINE__, fmt, ## args)
-#define avr_error(fmt, args...)   sysConHandler.vffatal(__FILE__, __LINE__, fmt, ## args)
+#define avr_message(fmt, ...) sysConHandler.vfmessage(__FILE__, __LINE__, fmt, ## __VA_ARGS__)
+#define avr_warning(fmt, ...) sysConHandler.vfwarning(__FILE__, __LINE__, fmt, ## __VA_ARGS__)
+#define avr_failure(fmt, ...) sysConHandler.vferror(__FILE__, __LINE__, fmt, ## __VA_ARGS__)
+#define avr_error(fmt, ...)   sysConHandler.vffatal(__FILE__, __LINE__, fmt, ## __VA_ARGS__)
 
 #endif /* SIM_AVRERROR_H */
