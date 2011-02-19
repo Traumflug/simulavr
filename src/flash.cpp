@@ -27,9 +27,6 @@
 #include <fstream>
 #include <sstream>
 
-extern "C" {
-#include <unistd.h>
-}
 
 
 #include "flash.h"
