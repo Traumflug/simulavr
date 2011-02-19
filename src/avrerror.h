@@ -28,12 +28,15 @@
 
 #include <iostream>
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #define ATTRIBUTE_NORETURN __declspec(noreturn)
 #define ATTRIBUTE_PRINTF(string_arg, first_arg)
-#else
+#elif defined(__GNUC__)
 #define ATTRIBUTE_NORETURN __attribute__((noreturn))
 #define ATTRIBUTE_PRINTF(string_arg, first_arg) __attribute__ ((format (printf, string_arg, first_arg)))
+#else
+#define ATTRIBUTE_NORETURN
+#define ATTRIBUTE_PRINTF(string_arg, first_arg)
 #endif
 
 //! Class, that handle messages to console and also exit/abort calls
