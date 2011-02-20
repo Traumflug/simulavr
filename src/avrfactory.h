@@ -60,7 +60,8 @@ class AvrFactory {
         
     private:
         AvrFactory() {}
-        
+        //! map of registered AVR devices
+        std::map<std::string, AvrFactory::AvrDeviceCreator> devmap;
 };
 
 /*! Macro to be used to register an AVR device with the AvrFactory.

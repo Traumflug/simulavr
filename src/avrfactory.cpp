@@ -34,44 +34,12 @@ using namespace std;
 
 typedef map<std::string, AvrFactory::AvrDeviceCreator> AVRDeviceMap;
 
-#ifdef _MFC_VER
-#pragma data_seg(".crt$xct")
-typedef void (__cdecl *PF)(void);
-__declspec(allocate(".crt$xct")) const PF InitSegEnd1 = (PF) 0;
-#pragma data_seg(".crt")
-__declspec(allocate(".crt"))     const PF InitSegEnd2 = (PF) 0;
-
-#pragma section(".mine$a", read)
-__declspec(allocate(".mine$a")) const PF InitSegStart = (PF)1;
-#pragma section(".mine$z",read)
-__declspec(allocate(".mine$z")) const PF InitSegEnd = (PF)1;
-// by default, goes into a read only section
-//#pragma init_seg(".mine$m")
-
-
-
-// creates new section in executable
-#pragma section(".crt", read)
-#pragma section(".crt$xct", read)
-// force initialization of 'devmap' before initializers of AVRFactoryRegistryMaker execute
-//#pragma init_seg(".crt$xct")
-//#pragma init_seg("CRT$xcl")
-#pragma init_seg(lib)
-
-bool g_afas = 1;
-int g_nInitTime = g_afas ? 44 : 55;
-#endif
-
-//! map of registered AVR devices
-AVRDeviceMap devmap;
-
 void AvrFactory::reg(const std::string name,
                      AvrDeviceCreator create) {
     string devname(name);
     for(unsigned int i = 0; i < devname.size(); i++)
         devname[i] = tolower(devname[i]);
-	if(devmap.empty())
-		devmap = AVRDeviceMap();
+    AVRDeviceMap & devmap = instance().devmap;
     AVRDeviceMap::iterator i = devmap.find(devname);
     if(i == devmap.end())
         devmap[devname] = create;
@@ -94,7 +62,8 @@ AvrDevice* AvrFactory::makeDevice(const char *in) {
 
 std::string AvrFactory::supportedDevices() {
     std::string ret;
-    
+    AVRDeviceMap & devmap = instance().devmap;
+
     for(AVRDeviceMap::iterator i = devmap.begin(); i != devmap.end(); i++)
         ret += i->first + "\n";
     return ret;
