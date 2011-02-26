@@ -160,7 +160,7 @@ void TraceValueRegister::_tvr_registerTraceValues(TraceValueRegister *r) {
         pair<string*, TraceValueRegister*> v(s, r);
         _tvr_registers.insert(v);
     } else
-        avr_error("nested add TraceValueRegister denied: name found: '%s'", n.c_str());
+        avr_error("duplicate name '%s', another TraceValueRegister child is already registered", n.c_str());
 }
 
 size_t TraceValueRegister::_tvr_getValuesCount(void) {
