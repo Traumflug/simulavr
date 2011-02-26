@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <iostream>
 #include "hwpinchange.h"
 #include "irqsystem.h"
@@ -30,8 +31,11 @@ HWPcir::HWPcir(	AvrDevice*		avr,
         pcicr_reg(avr, "PINCHANGE.PCICR", this, &HWPcir::getPcicrMask,
                   &HWPcir::setPcicrMask),
         pcifr_reg(avr, "PINCHANGE.PCIFR", this, &HWPcir::getPcifrMask,
-                  &HWPcir::setPcifrMask) {
-	}
+                  &HWPcir::setPcifrMask)
+{
+	assert(false);  // Unreachable. No code ever constructs this class.
+	irqSystem.DebugVerifyInterruptVector(_vector0, this);
+}
 
 bool	HWPcir::getPcifr(unsigned pcifrBit) throw(){
 	return _pcifr & (1<<pcifrBit);
@@ -210,6 +214,7 @@ HWPcmsk::HWPcmsk(
                   this, &HWPcmsk::getPcmskMask,
                   &HWPcmsk::setPcmskMask)
 		{
+			assert(false);  // Unreachable. No code ever constructs this class.
 	}
 
 void	HWPcmsk::setPcmskMask(unsigned char val) throw(){
@@ -235,6 +240,7 @@ PinChange::PinChange(	Pin&				pin,
 		_pcmskBit(pcmskBit),
 		_prevState(true)
 		{
+	assert(false);  // Unreachable. No code ever constructs this class.
 	pin.RegisterCallback(this);
 	}
 

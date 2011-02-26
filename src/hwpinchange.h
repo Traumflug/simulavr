@@ -49,6 +49,7 @@ class HWPcirMaskApi {
 		virtual unsigned char	getPcicrMask() const throw()=0;
 	};
 		
+/// This class is never used.
 class HWPcir : public HWPcifrApi , public HWPcirMaskApi , public Hardware {
 	private:
 		unsigned char	_pcifr;
@@ -105,6 +106,7 @@ class HWPcir : public HWPcifrApi , public HWPcirMaskApi , public Hardware {
 	
 	};
 
+/// This class is never used.
 class HWPcmsk : public HWPcmskApi , public HWPcmskPinApi {
 	private:
 		HWPcifrApi&			_pcifrApi;
@@ -131,6 +133,7 @@ class HWPcmsk : public HWPcmskApi , public HWPcmskPinApi {
 
 // This class monitors a single pin for changes
 // an reports an interrupt if the pin chages.
+/// This class is never used. Delete? (Pin-change interrupt is done by ExternalIRQPort.)
 class PinChange : public HasPinNotifyFunction {
 	private:
 		Pin&				_pin;
