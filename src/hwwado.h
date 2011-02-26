@@ -34,6 +34,7 @@
 class AvrDevice;
 class HWIrqSystem;
 
+/** Watchdog (WDT) peripheral. Interrupts are not implemented. */
 class HWWado: public Hardware, public TraceValueRegister {
 	protected:
 	unsigned char wdtcr;

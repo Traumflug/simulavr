@@ -23,8 +23,8 @@
  *  $Id$
  */
 
-#ifndef EXTERNALIRQ
-#define EXTERNALIRQ
+#ifndef EXTERNALIRQ_INCLUDED
+#define EXTERNALIRQ_INCLUDED
 
 #include <vector>
 
@@ -104,10 +104,9 @@ class ExternalIRQ: public IOSpecialRegClient {
         // from IOSpecialRegClient
         virtual unsigned char set_from_reg(const IOSpecialReg* reg, unsigned char nv);
         virtual unsigned char get_from_client(const IOSpecialReg* reg, unsigned char v);
-        
 };
 
-//! Handler for external IRQ on a single pin, one and 2 bit configuration
+//! External interrupt (INT0, INT1...) on a single pin, one and 2 bit configuration
 class ExternalIRQSingle: public ExternalIRQ, public HasPinNotifyFunction {
     
     protected:
@@ -132,10 +131,9 @@ class ExternalIRQSingle: public ExternalIRQ, public HasPinNotifyFunction {
         
         // from HasPinNotifyFunction
         void PinStateHasChanged(Pin *pin);
-        
 };
 
-//! Handler for external IRQ on a single pin, one and 2 bit configuration
+//! Pin-change interrupt on all pins of a port
 class ExternalIRQPort: public ExternalIRQ, public HasPinNotifyFunction {
     
     protected:
@@ -148,7 +146,6 @@ class ExternalIRQPort: public ExternalIRQ, public HasPinNotifyFunction {
         
         // from HasPinNotifyFunction
         void PinStateHasChanged(Pin *pin);
-        
 };
 
 #endif

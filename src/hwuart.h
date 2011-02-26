@@ -108,10 +108,10 @@ class HWUart: public Hardware, public TraceValueRegister {
                HWIrqSystem *,
                PinAtPort tx,
                PinAtPort rx,
-               unsigned int vrx,
-               unsigned int vudre,
-               unsigned int vtx,
-               int n = 0);
+               unsigned int rx_interrupt,
+               unsigned int udre_interrupt,
+               unsigned int tx_interrupt,
+               int instance_id = 0);
         virtual unsigned int CpuCycle();
 
         void Reset();
@@ -138,8 +138,8 @@ class HWUart: public Hardware, public TraceValueRegister {
             ucr_reg,
             ucsra_reg,
             ucsrb_reg,
-            ubrr_reg,
-            ubrrhi_reg;
+            ubrr_reg,    ///< IO register "UBRRxL" - baudrate
+            ubrrhi_reg;  ///< IO register "UBRRxH" - baudrate
             
     protected:
         void SetFrameLengthFromRegister();
@@ -158,10 +158,10 @@ class HWUsart: public HWUart {
                 PinAtPort tx,
                 PinAtPort rx,
                 PinAtPort xck,
-                unsigned int vrx,
-                unsigned int vudre,
-                unsigned int vtx,
-                int n = 0,
+                unsigned int rx_interrupt,
+                unsigned int udre_interrupt,
+                unsigned int tx_interrupt,
+                int instance_id = 0,
                 bool mxReg = true);
 
         void SetUcsrc(unsigned char val);

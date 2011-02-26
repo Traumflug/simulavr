@@ -32,6 +32,7 @@
 #include "rwmem.h"
 #include "traceval.h"
 
+/** ADC multiplexer. This version does not handle differential inputs. */
 class HWAdmux: public Hardware, public TraceValueRegister {
     protected:
         unsigned char admux;
@@ -54,10 +55,12 @@ class HWAdmux: public Hardware, public TraceValueRegister {
         void SetAdmux(unsigned char);
         //unsigned int CpuCycle(); //not used!
         void Reset();
-        int GetMuxOutput(); //give the analog from the selcted pin
+		/// Get analog voltage (0..INT_MAX=Vcc) of the selected pin
+        int GetMuxOutput();
 	IOReg<HWAdmux> admux_reg;
 };
 
+/** Analog-digital converter (ADC) */
 class HWAd: public Hardware, public TraceValueRegister {
     protected:
         unsigned char adch;
