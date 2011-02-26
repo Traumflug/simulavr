@@ -42,7 +42,9 @@ HWAcomp::HWAcomp(AvrDevice *core, HWIrqSystem *irqsys, PinAtPort ain0, PinAtPort
     irqSystem(irqsys),
     pinAin0(ain0), pinAin1(ain1),
     acsr_reg(this, "ACSR", this, &HWAcomp::GetAcsr, &HWAcomp::SetAcsr),
-    irqVec(_irqVec) {
+    irqVec(_irqVec)
+{
+    irqSystem->DebugVerifyInterruptVector(irqVec, this);
     ain0.GetPin().RegisterCallback(this);
     ain1.GetPin().RegisterCallback(this);
     Reset();

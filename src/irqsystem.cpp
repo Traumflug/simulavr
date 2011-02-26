@@ -33,6 +33,7 @@
 #include "application.h"
 
 #include <iostream>
+#include <assert.h>
 
 using namespace std;
 
@@ -185,6 +186,7 @@ HWIrqSystem::HWIrqSystem(AvrDevice* _core, int bytes, int tblsize):
     TraceValueRegister(_core, "IRQ"),
     bytesPerVector(bytes),
     vectorTableSize(tblsize),
+    debugInterruptTable(tblsize, NULL),
     core(_core),
     irqTrace(tblsize),
     irqStatistic(_core)
@@ -197,7 +199,6 @@ HWIrqSystem::HWIrqSystem(AvrDevice* _core, int bytes, int tblsize):
     }
 }
 
-//a map is allways sorted, so the priority of the irq vector is known and handled correctly
 unsigned int HWIrqSystem::GetNewPc(unsigned int &actualVector) {
     unsigned int newPC = 0xffffffff;
 
@@ -205,21 +206,22 @@ unsigned int HWIrqSystem::GetNewPc(unsigned int &actualVector) {
     static map<unsigned int, Hardware *>::iterator end;
     end = irqPartnerList.end();
 
+    //a map is always sorted, so the priority of the irq vector is known and handled correctly
     for(ii = irqPartnerList.begin(); ii != end; ii++) {
         Hardware* second = ii->second;
-        unsigned int first = ii->first;
+        unsigned int index = ii->first;
 
-        if(second->IsLevelInterrupt(first)) {
-            second->ClearIrqFlag(first);
-            if(second->LevelInterruptPending(first)) {
-                actualVector = first;
-                newPC = first * (bytesPerVector / 2);
+        if(second->IsLevelInterrupt(index)) {
+            second->ClearIrqFlag(index);
+            if(second->LevelInterruptPending(index)) {
+                actualVector = index;
+                newPC = index * (bytesPerVector / 2);
                 break;
             }
         } else {
-            second->ClearIrqFlag(first);
-            actualVector = first;
-            newPC = first * (bytesPerVector / 2);
+            second->ClearIrqFlag(index);
+            actualVector = index;
+            newPC = index * (bytesPerVector / 2);
             break;
         }
     }
@@ -230,7 +232,7 @@ unsigned int HWIrqSystem::GetNewPc(unsigned int &actualVector) {
 void HWIrqSystem::SetIrqFlag(Hardware *hwp, unsigned int vector) {
     irqPartnerList[vector]=hwp;
     if (core->trace_on) {
-        traceOut << core->GetFname() << " IrqSystem: IrqFlagSet Vec: " << vector << endl;
+        traceOut << core->GetFname() << " interrupt on index " << vector << " is pending" << endl;
     }
 
     if ( irqStatistic.entries[vector].actual.flagSet==0) { //the actual entry was not used before... fine!
@@ -242,7 +244,7 @@ void HWIrqSystem::SetIrqFlag(Hardware *hwp, unsigned int vector) {
 void HWIrqSystem::ClearIrqFlag(unsigned int vector) {
     irqPartnerList.erase(vector);
     if (core->trace_on) {
-        traceOut << core->GetFname() << " IrqSystem: IrqFlagCleared Vec: " << vector << endl;
+        traceOut << core->GetFname() << " interrupt on index " << vector << "cleared" << endl;
     }
 
     if (irqStatistic.entries[vector].actual.flagCleared==0) {
@@ -274,6 +276,29 @@ void HWIrqSystem::IrqHandlerFinished(unsigned int vector) {
         irqStatistic.entries[vector].actual.handlerFinished=SystemClock::Instance().GetCurrentTime();
     }
     irqStatistic.entries[vector].CheckComplete();
+}
+
+void HWIrqSystem::DebugVerifyInterruptVector(unsigned int vector, const Hardware* source) {
+    assert(vector < vectorTableSize);
+    const Hardware* existing = debugInterruptTable[vector];
+    if(existing == NULL)
+        debugInterruptTable[vector] = source;
+    else
+        assert(existing == source);
+    // The same `source' for multiple `vector' values is OK. It would be pain
+    // for ExternalIRQSingle class to inherit from Hardware just for this test.
+}
+void HWIrqSystem::DebugDumpTable()
+{
+    fprintf(stderr, "Interrupt vector table (for comparison against a datasheet)\n");
+    fprintf(stderr, "Vector | Address/2 | Source Peripheral (class)\n");
+    for(unsigned i = 0; i < debugInterruptTable.size(); i++)
+    {
+        const Hardware* source = debugInterruptTable[i];
+        const char * handler = (i==0) ? "funct AvrDevice::Reset()"
+            : source ? typeid(*source).name() : "(unsupported or not registered)";
+        fprintf(stderr, "  %3d  |   $%04x   | %s\n", i+1, i*bytesPerVector/2, handler);
+    }
 }
 
 IrqStatistic::IrqStatistic (AvrDevice *c):Printable(cout), core(c) {

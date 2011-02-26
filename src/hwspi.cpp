@@ -176,6 +176,7 @@ HWSpi::HWSpi(AvrDevice *_c,
     spsr_reg(this, "SPSR", this, &HWSpi::GetSPSR, &HWSpi::SetSPSR),
     spcr_reg(this, "SPCR", this, &HWSpi::GetSPCR, &HWSpi::SetSPCR)
 {
+    irq->DebugVerifyInterruptVector(ivec, this);
     bitcnt=8;
     finished=false;
 

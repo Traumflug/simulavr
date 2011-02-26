@@ -77,6 +77,7 @@ TimerIRQRegister::TimerIRQRegister(AvrDevice* c,
 }
 
 void TimerIRQRegister::registerLine(int idx, IRQLine* irq) {
+    irqsystem->DebugVerifyInterruptVector(irq->irqvector, this);
     // no check, if idx is in right range!
     irq->irqreg = this;
     lines[idx] = irq;

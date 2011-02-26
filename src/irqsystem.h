@@ -123,19 +123,24 @@ class HWIrqSystem: public TraceValueRegister {
         HWSreg *status;
         std::vector<TraceValue*> irqTrace;
         
-        //setup a stack for hardwareIrqPartners
+        /// priority queue of pending interrupts (i.e. waiting to be processed)
         std::map<unsigned int, Hardware *> irqPartnerList;
         AvrDevice *core;
         IrqStatistic irqStatistic;
+        std::vector<const Hardware*> debugInterruptTable;
 
     public:
-        HWIrqSystem (AvrDevice* _core, int bytes, int tblsize);
+        HWIrqSystem (AvrDevice* _core, int bytes_per_vector, int number_of_vectors);
 
-        unsigned int GetNewPc(unsigned int &vecNo); //if an IRQ occured, we need the new PC,
-        void SetIrqFlag(Hardware *, unsigned int vector);
-        void ClearIrqFlag(unsigned int vector);
-        void IrqHandlerStarted(unsigned int vector);
-        void IrqHandlerFinished(unsigned int vector);
+        /// returns a new PC pointer if interrupt occurred, -1 otherwise.
+        unsigned int GetNewPc(unsigned int &vector_index);
+        void SetIrqFlag(Hardware *, unsigned int vector_index);
+        void ClearIrqFlag(unsigned int vector_index);
+        void IrqHandlerStarted(unsigned int vector_index);
+        void IrqHandlerFinished(unsigned int vector_index);
+        /// In datasheets RESET vector is index 1 but we use 0! And not a byte address.
+        void DebugVerifyInterruptVector(unsigned int vector_index, const Hardware* source);
+        void DebugDumpTable();
 };
 
 #ifndef SWIG

@@ -110,6 +110,7 @@ HWAd::HWAd( AvrDevice *c, HWAdmux *a, HWIrqSystem *i, Pin& _aref, unsigned int i
     adcl_reg(this, "ADCL",  this, &HWAd::GetAdcl, 0),
     adcsr_reg(this, "ADCSR", this, &HWAd::GetAdcsr, &HWAd::SetAdcsr)
 {
+    irqSystem->DebugVerifyInterruptVector(irqVec, this);
     core->AddToCycleList(this);
 //    irqSystem->RegisterIrqPartner(this, iv);
 

@@ -525,18 +525,18 @@ HWUart::HWUart(AvrDevice *core,
                HWIrqSystem *s,
                PinAtPort tx,
                PinAtPort rx,
-               unsigned int vrx,
-               unsigned int vudre,
-               unsigned int vtx,
-               int n):
+               unsigned int rx_interrupt,
+               unsigned int udre_interrupt,
+               unsigned int tx_interrupt,
+               int instance_id):
     Hardware(core),
-    TraceValueRegister(core, "UART" + int2str(n)),
+    TraceValueRegister(core, "UART" + int2str(instance_id)),
     irqSystem(s),
     pinTx(tx),
     pinRx(rx),
-    vectorRx(vrx),
-    vectorUdre(vudre),
-    vectorTx(vtx),
+    vectorRx(rx_interrupt),
+    vectorUdre(udre_interrupt),
+    vectorTx(tx_interrupt),
     udr_reg(this, "UDR",
             this, &HWUart::GetUdr, &HWUart::SetUdr),
     usr_reg(this, "USR",
@@ -552,6 +552,10 @@ HWUart::HWUart(AvrDevice *core,
     ubrrhi_reg(this, "UBRRHI",
                this, &HWUart::GetUbrrhi, &HWUart::SetUbrrhi)
 {
+    irqSystem->DebugVerifyInterruptVector(vectorRx, this);
+    irqSystem->DebugVerifyInterruptVector(vectorUdre, this);
+    irqSystem->DebugVerifyInterruptVector(vectorTx, this);
+
     core->AddToCycleList(this);
 
     trace_direct(this, "UDR_write", &udrWrite);
@@ -651,9 +655,9 @@ HWUsart::HWUsart(AvrDevice *core,
                  unsigned int vrx,
                  unsigned int vudre,
                  unsigned int vtx,
-                 int n,
+                 int instance_id,
                  bool mxReg):
-    HWUart(core, s, tx, rx, vrx, vudre, vtx, n),
+    HWUart(core, s, tx, rx, vrx, vudre, vtx, instance_id),
     pinXck(xck),
     ucsrc_reg(this, "UCSRC",
               this, &HWUsart::GetUcsrc, &HWUsart::SetUcsrc),

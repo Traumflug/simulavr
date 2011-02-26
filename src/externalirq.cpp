@@ -51,6 +51,7 @@ ExternalIRQHandler::~ExternalIRQHandler(void) {
 }
 
 void ExternalIRQHandler::registerIrq(int vector, int irqBit, ExternalIRQ* extirq) {
+    irqsystem->DebugVerifyInterruptVector(vector, this);
     // set mask for relevant bits
     reg_mask |= 1 << irqBit;
     // register IRQ, mask bit and vector
