@@ -81,7 +81,7 @@ ssize_t Socket::Poll() {
 
 #else
 
-Socket::Socket(int port):sockstream(&conn) {
+Socket::Socket(int port) {
     OpenSocket(port);
 }
 

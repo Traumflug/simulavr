@@ -76,45 +76,9 @@ class Socket {
 #include <unistd.h>
 
 #include <iostream>
-
-class sockbuf 
-#ifndef SWIG
-: public std::streambuf
-#endif
-{
-    protected:
-        int *conn;
-
-    public: 
-        sockbuf(int *c) {conn=c;}
-
-    protected:
-        virtual int overflow(int c){
-            char dummy =c&0xff;
-            ::write( *conn, &dummy, 1);
-            return 0;
-        }
-};
-
-class sockstream
-#ifndef SWIG
-:public std::ostream 
-#endif 
-{
-
-    private:
-        sockbuf buffer; 
-
-    public: 
-        sockstream(int *c): std::ostream(&buffer), buffer(c){}
-};
-
-class Pin;
-class ExternalType;
-
 #include <sys/poll.h>
 
-class Socket: public sockstream {
+class Socket {
     protected:
         int sock, conn;
         void OpenSocket(int port);
