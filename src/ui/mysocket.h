@@ -23,8 +23,8 @@
  *  $Id$
  */
 
-#ifndef MYSOCKET
-#define MYSOCKET
+#ifndef MYSOCKET_INCLUDED
+#define MYSOCKET_INCLUDED
 
 /*! \todo The implementation of Socket has to be cleaned. In the moment,
   the Socket implementation for MingW acts only as client, the unix implementation
@@ -34,18 +34,25 @@
 #include "config.h"
 
 #if defined(_MSC_VER) || defined(HAVE_SYS_MINGW)
-
 #include <winsock2.h>
 #include <sys/types.h>
 #define ssize_t size_t
+#else
+#include <unistd.h>
+#endif
 
 class Socket {
     
     private:
+#     if defined(_MSC_VER) || defined(HAVE_SYS_MINGW)
         static void Start();
         static void End();
         static int socketCount;
         SOCKET _socket;
+#     else
+        int sock, conn;
+        void OpenSocket(int port);
+#     endif
         
     public:
         Socket(int port);
@@ -60,43 +67,6 @@ class Socket {
         }
 };
 
-#else
-
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <unistd.h>
-#include <fcntl.h>
-
-#include <unistd.h>
-
-#include <iostream>
-#include <sys/poll.h>
-
-class Socket {
-    protected:
-        int sock, conn;
-        void OpenSocket(int port);
-
-    public:
-        Socket(int port);
-        ~Socket();
-        ssize_t Read(std::string &a);
-        void Write(const std::string &s); 
-        ssize_t Poll();
-
-        void Write(const char *in) {
-        std::string a(in);
-            Write(a);
-        }
-};
-
-#endif
 
 #endif
 

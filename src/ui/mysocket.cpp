@@ -9,7 +9,22 @@
 
 using namespace std;
 
-#if defined(_MSC_VER) || defined(HAVE_SYS_MINGW)
+#if !(defined(_MSC_VER) || defined(HAVE_SYS_MINGW))
+
+#include <errno.h>
+#include <fcntl.h>
+#include <iostream>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/poll.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#else
 
 int Socket::socketCount = 0;
 
@@ -57,10 +72,16 @@ Socket::~Socket() {
     if(socketCount == 0)
         End();
 }
+#endif
 
 ssize_t Socket::Read(string &a) {
     char buf[256];
+#if defined(_MSC_VER) || defined(HAVE_SYS_MINGW)
     ssize_t len = recv(_socket, buf, 255, 0);
+#else
+    ssize_t len = read( conn, &buf, 255 );
+#endif
+
     if(len < 0)
         len=0;
     buf[len]= '\0';
@@ -69,7 +90,13 @@ ssize_t Socket::Read(string &a) {
 }
 
 void Socket::Write(const string &s) {
-    send(_socket, s.c_str(), s.length(), 0);
+#if defined(_MSC_VER) || defined(HAVE_SYS_MINGW)
+    int err = ::send(_socket, s.c_str(), s.length(), 0);
+#else
+    int err = ::write( conn, s.c_str(), s.size());
+#endif
+    if (err<0)
+        cerr << "Write in UI fails!" << endl;
 }
 
 ssize_t Socket::Poll() {
@@ -79,7 +106,7 @@ ssize_t Socket::Poll() {
     return arg;
 }
 
-#else
+#if !(defined(_MSC_VER) || defined(HAVE_SYS_MINGW))
 
 Socket::Socket(int port) {
     OpenSocket(port);
@@ -179,20 +206,6 @@ void Socket::OpenSocket(int port) {
     fcntl(conn, F_SETFL, O_NONBLOCK);
 }
 
-
-ssize_t Socket::Read( string &a) {
-    char dummy[256];
-    ssize_t len=read( conn, &dummy, 255 );
-    if (len<0) len=0;
-    dummy[len]=0;
-    a+=dummy;
-    return len;
-}
-
-void Socket::Write(const string &s) {
-    int err=::write( conn, s.c_str(), s.size());
-    if (err<0) { cerr << "Write in UI fails!" << endl; }
-}
 
 ssize_t Socket::Poll() {
     pollfd pfd= {
