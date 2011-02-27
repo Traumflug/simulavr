@@ -72,6 +72,14 @@ Socket::~Socket() {
     if(socketCount == 0)
         End();
 }
+
+ssize_t Socket::Poll() {
+    u_long arg = 0;
+    if(ioctlsocket(_socket, FIONREAD, &arg) != 0)
+        return 0;
+    return arg;
+}
+
 #endif
 
 ssize_t Socket::Read(string &a) {
@@ -97,13 +105,6 @@ void Socket::Write(const string &s) {
 #endif
     if (err<0)
         cerr << "Write in UI fails!" << endl;
-}
-
-ssize_t Socket::Poll() {
-    u_long arg = 0;
-    if(ioctlsocket(_socket, FIONREAD, &arg) != 0)
-        return 0;
-    return arg;
 }
 
 #if !(defined(_MSC_VER) || defined(HAVE_SYS_MINGW))
