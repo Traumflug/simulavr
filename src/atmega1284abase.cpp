@@ -262,10 +262,17 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
     rw[0x69]= eicra_reg;
     rw[0x68]= pcicr_reg;
     // 0x67 reserved
+    rw[0x66]= new NotSimulatedRegister("MCU register OSCCAL not simulated");
+    // 0x65 reserved
+    rw[0x64]= new NotSimulatedRegister("MCU register PRR not simulated");
+    // 0x63 reserved
+    // 0x62 reserved
+    rw[0x61]= new NotSimulatedRegister("MCU register CLKPR not simulated");
+    rw[0x60]= new NotSimulatedRegister("MCU register WDTCSR not simulated");
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
-    // 0x58 - 0x5E reserved
+    // 0x58 - 0x5c reserved
     rw[0x57]= new NotSimulatedRegister("Self-programming register SPMCSR not simulated");
     // 0x56 reserved
     rw[0x55]= new NotSimulatedRegister("MCU register MCUCR not simulated");

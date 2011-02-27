@@ -194,7 +194,14 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0xC2]= & usart0->ucsrc_reg;
     rw[0xC1]= & usart0->ucsrb_reg;
     rw[0xC0]= & usart0->ucsra_reg;
-
+    // 0xBF reserved
+    rw[0xBD]= new NotSimulatedRegister("TWI register TWAMR not simulated");
+    rw[0xBC]= new NotSimulatedRegister("TWI register TWCR not simulated");
+    rw[0xBB]= new NotSimulatedRegister("TWI register TWDR not simulated");
+    rw[0xBA]= new NotSimulatedRegister("TWI register TWAR not simulated");
+    rw[0xB9]= new NotSimulatedRegister("TWI register TWSR not simulated");
+    rw[0xB8]= new NotSimulatedRegister("TWI register TWBR not simulated");
+    // 0xB7 reserved
     rw[0xb6]= & assr_reg;
     // 0xb5 reserved
     rw[0xb4]= & timer2->ocrb_reg;
@@ -215,13 +222,15 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x82]= & timer1->tccrc_reg;
     rw[0x81]= & timer1->tccrb_reg;
     rw[0x80]= & timer1->tccra_reg;
-    
+    rw[0x7F]= new NotSimulatedRegister("ADC register DIDR1 not simulated");
+    rw[0x7E]= new NotSimulatedRegister("ADC register DIDR0 not simulated");
+    // 0x7D reserved
     rw[0x7C]= & admux.admux_reg;
-
+    rw[0x7B]= new NotSimulatedRegister("ADC register ADCSRB not simulated");
     rw[0x7A]= & ad->adcsr_reg;
     rw[0x79]= & ad->adch_reg;
     rw[0x78]= & ad->adcl_reg;
-
+    // 0x71 - 0x77 reserved
     rw[0x70]= & timerIrq2->timsk_reg;
     rw[0x6F]= & timerIrq1->timsk_reg;
     rw[0x6E]= & timerIrq0->timsk_reg;
@@ -229,18 +238,36 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x6d]= pcmsk2_reg;
     rw[0x6c]= pcmsk1_reg;
     rw[0x6b]= pcmsk0_reg;
-    
+    // 0x6A reserved
     rw[0x69]= eicra_reg;
     rw[0x68]= pcicr_reg;
-
+    // 0x67 reserved
+    rw[0x66]= new NotSimulatedRegister("MCU register OSCCAL not simulated");
+    // 0x65 reserved
+    rw[0x64]= new NotSimulatedRegister("MCU register PRR not simulated");
+    // 0x63 reserved
+    // 0x62 reserved
+    rw[0x61]= new NotSimulatedRegister("MCU register CLKPR not simulated");
+    rw[0x60]= new NotSimulatedRegister("MCU register WDTCSR not simulated");
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
-
+    // 0x58 - 0x5C reserved
+    rw[0x57]= new NotSimulatedRegister("Self-programming register SPMCSR not simulated");
+    // 0x56 reserved
+    rw[0x55]= new NotSimulatedRegister("MCU register MCUCR not simulated");
+    rw[0x54]= new NotSimulatedRegister("MCU register MCUSR not simulated");
+    rw[0x53]= new NotSimulatedRegister("MCU register SMCR not simulated");
+    // 0x52 reserved
+    // 0x51 reserved
+    rw[0x50]= new NotSimulatedRegister("ADC register ADCSRA not simulated");
+    // 0x4F reserved
     rw[0x4E]= & spi->spdr_reg;
     rw[0x4D]= & spi->spsr_reg;
     rw[0x4C]= & spi->spcr_reg;
-
+    rw[0x4B]= new NotSimulatedRegister("General purpose register GPIOR2 not simulated");
+    rw[0x4A]= new NotSimulatedRegister("General purpose register GPIOR1 not simulated");
+    // 0x49 reserved
     rw[0x48]= & timer0->ocrb_reg;
     rw[0x47]= & timer0->ocra_reg;
     rw[0x46]= & timer0->tcnt_reg;
@@ -251,15 +278,15 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x41]= & eeprom->eearl_reg;
     rw[0x40]= & eeprom->eedr_reg;
     rw[0x3F]= & eeprom->eecr_reg;
-
+    rw[0x3E]= new NotSimulatedRegister("General purpose register GPIOR1 not simulated");
     rw[0x3D]= eimsk_reg;
     rw[0x3C]= eifr_reg;
     rw[0x3b]= pcifr_reg;
-
+    // 0x38, 0x39, 0x3A reserved
     rw[0x37]= & timerIrq2->tifr_reg;
     rw[0x36]= & timerIrq1->tifr_reg;
     rw[0x35]= & timerIrq0->tifr_reg;
-
+    // 0x2C - 0x34 reserved
     rw[0x2B]= & portd.port_reg;
     rw[0x2A]= & portd.ddr_reg;
     rw[0x29]= & portd.pin_reg;
