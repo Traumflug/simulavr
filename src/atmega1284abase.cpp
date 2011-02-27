@@ -63,9 +63,9 @@ AvrDevice_atmega668base::~AvrDevice_atmega668base() {
 }
 
 AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
-                                                 unsigned flash_bytes,
-                                                 unsigned ee_bytes ):
-    AvrDevice(224,          // I/O space above General Purpose Registers
+                                                     unsigned flash_bytes,
+                                                     unsigned ee_bytes ):
+    AvrDevice(256-32,       // I/O space size (above ALU registers)
               ram_bytes,    // RAM size
               0,            // External RAM size
               flash_bytes), // Flash Size
@@ -91,7 +91,7 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
 { 
     flagJMPInstructions = (flash_bytes > 8U * 1024U) ? true : false;
     irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 26);
-    
+
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 23, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 16);
 
@@ -115,12 +115,12 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     extirqpc->registerIrq(3, 0, new ExternalIRQPort(pcmsk0_reg, &portb));
     extirqpc->registerIrq(4, 1, new ExternalIRQPort(pcmsk1_reg, &portc));
     extirqpc->registerIrq(5, 2, new ExternalIRQPort(pcmsk2_reg, &portd));
-    
+
     timerIrq0 = new TimerIRQRegister(this, irqSystem, 0);
     timerIrq0->registerLine(0, new IRQLine("TOV0",  16));
     timerIrq0->registerLine(1, new IRQLine("OCF0A", 14));
     timerIrq0->registerLine(2, new IRQLine("OCF0B", 15));
-    
+
     timer0 = new HWTimer8_2C(this,
                              new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 4)),
                              0,
@@ -135,7 +135,7 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     timerIrq1->registerLine(1, new IRQLine("OCF1A", 11));
     timerIrq1->registerLine(2, new IRQLine("OCF1B", 12));
     timerIrq1->registerLine(5, new IRQLine("ICF1",  10));
-    
+
     inputCapture1 = new ICaptureSource(PinAtPort(&portb, 0));
     timer1 = new HWTimer16_2C3(this,
                                new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)),
@@ -147,12 +147,12 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
                                new PinAtPort(&portb, 2),
                                timerIrq1->getLine("ICF1"),
                                inputCapture1);
-    
+
     timerIrq2 = new TimerIRQRegister(this, irqSystem, 2);
     timerIrq2->registerLine(0, new IRQLine("TOV2",  9));
     timerIrq2->registerLine(1, new IRQLine("OCF2A", 7));
     timerIrq2->registerLine(2, new IRQLine("OCF2B", 8));
-    
+
     timer2 = new HWTimer8_2C(this,
                              new PrescalerMultiplexer(&prescaler2),
                              2,
@@ -176,9 +176,9 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
 
     usart0 = new HWUsart(this,
                          irqSystem,
-                         PinAtPort(&portd,1),    // TXD
-                         PinAtPort(&portd,0),    // RXD
-                         PinAtPort(&portd, 4),   // XCK
+                         PinAtPort(&portd, 1),    // TXD
+                         PinAtPort(&portd, 0),    // RXD
+                         PinAtPort(&portd, 4),    // XCK
                          19,   // (18) RX complete vector
                          20,   // (19) UDRE vector
                          21);  // (20) TX complete vector
@@ -262,11 +262,11 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x2B]= & portd.port_reg;
     rw[0x2A]= & portd.ddr_reg;
     rw[0x29]= & portd.pin_reg;
-    
+
     rw[0x28]= & portc.port_reg;
     rw[0x27]= & portc.ddr_reg;
     rw[0x26]= & portc.pin_reg;
-    
+
     rw[0x25]= & portb.port_reg;
     rw[0x24]= & portb.ddr_reg;
     rw[0x23]= & portb.pin_reg;
