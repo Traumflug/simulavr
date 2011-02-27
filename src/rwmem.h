@@ -83,7 +83,7 @@ class RWMemoryMember {
         TraceValueRegister *registry;
 };
 
-//! Represents a GPIO register like in Attiny2313
+//! A register in IO register space unrelated to any peripheral. "GPIORx" in datasheets.
 /*! Allows clean read and write accesses and simply has one stored byte. */
 class GPIORegister: public RWMemoryMember, public Hardware {
     
