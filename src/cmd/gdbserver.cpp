@@ -141,7 +141,9 @@ void GdbServerSocketMingW::SetBlockingMode(int mode) {
     u_long arg = 1;
     if(mode)
         arg = 0;
-    ioctlsocket(_socket, FIONBIO, &arg);
+    int res = ioctlsocket(_conn, FIONBIO, &arg);
+    if(res)
+        avr_warning( "fcntl failed: %d\n", WSAGetLastError() );
 }
 
 bool GdbServerSocketMingW::Connect(void) {
@@ -1381,7 +1383,7 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
 
         do {
             //cout << "Loop" << endl;
-            int gdbRet=gdb_pre_parse_packet(GDB_BLOCKING_OFF);
+            int gdbRet=gdb_pre_parse_packet((runMode==GDB_RET_CONTINUE) ? GDB_BLOCKING_OFF : GDB_BLOCKING_ON);
 
             switch (gdbRet) { //GDB_RESULT TYPES
                 case GDB_RET_NOTHING_RECEIVED:  //nothing changes here
