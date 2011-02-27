@@ -196,22 +196,30 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
 
     // 0xCF - 0xFF reserved
 
-	rw[0xCE]= & usart0->udr_reg;
-	rw[0xCD]= & usart0->ubrrhi_reg;
-	rw[0xCC]= & usart0->ubrr_reg;
-	// 0xCB reserved
-	rw[0xCA]= & usart0->ucsrc_reg;
-	rw[0xC9]= & usart0->ucsrb_reg;
-	rw[0xC8]= & usart0->ucsra_reg;
-
+    rw[0xCE]= & usart1->udr_reg;
+    rw[0xCD]= & usart1->ubrrhi_reg;
+    rw[0xCC]= & usart1->ubrr_reg;
+    // 0xCB reserved
+    rw[0xCA]= & usart1->ucsrc_reg;
+    rw[0xC9]= & usart1->ucsrb_reg;
+    rw[0xC8]= & usart1->ucsra_reg;
+    // 0xC7 reserved
     rw[0xC6]= & usart0->udr_reg;
     rw[0xC5]= & usart0->ubrrhi_reg;
     rw[0xC4]= & usart0->ubrr_reg;
     // 0xC3 reserved
     rw[0xC2]= & usart0->ucsrc_reg;
-	rw[0xC1]= & usart0->ucsrb_reg;
-	rw[0xC0]= & usart0->ucsra_reg;
-
+    rw[0xC1]= & usart0->ucsrb_reg;
+    rw[0xC0]= & usart0->ucsra_reg;
+    // 0xBF reserved
+    // 0xBE reserved
+    rw[0xBD]= new NotSimulatedRegister("TWI register TWAMR not simulated");
+    rw[0xBC]= new NotSimulatedRegister("TWI register TWCR not simulated");
+    rw[0xBB]= new NotSimulatedRegister("TWI register TWDR not simulated");
+    rw[0xBA]= new NotSimulatedRegister("TWI register TWAR not simulated");
+    rw[0xB9]= new NotSimulatedRegister("TWI register TWSR not simulated");
+    rw[0xB8]= new NotSimulatedRegister("TWI register TWBR not simulated");
+    // 0xB7 reserved
     rw[0xb6]= & assr_reg;
     // 0xb5 reserved
     rw[0xb4]= & timer2->ocrb_reg;
@@ -232,34 +240,47 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
     rw[0x82]= & timer1->tccrc_reg;
     rw[0x81]= & timer1->tccrb_reg;
     rw[0x80]= & timer1->tccra_reg;
-    
+    rw[0x7F]= new NotSimulatedRegister("ADC register DIDR1 not simulated");
+    rw[0x7E]= new NotSimulatedRegister("ADC register DIDR0 not simulated");
+    // 0x7D reserved
     rw[0x7C]= & admux.admux_reg;
-
+    rw[0x7B]= new NotSimulatedRegister("ADC register ADCSRB not simulated");
     rw[0x7A]= & ad->adcsr_reg;
     rw[0x79]= & ad->adch_reg;
     rw[0x78]= & ad->adcl_reg;
-
+    // 0x74, 0x75, 0x76, 0x77 reserved
     rw[0x73]= pcmsk3_reg;
-
+    // 0x72 reserved
+    // 0x71 reserved
     rw[0x70]= & timerIrq2->timsk_reg;
     rw[0x6F]= & timerIrq1->timsk_reg;
     rw[0x6E]= & timerIrq0->timsk_reg;
-
     rw[0x6d]= pcmsk2_reg;
     rw[0x6c]= pcmsk1_reg;
     rw[0x6b]= pcmsk0_reg;
-    
+    // 0x6A reserved
     rw[0x69]= eicra_reg;
     rw[0x68]= pcicr_reg;
-
+    // 0x67 reserved
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
-
+    // 0x58 - 0x5E reserved
+    rw[0x57]= new NotSimulatedRegister("Self-programming register SPMCSR not simulated");
+    // 0x56 reserved
+    rw[0x55]= new NotSimulatedRegister("MCU register MCUCR not simulated");
+	rw[0x54]= new NotSimulatedRegister("MCU register MCUSR not simulated");
+    rw[0x53]= new NotSimulatedRegister("MCU register SMCR not simulated");
+	// 0x52 reserved
+	rw[0x51]= new NotSimulatedRegister("On-chip debug register OCDR not simulated");
+    rw[0x50]= new NotSimulatedRegister("ADC register ADCSRA not simulated");
+    // 0x4F reserved
     rw[0x4E]= & spi->spdr_reg;
     rw[0x4D]= & spi->spsr_reg;
     rw[0x4C]= & spi->spcr_reg;
-
+	rw[0x4B]= new NotSimulatedRegister("General purpose register GPIOR2 not simulated");
+	rw[0x4A]= new NotSimulatedRegister("General purpose register GPIOR1 not simulated");
+    // 0x49 reserved
     rw[0x48]= & timer0->ocrb_reg;
     rw[0x47]= & timer0->ocra_reg;
     rw[0x46]= & timer0->tcnt_reg;
@@ -270,27 +291,24 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
     rw[0x41]= & eeprom->eearl_reg;
     rw[0x40]= & eeprom->eedr_reg;
     rw[0x3F]= & eeprom->eecr_reg;
-
+    rw[0x3E]= new NotSimulatedRegister("General purpose register GPIOR1 not simulated");
     rw[0x3D]= eimsk_reg;
     rw[0x3C]= eifr_reg;
     rw[0x3b]= pcifr_reg;
-
+    // 0x38, 0x39, 0x3A reserved
     rw[0x37]= & timerIrq2->tifr_reg;
     rw[0x36]= & timerIrq1->tifr_reg;
     rw[0x35]= & timerIrq0->tifr_reg;
-
+    // 0x2C - 0x34 reserved
     rw[0x2B]= & portd.port_reg;
     rw[0x2A]= & portd.ddr_reg;
     rw[0x29]= & portd.pin_reg;
-
     rw[0x28]= & portc.port_reg;
     rw[0x27]= & portc.ddr_reg;
     rw[0x26]= & portc.pin_reg;
-
     rw[0x25]= & portb.port_reg;
     rw[0x24]= & portb.ddr_reg;
     rw[0x23]= & portb.pin_reg;
-
     rw[0x25]= & porta.port_reg;
     rw[0x24]= & porta.ddr_reg;
     rw[0x23]= & porta.pin_reg;
