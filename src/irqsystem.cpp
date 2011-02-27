@@ -210,6 +210,7 @@ unsigned int HWIrqSystem::GetNewPc(unsigned int &actualVector) {
     for(ii = irqPartnerList.begin(); ii != end; ii++) {
         Hardware* second = ii->second;
         unsigned int index = ii->first;
+        assert(index < vectorTableSize);
 
         if(second->IsLevelInterrupt(index)) {
             second->ClearIrqFlag(index);
@@ -230,6 +231,7 @@ unsigned int HWIrqSystem::GetNewPc(unsigned int &actualVector) {
 }
 
 void HWIrqSystem::SetIrqFlag(Hardware *hwp, unsigned int vector) {
+    assert(vector < vectorTableSize);
     irqPartnerList[vector]=hwp;
     if (core->trace_on) {
         traceOut << core->GetFname() << " interrupt on index " << vector << " is pending" << endl;
@@ -238,7 +240,6 @@ void HWIrqSystem::SetIrqFlag(Hardware *hwp, unsigned int vector) {
     if ( irqStatistic.entries[vector].actual.flagSet==0) { //the actual entry was not used before... fine!
         irqStatistic.entries[vector].actual.flagSet=SystemClock::Instance().GetCurrentTime();
     } 
-
 }
 
 void HWIrqSystem::ClearIrqFlag(unsigned int vector) {
