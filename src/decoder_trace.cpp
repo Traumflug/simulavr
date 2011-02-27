@@ -38,6 +38,24 @@
 
 using namespace std;
 
+/// Calculate index from mask so that (1<<index)==mask. Crash on incorrect values.
+#define INDEX_FROM_BITMASK(mask)  \
+    ( (mask) == 0x01 ? 0          \
+    : (mask) == 0x02 ? 1          \
+    : (mask) == 0x04 ? 2          \
+    : (mask) == 0x08 ? 3          \
+    : (mask) == 0x10 ? 4          \
+    : (mask) == 0x20 ? 5          \
+    : (mask) == 0x40 ? 6          \
+    : (mask) == 0x80 ? 7          \
+	: abort_in_expression() )
+
+int abort_in_expression()
+{
+    abort();
+    return 0;
+}
+
 int avr_op_ADC::Trace()  {
     traceOut << "ADC R" << (int)R1 << ", R" << (int)R2 << " ";
     int ret = this->operator()();
@@ -116,7 +134,8 @@ const char *branch_opcodes_clear[8] = {
 };
 
 int avr_op_BRBC::Trace() {
-    traceOut << branch_opcodes_clear[bitmask] << " ->" << HexShort(offset * 2) << " ";
+    traceOut << branch_opcodes_clear[INDEX_FROM_BITMASK(bitmask)]
+             << " ->" << HexShort(offset * 2) << " ";
     unsigned int oldPC = core->PC;
     int ret = this->operator()();
     
@@ -142,7 +161,8 @@ const char *branch_opcodes_set[8] = {
 };
 
 int avr_op_BRBS::Trace() {
-    traceOut << branch_opcodes_set[bitmask] << " ->" << HexShort(offset * 2) << " ";
+    traceOut << branch_opcodes_set[INDEX_FROM_BITMASK(bitmask)]
+             << " ->" << HexShort(offset * 2) << " ";
     unsigned int oldPC = core->PC;
     int ret=this->operator()();
 
