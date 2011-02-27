@@ -193,6 +193,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\atmega1284abase.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\atmega16_32.h"
 				>
 			</File>
@@ -506,6 +510,10 @@
 			</File>
 			<File
 				RelativePath=".\src\atmega128.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\atmega1284abase.cpp"
 				>
 			</File>
 			<File
