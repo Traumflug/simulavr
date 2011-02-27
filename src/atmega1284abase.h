@@ -73,6 +73,9 @@ protected:
     HWTimer16_2C3*      timer1;      //!< timer 1 unit
     TimerIRQRegister*   timerIrq2;   //!< timer interrupt unit for timer 2
     HWTimer8_2C*        timer2;      //!< timer 2 unit
+    GPIORegister*       gpior0_reg;  //!< general purpose IO register
+    GPIORegister*       gpior1_reg;  //!< general purpose IO register
+    GPIORegister*       gpior2_reg;  //!< general purpose IO register
 
 public:
     AvrDevice_atmega1284Abase(unsigned ram_bytes, unsigned flash_bytes,

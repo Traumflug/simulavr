@@ -40,6 +40,9 @@ AvrDevice_atmega668base::~AvrDevice_atmega668base() {
     delete wado;
     delete spi;
     delete ad;
+    delete gpior2_reg;
+    delete gpior1_reg;
+    delete gpior0_reg;
     delete timer2;
     delete timerIrq2;
     delete timer1;
@@ -162,6 +165,10 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
                              timerIrq2->getLine("OCF2B"),
                              new PinAtPort(&portd, 3));
 
+    gpior0_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR0");
+    gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
+    gpior2_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR2");
+
     ad = new HWAd(this, &admux, irqSystem, aref, 21);
     spi = new HWSpi(this,
                     irqSystem,
@@ -265,8 +272,8 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x4E]= & spi->spdr_reg;
     rw[0x4D]= & spi->spsr_reg;
     rw[0x4C]= & spi->spcr_reg;
-    rw[0x4B]= new NotSimulatedRegister("General purpose register GPIOR2 not simulated");
-    rw[0x4A]= new NotSimulatedRegister("General purpose register GPIOR1 not simulated");
+    rw[0x4B]= gpior2_reg;
+    rw[0x4A]= gpior1_reg;
     // 0x49 reserved
     rw[0x48]= & timer0->ocrb_reg;
     rw[0x47]= & timer0->ocra_reg;
@@ -278,7 +285,7 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x41]= & eeprom->eearl_reg;
     rw[0x40]= & eeprom->eedr_reg;
     rw[0x3F]= & eeprom->eecr_reg;
-    rw[0x3E]= new NotSimulatedRegister("General purpose register GPIOR1 not simulated");
+    rw[0x3E]= gpior0_reg;
     rw[0x3D]= eimsk_reg;
     rw[0x3C]= eifr_reg;
     rw[0x3b]= pcifr_reg;
