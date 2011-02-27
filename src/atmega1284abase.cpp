@@ -20,7 +20,7 @@
  *
  ****************************************************************************
  */
-#include "atmega668base.h"
+#include "atmega1284abase.h"
 
 #include "irqsystem.h"
 #include "hwstack.h"
@@ -30,12 +30,13 @@
 #include "avrerror.h"
 #include "avrfactory.h"
 
-AVR_REGISTER(atmega48, AvrDevice_atmega48);
-AVR_REGISTER(atmega88, AvrDevice_atmega88);
-AVR_REGISTER(atmega168, AvrDevice_atmega168);
-AVR_REGISTER(atmega328, AvrDevice_atmega328);
+AVR_REGISTER(atmega164A, AvrDevice_atmega164A);
+AVR_REGISTER(atmega324A, AvrDevice_atmega324A);
+AVR_REGISTER(atmega644A, AvrDevice_atmega644A);
+AVR_REGISTER(atmega1284A, AvrDevice_atmega1284A);
 
-AvrDevice_atmega668base::~AvrDevice_atmega668base() {
+AvrDevice_atmega1284Abase::~AvrDevice_atmega1284Abase() {
+    delete usart1;
     delete usart0;
     delete wado;
     delete spi;
@@ -48,12 +49,13 @@ AvrDevice_atmega668base::~AvrDevice_atmega668base() {
     delete timer0;
     delete timerIrq0;
     delete extirqpc;
+    delete pcmsk3_reg;
     delete pcmsk2_reg;
     delete pcmsk1_reg;
     delete pcmsk0_reg;
     delete pcifr_reg;
     delete pcicr_reg;
-    delete extirq01;
+    delete extirq012;
     delete eifr_reg;
     delete eimsk_reg;
     delete eicra_reg;
@@ -62,7 +64,7 @@ AvrDevice_atmega668base::~AvrDevice_atmega668base() {
     delete irqSystem;
 }
 
-AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
+AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
                                                      unsigned flash_bytes,
                                                      unsigned ee_bytes ):
     AvrDevice(256-32,       // I/O space size (above ALU registers)
@@ -70,71 +72,70 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
               0,            // External RAM size
               flash_bytes), // Flash Size
     aref(),
-    adc6(),
-    adc7(),
+    porta(this, "A", true),
     portb(this, "B", true),
-    portc(this, "C", true, 7),
+    portc(this, "C", true),
     portd(this, "D", true),
     assr_reg(&coreTraceGroup, "ASSR"),
     gtccr_reg(&coreTraceGroup, "GTCCR"),
     prescaler01(this, "01", &gtccr_reg, 0, 7),
     prescaler2(this, "2", PinAtPort(&portb, 6), &assr_reg, 5, &gtccr_reg, 1, 7),
     admux(this,
-          &portc.GetPin(0),
-          &portc.GetPin(1),
-          &portc.GetPin(2),
-          &portc.GetPin(3),
-          &portc.GetPin(4),
-          &portc.GetPin(5),
-          &adc6,
-          &adc7)
+          &porta.GetPin(0),
+          &porta.GetPin(1),
+          &porta.GetPin(2),
+          &porta.GetPin(3),
+          &porta.GetPin(4),
+          &porta.GetPin(5),
+          &porta.GetPin(6),
+          &porta.GetPin(7)) // TODO: Differential inputs, 1.1V ref, GND input
 { 
-    flagJMPInstructions = (flash_bytes > 8U * 1024U) ? true : false;
-    irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 26);
+    irqSystem = new HWIrqSystem(this, 4, 31);
 
-    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 23, HWEeprom::DEVMODE_EXTENDED); 
+    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 25, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 16);
 
     RegisterPin("AREF", &aref);
-    RegisterPin("ADC6", &adc6);
-    RegisterPin("ADC7", &adc7);
 
     eicra_reg = new IOSpecialReg(&coreTraceGroup, "EICRA");
     eimsk_reg = new IOSpecialReg(&coreTraceGroup, "EIMSK");
     eifr_reg = new IOSpecialReg(&coreTraceGroup, "EIFR");
-    extirq01 = new ExternalIRQHandler(this, irqSystem, eimsk_reg, eifr_reg);
-    extirq01->registerIrq(1, 0, new ExternalIRQSingle(eicra_reg, 0, 2, GetPin("D2")));
-    extirq01->registerIrq(2, 1, new ExternalIRQSingle(eicra_reg, 2, 2, GetPin("D3")));
+    extirq012 = new ExternalIRQHandler(this, irqSystem, eimsk_reg, eifr_reg);
+    extirq012->registerIrq(1, 0, new ExternalIRQSingle(eicra_reg, 0, 2, GetPin("D2")));
+    extirq012->registerIrq(2, 1, new ExternalIRQSingle(eicra_reg, 2, 2, GetPin("D3")));
+    extirq012->registerIrq(3, 2, new ExternalIRQSingle(eicra_reg, 4, 2, GetPin("B2")));
 
     pcicr_reg = new IOSpecialReg(&coreTraceGroup, "PCICR");
     pcifr_reg = new IOSpecialReg(&coreTraceGroup, "PCIFR");
     pcmsk0_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK0");
     pcmsk1_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK1");
     pcmsk2_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK2");
+    pcmsk3_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK3");
     extirqpc = new ExternalIRQHandler(this, irqSystem, pcicr_reg, pcifr_reg);
-    extirqpc->registerIrq(3, 0, new ExternalIRQPort(pcmsk0_reg, &portb));
-    extirqpc->registerIrq(4, 1, new ExternalIRQPort(pcmsk1_reg, &portc));
-    extirqpc->registerIrq(5, 2, new ExternalIRQPort(pcmsk2_reg, &portd));
+    extirqpc->registerIrq(4, 0, new ExternalIRQPort(pcmsk0_reg, &porta));
+    extirqpc->registerIrq(5, 1, new ExternalIRQPort(pcmsk1_reg, &portb));
+    extirqpc->registerIrq(6, 2, new ExternalIRQPort(pcmsk2_reg, &portc));
+    extirqpc->registerIrq(7, 3, new ExternalIRQPort(pcmsk3_reg, &portd));
 
     timerIrq0 = new TimerIRQRegister(this, irqSystem, 0);
-    timerIrq0->registerLine(0, new IRQLine("TOV0",  16));
-    timerIrq0->registerLine(1, new IRQLine("OCF0A", 14));
-    timerIrq0->registerLine(2, new IRQLine("OCF0B", 15));
+    timerIrq0->registerLine(0, new IRQLine("TOV0",  18));
+    timerIrq0->registerLine(1, new IRQLine("OCF0A", 16));
+    timerIrq0->registerLine(2, new IRQLine("OCF0B", 17));
 
     timer0 = new HWTimer8_2C(this,
                              new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 4)),
                              0,
                              timerIrq0->getLine("TOV0"),
                              timerIrq0->getLine("OCF0A"),
-                             new PinAtPort(&portd, 6),
+                             new PinAtPort(&portb, 3),
                              timerIrq0->getLine("OCF0B"),
-                             new PinAtPort(&portd, 5));
+                             new PinAtPort(&portb, 4));
 
     timerIrq1 = new TimerIRQRegister(this, irqSystem, 1);
-    timerIrq1->registerLine(0, new IRQLine("TOV1",  13));
-    timerIrq1->registerLine(1, new IRQLine("OCF1A", 11));
-    timerIrq1->registerLine(2, new IRQLine("OCF1B", 12));
-    timerIrq1->registerLine(5, new IRQLine("ICF1",  10));
+    timerIrq1->registerLine(0, new IRQLine("TOV1",  15));
+    timerIrq1->registerLine(1, new IRQLine("OCF1A", 13));
+    timerIrq1->registerLine(2, new IRQLine("OCF1B", 14));
+    timerIrq1->registerLine(5, new IRQLine("ICF1",  12));
 
     inputCapture1 = new ICaptureSource(PinAtPort(&portb, 0));
     timer1 = new HWTimer16_2C3(this,
@@ -142,57 +143,74 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
                                1,
                                timerIrq1->getLine("TOV1"),
                                timerIrq1->getLine("OCF1A"),
-                               new PinAtPort(&portb, 1),
+                               new PinAtPort(&portd, 5),
                                timerIrq1->getLine("OCF1B"),
-                               new PinAtPort(&portb, 2),
+                               new PinAtPort(&portd, 4),
                                timerIrq1->getLine("ICF1"),
                                inputCapture1);
 
     timerIrq2 = new TimerIRQRegister(this, irqSystem, 2);
-    timerIrq2->registerLine(0, new IRQLine("TOV2",  9));
-    timerIrq2->registerLine(1, new IRQLine("OCF2A", 7));
-    timerIrq2->registerLine(2, new IRQLine("OCF2B", 8));
+    timerIrq2->registerLine(0, new IRQLine("TOV2",  11));
+    timerIrq2->registerLine(1, new IRQLine("OCF2A", 9));
+    timerIrq2->registerLine(2, new IRQLine("OCF2B", 10));
 
     timer2 = new HWTimer8_2C(this,
                              new PrescalerMultiplexer(&prescaler2),
                              2,
                              timerIrq2->getLine("TOV2"),
                              timerIrq2->getLine("OCF2A"),
-                             new PinAtPort(&portb, 3),
+                             new PinAtPort(&portd, 7),
                              timerIrq2->getLine("OCF2B"),
-                             new PinAtPort(&portd, 3));
+                             new PinAtPort(&portd, 6));
 
-    ad = new HWAd(this, &admux, irqSystem, aref, 21);
+    ad = new HWAd(this, &admux, irqSystem, aref, 24);
     spi = new HWSpi(this,
                     irqSystem,
-                    PinAtPort(&portb, 3),   // MOSI
-                    PinAtPort(&portb, 4),   // MISO
-                    PinAtPort(&portb, 5),   // SCK
-                    PinAtPort(&portb, 2),   // /SS
-                    17,                     // irqvec
+                    PinAtPort(&portb, 5),   // MOSI
+                    PinAtPort(&portb, 6),   // MISO
+                    PinAtPort(&portb, 7),   // SCK
+                    PinAtPort(&portb, 4),   // /SS
+                    19,                     // irqvec
                     true);
     
     wado = new HWWado(this);
 
     usart0 = new HWUsart(this,
                          irqSystem,
-                         PinAtPort(&portd, 1),    // TXD
-                         PinAtPort(&portd, 0),    // RXD
-                         PinAtPort(&portd, 4),    // XCK
-                         19,   // (18) RX complete vector
-                         20,   // (19) UDRE vector
-                         21);  // (20) TX complete vector
+                         PinAtPort(&portd, 1),    // TXD0
+                         PinAtPort(&portd, 0),    // RXD0
+                         PinAtPort(&portb, 0),    // XCK0
+                         20,   // (21) RX complete vector
+                         21,   // (22) UDRE vector
+                         22);  // (23) TX complete vector
 
-    rw[0xE6]= & usart0->udr_reg;
+    usart1 = new HWUsart(this,
+                         irqSystem,
+                         PinAtPort(&portd, 3),    // TXD1
+                         PinAtPort(&portd, 2),    // RXD1
+                         PinAtPort(&portd, 4),    // XCK1
+                         28,   // (29) RX complete vector
+                         29,   // (30) UDRE vector
+                         30,   // (31) TX complete vector
+                         1);   // instance_id for tracking in UI
 
-    rw[0xE4]= & usart0->ubrr_reg;
+    // 0xCF - 0xFF reserved
 
-    rw[0xE1]= & usart0->ucsrb_reg;
-    rw[0xE0]= & usart0->ucsra_reg;
+	rw[0xCE]= & usart0->udr_reg;
+	rw[0xCD]= & usart0->ubrrhi_reg;
+	rw[0xCC]= & usart0->ubrr_reg;
+	// 0xCB reserved
+	rw[0xCA]= & usart0->ucsrc_reg;
+	rw[0xC9]= & usart0->ucsrb_reg;
+	rw[0xC8]= & usart0->ucsra_reg;
 
+    rw[0xC6]= & usart0->udr_reg;
     rw[0xC5]= & usart0->ubrrhi_reg;
-
+    rw[0xC4]= & usart0->ubrr_reg;
+    // 0xC3 reserved
     rw[0xC2]= & usart0->ucsrc_reg;
+	rw[0xC1]= & usart0->ucsrb_reg;
+	rw[0xC0]= & usart0->ucsra_reg;
 
     rw[0xb6]= & assr_reg;
     // 0xb5 reserved
@@ -220,6 +238,8 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x7A]= & ad->adcsr_reg;
     rw[0x79]= & ad->adch_reg;
     rw[0x78]= & ad->adcl_reg;
+
+    rw[0x73]= pcmsk3_reg;
 
     rw[0x70]= & timerIrq2->timsk_reg;
     rw[0x6F]= & timerIrq1->timsk_reg;
@@ -270,6 +290,10 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x25]= & portb.port_reg;
     rw[0x24]= & portb.ddr_reg;
     rw[0x23]= & portb.pin_reg;
+
+    rw[0x25]= & porta.port_reg;
+    rw[0x24]= & porta.ddr_reg;
+    rw[0x23]= & porta.pin_reg;
 
     Reset();
 }

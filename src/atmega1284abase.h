@@ -34,16 +34,15 @@
 #include "hwtimer/timerprescaler.h"
 #include "hwtimer/hwtimer.h"
 
-/*! AVRDevice class for ATMega48/88/168/328
-  \todo This device isn't completely implemented. There is no
-  boot loader section support for >= ATMega88, only normal interrupt vector
-  start address supported, incomplete usart registers (and maybe more ...) */
-class AvrDevice_atmega668base: public AvrDevice {
+/*! AvrDevice class for ATmega164A/164PA/324A/324PA/644A/644PA/1284/1284P.
+The only difference of ATmega164PA/324PA/644PA/1284P flavor is it has
+a BODS bit in MCUCR. (We do not simulate the register anyway.)
+\todo This device isn't completely implemented. */
+class AvrDevice_atmega1284Abase: public AvrDevice {
 
 protected:
     Pin                 aref;        //!< analog reference pin
-    Pin                 adc6;        //!< adc channel 6 input pin
-    Pin                 adc7;        //!< adc channel 7 input pin
+    HWPort              porta;       //!< port A
     HWPort              portb;       //!< port B
     HWPort              portc;       //!< port C
     HWPort              portd;       //!< port D
@@ -51,7 +50,7 @@ protected:
     IOSpecialReg        assr_reg;    //!< ASSR IO register
     HWPrescaler         prescaler01; //!< prescaler unit for timer 0 and 1
     HWPrescalerAsync    prescaler2;  //!< prescaler unit for timer 2
-    ExternalIRQHandler* extirq01;    //!< external interrupt support for INT0, INT1
+    ExternalIRQHandler* extirq012;   //!< external interrupt support for INT0, INT1, INT2
     IOSpecialReg*       eicra_reg;   //!< EICRA IO register
     IOSpecialReg*       eimsk_reg;   //!< EIMSK IO register
     IOSpecialReg*       eifr_reg;    //!< EIFR IO register
@@ -61,10 +60,12 @@ protected:
     IOSpecialReg*       pcmsk0_reg;  //!< PCIMSK0 IO register
     IOSpecialReg*       pcmsk1_reg;  //!< PCIMSK1 IO register
     IOSpecialReg*       pcmsk2_reg;  //!< PCIMSK2 IO register
+    IOSpecialReg*       pcmsk3_reg;  //!< PCIMSK3 IO register
     HWAdmux             admux;       //!< adc multiplexer unit
     HWAd*               ad;          //!< adc unit
     HWSpi*              spi;         //!< spi unit
     HWUsart*            usart0;      //!< usart 0 unit
+    HWUsart*            usart1;      //!< usart 1 unit
     TimerIRQRegister*   timerIrq0;   //!< timer interrupt unit for timer 0
     HWTimer8_2C*        timer0;      //!< timer 0 unit
     ICaptureSource*     inputCapture1; //!< input capture source for timer1
@@ -74,29 +75,29 @@ protected:
     HWTimer8_2C*        timer2;      //!< timer 2 unit
 
 public:
-    AvrDevice_atmega668base(unsigned ram_bytes, unsigned flash_bytes,
+    AvrDevice_atmega1284Abase(unsigned ram_bytes, unsigned flash_bytes,
                               unsigned ee_bytes );
-    ~AvrDevice_atmega668base();
+    ~AvrDevice_atmega1284Abase();
 };
 
-class AvrDevice_atmega328: public AvrDevice_atmega668base {
+class AvrDevice_atmega1284A: public AvrDevice_atmega1284Abase {
 public:
-    AvrDevice_atmega328() : AvrDevice_atmega668base(2 * 1024, 32 * 1024, 1024) {}
+    AvrDevice_atmega1284A() : AvrDevice_atmega1284Abase(16 * 1024, 128 * 1024, 4 * 1024) {}
 };
 
-class AvrDevice_atmega168: public AvrDevice_atmega668base {
+class AvrDevice_atmega644A: public AvrDevice_atmega1284Abase {
 public:
-    AvrDevice_atmega168() : AvrDevice_atmega668base(1024, 16 * 1024, 512) {}
+    AvrDevice_atmega644A() : AvrDevice_atmega1284Abase(4 * 1024, 64 * 1024, 2 * 1024) {}
 };
 
-class AvrDevice_atmega88:public AvrDevice_atmega668base {
+class AvrDevice_atmega324A: public AvrDevice_atmega1284Abase {
 public:
-    AvrDevice_atmega88() : AvrDevice_atmega668base(1024, 8 * 1024, 512) {}
+    AvrDevice_atmega324A() : AvrDevice_atmega1284Abase(2 * 1024, 32 * 1024, 1 * 1024) {}
 };
 
-class AvrDevice_atmega48:public AvrDevice_atmega668base {
+class AvrDevice_atmega164A: public AvrDevice_atmega1284Abase {
 public:
-    AvrDevice_atmega48() : AvrDevice_atmega668base(512, 4 * 1024, 256) {}
+    AvrDevice_atmega164A() : AvrDevice_atmega1284Abase(1 * 1024, 16 * 1024,    512  ) {}
 };
 
 #endif
