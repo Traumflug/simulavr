@@ -128,6 +128,20 @@ void InvalidMem::set(unsigned char c) {
     avr_warning(s.c_str());
 }
 
+NotSimulatedRegister::NotSimulatedRegister(const char * message_on_access_)
+    : message_on_access(message_on_access_)  {}
+
+unsigned char NotSimulatedRegister::get() const {
+    avr_warning(message_on_access);
+    return 0;
+}
+
+void NotSimulatedRegister::set(unsigned char c) {
+    avr_warning(message_on_access);
+}
+
+
+
 IOSpecialReg::IOSpecialReg(TraceValueRegister *registry, const std::string &name):
     RWMemoryMember(registry, name)
 {

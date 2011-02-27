@@ -139,6 +139,20 @@ class InvalidMem : public RWMemoryMember {
         void set(unsigned char);
 };
 
+//! An IO register which is not simulated because programmers are lazy.
+/*! Reads and writes are ignored and produce warning. */
+class NotSimulatedRegister : public RWMemoryMember {
+    private:
+        const char * message_on_access;
+
+    public:
+        NotSimulatedRegister(const char * message_on_access);
+
+    protected:
+        unsigned char get() const;
+        void set(unsigned char);
+};
+
 //! Memory blocks of RWMemoryMembers
 /*! Memory offsets are used to represent a given memory area
   inside a block of RWMemoryMember objects. Used for RAM blocks and
