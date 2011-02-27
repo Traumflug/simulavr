@@ -183,16 +183,17 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
                          20,   // (19) UDRE vector
                          21);  // (20) TX complete vector
 
-    rw[0xE6]= & usart0->udr_reg;
-
-    rw[0xE4]= & usart0->ubrr_reg;
-
-    rw[0xE1]= & usart0->ucsrb_reg;
-    rw[0xE0]= & usart0->ucsra_reg;
-
+    rw[0xE6]= new NotSimulatedRegister("UDR0 register is placed 0xC6!");
+    rw[0xE4]= new NotSimulatedRegister("UBRR0L register is placed 0xC4!");
+    rw[0xE1]= new NotSimulatedRegister("UCSR0B register is placed 0xC1!");
+    rw[0xE1]= new NotSimulatedRegister("UCSR0A register is placed 0xC0!");
+    rw[0xC6]= & usart0->udr_reg;
     rw[0xC5]= & usart0->ubrrhi_reg;
-
+    rw[0xC4]= & usart0->ubrr_reg;
+    // 0xC3 reserved
     rw[0xC2]= & usart0->ucsrc_reg;
+    rw[0xC1]= & usart0->ucsrb_reg;
+    rw[0xC0]= & usart0->ucsra_reg;
 
     rw[0xb6]= & assr_reg;
     // 0xb5 reserved
