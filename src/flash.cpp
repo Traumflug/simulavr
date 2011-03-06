@@ -64,6 +64,7 @@ AvrFlash::~AvrFlash() {
 void AvrFlash::WriteMem(unsigned char *src, unsigned int offset, unsigned int secSize) {
     for(unsigned tt = 0; tt < secSize; tt += 2) { 
         if(tt + offset < size) {
+            assert(tt+offset+1<size);
 #ifndef WORDS_BIGENDIAN
             *(myMemory + tt + offset) = src[tt + 1];
             *(myMemory + tt + 1 + offset) = src[tt];
@@ -112,11 +113,10 @@ void AvrFlash::Decode(unsigned int offset, int secSize) {
 }
 
 void AvrFlash::Decode(unsigned int addr) {
-    unsigned int index = addr >> 1;
-    addr &= ~1;
-    
+    assert(0 <= addr && (unsigned)addr < size);
+    assert((addr % 2) == 0);
     word opcode = (myMemory[addr] << 8) + myMemory[addr + 1];
-
+    unsigned int index = addr / 2;
     if(DecodedMem[index] != NULL)
         delete DecodedMem[index];                     //delete old Instruction here 
     DecodedMem[index] = lookup_opcode(opcode, core);  //and set new one
