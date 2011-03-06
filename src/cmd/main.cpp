@@ -95,6 +95,7 @@ const char Usage[] =
     "-d --device <name>    simulate device <name> \n"
     "-g --gdbserver        listen for GDB connection on TCP port defined by -p\n"
     "-G                    listen for GDB connection and write debug info\n"
+    "   --gdb-stdin        for use with GDB as 'target remote | ./simulavr'"
     "-m  <nanoseconds>     maximum run time of <nanoseconds>\n"
     "-M                    disable messages for bad I/O and memory references\n"
     "-p  <port>            use <port> for gdb server\n"
@@ -159,7 +160,6 @@ int main(int argc, char *argv[]) {
     while (1) {
         //int this_option_optind = optind ? optind : 1;
         int option_index = 0;
-        char *dummy;
         static struct option long_options[] = {
             {"file", 1, 0, 'f'},
             {"device", 1, 0, 'd'},
@@ -344,7 +344,7 @@ int main(int argc, char *argv[]) {
     SetDumpTraceArgs(tracer_opts, dev1);
     
     if(!gdbserver_flag && filename == "unknown") {
-        cerr << "No executable file specified" << endl;
+        cerr << "Specify either --file <executable> or --gdbserver" << endl;
         exit(1);
     }
     
@@ -410,7 +410,8 @@ int main(int argc, char *argv[]) {
             SystemClock::Instance().Run(maxRunTime);
         }
     } else { // gdb should be activated
-        cout << "Going to gdb..." << endl;
+        if(global_verbose_on)
+            cout << "Going to gdb..." << endl;
         GdbServer gdb1(dev1, global_gdbserver_port, global_gdb_debug, globalWaitForGdbConnection);
         SystemClock::Instance().Add(&gdb1);
         SystemClock::Instance().Endless();
