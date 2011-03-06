@@ -162,8 +162,8 @@ class avr_op_ANDI: public DecodedInstruction
 
     protected:
         unsigned char R1;
-        HWSreg *status;
         unsigned char K;
+        HWSreg *status;
 
     public:
         avr_op_ANDI(word opcode, AvrDevice *c);
@@ -330,8 +330,8 @@ class avr_op_BST: public DecodedInstruction
 
     protected:
         unsigned char R1;
-        HWSreg *status;
         unsigned char Kbit;
+        HWSreg *status;
 
     public:
         avr_op_BST(word opcode, AvrDevice *c);
@@ -375,8 +375,8 @@ class avr_op_CBI: public DecodedInstruction
 
     protected:
         unsigned char ioreg;
-        HWSreg *status;
         unsigned char Kbit;
+        HWSreg *status;
 
     public:
         avr_op_CBI(word opcode, AvrDevice *c);
@@ -466,8 +466,8 @@ class avr_op_CPI: public DecodedInstruction
 
     protected:
         unsigned char R1;
-        HWSreg *status;
         unsigned char K;
+        HWSreg *status;
 
     public:
         avr_op_CPI(word opcode, AvrDevice *c);
@@ -1342,8 +1342,8 @@ class avr_op_ORI: public DecodedInstruction
 
     protected:
         unsigned char R1;
-        HWSreg *status;
         unsigned char K;
+        HWSreg *status;
 
     public:
         avr_op_ORI(word opcode, AvrDevice *c);
@@ -1555,8 +1555,8 @@ class avr_op_SBCI: public DecodedInstruction
 
     protected:
         unsigned char R1;
-        HWSreg *status;
         unsigned char K;
+        HWSreg *status;
 
     public:
         avr_op_SBCI(word opcode, AvrDevice *c);
@@ -1644,8 +1644,8 @@ class avr_op_SBIW: public DecodedInstruction
 
     protected:
         unsigned char R1;
-        HWSreg *status;
         unsigned char K;
+        HWSreg *status;
 
     public:
         avr_op_SBIW(word opcode, AvrDevice *c);
