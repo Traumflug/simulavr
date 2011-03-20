@@ -20,6 +20,8 @@ libtool
 ltmain.sh
 missing
 py-compile
+simulavr.ncb
+simulavr.sdf
 .project
 .cproject
 .pydevproject
