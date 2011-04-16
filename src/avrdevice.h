@@ -77,6 +77,7 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         int noDirectIrqJump;
         
     public:
+        int trace_on;
         Breakpoints BP;
         Exitpoints EP;
         word PC;

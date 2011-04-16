@@ -45,7 +45,11 @@ SystemClock::SystemClock() {
 void SystemClock::SetTraceModeForAllMembers(int trace_on) {
     iterator mi;
     for(mi = begin(); mi != end(); mi++)
-        mi->second->trace_on = trace_on;
+    {
+        AvrDevice* core = dynamic_cast<AvrDevice*>( mi->second );
+        if(core != NULL)
+            core->trace_on = trace_on;
+    }
 } 
 
 
@@ -73,9 +77,6 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
         core = begin()->second;
         currentTime = begin()->first; 
         erase(begin());
-        
-        if(core->trace_on)
-            traceOut << DecLong(currentTime) << " ";
         
         // do a step on simulation member
         res = core->Step(untilCoreStepFinished, &nextStepIn_ns);
