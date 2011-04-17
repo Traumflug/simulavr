@@ -23,8 +23,8 @@
  *  $Id$
  */
 
-#ifndef FLASH
-#define FLASH
+#ifndef FLASH_H_INCLUDED
+#define FLASH_H_INCLUDED
 #include <string>
 #include <map>
 #include <vector>
@@ -34,13 +34,13 @@
 
 class DecodedInstruction;
 
-//! Hold AVR flash content and symbol informations.
+//! Holds AVR flash content and symbol informations.
 class AvrFlash: public Memory {
   
     protected:
-        AvrDevice *core; //!< ptr to connected device core
-        std::vector <DecodedInstruction*> DecodedMem; //!< list of decoded ops
-        unsigned int rww_lock; //!< RWW flash lock address, the area below is locked
+        AvrDevice *core;
+        std::vector <DecodedInstruction*> DecodedMem;
+        unsigned int rww_lock; //!< When Flash write is in progress then addresses below this are inaccesible, otherwise 0.
         bool flashLoaded; //!< Flag, true if there was a write to Flash after constructor call (program load)
         
         friend int avr_op_CPSE::operator()();
@@ -48,26 +48,21 @@ class AvrFlash: public Memory {
         friend int avr_op_SBIS::operator()();
         friend int avr_op_SBRC::operator()();
         friend int avr_op_SBRS::operator()();
-        friend int AvrDevice::Step(bool &, SystemClockOffset *);
 
     public:
       
-        /*! Creates the AVR Flash block.
-          @param c pointer to connected device
-          @param size the memory block size */
         AvrFlash(AvrDevice *c, int size);
         ~AvrFlash();
         
-        void Decode(); /*!< Decode complete memory block */
+        void Decode(); /*!< Decode/create all instructions */
         
-        /*! Decode only operation at address
-          @param addr address, where operation have to be decoded */
+        /*! Decode/create instruction at address 'addr'. */
         void Decode(unsigned int addr);
         
         /*! Decode memory block with offset and size
           @param offset data offset in memory block, beginning from start of THIS memory block!
           @param secSize count of available data (bytes) in src */
-        void Decode(unsigned int offset, int secSize);
+        void Decode(unsigned int addr, int secSize);
         
         /*! Write memory data to memory block.
           @param src binary c-string with data to write in
@@ -80,43 +75,30 @@ class AvrFlash: public Memory {
           @param offset data offset in memory block, beginning from start of THIS memory block! */
         void WriteMemByte(unsigned char val, unsigned int offset);
         
-        /*! Return flashLoaded value
-          @return true, if flash was written after initialisation, means program was loaded */
+        /*! True if flash was written, i.e. a program was loaded */
         bool IsProgramLoaded(void) { return flashLoaded; }
         
-        /*! Returns true, if lock is set for address
-          @param addr address to check
-          @return true, if address is locked, false, if not */
+        /*! True if simulated Flash write is in progress and the address is in locked area. */
         bool IsRWWLock(unsigned int addr) { return (addr < rww_lock);}
         
         /*! Sets/Resets RWW lock address
           @param addr address, below flash is locked, 0 to disable lock */
         void SetRWWLock(unsigned int addr) { rww_lock = addr;}
         
-        /*! Returns instruction at address
-          @param pc pc word address
-          @return instruction at pc word address */
+        /*! Returns instruction at pointer PC. Aborts if Flash write is in progress. */
         DecodedInstruction* GetInstruction(unsigned int pc);
         
-        /*! Returns byte at flash address
-          @param offset data offset in memory block, beginning from start of THIS memory block!
-          @return byte at offset */
-        unsigned char ReadMemRaw(unsigned int offset) { return myMemory[offset]; }
+        /*! Returns byte at flash address. Works even during flash writing. */
+        unsigned char ReadMemRaw(unsigned int addr) { return myMemory[addr]; }
         
-        /*! Returns byte at flash address (respects RWW lock)
-          @param offset data offset in memory block, beginning from start of THIS memory block!
-          @return byte at offset */
-        unsigned char ReadMem(unsigned int offset);
+        /*! Returns byte at flash address. Aborts if Flash write is in progress. */
+        unsigned char ReadMem(unsigned int addr);
         
-        /*! Returns word at flash address
-          @param offset data offset in memory block, beginning from start of THIS memory block!
-          @return word at offset */
-        unsigned int ReadMemRawWord(unsigned int offset) { return (myMemory[offset] << 8) + myMemory[offset + 1]; }
+        /*! Returns 16bits at flash address. Works even during flash writing. */
+        unsigned int ReadMemRawWord(unsigned int addr) { return (myMemory[addr] << 8) + myMemory[addr + 1]; }
         
-        /*! Returns word at flash address (respects RWW lock)
-          @param offset data offset in memory block, beginning from start of THIS memory block!
-          @return word at offset */
-        unsigned int ReadMemWord(unsigned int offset);
+        /*! Returns 16bits at flash address. Aborts if Flash write is in progress. */
+        unsigned int ReadMemWord(unsigned int addr);
 };
 
 #endif
