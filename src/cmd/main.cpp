@@ -94,7 +94,7 @@ const char Usage[] =
     "-f --file <name>      load elf-file <name> for simulation in simulated target\n"
     "-d --device <name>    simulate device <name> \n"
     "-g --gdbserver        listen for GDB connection on TCP port defined by -p\n"
-    "-G                    listen for GDB connection and write debug info\n"
+    "-G --gdb-debug        listen for GDB connection and write debug info\n"
     "   --gdb-stdin        for use with GDB as 'target remote | ./simulavr'"
     "-m  <nanoseconds>     maximum run time of <nanoseconds>\n"
     "-M                    disable messages for bad I/O and memory references\n"
@@ -164,6 +164,8 @@ int main(int argc, char *argv[]) {
             {"file", 1, 0, 'f'},
             {"device", 1, 0, 'd'},
             {"gdbserver", 0, 0, 'g'},
+            {"gdb-debug", 0, 0, 'G'},
+            {"debug-gdb", 0, 0, 'G'},
             {"maxruntime", 1, 0, 'm'},
             {"nogdbwait", 0, 0, 'n'},
             {"trace", 1, 0, 't'},
@@ -344,7 +346,7 @@ int main(int argc, char *argv[]) {
     SetDumpTraceArgs(tracer_opts, dev1);
     
     if(!gdbserver_flag && filename == "unknown") {
-        cerr << "Specify either --file <executable> or --gdbserver" << endl;
+        cerr << "Specify either --file <executable> or --gdbserver (or --gdb-stdin)" << endl;
         exit(1);
     }
     
