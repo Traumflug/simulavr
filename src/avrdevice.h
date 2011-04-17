@@ -59,8 +59,8 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
     private:
         RWMemoryMember **invalidRW; //!< hold invalid RW memory cells created by device
         const unsigned int ioSpaceSize;
-        const unsigned int totalIoSpace;
-        const unsigned int registerSpaceSize;
+        static const unsigned int totalIoSpace;
+        static const unsigned int registerSpaceSize;
         const unsigned int iRamSize;
         const unsigned int eRamSize;
         
@@ -68,9 +68,8 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         SystemClockOffset clockFreq;  ///< Period of a tick (1/F_OSC) in [ns]
         std::map < std::string, Pin *> allPins;
         std::string actualFilename;
-        RWMemoryMember **rw; //!< hold the complete space or Data memory included registers
         
-        //old static vars for Step()
+        /// Count of cycles before next instruction is executed (i.e. countdown)
         int cpuCycles;
         unsigned int newIrqPc;
         unsigned int actualIrqVector;
@@ -80,17 +79,14 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         int trace_on;
         Breakpoints BP;
         Exitpoints EP;
-        word PC;
-
-        /*! Current PC value, stays the same for the full time an instruction
-         * is being processed. */
+        word PC;  ///< Next/current instruction index. Multiply by 2 to get an address. This will not be enough for ATmega2560
+        /// When mupti-cycle instruction is "processed" this holds its address, PC holds the next instruction.
         word cPC;
-        
         int PC_size;
         AvrFlash *Flash;
         FlashProgramming * spmRegister;
         HWEeprom *eeprom;
-        Data *data;
+        Data *data;  ///< a hack for symbol look-up
         HWIrqSystem *irqSystem;
         AddressExtensionRegister *rampz; //!< RAMPZ address extension register
         AddressExtensionRegister *eind; //!< EIND address extension register
@@ -112,11 +108,12 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         MemoryOffsets *Sram;
         MemoryOffsets *R;
         MemoryOffsets *ioreg;
+        RWMemoryMember **rw;  ///< The whole memory: R0-R31, IO, Internal RAM.
 
         HWStack *stack;
         HWSreg *status;           //!< the status register itself
         RWSreg *statusRegister;   //!< the memory interface for status
-        HWWado *wado;
+        HWWado *wado;  ///< WDT timer
 
         std::vector<Hardware *> hwResetList; 
         std::vector<Hardware *> hwCycleList; 
@@ -145,10 +142,6 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         void RegisterTerminationSymbol(const char *symbol);
 
         Pin *GetPin(const char *name);
-#ifndef SWIG
-        MemoryOffsets &operator->*(MemoryOffsets *m) { return *m;}
-#endif
-
         /*! Steps the AVR core.
           \param untilCoreStepFinished iff true, steps a core step and not a
           single clock cycle. */

@@ -44,6 +44,9 @@
 
 using namespace std;
 
+const unsigned int AvrDevice::registerSpaceSize = 32;
+const unsigned int AvrDevice::totalIoSpace = 0x10000;
+
 void AvrDevice::AddToResetList(Hardware *hw) {
     if(find(hwResetList.begin(), hwResetList.end(), hw) == hwResetList.end())
         hwResetList.push_back(hw);
@@ -170,8 +173,8 @@ void AvrDevice::Load(const char* fname) {
 }
 #endif
 
-void AvrDevice::SetClockFreq(SystemClockOffset f) {
-    clockFreq=f;
+void AvrDevice::SetClockFreq(SystemClockOffset nanosec) {
+   clockFreq = nanosec;
 }
 
 SystemClockOffset AvrDevice::GetClockFreq() {
@@ -193,7 +196,7 @@ AvrDevice::~AvrDevice() {
     unsigned size = totalIoSpace - registerSpaceSize - iRamSize - eRamSize;
     for(unsigned idx = 0; idx < size; idx++)
         delete invalidRW[idx];
-    avr_free(invalidRW);
+    delete [] invalidRW;
     
     // delete Ram cells and registers
     for(unsigned idx = 0; idx < registerSpaceSize; idx++)
@@ -209,7 +212,7 @@ AvrDevice::~AvrDevice() {
     delete R;
     delete statusRegister;
     delete status;
-    avr_free(rw);
+    delete [] rw;
     delete data;
 }
 
@@ -229,7 +232,7 @@ private:
     TraceValue *ref; // Reference value that will be doubled
 };
 
-    
+
 AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
                      unsigned int IRamSize,
                      unsigned int ERamSize,
@@ -237,8 +240,6 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     TraceValueRegister(),
     coreTraceGroup(this),
     abortOnInvalidAccess(false),
-    totalIoSpace(0x10000),
-    registerSpaceSize(32),
     iRamSize(IRamSize),
     eRamSize(ERamSize),
     ioSpaceSize(_ioSpaceSize),
@@ -267,8 +268,8 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     
     // memory space for all RW-Memory addresses + shadow store for invalid cells
     unsigned invalidSize = totalIoSpace - registerSpaceSize - IRamSize - ERamSize; 
-    rw = (RWMemoryMember**)avr_malloc(sizeof(RWMemoryMember*) * totalIoSpace);
-    invalidRW = (RWMemoryMember**)avr_malloc(sizeof(RWMemoryMember*) * invalidSize);
+    rw = new RWMemoryMember* [totalIoSpace];
+    invalidRW = new RWMemoryMember* [invalidSize];
     
     // the status register is generic to all devices
     status = new HWSreg();
@@ -351,7 +352,6 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
             avr_error("Not enough memory for fill address space in AvrDevice::AvrDevice");
         rw[currentOffset] = invalidRW[invalidRWOffset];
     }
-
 }
 
 //do a single core step, (0)->a real hardware step, (1) until the uC finish the opcode! 
@@ -550,34 +550,29 @@ bool AvrDevice::SetRWMem(unsigned addr, unsigned char val) {
 }
 
 unsigned char AvrDevice::GetCoreReg(unsigned addr) {
-    if(addr >= registerSpaceSize)
-        return 0;
+    assert(addr < registerSpaceSize);
     return *(rw[addr]);
 }
 
 bool AvrDevice::SetCoreReg(unsigned addr, unsigned char val) {
-    if(addr >= registerSpaceSize)
-        return false;
+    assert(addr < registerSpaceSize);
     *(rw[addr]) = val;
     return true;
 }
 
 unsigned char AvrDevice::GetIOReg(unsigned addr) {
-    if(addr >= ioSpaceSize)
-        return 0;
+    assert(addr < ioSpaceSize);  // callers do use 0x00 base, not 0x20
     return *(rw[addr + registerSpaceSize]);
 }
 
 bool AvrDevice::SetIOReg(unsigned addr, unsigned char val) {
-    if(addr >= ioSpaceSize)
-        return false;
+    assert(addr < ioSpaceSize);  // callers do use 0x00 base, not 0x20
     *(rw[addr + registerSpaceSize]) = val;
     return true;
 }
 
 bool AvrDevice::SetIORegBit(unsigned addr, unsigned bitaddr, bool bval) {
-    if(addr >= 0x20)
-        return false;
+    assert(addr < 0x20);  // only first 32 IO registers are bit-settable
     unsigned char val = *(rw[addr + registerSpaceSize]);
     if(bval)
       val |= 1 << bitaddr;
