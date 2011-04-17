@@ -737,8 +737,8 @@ avr_op_JMP::avr_op_JMP(word opcode, AvrDevice *c):
     K(get_k_22(opcode)) {}
 
 int avr_op_JMP::operator()() {
-    word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);
-    core->PC = K + offset - 1;
+    word K_lsb = core->Flash->ReadMemWord((core->PC + 1) * 2);
+    core->PC = (K << 16) + K_lsb - 1;
     return 3;
 }
 
@@ -1822,7 +1822,7 @@ static int get_k_12( word opcode )
 
 static int get_k_22( word opcode )
 {
-    /* Masks only the upper 6 bits of the address, the other 16 bits
+    /* Masks only the upper 6 bits of the address, the lower 16 bits
      * are in PC + 1.
      * Examples: "JMP  0xFFFF", "JMP  0x10FF" -> both have opcode: 0x940c
      * Examples: "JMP 0x1FFFF", "JMP 0x110FF" -> both have opcode: 0x940d
