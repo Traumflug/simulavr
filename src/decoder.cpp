@@ -988,8 +988,7 @@ int avr_op_MOV::operator()() {
 avr_op_MOVW::avr_op_MOVW(word opcode, AvrDevice *c):
     DecodedInstruction(c),
     Rd((get_rd_4(opcode) - 16) << 1),
-    Rs((get_rr_4(opcode) - 16) << 1),
-    status(c->status) {}
+    Rs((get_rr_4(opcode) - 16) << 1) {}
 
 int avr_op_MOVW::operator()() {
     core->SetCoreReg(Rd, core->GetCoreReg(Rs));
