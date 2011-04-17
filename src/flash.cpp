@@ -45,10 +45,8 @@ AvrFlash::AvrFlash(AvrDevice *c, int _size):
     core(c),
     DecodedMem(_size),
     flashLoaded(false) {
-    // initialize memory block
     for(unsigned int tt = 0; tt < size; tt++)
-        myMemory[tt] = 0xff;
-    // reset RWW lock
+        myMemory[tt] = 0xff;  // Safeguard, will be decoded as avr_op_ILLEGAL
     rww_lock = 0;
     // initialize DecodedMem
     Decode();
@@ -65,13 +63,8 @@ void AvrFlash::WriteMem(unsigned char *src, unsigned int offset, unsigned int se
     for(unsigned tt = 0; tt < secSize; tt += 2) { 
         if(tt + offset < size) {
             assert(tt+offset+1<size);
-#ifndef WORDS_BIGENDIAN
             *(myMemory + tt + offset) = src[tt + 1];
             *(myMemory + tt + 1 + offset) = src[tt];
-#else
-            *(myMemory + tt + offset) = src[tt];
-            *(myMemory + tt + 1 + offset) = src[tt + 1];
-#endif
         } 
     }
     Decode(offset, secSize);
@@ -79,6 +72,7 @@ void AvrFlash::WriteMem(unsigned char *src, unsigned int offset, unsigned int se
 }
 
 void AvrFlash::WriteMemByte(unsigned char val, unsigned int offset) {
+    assert(offset < size);  // in bytes
     *(myMemory + offset) = val;
     flashLoaded = true;
 }
