@@ -23,8 +23,8 @@
  *  $Id$
  */
 
-#ifndef SERIALTX
-#define SERIALTX
+#ifndef SERIALTX_H_INCLUDED
+#define SERIALTX_H_INCLUDED
 
 #include "systemclocktypes.h"
 #include "ui.h"
@@ -33,7 +33,7 @@ class SerialTxBuffered: public SimulationMember {
     protected:
         Pin tx;
 
-	std::map < std::string, Pin *> allPins;
+        std::map < std::string, Pin *> allPins;
         unsigned long long baudrate;
 
         enum T_TxState{
@@ -46,7 +46,7 @@ class SerialTxBuffered: public SimulationMember {
 
         T_TxState txState;
 
-	std::vector<unsigned char> inputBuffer;
+        std::vector<unsigned char> inputBuffer;
         unsigned int data;
         unsigned int bitCnt;
         unsigned int maxBitCnt;
@@ -57,24 +57,19 @@ class SerialTxBuffered: public SimulationMember {
         SerialTxBuffered();
         void Reset();
         virtual ~SerialTxBuffered(){};
-    	void SetHexInput(bool newValue);
+        void SetHexInput(bool newValue);
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
+        /// Add byte from UI to be sent to device's UART.
         virtual void Send(unsigned char data);
         virtual void SetBaudRate(SystemClockOffset baud);
         virtual Pin* GetPin(const char *name); 
 };
 
 
+/** Buffers byte from UI to be sent to device's UART. */
 class SerialTx: public SerialTxBuffered, public ExternalType {
-    protected:
-        UserInterface *ui;
-	std::string name;
-
-        unsigned int CpuCycleTx();
-
     public:
         SerialTx(UserInterface *_ui, const char *_name, const char *baseWindow);
-        unsigned int CpuCycle();
         virtual ~SerialTx(){};
         virtual void SetNewValueFromUi(const std::string &);
  };

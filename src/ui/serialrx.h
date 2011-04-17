@@ -23,8 +23,8 @@
  *  $Id$
  */
 
-#ifndef SERIALRX
-#define SERIALRX
+#ifndef SERIALRX_H_INCLUDED
+#define SERIALRX_H_INCLUDED
 
 #include "systemclocktypes.h"
 #include "ui.h"
@@ -34,7 +34,7 @@
 class SerialRxBasic: public SimulationMember, public HasPinNotifyFunction {
     protected:
         Pin rx;
-	std::map < std::string, Pin *> allPins;
+        std::map < std::string, Pin *> allPins;
         unsigned long long baudrate;
 
         void PinStateHasChanged(Pin*);
@@ -60,45 +60,36 @@ class SerialRxBasic: public SimulationMember, public HasPinNotifyFunction {
         bool sendInHex;
 
     public:
-    	void SetBaudRate(SystemClockOffset baud);
-    	void SetHexOutput(bool newValue);
+        void SetBaudRate(SystemClockOffset baud);
+        void SetHexOutput(bool newValue);
         SerialRxBasic();
         void Reset();
         virtual Pin* GetPin(const char *name) ;
         virtual ~SerialRxBasic(){};
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
  };
- 
- 
- // ===========================================================================
- 
- 
- class SerialRxBuffered: public SerialRxBasic{
+
+
+/** This class is never instantiated or inherited. Delete? */
+class SerialRxBuffered: public SerialRxBasic{
  	protected:
-                std::vector<unsigned char> buffer;
- 		virtual void CharReceived(unsigned char c);
+        std::vector<unsigned char> buffer;
+        virtual void CharReceived(unsigned char c);
  	public:
  		unsigned char Get();
  		long Size();
  };
 
 
-// ===========================================================================
-
-
+/** Reads bits from device pins, reconstructs UART bytes and sends them to UI. */
 class SerialRx: public SerialRxBasic, public ExternalType{
     protected:
         UserInterface *ui;
-	std::string name;
+        std::string name;
 
-	std::map < std::string, Pin *> allPins;
-
-        unsigned int CpuCycleRx();
         virtual void CharReceived(unsigned char c);
-
     public:
         SerialRx(UserInterface *_ui, const char *_name, const char *baseWindow);
-        unsigned int CpuCycle();
         virtual ~SerialRx(){};
         virtual void SetNewValueFromUi(const std::string &);
  };

@@ -31,13 +31,6 @@
 
 using namespace std;
 
-/*---------------------------------------------------------------------------
- *
- * This module simulates a HD 44780 LCD controller with a 4 Bit interface
- * This HD-controller is boaring slow :-) like some original
- *
- *---------------------------------------------------------------------------
- */
 // "Bit-Values for the control lines of the LCD
 #define ENABLE 16
 #define READWRITE 32

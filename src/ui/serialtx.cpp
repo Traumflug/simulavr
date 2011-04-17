@@ -129,19 +129,9 @@ void SerialTxBuffered::SetHexInput(bool newValue){
 // ===========================================================================
 // ===========================================================================
 
-// don't know why is this needed, but don't want to change it.. just in case..
-unsigned int SerialTx::CpuCycle() {
-    CpuCycleTx();
 
-    return 0;
-}
-
-unsigned int SerialTx::CpuCycleTx() {
-    return 0;
-}
-
-SerialTx::SerialTx(UserInterface *_ui, const char *_name, const char *baseWindow):
-ui(_ui), name(_name)  {
+SerialTx::SerialTx(UserInterface *ui, const char *name, const char *baseWindow)
+{
     ostringstream os;
     os << "create SerialTx " << name  << " " << baseWindow << endl;
     ui->Write(os.str());

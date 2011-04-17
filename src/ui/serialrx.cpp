@@ -150,19 +150,9 @@ long SerialRxBuffered::Size(){
 // ===========================================================================
 
 
-unsigned int SerialRx::CpuCycle() {
-    CpuCycleRx();
-
-    return 0;
-}
-unsigned int SerialRx::CpuCycleRx() {
-    return 0;
-}
-
 SerialRx::SerialRx(UserInterface *_ui, const char *_name, const char *baseWindow):
 ui(_ui), name(_name)  {
     rx.RegisterCallback(this);
-    allPins["rx"]= &rx;
 
     ostringstream os;
     os << "create SerialRx " << name  << " " << baseWindow << endl;

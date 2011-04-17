@@ -23,8 +23,8 @@
  *  $Id$
  */
 
-#ifndef LCD
-#define LCD
+#ifndef LCD_H_INCLUDED
+#define LCD_H_INCLUDED
 
 
 #include <fstream>
@@ -46,12 +46,15 @@ typedef enum {
     } t_myState;
 
 
+/** Simulates a HD44780 character-LCD controller with a 4 bit interface.
+ * This HD-controller is boring slow :-) like some original.
+ */
 class Lcd : public SimulationMember {
     protected:
         UserInterface *ui;
-	std::string name;
+        std::string name;
         unsigned char myPortValue;
-	std::map<std::string, Pin*> allPins;
+        std::map<std::string, Pin*> allPins;
         Pin d0;
         Pin d1;
         Pin d2;
@@ -86,7 +89,6 @@ class Lcd : public SimulationMember {
         Lcd(UserInterface *ui, const char *name, const char *baseWindow);
         virtual ~Lcd();
         Pin *GetPin(const char *name);
-
 };
 
 #endif

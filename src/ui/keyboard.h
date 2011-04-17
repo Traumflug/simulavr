@@ -23,8 +23,8 @@
  *  $Id$
  */
 
-#ifndef KEYBD
-#define KEYBD
+#ifndef KEYBDOARD_H_INCLUDED
+#define KEYBDOARD_H_INCLUDED
 
 #define KBD_BUFFER_SIZE 128
 
@@ -37,16 +37,13 @@
 #include "pin.h"
 
 
+/** A PS2-style keyboard sending scan-codes obtained from UI to pins on device (I guess). */
 class Keyboard : public SimulationMember, public ExternalType {
     protected:
-        UserInterface *ui;
-	std::string name;
         unsigned char myPortValue;
-	std::map<std::string, Pin*> allPins;
         Pin clk;
         Pin data;
 
-        unsigned int actChar;
         unsigned int bitCnt;
 
         //ofstream debugOut;
@@ -61,16 +58,14 @@ class Keyboard : public SimulationMember, public ExternalType {
         int InsertScanCodeToBuffer( unsigned char scan);
 
         unsigned char actualChar;
-         unsigned char lastPortValue;
+        unsigned char lastPortValue;
 
     public:
-	 void SetNewValueFromUi(const std::string &);
+        void SetNewValueFromUi(const std::string &);
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
-      Keyboard(UserInterface *, const char *name, const char *baseWindow);
+        Keyboard(UserInterface *, const char *name, const char *baseWindow);
         void SetClockFreq(SystemClockOffset f);
         virtual ~Keyboard();
-        Pin *GetPin(const char *name);
-
 };
 
 #endif

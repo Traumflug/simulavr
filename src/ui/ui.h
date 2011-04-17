@@ -23,8 +23,8 @@
  *  $Id$
  */
 
-#ifndef UI
-#define UI
+#ifndef UI_H_INCLUDED
+#define UI_H_INCLUDED
 
 #include <map>
 #include <sstream>
@@ -35,25 +35,28 @@
 #include "../pin.h"
 #include "../externaltype.h"
 
-class UserInterface: public SimulationMember, public Socket, public ExternalType {
+/** Interfacing between "UI" application on TCP port and
+ExternalType objects which interface with device peripherals.
+*/
+class UserInterface: public SimulationMember, private Socket, public ExternalType {
     protected:
         std::map<std::string, ExternalType*> extMembers;
         bool updateOn;
         SystemClockOffset pollFreq;
-	std::string dummy; //replaces old dummy in Step which was static :-(
-	std::map<std::string, char> LastState;
+        std::string dummy; //replaces old dummy in Step which was static :-(
+        std::map<std::string, char> LastState;
         int waitOnAckFromTclRequest; 
         int waitOnAckFromTclDone;
 
-    public:
         //this is mainly for controlling the ui interface itself from the gui
         void SetNewValueFromUi(const std::string &);
+    public:
         void AddExternalType(const char *name, ExternalType *p) {
-          extMembers[name]=p;
+            extMembers[name]=p;
         }
 #ifndef SWIG
-        void AddExternalType(const std::string name, ExternalType *p) {
-          AddExternalType(name.c_str(), p);
+        void AddExternalType(const std::string& name, ExternalType *p) {
+            AddExternalType(name.c_str(), p);
         }
 #endif
         UserInterface(int port, bool withUpdateControl=true);
@@ -63,7 +66,6 @@ class UserInterface: public SimulationMember, public Socket, public ExternalType
         int Step(bool &, SystemClockOffset *nextStepIn_ns=0);
         void SwitchUpdateOnOff(bool PollFreq);
         void Write(const std::string &s);
-
 };
 
 #endif

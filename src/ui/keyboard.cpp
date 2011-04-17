@@ -179,16 +179,11 @@ int Keyboard::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
     if(timeToNextStepIn_ns!=0) *timeToNextStepIn_ns=myClockFreq; //call as fast as possible
     return 0;
 }
-Keyboard::Keyboard(UserInterface *_ui, const char *_name, const char *baseWindow):
-ui(_ui),
-    name(_name),
+Keyboard::Keyboard(UserInterface *ui, const char *name, const char *baseWindow):
     clk( &myPortValue, 1),
     data( &myPortValue, 2),
 bufferWriteIndex(0), bufferReadIndex(0)
 {
-    allPins["clk"]=&clk;
-    allPins["data"]=&data;
-
     myPortValue=0;
     bitCnt=0;
 
@@ -203,9 +198,7 @@ bufferWriteIndex(0), bufferReadIndex(0)
 }
 
 Keyboard::~Keyboard() { }
-Pin *Keyboard::GetPin(const char *name) {
-    return allPins[name];
-}
+
 void Keyboard::SetClockFreq(SystemClockOffset f){
     myClockFreq=f;
 }
