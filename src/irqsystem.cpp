@@ -34,6 +34,8 @@
 
 #include <iostream>
 #include <assert.h>
+#include <stdio.h>
+#include <typeinfo>
 
 using namespace std;
 
