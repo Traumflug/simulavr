@@ -186,9 +186,9 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
                          PinAtPort(&portd,1),    // TXD
                          PinAtPort(&portd,0),    // RXD
                          PinAtPort(&portd, 4),   // XCK
-                         19,   // (18) RX complete vector
-                         20,   // (19) UDRE vector
-                         21);  // (20) TX complete vector
+                         18,   // (18) RX complete vector
+                         19,   // (19) UDRE vector
+                         20);  // (20) TX complete vector
 
     rw[0xE6]= new NotSimulatedRegister("UDR0 register is placed 0xC6!");
     rw[0xE4]= new NotSimulatedRegister("UBRR0L register is placed 0xC4!");

@@ -34,7 +34,6 @@
 
 #include <iostream>
 #include <assert.h>
-#include <stdio.h>
 #include <typeinfo>
 
 using namespace std;
@@ -293,14 +292,14 @@ void HWIrqSystem::DebugVerifyInterruptVector(unsigned int vector, const Hardware
 }
 void HWIrqSystem::DebugDumpTable()
 {
-    fprintf(stderr, "Interrupt vector table (for comparison against a datasheet)\n");
-    fprintf(stderr, "Vector | Address/2 | Source Peripheral (class)\n");
+    avr_message("Interrupt vector table (for comparison against a datasheet)\n");
+    avr_message("Vector | Address/2 | Source Peripheral (class)\n");
     for(unsigned i = 0; i < debugInterruptTable.size(); i++)
     {
         const Hardware* source = debugInterruptTable[i];
         const char * handler = (i==0) ? "funct AvrDevice::Reset()"
             : source ? typeid(*source).name() : "(unsupported or not registered)";
-        fprintf(stderr, "  %3d  |   $%04x   | %s\n", i+1, i*bytesPerVector/2, handler);
+        avr_message("  %3d  |   $%04x   | %s\n", i+1, i*bytesPerVector/2, handler);
     }
 }
 
