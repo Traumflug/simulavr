@@ -345,7 +345,8 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
         currentOffset++;
     }
 
-    // fill the rest of the adress space with error handlers
+    assert(currentOffset<=totalIoSpace);
+    // fill the rest of the address space with error handlers
     for(; currentOffset < totalIoSpace; currentOffset++, invalidRWOffset++) {
         invalidRW[invalidRWOffset] = new InvalidMem(this, currentOffset);
         if(invalidRW[invalidRWOffset] == NULL)

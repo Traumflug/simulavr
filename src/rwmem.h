@@ -153,10 +153,9 @@ class NotSimulatedRegister : public RWMemoryMember {
         void set(unsigned char);
 };
 
-//! Memory blocks of RWMemoryMembers
-/*! Memory offsets are used to represent a given memory area
-  inside a block of RWMemoryMember objects. Used for RAM blocks and
-  similar things. */
+/** Part of an unified data memory, e.g. R0-31 or IO or Internal RAM.
+  Used for accessing the whole memory in range [myOffset,myOffset+myLength).
+  inside a block of RWMemoryMember objects. */
 class MemoryOffsets {
     
     private:

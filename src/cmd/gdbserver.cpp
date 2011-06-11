@@ -26,6 +26,7 @@
 #include <iostream>
 using namespace std;
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -253,11 +254,11 @@ void GdbServerSocketUnix::SetBlockingMode(int mode) {
 
 bool GdbServerSocketUnix::Connect(void) {
     /* accept() needs this set, or it fails (sometimes) */
-    addrLength[0] = sizeof(struct sockaddr_in);
+    socklen_t addrLength = sizeof(struct sockaddr_in);
 
     /* We only want to accept a single connection, thus don't need a loop. */
     /* Wait until we have a connection */
-    conn = accept(sock, (struct sockaddr *)address, addrLength);
+    conn = accept(sock, (struct sockaddr *)address, &addrLength);
     if(conn > 0) {
         /* Tell TCP not to delay small packets.  This greatly speeds up
         interactive response. WARNING: If TCP_NODELAY is set on, then gdb
@@ -316,28 +317,29 @@ GdbServer::~GdbServer() {
 }
 
 word GdbServer::avr_core_flash_read(int addr) {
+    assert(0 <= addr && (unsigned) addr*2+1 < core->Flash->GetSize());
     return core->Flash->ReadMemRawWord(addr);
 }
 
 void GdbServer::avr_core_flash_write(int addr, word val) {
-    if(((addr * 2) + 1) >= (int)core->Flash->GetSize())
+    if((addr + 1) >= (int)core->Flash->GetSize())
         avr_error("try to write in flash after last valid address!");
-    core->Flash->WriteMemByte(val & 0xff, (addr * 2) + 1);
-    core->Flash->WriteMemByte((val >> 8) & 0xff, addr * 2);
-    core->Flash->Decode(addr * 2);
+    core->Flash->WriteMemByte(val & 0xff, addr + 1);
+    core->Flash->WriteMemByte((val >> 8) & 0xff, addr);
+    core->Flash->Decode(addr);
 }
 
 void GdbServer::avr_core_flash_write_hi8(int addr, byte val) {
-    if((addr * 2) >= (int)core->Flash->GetSize())
+    if(addr >= (int)core->Flash->GetSize())
         avr_error("try to write in flash after last valid address! (hi8)");
-    core->Flash->WriteMemByte(val, addr * 2);
+    core->Flash->WriteMemByte(val, addr);
     core->Flash->Decode();
 }
 
 void GdbServer::avr_core_flash_write_lo8(int addr, byte val) {
-    if(((addr * 2) + 1) >= (int)core->Flash->GetSize())
+    if(addr + 1 >= (int)core->Flash->GetSize())
         avr_error("try to write in flash after last valid address! (lo8)");
-    core->Flash->WriteMemByte(val, (addr * 2) + 1);
+    core->Flash->WriteMemByte(val, addr + 1);
     core->Flash->Decode();
 }
 
@@ -586,7 +588,7 @@ void GdbServer::gdb_write_registers(const char *pkt) {
 }
 
 /*! Extract a hexidecimal number from the pkt. Keep scanning pkt until stop char
-is reached or size of int is exceeded or a NULL is reached. pkt is modified
+is reached or size of int is exceeded or a '\0' is reached. pkt is modified
 to point to stop char when done.
 
 Use this function to extract a num with an arbitrary num of hex
@@ -780,7 +782,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
         addr = addr & ~MEM_SPACE_MASK; /* remove the offset bits */
 
         /* Return an error to gdb if it tries to read or write any of the 32
-        general purpse registers. This allows gdb to know when a zero
+        general purpose registers. This allows gdb to know when a zero
         pointer has been dereferenced. */
 
         /* FIXME: [TRoth 2002/03/31] This isn't working quite the way I
@@ -859,8 +861,6 @@ void GdbServer::gdb_write_memory(const char *pkt) {
     unsigned int addr = 0;
     int  len  = 0;
     byte bval;
-    word wval;
-    int  is_odd_addr;
     unsigned int  i;
     char reply[10];
 
@@ -883,9 +883,6 @@ void GdbServer::gdb_write_memory(const char *pkt) {
             core->eeprom->WriteAtAddress(addr, bval);
             addr++;
         }
-
-
-
     }
     else if ( (addr & MEM_SPACE_MASK) == SRAM_OFFSET )
     {
@@ -917,24 +914,23 @@ void GdbServer::gdb_write_memory(const char *pkt) {
 
         addr = addr & ~MEM_SPACE_MASK; /* remove the offset bits */
 
-        is_odd_addr = addr % 2;
-
-        if (is_odd_addr)
+        if (addr % 2)
         {
             bval  = hex2nib(*pkt++) << 4;
             bval += hex2nib(*pkt++);
-            avr_core_flash_write_hi8(addr/2, bval);
+            avr_core_flash_write_hi8(addr, bval);
             len--;
             addr++;
         }
 
         while (len > 1)
         {
+            word wval;
             wval  = hex2nib(*pkt++) << 4; /* low byte first */
             wval += hex2nib(*pkt++);
             wval += hex2nib(*pkt++) << 12; /* high byte last */
             wval += hex2nib(*pkt++) << 8;
-            avr_core_flash_write( addr/2, wval);
+            avr_core_flash_write( addr, wval);
             len  -= 2;
             addr += 2;
         }
@@ -944,7 +940,7 @@ void GdbServer::gdb_write_memory(const char *pkt) {
             /* one more byte to write */
             bval  = hex2nib(*pkt++) << 4;
             bval += hex2nib(*pkt++);
-            avr_core_flash_write_lo8( addr/2, bval );
+            avr_core_flash_write_lo8( addr, bval );
         }
     }
     else
@@ -1160,7 +1156,6 @@ int GdbServer::gdb_parse_packet(const char *pkt) {
                 return GDB_RET_OK;
             }
             return GDB_RET_SINGLE_STEP;
-            break;
 
         case 'z':               /* remove break/watch point */
         case 'Z':               /* insert break/watch point */
@@ -1204,7 +1199,7 @@ outside the realm of packets or prepare a packet for parsing.
 
 Use the static block_on flag to reduce the over head of turning blocking on
 and off every time this function is called. */
-int GdbServer::gdb_pre_parse_packet(int blocking) {
+int GdbServer::gdb_receive_and_process_packet(int blocking) {
     int  res;
     int  c;
     std::string pkt_buf;
@@ -1253,6 +1248,7 @@ int GdbServer::gdb_pre_parse_packet(int blocking) {
             break;
 
         case '-':
+            // When debugging do type "set remotetimeout 1000000" in GDB.
             if(global_debug_on)
                 fprintf(stderr, " gdb -> Nak\n");
             gdb_send_reply(gdb_last_reply(NULL));
@@ -1300,7 +1296,7 @@ void GdbServer::Run( )
 
     while (1)
     {
-        res = gdb_pre_parse_packet( GDB_BLOCKING_ON);
+        res = gdb_receive_and_process_packet( GDB_BLOCKING_ON);
         switch (res)
         {
             case GDB_RET_KILL_REQUEST:
@@ -1318,7 +1314,7 @@ void GdbServer::Run( )
     }
 }
 
-//! try to open a new connection to gdb
+//! try to accept a new connection from gdb
 void GdbServer::TryConnectGdb() {
     time_t newTime = time(NULL);
 
@@ -1345,7 +1341,7 @@ int GdbServer::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
 }
 
 void GdbServer::IdleStep() {
-    int gdbRet=gdb_pre_parse_packet(GDB_BLOCKING_OFF);
+    int gdbRet=gdb_receive_and_process_packet(GDB_BLOCKING_OFF);
     cout << "IdleStep Instance" << this << " RunMode:" << dec << runMode << endl;
 
     if (lastCoreStepFinished) {
@@ -1367,14 +1363,11 @@ void GdbServer::IdleStep() {
 
             default:
                 cout << "wondering" << endl;
-
         }
     }
-
 }
 
 int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *timeToNextStepIn_ns) {
-    char reply[MAX_BUF + 1];
     //cout << "Internal Step entered" << endl;
     //cout << "RunMode: " << dec << runMode << endl;
 
@@ -1383,7 +1376,7 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
 
         do {
             //cout << "Loop" << endl;
-            int gdbRet=gdb_pre_parse_packet((runMode==GDB_RET_CONTINUE) ? GDB_BLOCKING_OFF : GDB_BLOCKING_ON);
+            int gdbRet=gdb_receive_and_process_packet((runMode==GDB_RET_CONTINUE) ? GDB_BLOCKING_OFF : GDB_BLOCKING_ON);
 
             switch (gdbRet) { //GDB_RESULT TYPES
                 case GDB_RET_NOTHING_RECEIVED:  //nothing changes here
@@ -1403,7 +1396,6 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
                     runMode=GDB_RET_SINGLE_STEP;
                     break;
 
-
                 case GDB_RET_CTRL_C:
                     //cout << "############################################################# CTRL C" << endl;
                     runMode=GDB_RET_CTRL_C;
@@ -1421,10 +1413,10 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
 
             } //end switch GDB_RETURN_VALUE
 
-            if ((runMode!= GDB_RET_SINGLE_STEP ) && ( runMode!= GDB_RET_CONTINUE) ) {
-                leave=false;
+            if (runMode == GDB_RET_SINGLE_STEP || runMode == GDB_RET_CONTINUE) {
+                leave = true;
             } else {
-                leave=true;
+                leave = false;
             }
 
             if(!leave) { //we can�t leave the loop so we have to request the other gdb instances now!
@@ -1453,11 +1445,11 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
     {
         //why we send here another reply??? is it not better to send it later
         //the signo is set correct.... TODO
+        char reply[MAX_BUF+1];
         snprintf(reply, sizeof(reply), "S%02x", GDB_SIGILL);
         gdb_send_reply( reply );
         runMode=GDB_RET_OK;
         SendPosition(GDB_SIGILL);
-
     }
 
     if (runMode==GDB_RET_SINGLE_STEP) {

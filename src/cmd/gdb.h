@@ -94,10 +94,9 @@ class GdbServerSocketMingW: public GdbServerSocket {
 //! Interface implementation for server socket wrapper on unix systems
 class GdbServerSocketUnix: public GdbServerSocket {
     private:
-        int sock;       //!< the opened os-net-socket
-        int conn;       //!< the real established connection
+        int sock;       //!< socket for listening for a new client
+        int conn;       //!< the TCP connection from gdb client
         struct sockaddr_in address[1];
-        socklen_t          addrLength[1]; 
 
     public:
         GdbServerSocketUnix(int port);
@@ -163,7 +162,7 @@ class GdbServer: public SimulationMember {
         void gdb_break_point(const char *pkt);
         int gdb_get_signal(const char *pkt);
         int gdb_parse_packet(const char *pkt);
-        int gdb_pre_parse_packet(int blocking);
+        int gdb_receive_and_process_packet(int blocking);
         void gdb_main_loop(); 
         void gdb_interact(int port, int debug_on);
         void IdleStep();

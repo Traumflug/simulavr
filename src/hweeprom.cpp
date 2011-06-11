@@ -29,6 +29,7 @@
 #include "systemclock.h"
 #include "irqsystem.h"
 #include "avrerror.h"
+#include <assert.h>
 
 using namespace std;
 
@@ -138,6 +139,7 @@ void HWEeprom::SetEecr(unsigned char newval) {
             // read will be processed immediately
             if((eecr & CTRL_READ) == CTRL_READ) {
                 cpuHoldCycles = 4;
+                assert(eear < size);
                 eedr = myMemory[eear];
                 eecr &= ~CTRL_READ; // reset read bit isn't decribed in document!
                 core->AddToCycleList(this);
@@ -154,6 +156,7 @@ void HWEeprom::SetEecr(unsigned char newval) {
             // read will be processed immediately
             if((eecr & CTRL_READ) == CTRL_READ) {
                 cpuHoldCycles = 4;
+                assert(eear < size);
                 eedr = myMemory[eear];
                 eecr &= ~CTRL_READ; // reset read bit isn't decribed in document!
                 if(core->trace_on == 1)
@@ -166,6 +169,7 @@ void HWEeprom::SetEecr(unsigned char newval) {
                 // abort enable state, switch to write state
                 opMode = eecr & CTRL_MODES;
                 opAddr = eear;
+                assert(opAddr < size);
                 opState = OPSTATE_WRITE;
                 opEnableCycles = 0;
                 eecr &= ~CTRL_ENABLE;
@@ -224,6 +228,7 @@ unsigned int HWEeprom::CpuCycle() {
             opState = OPSTATE_READY;
             // reset write enable bit
             eecr &= ~CTRL_WRITE;
+            assert(opAddr < size);
             // process operation
             switch(opMode & CTRL_MODES) {
                 default:

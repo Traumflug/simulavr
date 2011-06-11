@@ -31,6 +31,7 @@
 #include "avrerror.h"
 
 #include "signal.h"
+#include <assert.h>
 
 using namespace std;
 
@@ -65,27 +66,24 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
     //0-> return also if cpu in waitstate 1-> return if cpu is really finished
     int res = 0; // returns the state from a core step. Needed by gdb-server to
                  // watch for breakpoints
-    SystemClockOffset nextStepIn_ns = -1;
 
     static vector<SimulationMember*>::iterator ami;
     static vector<SimulationMember*>::iterator amiEnd;
 
-    SimulationMember *core;
-    
     if(begin() != end()) {
         // take simulation member and current simulation time from time table
-        core = begin()->second;
+        SimulationMember * core = begin()->second;
         currentTime = begin()->first; 
         erase(begin());
+        SystemClockOffset nextStepIn_ns = -1;
         
         // do a step on simulation member
         res = core->Step(untilCoreStepFinished, &nextStepIn_ns);
         
-        
         if(nextStepIn_ns == 0) { // insert the next step behind the following!
             SystemClock::iterator ii = begin();
             nextStepIn_ns = 1 + ((ii != end()) ? ii->first : currentTime);
-        } else if(nextStepIn_ns > 0) // or on offset, given back from Step call
+        } else if(nextStepIn_ns > 0)
             nextStepIn_ns += currentTime;
         // if nextStepIn_ns is < 0, it means, that this simulation member will not
         // be called anymore!

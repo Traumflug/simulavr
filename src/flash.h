@@ -64,16 +64,13 @@ class AvrFlash: public Memory {
           @param secSize count of available data (bytes) in src */
         void Decode(unsigned int addr, int secSize);
         
-        /*! Write memory data to memory block.
+        /*! Write `secSize' bytes from `src' data to byte address `addr'.
           @param src binary c-string with data to write in
-          @param offset data offset in memory block, beginning from start of THIS memory block!
           @param secSize count of available data (bytes) in src */
-        void WriteMem(unsigned char* src, unsigned int offset, unsigned int secSize);
+        void WriteMem(unsigned char* src, unsigned int addr, unsigned int secSize);
         
-        /*! Write data byte to memory block (Attention! Dosn't decode written content!)
-          @param src byte data
-          @param offset data offset in memory block, beginning from start of THIS memory block! */
-        void WriteMemByte(unsigned char val, unsigned int offset);
+        /*! Write byte `val' at `address' (in bytes). Caller must call Decode() later. */
+        void WriteMemByte(unsigned char val, unsigned int address);
         
         /*! True if flash was written, i.e. a program was loaded */
         bool IsProgramLoaded(void) { return flashLoaded; }
