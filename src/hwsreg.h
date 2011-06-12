@@ -58,7 +58,7 @@ class HWSreg: public HWSreg_bool {
 #endif
 };
 
-/*! IO register mapping for the status register.
+/*! SREG - ALU status register in IO space
   \todo Replace the status register with an ordinary byte somewhere and simple
   inline access functions sN(), gN() to get/set flags. This should also make
   accesses faster. */

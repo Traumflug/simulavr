@@ -815,6 +815,8 @@ avr_op_LD_X_decr::avr_op_LD_X_decr(word opcode, AvrDevice *c):
 int avr_op_LD_X_decr::operator()() {
     /* X is R27:R26 */
     word X = core->GetRegX();
+    if (Rd == 26 || Rd == 27)
+        avr_error( "Result of operation is undefined" );
 
     /* Perform pre-decrement */
     X--;
@@ -832,6 +834,8 @@ avr_op_LD_X_incr::avr_op_LD_X_incr(word opcode, AvrDevice *c):
 int avr_op_LD_X_incr::operator()() {
     /* X is R27:R26 */
     word X = core->GetRegX();
+    if (Rd == 26 || Rd == 27)
+       avr_error( "Result of operation is undefined" );
 
     /* Perform post-increment */
     core->SetCoreReg(Rd, core->GetRWMem(X));
@@ -849,6 +853,8 @@ avr_op_LD_Y_decr::avr_op_LD_Y_decr(word opcode, AvrDevice *c):
 int avr_op_LD_Y_decr::operator()() {
     /* Y is R29:R28 */
     word Y = core->GetRegY();
+    if (Rd == 28 || Rd == 29)
+        avr_error( "Result of operation is undefined" );
 
     /* Perform pre-decrement */
     Y--;
@@ -866,6 +872,8 @@ avr_op_LD_Y_incr::avr_op_LD_Y_incr(word opcode, AvrDevice *c):
 int avr_op_LD_Y_incr::operator()() {
     /* Y is R29:R28 */
     word Y = core->GetRegY();
+    if (Rd == 28 || Rd == 29)
+        avr_error( "Result of operation is undefined" );
 
     /* Perform post-increment */
     core->SetCoreReg(Rd, core->GetRWMem(Y));
@@ -883,6 +891,8 @@ avr_op_LD_Z_incr::avr_op_LD_Z_incr(word opcode, AvrDevice *c):
 int avr_op_LD_Z_incr::operator()() {
     /* Z is R31:R30 */
     word Z = core->GetRegZ();
+    if (Rd == 30 || Rd == 31)
+        avr_error( "Result of operation is undefined" );
 
     /* Perform post-increment */
     core->SetCoreReg(Rd, core->GetRWMem(Z));
@@ -900,6 +910,8 @@ avr_op_LD_Z_decr::avr_op_LD_Z_decr(word opcode, AvrDevice *c):
 int avr_op_LD_Z_decr::operator()() {
     /* Z is R31:R30 */
     word Z = core->GetRegZ();
+    if (Rd == 30 || Rd == 31)
+        avr_error( "Result of operation is undefined" );
 
     /* Perform pre-decrement */
     Z--;
@@ -1519,7 +1531,9 @@ avr_op_ST_X_decr::avr_op_ST_X_decr(word opcode, AvrDevice *c):
 int avr_op_ST_X_decr::operator()() {
     /* X is R27:R26 */
     word X = core->GetRegX();
- 
+    if (R1 == 26 || R1 == 27)
+        avr_error( "Result of operation is undefined" );
+
     /* Perform pre-decrement */
     X--;
     core->SetCoreReg(26, X & 0xff);
@@ -1536,6 +1550,8 @@ avr_op_ST_X_incr::avr_op_ST_X_incr(word opcode, AvrDevice *c):
 int avr_op_ST_X_incr::operator()() {
     /* X is R27:R26 */
     word X = core->GetRegX();
+    if (R1 == 26 || R1 == 27)
+        avr_error( "Result of operation is undefined" );
 
     core->SetRWMem(X, core->GetCoreReg(R1));
 
@@ -1554,6 +1570,8 @@ avr_op_ST_Y_decr::avr_op_ST_Y_decr(word opcode, AvrDevice *c):
 int avr_op_ST_Y_decr::operator()() {
     /* Y is R29:R28 */
     word Y = core->GetRegY();
+    if (R1 == 28 || R1 == 29)
+        avr_error( "Result of operation is undefined" );
  
     /* Perform pre-decrement */
     Y--;
@@ -1571,6 +1589,8 @@ avr_op_ST_Y_incr::avr_op_ST_Y_incr(word opcode, AvrDevice *c):
 int avr_op_ST_Y_incr::operator()() {
     /* Y is R29:R28 */
     word Y = core->GetRegY();
+    if (R1 == 28 || R1 == 29)
+        avr_error( "Result of operation is undefined" );
 
     core->SetRWMem(Y, core->GetCoreReg(R1));
 
@@ -1589,6 +1609,8 @@ avr_op_ST_Z_decr::avr_op_ST_Z_decr(word opcode, AvrDevice *c):
 int avr_op_ST_Z_decr::operator()() {
     /* Z is R31:R30 */
     word Z = core->GetRegZ();
+    if (R1 == 30 || R1 == 31)
+        avr_error( "Result of operation is undefined" );
  
     /* Perform pre-decrement */
     Z--;
@@ -1606,6 +1628,8 @@ avr_op_ST_Z_incr::avr_op_ST_Z_incr(word opcode, AvrDevice *c):
 int avr_op_ST_Z_incr::operator()() {
     /* Z is R31:R30 */
     word Z = core->GetRegZ();
+    if (R1 == 30 || R1 == 31)
+        avr_error( "Result of operation is undefined" );
 
     core->SetRWMem(Z, core->GetCoreReg(R1));
 

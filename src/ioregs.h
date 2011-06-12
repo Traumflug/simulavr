@@ -29,6 +29,7 @@
 #include "traceval.h"
 #include "avrdevice.h"
 
+/** Used for RAMPZ and MCUCR registers. */
 class AddressExtensionRegister: public Hardware, public TraceValueRegister {
   
     private:
