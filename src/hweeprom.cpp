@@ -53,7 +53,8 @@ HWEeprom::HWEeprom(AvrDevice *_core,
     eecr_reg(this, "EECR",
              this, &HWEeprom::GetEecr, &HWEeprom::SetEecr)
 {
-    irqSystem->DebugVerifyInterruptVector(irqVectorNo, this);
+    if(irqSystem)
+        irqSystem->DebugVerifyInterruptVector(irqVectorNo, this);
 
     // in a "fresh" device eeprom is intialized to 0xff like flash too
     for(unsigned int tt = 0; tt < size; tt++)
