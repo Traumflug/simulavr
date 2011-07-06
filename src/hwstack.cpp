@@ -26,10 +26,13 @@
 #include "hwstack.h"
 #include "avrerror.h"
 #include "avrmalloc.h"
+#include "flash.h"
+#include <assert.h>
 
 using namespace std;
 
 HWStack::HWStack(AvrDevice *c):
+    m_ThreadList(*c),
     core(c) {
     Reset();
 }
@@ -63,7 +66,7 @@ HWStackSram::HWStackSram(AvrDevice *c, int bs, bool initRE):
     spl_reg(this, "SPL",
             this, &HWStackSram::GetSpl, &HWStackSram::SetSpl),
     initRAMEND(initRE) {
-    stackCeil = 1 << bs;
+    stackCeil = 1 << bs;  // TODO: The number of bits is unable to acurately represent 0x460 ceiling of ATmega8: has 1024 B RAM (0x400) and 32+64 (0x60) registers.
     mem = c->Sram;
     Reset();
 }
@@ -89,6 +92,7 @@ void HWStackSram::Push(unsigned char val) {
     
     if(core->trace_on == 1)
         traceOut << "SP=0x" << hex << stackPointer << " 0x" << int(val) << dec << " ";
+    m_ThreadList.OnPush();
     CheckReturnPoints();
     
     // measure stack usage, calculate lowest stack pointer
@@ -105,6 +109,7 @@ unsigned char HWStackSram::Pop() {
     
     if(core->trace_on == 1)
         traceOut << "SP=0x" << hex << stackPointer << " 0x" << int((*mem)[stackPointer]) << dec << " ";
+    m_ThreadList.OnPop();
     CheckReturnPoints();
     return (*mem)[stackPointer];
 }
@@ -133,6 +138,7 @@ unsigned long HWStackSram::PopAddr() {
 }
 
 void HWStackSram::SetSpl(unsigned char val) {
+    uint32_t oldSP = stackPointer;
     stackPointer &= ~0xff;
     stackPointer += val;
     stackPointer %= stackCeil; // zero the not used bits
@@ -141,10 +147,13 @@ void HWStackSram::SetSpl(unsigned char val) {
     
     if(core->trace_on == 1)
         traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
+    if(oldSP != stackPointer)
+        m_ThreadList.OnSPWrite(stackPointer);
     CheckReturnPoints();
 }
 
 void HWStackSram::SetSph(unsigned char val) {
+    uint32_t oldSP = stackPointer;
     if(stackCeil <= 0x100)
         avr_warning("assignment to non existent SPH (value=0x%x)", (unsigned int)val);
     stackPointer &= ~0xff00;
@@ -155,15 +164,22 @@ void HWStackSram::SetSph(unsigned char val) {
 
     if(core->trace_on == 1)
         traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
+    if(oldSP != stackPointer)
+        m_ThreadList.OnSPWrite(stackPointer);
     CheckReturnPoints();
 }
 
 unsigned char HWStackSram::GetSph() {
+    OnSPReadByTarget();
     return (stackPointer & 0xff00) >> 8;
 }
 
 unsigned char HWStackSram::GetSpl() {
+    OnSPReadByTarget();
     return stackPointer & 0xff;
+}
+void HWStackSram::OnSPReadByTarget() {
+    m_ThreadList.OnSPRead(stackPointer);
 }
 
 ThreeLevelStack::ThreeLevelStack(AvrDevice *c):
@@ -215,6 +231,137 @@ unsigned long ThreeLevelStack::PopAddr() {
         avr_warning("stack underflow");
     }
     return val;
+}
+
+ThreadList::ThreadList(AvrDevice & core)
+	: m_core(core)
+{
+	m_phase_of_switch = eNormal;
+	m_last_SP_read = 0x0000;
+	m_last_SP_writen = 0x0000;
+	m_cur_thread = 0;  // we are running main() thread
+
+	Thread * main_thread = new Thread;
+	main_thread->m_sp = 0;  // invalid address, GDB never sees it, updated on switch
+	main_thread->m_ip = 0;
+	main_thread->m_alive = true;
+	m_threads.push_back(main_thread);
+}
+ThreadList::~ThreadList()
+{
+	OnReset();
+}
+void ThreadList::OnReset()
+{
+	for(unsigned int i = 0; i < m_threads.size(); i++) {
+		Thread * p = m_threads[i];
+		delete p;
+	}
+	m_threads.resize(0);
+}
+
+void ThreadList::OnCall()
+{
+	m_on_call_sp = m_core.stack->GetStackPointer();
+	assert(m_on_call_sp != 0x0000);
+	m_on_call_ip = m_core.PC * 2;
+	Thread * old = m_threads[m_cur_thread];
+	for(unsigned int i = 0; i < 32; i++) {
+		old->registers[i] = (*m_core.R)[i];
+	}
+
+	if(0xc9c <= m_on_call_ip && m_on_call_ip <= 0xca4)
+		fprintf(stderr, "Pripravit se ke startu: proc_switch()\n");
+	if(0x80a <= m_on_call_ip && m_on_call_ip <= 0x810)
+		fprintf(stderr, "Pripravit se ke startu: asm_switch_context()\n");
+}
+
+void ThreadList::OnSPRead(int SP_value)
+{
+	assert(0 <= SP_value && SP_value <= 0xFFFF);
+	assert(0 != SP_value);  // SP must not point to register area
+	m_phase_of_switch = eReaded;
+	m_last_SP_read = SP_value;
+}
+
+void ThreadList::OnSPWrite( int new_SP )
+{
+	if( ! m_core.Flash->LooksLikeContextSwitch(m_core.PC*2))
+		return;
+	m_phase_of_switch = (m_phase_of_switch==eWritten) ? eWritten2 : eWritten;
+	m_last_SP_writen = new_SP;
+}
+
+void ThreadList::OnPush()
+{
+	m_phase_of_switch = eNormal;
+	m_last_SP_read = 0x0000;
+	m_last_SP_writen = 0x0000;
+}
+
+void ThreadList::OnPop()
+{
+	if(m_phase_of_switch != eWritten2)
+	{
+		m_phase_of_switch = eNormal;
+		m_last_SP_read = 0x0000;
+		m_last_SP_writen = 0x0000;
+		return;
+	}
+	m_phase_of_switch = eNormal;
+	int addr = m_core.PC * 2;
+	assert(0 <= m_cur_thread && m_cur_thread < (int) m_threads.size());
+	Thread * old = m_threads[m_cur_thread];
+	assert(m_on_call_sp != 0x0000);
+	old->m_sp = m_on_call_sp;
+	old->m_ip = m_on_call_ip;
+	old->m_alive = true; // does not on FreeRTOS's vPortYieldFromTick: (m_last_SP_read != 0x0000);
+
+	int n = GetThreadBySP(m_last_SP_writen);
+	if(n == -1) {
+		m_threads.push_back( new Thread);
+		n = m_threads.size() - 1;
+	}
+	Thread * new_thread = m_threads[n];
+	new_thread->m_sp = 0x0000;  // invalid
+	new_thread->m_ip = 0x0000;
+	new_thread->m_alive = true;
+
+	fprintf(stderr, "Context switch at PC 0x%05x from thread %d to %d\n", addr, m_cur_thread, n);
+	m_cur_thread = n;
+}
+
+int ThreadList::GetThreadBySP(int sp) const
+{
+	for(unsigned int i = 0; i < m_threads.size(); i++) {
+		Thread * p = m_threads[i];
+		if(p->m_sp == sp)
+			return i;
+	}
+	return -1;  // not found
+}
+
+int ThreadList::GetCurrentThreadForGDB() const
+{
+	return m_cur_thread + 1;
+}
+
+const Thread * ThreadList::GetThreadFromGDB(int thread_id) const
+{
+	assert(thread_id >= 1);
+	unsigned int index = thread_id - 1;
+	assert(index < m_threads.size());
+	return m_threads[index];
+}
+bool ThreadList::IsGDBThreadAlive(int thread_id) const
+{
+	assert(thread_id >= 1);
+	unsigned int index = thread_id - 1;
+	if(index >= m_threads.size())
+		return false;
+
+	Thread * p = m_threads[index];
+	return p->m_alive;
 }
 
 /* EOF */

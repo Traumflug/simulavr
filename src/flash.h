@@ -96,6 +96,8 @@ class AvrFlash: public Memory {
         
         /*! Returns 16bits at flash address. Aborts if Flash write is in progress. */
         unsigned int ReadMemWord(unsigned int addr);
+
+		bool LooksLikeContextSwitch(unsigned int addr) const;
 };
 
 #endif

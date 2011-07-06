@@ -33,6 +33,51 @@
 
 #include <map>
 
+/** A thread automatically detected in simulated program.
+* We keep track of them in core->stack.m_ThreadList.m_threads[] and
+* report them to GDB.
+*/
+class Thread
+{
+public:
+	int m_sp;
+	int m_ip;  ///< address (in bytes, not index)
+	bool m_alive;
+	unsigned char registers[32];  ///< R0 - R31
+};
+
+/** List of auto-detected threads. See my Google Docs notes.
+Stack address 0x0000 is invalid (see datasheet).
+*/
+class ThreadList
+{
+    /// List of known threads. First addition (of main) is special.
+    std::vector<Thread*> m_threads;
+    enum {eNormal, eReaded, eWritten, eWritten2} m_phase_of_switch;
+    int m_last_SP_read;
+    int m_last_SP_writen;
+    int m_on_call_sp;
+    int m_on_call_ip;  ///< Address in a routine calling the context-switch
+    /// Currently running thread. (Thread index used for querying by GDB is in GdbServer.)
+    int m_cur_thread;
+    AvrDevice & m_core;
+public:
+
+    ThreadList(AvrDevice & core);
+    ~ThreadList();
+    void OnReset();
+    void OnCall();
+    void OnSPRead(int SP_value);
+    void OnSPWrite(int new_SP);
+    void OnPush();
+    void OnPop();
+    int GetThreadBySP(int SP) const;  ///< Search threads
+
+    int GetCurrentThreadForGDB() const;  ///< Get GDB-style thread ID (the first is 1)
+    const Thread * GetThreadFromGDB(int thread_id) const;
+    bool IsGDBThreadAlive(int thread_id) const;  ///< GDB-style thread ID (the first is 1)
+};
+
 //! Implements a stack register with stack logic
 /*! This is the base class for all 2 different stack types. It holds the interface
     for pushing and poping bytes and addresses from stack by core and for interrupt */
@@ -44,9 +89,11 @@ class HWStack {
         uint32_t lowestStackPointer; //!< marker: lowest stackpointer used by program
         std::multimap<unsigned long, Funktor*> returnPointList; //!< Maps adresses to listeners for return addresses
 
-        void CheckReturnPoints(); //!< Checks PC to inform listeners, that a special address is arrived
+        /// Run functions registered for current stack address and delete them
+        void CheckReturnPoints();
         
     public:
+        ThreadList m_ThreadList;  ///< List of known threads created within target.
         //! Creates a stack instance
         HWStack(AvrDevice *core);
         ~HWStack() {}
@@ -85,6 +132,7 @@ class HWStackSram: public HWStack, public TraceValueRegister {
         void SetSph(unsigned char);
         unsigned char GetSpl();
         unsigned char GetSph();
+        void OnSPReadByTarget();
         
     public:
         //! Creates a stack instance

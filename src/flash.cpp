@@ -115,3 +115,44 @@ void AvrFlash::Decode(unsigned int addr) {
         delete DecodedMem[index];                     //delete old Instruction here 
     DecodedMem[index] = lookup_opcode(opcode, core);  //and set new one
 }
+
+/** Returns true if insn at address index*2 looks like switching thread stacks (heuristics).
+*
+* We presume any switch contains "out SP?,r??" insn. We return false
+* for any other.
+* Problematic uses of "out SP?,r??" that are not a switch:
+*  * prologue with frame pointer (sbiw, sbci, subi)
+*  * epilogue with frame pointer (adiw)
+*  * SP initialization after reset (ldi)
+*  * -mcall-prologues functions (sub, sbc, add, adc)
+*  * kernels like AvrX and DTRTK which switch stacks in two phases
+* We analyze few preceding instructions in hope to rule out these cases.
+* (GDB's weak prologue analysis is doctored elsewhere.)
+*/
+bool AvrFlash::LooksLikeContextSwitch(unsigned int addr) const
+{
+	assert(addr < size);
+	word index = addr/2;
+	DecodedInstruction * instr = DecodedMem[index];
+	avr_op_OUT * out_instr = dynamic_cast<avr_op_OUT*>(instr);
+	if(out_instr == NULL)
+		return false;
+	bool is_SPL = (out_instr->ioreg == 0x3d);  // or 0x5d
+	bool is_SPH = (out_instr->ioreg == 0x3e);  // or 0x5d
+	if(! is_SPH && ! is_SPL)
+		return false;
+
+	unsigned char out_R = out_instr->R1;  // We have "OUT SP, R"
+
+	for(int i = 1; i < 8 && i <= index; i++) {
+		instr = DecodedMem[index - i];
+		byte Rlo = instr->GetModifiedR();  // "sbiw r28:r29, 42" returns 28
+		byte Rhi = instr->GetModifiedRHi();  // "sbiw r28:r29, 42" returns 29
+		if(out_R == Rlo || is_SPH && out_R == Rhi) {
+			// TODO: LD, LDD, LDS indicate switch (not LDI)
+			return false;  // The "OUT" insn is in prologue/epilogue.
+		}
+	}
+
+	return true;
+}

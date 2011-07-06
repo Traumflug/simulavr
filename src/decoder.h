@@ -32,6 +32,8 @@
 #include "types.h"
 #include "avrdevice.h"
 
+class AvrFlash;
+
 //! Base class of core instruction
 /*! All instruction are derived from this class */
 class DecodedInstruction {
@@ -51,6 +53,10 @@ class DecodedInstruction {
         virtual int operator()() = 0;
         //! Performs instruction and write out instruction mnemonic for trace
         virtual int Trace() = 0;
+		//! If this instruction modifies a R0-R31 register then return its number, otherwise -1.
+		unsigned char GetModifiedR() const {return -1;}
+		//! If this instruction modifies a pair of R0-R31 registers then ...
+		unsigned char GetModifiedRHi() const {return -1;}
 };
 
 //! Translates an opcode to a instance of DecodedInstruction
@@ -73,6 +79,7 @@ class avr_op_ADC: public DecodedInstruction {
 
     public:
         avr_op_ADC(word opcode, AvrDevice *c);
+        virtual unsigned char GetModifiedR() const;
         int operator()();
         int Trace(); 
 }; //end of class 
@@ -94,6 +101,7 @@ class avr_op_ADD: public DecodedInstruction {
 
     public:
         avr_op_ADD(word opcode, AvrDevice *c); 
+        virtual unsigned char GetModifiedR() const;
         int operator()();
         int Trace(); 
 }; //end of class 
@@ -121,6 +129,8 @@ class avr_op_ADIW: public DecodedInstruction
 
     public:
         avr_op_ADIW(word opcode, AvrDevice *c);
+        virtual unsigned char GetModifiedR() const;
+        virtual unsigned char GetModifiedRHi() const;
         int operator()();
         int Trace();
 };
@@ -892,6 +902,7 @@ class avr_op_LDI: public DecodedInstruction
 
     public:
         avr_op_LDI(word opcode, AvrDevice *c);
+        virtual unsigned char GetModifiedR() const;
         int operator()();
         int Trace();
 };
@@ -1371,6 +1382,8 @@ class avr_op_OUT: public DecodedInstruction
         avr_op_OUT(word opcode, AvrDevice *c);
         int operator()();
         int Trace();
+
+    friend class AvrFlash;  // AvrFlash::LooksLikeContextSwitch() needs to read ioreg
 };
 
 class avr_op_POP: public DecodedInstruction
@@ -1537,6 +1550,7 @@ class avr_op_SBC: public DecodedInstruction
 
     public:
         avr_op_SBC(word opcode, AvrDevice *c);
+        virtual unsigned char GetModifiedR() const;
         int operator()();
         int Trace();
 };
@@ -1560,6 +1574,7 @@ class avr_op_SBCI: public DecodedInstruction
 
     public:
         avr_op_SBCI(word opcode, AvrDevice *c);
+        virtual unsigned char GetModifiedR() const;
         int operator()();
         int Trace();
 };
@@ -1649,6 +1664,8 @@ class avr_op_SBIW: public DecodedInstruction
 
     public:
         avr_op_SBIW(word opcode, AvrDevice *c);
+        virtual unsigned char GetModifiedR() const;
+        virtual unsigned char GetModifiedRHi() const;
         int operator()();
         int Trace();
 };
@@ -1968,6 +1985,7 @@ class avr_op_SUB: public DecodedInstruction
 
     public:
         avr_op_SUB(word opcode, AvrDevice *c);
+        virtual unsigned char GetModifiedR() const;
         int operator()();
         int Trace();
 };
@@ -1991,6 +2009,7 @@ class avr_op_SUBI: public DecodedInstruction
 
     public:
         avr_op_SUBI(word opcode, AvrDevice *c);
+        virtual unsigned char GetModifiedR() const;
         int operator()();
         int Trace();
 };

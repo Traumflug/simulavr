@@ -106,6 +106,9 @@ avr_op_ADC::avr_op_ADC(word opcode, AvrDevice *c):
     R2(get_rr_5(opcode)),
     status(c->status) {}
 
+unsigned char avr_op_ADC::GetModifiedR() const {
+    return R1;
+}
 int avr_op_ADC::operator()() { 
     unsigned char rd = core->GetCoreReg(R1);
     unsigned char rr = core->GetCoreReg(R2);
@@ -129,6 +132,9 @@ avr_op_ADD::avr_op_ADD(word opcode, AvrDevice *c):
     R2(get_rr_5(opcode)), 
     status(c->status) {}
 
+unsigned char avr_op_ADD::GetModifiedR() const {
+    return R1;
+}
 int avr_op_ADD::operator()() { 
     unsigned char rd = core->GetCoreReg(R1);
     unsigned char rr = core->GetCoreReg(R2);
@@ -154,6 +160,12 @@ avr_op_ADIW::avr_op_ADIW(word opcode, AvrDevice *c):
     status(c->status) {
     }
 
+unsigned char avr_op_ADIW::GetModifiedR() const {
+    return Rl;
+}
+unsigned char avr_op_ADIW::GetModifiedRHi() const {
+	return Rh;
+}
 int avr_op_ADIW::operator()() {
     word rd = (core->GetCoreReg(Rh) << 8) + core->GetCoreReg(Rl);
     word res = rd + K;
@@ -337,6 +349,7 @@ int avr_op_CALL::operator()()
     int k = (KH << 16) + K_lsb;
     int clkadd = core->flagXMega ? 1 : 2;
     
+    core->stack->m_ThreadList.OnCall();
     core->stack->PushAddr(core->PC + 2);
     core->DebugOnJump();
     core->PC = k - 1;
@@ -495,6 +508,7 @@ avr_op_EICALL::avr_op_EICALL(word opcode, AvrDevice *c):
 int avr_op_EICALL::operator()() {
     unsigned new_PC = core->GetRegZ() + (core->eind->GetRegVal() << 16);
 
+    core->stack->m_ThreadList.OnCall();
     core->stack->PushAddr(core->PC + 1);
 
     core->DebugOnJump();
@@ -690,6 +704,7 @@ int avr_op_ICALL::operator()() {
     /* Z is R31:R30 */
     unsigned int new_pc = core->GetRegZ();
 
+    core->stack->m_ThreadList.OnCall();
     core->stack->PushAddr(pc + 1);
 
     core->DebugOnJump();
@@ -784,6 +799,9 @@ avr_op_LDI::avr_op_LDI(word opcode, AvrDevice *c):
     R1(get_rd_4(opcode)),
     K(get_K_8(opcode)) {}
 
+unsigned char avr_op_LDI::GetModifiedR() const {
+    return R1;
+}
 int avr_op_LDI::operator()() { 
     core->SetCoreReg(R1, K);
 
@@ -1188,6 +1206,7 @@ avr_op_RCALL::avr_op_RCALL(word opcode, AvrDevice *c):
 
 int avr_op_RCALL::operator()() {
     core->stack->PushAddr(core->PC + 1);
+    core->stack->m_ThreadList.OnCall();
     core->DebugOnJump();
     core->PC += K;
     core->PC &= (core->Flash->GetSize() - 1) >> 1;
@@ -1258,6 +1277,9 @@ avr_op_SBC::avr_op_SBC(word opcode, AvrDevice *c):
     R2(get_rr_5(opcode)),
     status(c->status) {}
 
+unsigned char avr_op_SBC::GetModifiedR() const {
+    return R1;
+}
 int avr_op_SBC::operator()() {
     byte rd = core->GetCoreReg(R1);
     byte rr = core->GetCoreReg(R2);
@@ -1284,6 +1306,9 @@ avr_op_SBCI::avr_op_SBCI(word opcode, AvrDevice *c):
     status(c->status),
     K(get_K_8(opcode)) {}
 
+unsigned char avr_op_SBCI::GetModifiedR() const {
+    return R1;
+}
 int avr_op_SBCI::operator()() {
     byte rd = core->GetCoreReg(R1);
 
@@ -1375,6 +1400,12 @@ avr_op_SBIW::avr_op_SBIW(word opcode, AvrDevice *c):
     status(c->status),
     K(get_K_6(opcode)) {}
 
+unsigned char avr_op_SBIW::GetModifiedR() const {
+    return R1;
+}
+unsigned char avr_op_SBIW::GetModifiedRHi() const {
+	return R1 + 1;
+}
 int avr_op_SBIW::operator()() {
     byte rdl = core->GetCoreReg(R1);
     byte rdh = core->GetCoreReg(R1 + 1);
@@ -1662,6 +1693,9 @@ avr_op_SUB::avr_op_SUB(word opcode, AvrDevice *c):
     R2(get_rr_5(opcode)),
     status(c->status) {}
 
+unsigned char avr_op_SUB::GetModifiedR() const {
+    return R1;
+}
 int avr_op_SUB::operator()() {
     byte rd = core->GetCoreReg(R1);
     byte rr = core->GetCoreReg(R2);
@@ -1686,6 +1720,9 @@ avr_op_SUBI::avr_op_SUBI(word opcode, AvrDevice *c):
     status(c->status),
     K(get_K_8(opcode)) {}
 
+unsigned char avr_op_SUBI::GetModifiedR() const {
+    return R1;
+}
 int avr_op_SUBI::operator()() {
     byte rd = core->GetCoreReg(R1);
     byte res = rd - K;
