@@ -274,6 +274,7 @@ int avr_op_BRBC::operator()() {
     int clks;
 
     if((bitmask & (*(status))) == 0) {
+        core->DebugOnJump();
         core->PC += offset;
         clks = 2;
     } else {
@@ -293,6 +294,7 @@ int avr_op_BRBS::operator()() {
     int clks;
 
     if((bitmask & (*(status))) != 0) {
+        core->DebugOnJump();
         core->PC += offset;
         clks = 2;
     } else {
@@ -336,6 +338,7 @@ int avr_op_CALL::operator()()
     int clkadd = core->flagXMega ? 1 : 2;
     
     core->stack->PushAddr(core->PC + 2);
+    core->DebugOnJump();
     core->PC = k - 1;
 
     return core->PC_size + clkadd;
@@ -459,6 +462,7 @@ int avr_op_CPSE::operator()() {
         skip = 2;
 
     if(rd == rr) {
+        core->DebugOnJump();
         core->PC += skip - 1;
         clks = skip;
     } else
@@ -493,6 +497,7 @@ int avr_op_EICALL::operator()() {
 
     core->stack->PushAddr(core->PC + 1);
 
+    core->DebugOnJump();
     core->PC = new_PC;
 
     return core->flagXMega ? 3 : 4;
@@ -502,6 +507,7 @@ avr_op_EIJMP::avr_op_EIJMP(word opcode, AvrDevice *c):
     DecodedInstruction(c) {}
 
 int avr_op_EIJMP::operator()() {
+    core->DebugOnJump();
     core->PC = (core->eind->GetRegVal() << 16) + core->GetRegZ();
 
     return 2;
@@ -686,6 +692,7 @@ int avr_op_ICALL::operator()() {
 
     core->stack->PushAddr(pc + 1);
 
+    core->DebugOnJump();
     core->PC = new_pc - 1;
 
     return core->PC_size + core->flagXMega ? 0 : 1;
@@ -697,6 +704,7 @@ avr_op_IJMP::avr_op_IJMP(word opcode, AvrDevice *c):
 int avr_op_IJMP::operator()() {
     int new_pc = core->GetRegZ();
     
+    core->DebugOnJump();
     core->PC = new_pc - 1;
 
     return 2;
@@ -738,6 +746,7 @@ avr_op_JMP::avr_op_JMP(word opcode, AvrDevice *c):
 
 int avr_op_JMP::operator()() {
     word K_lsb = core->Flash->ReadMemWord((core->PC + 1) * 2);
+    core->DebugOnJump();
     core->PC = (K << 16) + K_lsb - 1;
     return 3;
 }
@@ -1179,6 +1188,7 @@ avr_op_RCALL::avr_op_RCALL(word opcode, AvrDevice *c):
 
 int avr_op_RCALL::operator()() {
     core->stack->PushAddr(core->PC + 1);
+    core->DebugOnJump();
     core->PC += K;
     core->PC &= (core->Flash->GetSize() - 1) >> 1;
 
@@ -1213,6 +1223,7 @@ avr_op_RJMP::avr_op_RJMP(word opcode, AvrDevice *c):
     K(n_bit_unsigned_to_signed(get_k_12(opcode), 12)) {}
 
 int avr_op_RJMP::operator()() {
+    core->DebugOnJump();
     core->PC += K;
     core->PC &= (core->Flash->GetSize() - 1) >> 1;
 
@@ -1319,6 +1330,7 @@ int avr_op_SBIC::operator()() {
         skip = 2;
 
     if((core->GetIOReg(ioreg) & (1 << Kbit)) == 0) {
+        core->DebugOnJump();
         core->PC += skip - 1;
         clks = skip;
     } else
@@ -1344,6 +1356,7 @@ int avr_op_SBIS::operator()() {
         skip = 2;
 
     if((core->GetIOReg(ioreg) & (1 << Kbit)) != 0) {
+        core->DebugOnJump();
         core->PC += skip - 1;
         clks = skip;
     } else
@@ -1395,6 +1408,7 @@ int avr_op_SBRC::operator()() {
         skip = 2;
 
     if((core->GetCoreReg(R1) & (1 << Kbit)) == 0) {
+        core->DebugOnJump();
         core->PC += skip - 1;
         clks = skip;
     } else
@@ -1417,6 +1431,7 @@ int avr_op_SBRS::operator()() {
         skip = 2;
 
     if((core->GetCoreReg(R1) & (1 << Kbit)) != 0) {
+        core->DebugOnJump();
         core->PC += skip - 1;
         clks = skip;
     } else

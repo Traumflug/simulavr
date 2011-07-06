@@ -537,6 +537,15 @@ void AvrDevice::RegisterTerminationSymbol(const char *symbol) {
     EP.push_back(epa);
 }
 
+void AvrDevice::DebugOnJump()
+{
+	const int COUNT = sizeof DebugRecentJumps / sizeof DebugRecentJumps[0];
+    DebugRecentJumpsIndex = (DebugRecentJumpsIndex + 1) % COUNT;
+    DebugRecentJumps[DebugRecentJumpsIndex] = PC * 2;
+    int next = (DebugRecentJumpsIndex + 1) % COUNT;
+    DebugRecentJumps[next] = -1;
+}
+
 unsigned char AvrDevice::GetRWMem(unsigned addr) {
     if(addr >= GetMemTotalSize())
         return 0;

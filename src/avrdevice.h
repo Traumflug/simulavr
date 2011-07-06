@@ -104,7 +104,9 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         bool flagTiny10; //!< core is a tiny4/5/9/10, change used clocks on some instructions and disables instructions
         bool flagTiny1x; //!< core is a tiny1x (but not tiny10!), change used clocks on some instructions and disables instructions
         bool flagXMega; //!< core is a XMEGA device, change used clocks on some instructions
-        
+        int DebugRecentJumps[20];  ///< Addresses of last few 'call' and 'jump' executed. For debugging.
+        int DebugRecentJumpsIndex;  ///< Index to address of the most recent jump
+
         MemoryOffsets *Sram;
         MemoryOffsets *R;
         MemoryOffsets *ioreg;
@@ -195,6 +197,9 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         unsigned GetRegY(void);
         //! Get value of Z register (16bit)
         unsigned GetRegZ(void);
+
+        //! When a call/jump/cond-jump instruction was executed. For debugging.
+        void DebugOnJump();
 };
 
 #endif
