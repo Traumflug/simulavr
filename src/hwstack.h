@@ -40,10 +40,14 @@
 class Thread
 {
 public:
-	int m_sp;
-	int m_ip;  ///< address (in bytes, not index)
-	bool m_alive;
-	unsigned char registers[32];  ///< R0 - R31
+    /// Stack Pointer. Address 0x0000 is invalid; used for running thread. GDB never sees the 0.
+    int m_sp;
+    int m_ip;  ///< address (in bytes, not index)
+    bool m_alive;
+    /** State of R0 - R31 registers at last call-site. GDB's prologue analyzer is weak
+    * and would not unwind the stack at "switch-site" - but it would on call-site. */
+    unsigned char registers[32];
+    int m_created_by_thread;
 };
 
 /** List of auto-detected threads. See my Google Docs notes.
@@ -76,6 +80,7 @@ public:
     int GetCurrentThreadForGDB() const;  ///< Get GDB-style thread ID (the first is 1)
     const Thread * GetThreadFromGDB(int thread_id) const;
     bool IsGDBThreadAlive(int thread_id) const;  ///< GDB-style thread ID (the first is 1)
+    int GetCount() const;
 };
 
 //! Implements a stack register with stack logic

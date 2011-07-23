@@ -118,8 +118,7 @@ void AvrFlash::Decode(unsigned int addr) {
 
 /** Returns true if insn at address index*2 looks like switching thread stacks (heuristics).
 *
-* We presume any switch contains "out SP?,r??" insn. We return false
-* for any other.
+* Any switch contains "out SP?,r??" insn. We return false for any other.
 * Problematic uses of "out SP?,r??" that are not a switch:
 *  * prologue with frame pointer (sbiw, sbci, subi)
 *  * epilogue with frame pointer (adiw)

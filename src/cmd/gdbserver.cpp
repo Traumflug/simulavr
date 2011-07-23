@@ -296,6 +296,7 @@ GdbServer::GdbServer(AvrDevice *c, int _port, int debug, int _waitForGdbConnecti
     runMode = GDB_RET_NOTHING_RECEIVED;
     lastCoreStepFinished = true;
     connState = false;
+    m_gdb_thread_id = 1;  // we start with the first thread already created
 
 #if defined(HAVE_SYS_MINGW) || defined(_MSC_VER)
     server = new GdbServerSocketMingW(_port);
@@ -317,7 +318,7 @@ GdbServer::~GdbServer() {
 }
 
 word GdbServer::avr_core_flash_read(int addr) {
-    assert(0 <= addr && (unsigned) addr*2+1 < core->Flash->GetSize());
+    assert(0 <= addr && (unsigned) addr+1 < core->Flash->GetSize());
     return core->Flash->ReadMemRawWord(addr);
 }
 
@@ -478,6 +479,10 @@ r00, r01, ..., r31, SREG, SPL, SPH, PCL, PCH
 Low bytes before High since AVR is little endian. */
 void GdbServer::gdb_read_registers( )
 {
+    bool current = core->stack->m_ThreadList.GetCurrentThreadForGDB() == m_gdb_thread_id;
+    const Thread* nonrunning = core->stack->m_ThreadList.GetThreadFromGDB(m_gdb_thread_id);
+    assert(current || nonrunning->m_sp != 0x0000);
+
     int   i;
     dword val;                  /* ensure it's 32 bit value */
 
@@ -490,7 +495,7 @@ void GdbServer::gdb_read_registers( )
     /* 32 gen purpose working registers */
     for ( i=0; i<32; i++ )
     {
-        val = core->GetCoreReg(i);
+        val = current ? core->GetCoreReg(i) : nonrunning->registers[i];
         buf[i*2]   = HEX_DIGIT[(val >> 4) & 0xf];
         buf[i*2+1] = HEX_DIGIT[val & 0xf];
     }
@@ -502,7 +507,7 @@ void GdbServer::gdb_read_registers( )
     i++;
 
     /* GDB thinks SP is register number 33 */
-    val=core->stack->GetStackPointer();
+    val = current ? core->stack->GetStackPointer() : nonrunning->m_sp;
     buf[i*2]   = HEX_DIGIT[(val >> 4) & 0xf];
     buf[i*2+1] = HEX_DIGIT[val & 0xf];
     i++;
@@ -515,7 +520,7 @@ void GdbServer::gdb_read_registers( )
     GDB stores PC in a 32 bit value (only uses 23 bits though).
     GDB thinks PC is bytes into flash, not words like in simulavr. */
 
-    val = core->PC * 2;
+    val = current ? core->PC * 2 : nonrunning->m_ip;
     buf[i*2]   = HEX_DIGIT[(val >> 4)  & 0xf];
     buf[i*2+1] = HEX_DIGIT[val & 0xf];
 
@@ -587,7 +592,7 @@ void GdbServer::gdb_write_registers(const char *pkt) {
     gdb_send_reply( "OK" );
 }
 
-/*! Extract a hexidecimal number from the pkt. Keep scanning pkt until stop char
+/*! Extract a hexadecimal number from the pkt. Keep scanning pkt until stop char
 is reached or size of int is exceeded or a '\0' is reached. pkt is modified
 to point to stop char when done.
 
@@ -1043,6 +1048,72 @@ void GdbServer::gdb_break_point(const char *pkt) {
     gdb_send_reply( "OK" );
 }
 
+void GdbServer::gdb_select_thread(const char *pkt)
+{
+    if(pkt[0] == 'c') {
+        gdb_send_reply( "" );  // cannot force thread-switch on target
+        return;
+    }
+    if(pkt[0] != 'g') {
+        gdb_send_reply( "" );
+        pkt--;
+        if (global_debug_on)
+            fprintf(stderr, "gdb  '%s' not supported\n", pkt);
+        return;
+    }
+
+    int thread_id = 0;
+    if(strcmp(pkt+1, "-1") == 0)
+        thread_id = -1;
+    else{
+        for(const char* p = pkt+1; *p != '\0'; p++) {
+            thread_id = thread_id << 4 | hex2nib(*p);
+        }
+    }
+
+    if (global_debug_on)
+        fprintf(stderr, "gdb* set thread %d\n", thread_id);
+    m_gdb_thread_id = (thread_id >= 1) ? thread_id : 1;  // Values "0" (any) and "1" (all) are not supported
+    gdb_send_reply( "OK" );
+}
+
+void GdbServer::gdb_is_thread_alive(const char *pkt)
+{
+    int thread_id = 0;
+    if(strcmp(pkt, "-1") == 0)
+        thread_id = -1;
+    else{
+        for(const char* p = pkt; *p != '\0'; p++) {
+            thread_id = thread_id << 4 | hex2nib(*p);
+        }
+    }
+    if (global_debug_on)
+        fprintf(stderr, "gdb  is thread %d alive\n", thread_id);
+    bool alive = core->stack->m_ThreadList.IsGDBThreadAlive(thread_id);
+    assert(alive);
+    gdb_send_reply( alive ? "OK" : "E00" );
+}
+
+void GdbServer::gdb_get_thread_list(const char *pkt)
+{
+    if (global_debug_on)
+        fprintf(stderr, "gdb  get thread info\n");
+    unsigned char allocated = core->stack->m_ThreadList.GetCount() * 3 + 5;
+    char * response = new char[allocated];
+    response[0] = 'm';
+    unsigned char pos = 1;
+
+    for(unsigned int i = 0; i < core->stack->m_ThreadList.GetCount(); i++) {
+        int used = snprintf(response + pos, allocated-pos, "%d,", i+1);
+        pos += used;
+    }
+    assert(response[pos-1] == ',');
+    response[pos-1] = '\0';
+
+    gdb_send_reply(response);
+    delete [] response;
+}
+
 /*! Continue command format: "c<addr>" or "s<addr>"
 
 If addr is given, resume at that address, otherwise, resume at current
@@ -1093,6 +1164,12 @@ int GdbServer::gdb_parse_packet(const char *pkt) {
             gdb_send_reply("S05"); /* signal # 5 is SIGTRAP */
             break;
 
+        case 'H':               /* Set thread */
+            gdb_select_thread(pkt);
+            break;
+        case 'T':               /* Is thread alive */
+            gdb_is_thread_alive(pkt);
+            break;
         case 'g':               /* read registers */
             gdb_read_registers();
             break;
@@ -1176,6 +1253,20 @@ int GdbServer::gdb_parse_packet(const char *pkt) {
                                "<target version=\"1.0\">\n"
                                "    <architecture>avr</architecture>\n"
                                "</target>\n");
+                return GDB_RET_OK;
+            } else if(strcmp(pkt, "qC") == 0) {
+                int thread_id = core->stack->m_ThreadList.GetCurrentThreadForGDB();
+                if (global_debug_on)
+				    fprintf(stderr, "gdb  get current thread: %d\n", thread_id);
+                char reply[100];
+                snprintf( reply, sizeof(reply), "QC%02x", thread_id);
+                gdb_send_reply( reply );
+                return GDB_RET_OK;
+            } else if(strcmp(pkt, "qfThreadInfo") == 0) {
+                gdb_get_thread_list(pkt);
+                return GDB_RET_OK;
+            } else if(strcmp(pkt, "qsThreadInfo") == 0) {
+                gdb_send_reply(  "l" );  // note lowercase "L"
                 return GDB_RET_OK;
             }
             
@@ -1264,6 +1355,8 @@ int GdbServer::gdb_receive_and_process_packet(int blocking) {
              * telling the simulator to interrupt what it is doing and return
              * control back to gdb.
              */
+            if (global_debug_on)
+                fprintf( stderr, "gdb* Ctrl-C\n" );
             return GDB_RET_CTRL_C;
 
         case -1:
@@ -1468,17 +1561,21 @@ void GdbServer::SendPosition(int signo) {
     unsigned int spl = sp & 0xff;
     unsigned int sph = (sp >> 8) & 0xff;
     int pc = core->PC * 2;
+    int thread_id = core->stack->m_ThreadList.GetCurrentThreadForGDB();
 
     bytes = snprintf(reply, sizeof(reply), "T%02x", signo);
 
     /* SREG, SP & PC */
     snprintf(reply + bytes, sizeof(reply) - bytes,
-            "20:%02x;" "21:%02x%02x;" "22:%02x%02x%02x%02x;",
+            "20:%02x;" "21:%02x%02x;" "22:%02x%02x%02x%02x;" "thread:%d;",
             ((int)(*(core->status))),
             spl, sph,
-            pc & 0xff, (pc >> 8) & 0xff, (pc >> 16) & 0xff, (pc >> 24) & 0xff );
+            pc & 0xff, (pc >> 8) & 0xff, (pc >> 16) & 0xff, (pc >> 24) & 0xff,
+            thread_id);
 
     gdb_send_reply(reply);
+    /* Next "read registers" command will be related to the new thread. */
+    m_gdb_thread_id = thread_id;
 }
 
 int GdbServer::SleepStep() {

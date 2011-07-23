@@ -327,8 +327,9 @@ void ThreadList::OnPop()
 	new_thread->m_ip = 0x0000;
 	new_thread->m_alive = true;
 
-	fprintf(stderr, "Context switch at PC 0x%05x from thread %d to %d\n", addr, m_cur_thread, n);
-	m_cur_thread = n;
+    if(global_verbose_on)
+        fprintf(stderr, "Context switch at PC 0x%05x from thread %d to %d\n", addr, m_cur_thread, n);
+    m_cur_thread = n;
 }
 
 int ThreadList::GetThreadBySP(int sp) const
@@ -362,6 +363,10 @@ bool ThreadList::IsGDBThreadAlive(int thread_id) const
 
 	Thread * p = m_threads[index];
 	return p->m_alive;
+}
+int ThreadList::GetCount() const
+{
+	return m_threads.size();
 }
 
 /* EOF */

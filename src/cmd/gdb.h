@@ -134,6 +134,7 @@ class GdbServer: public SimulationMember {
         //method local static vars.
         char *last_reply;  //used in last_reply();
         char buf[MAX_BUF]; //used in send_reply();
+        int m_gdb_thread_id;  ///< For queries by GDB. First thread ID is 1. See http://sources.redhat.com/gdb/current/onlinedocs/gdb/Packets.html#thread-id
 
 
         word avr_core_flash_read(int addr) ;
@@ -160,6 +161,9 @@ class GdbServer: public SimulationMember {
         void gdb_read_memory(const char *pkt);
         void gdb_write_memory(const char *pkt);
         void gdb_break_point(const char *pkt);
+        void gdb_select_thread(const char *pkt);
+        void gdb_is_thread_alive(const char *pkt);
+        void gdb_get_thread_list(const char *pkt);
         int gdb_get_signal(const char *pkt);
         int gdb_parse_packet(const char *pkt);
         int gdb_receive_and_process_packet(int blocking);

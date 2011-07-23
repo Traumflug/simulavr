@@ -81,7 +81,7 @@ class Memory {
           @param p a std::pair with address and symbol string */
         void AddSymbol(std::pair<unsigned int, std::string> p) { sym.insert(p); }
         
-        /*! Returns the size of memory block */
+        /*! Returns the size in bytes of memory block */
         unsigned int GetSize() { return size; }
         
         /*! Write memory data to memory */
