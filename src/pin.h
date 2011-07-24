@@ -25,6 +25,7 @@
 
 #ifndef PIN
 #define PIN
+#include <cstddef>
 #include <vector>
 
 #include "pinnotify.h"
