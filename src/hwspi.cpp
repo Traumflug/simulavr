@@ -275,7 +275,7 @@ unsigned int HWSpi::CpuCycle() {
                         txbit(bitpos);
                     }
                     break;
-                case 1:  // PetrH: Seems to be unreachable. WTF?
+                case 1:
                     // set valid clock
                     SCK.SetAlternatePort(!(spcr&CPOL));
                     if (spcr&CPHA) {
