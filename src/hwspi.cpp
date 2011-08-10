@@ -81,13 +81,13 @@ void HWSpi::SetSPDR(unsigned char val) {
     spdr_access();
     data_write=val;
     if (spcr & MSTR) { // mster mode?
-    if (bitcnt<8) {
-        spsr|=WCOL; // not yet ready -> Write Collision
-    } else {
-        bitcnt=0;
-        finished=false;
-        clkcnt=0;
-    }
+        if (bitcnt<8) {
+            spsr|=WCOL; // not yet ready -> Write Collision
+        } else {
+            bitcnt=0;
+            finished=false;
+            clkcnt=0;
+        }
     }
 }
 
@@ -104,14 +104,14 @@ void HWSpi::updatePrescaler() {
 
 void HWSpi::SetSPSR(unsigned char val) {
     if (mega_mode) {
-    spsr&=~SPI2X;
-    spsr|=val&SPI2X;
-    updatePrescaler();
+        spsr&=~SPI2X;
+        spsr|=val&SPI2X;
+        updatePrescaler();
     } else {
-    ((core->trace_on) ?
-     (traceOut) : (cerr))
-        << "spsr is read only! (0x" << hex << core->PC << " =  " <<
-        core->Flash->GetSymbolAtAddress(core->PC) << ")" << endl;
+        ((core->trace_on) ?
+            (traceOut) : (cerr))
+            << "spsr is read only! (0x" << hex << core->PC << " =  " <<
+            core->Flash->GetSymbolAtAddress(core->PC) << ")" << endl;
     }
 }
 
@@ -119,7 +119,7 @@ void HWSpi::SetSPSR(unsigned char val) {
 void HWSpi::SetSPCR(unsigned char val) { 
     spcr=val;
     if ( spcr & SPE) { //SPI is enabled
-    core->AddToCycleList(this);
+        core->AddToCycleList(this);
         if (spcr & MSTR) { //master
             MISO.SetUseAlternateDdr(1);
             MISO.SetAlternateDdr(0); //always input
@@ -234,7 +234,8 @@ void HWSpi::trxend() {
 }
 
 unsigned int HWSpi::CpuCycle() {
-    if (spcr & SPE) { // active at all?
+    if ((spcr & SPE) == 0)  // active at all?
+        return 0;
     int bitpos=(spcr&DORD) ? bitcnt : 7-bitcnt;
     int bitpos_prec=(spcr&DORD) ? bitcnt-1 : 8-bitcnt;
     
@@ -244,107 +245,104 @@ unsigned int HWSpi::CpuCycle() {
     
     if (spcr & MSTR) {
         /* Check whether we're externally driven into slave mode.
-           FIXME: It is unclear atleast from mega8 docs if this behaviour is
+           FIXME: It is unclear at least from mega8 docs if this behaviour is
            also right when the SPI is inactive!*/
-        if ((!SS.GetDdr()) &&
-        (!SS)) {
-        SetSPCR(spcr&~MSTR);
-        // request interrupt
-        spsr|=SPIF;
-        if (spcr&SPIE) {
-            irq->SetIrqFlag(this, irq_vector);
+        if (! SS.GetDdr() && ! SS) {
+            SetSPCR(spcr & ~MSTR);
+            // request interrupt
+            spsr |= SPIF;
+            if (spcr&SPIE) {
+                irq->SetIrqFlag(this, irq_vector);
+            }
+            bitcnt = 8; // slave and idle
+            finished=false;
+                clkcnt=0;
         }
-        bitcnt=8; // slave and idle
-        finished=false;
-        clkcnt=0;
-        }
-        if (!(clkcnt%clkdiv)){ // TRX bits
-        if (bitcnt<8) {
-            if (bitcnt==0)
-            shift_in=0;
-            switch ((clkcnt/clkdiv)&1) {
-            case 0:
-            // set idle clock
-            SCK.SetAlternatePort(spcr&CPOL);
-            // late phase (for last bit)?
-            if (spcr&CPHA) {
-                if (bitcnt) {
-                rxbit(bitpos_prec);
+        if ((clkcnt%clkdiv) == 0){ // TRX bits
+            if (bitcnt < 8) {
+                if (bitcnt == 0)
+                    shift_in = 0;
+                switch ((clkcnt/clkdiv)&1) {
+                case 0:
+                    // set idle clock
+                    SCK.SetAlternatePort(spcr&CPOL);
+                    // late phase (for last bit)?
+                    if (spcr&CPHA) {
+                        if (bitcnt) {
+                            rxbit(bitpos_prec);
+                        }
+                    } else {
+                        txbit(bitpos);
+                    }
+                    break;
+                case 1:  // PetrH: Seems to be unreachable. WTF?
+                    // set valid clock
+                    SCK.SetAlternatePort(!(spcr&CPOL));
+                    if (spcr&CPHA) {
+                        txbit(bitpos);
+                    } else {
+                        rxbit(bitpos);
+                    }
+                    bitcnt++;
+                    break;
                 }
-            } else {
-                txbit(bitpos);
+                finished = (bitcnt==8);
+            } else if (finished) {
+                if (spcr&CPHA) {
+                    rxbit(bitpos_prec);
+                }
+                trxend();
+                // set idle clock
+                SCK.SetAlternatePort(spcr&CPOL);
+                // set idle MOSI (high if CPHA==0)
+                if (!(spcr&CPHA))
+                    MOSI.SetAlternatePort(1);
             }
-            break;
-            case 1:
-            // set valid clock
-            SCK.SetAlternatePort(!(spcr&CPOL));
-            if (spcr&CPHA) {
-                txbit(bitpos);
-            } else {
-                rxbit(bitpos);
-            }
-            bitcnt++;
-            break;
-            }
-            finished=(bitcnt==8);
-        } else if (finished) {
-            if (spcr&CPHA) {
-            rxbit(bitpos_prec);
-            }
-            trxend();
-            // set idle clock
-            SCK.SetAlternatePort(spcr&CPOL);
-            // set idle MOSI (high if CPHA==0)
-            if (!(spcr&CPHA))
-            MOSI.SetAlternatePort(1);
         }
-        }    
     } else {
         // possible slave mode
         if (SS) {
-        // slave selected lifted-> force end of transmission
-        bitcnt=8;
+            // slave selected lifted-> force end of transmission
+            bitcnt=8;
         } else {
-        // Slave mode
-        
-        // start slave if necessary
-        if (bitcnt==8) {
-            bitcnt=0;
-            finished=false;
-            shift_in=0;
-            oldsck=SCK;
-        } else {
-            /* Set initial bit for CPHA==0 */
-            if (!(spcr&CPHA)) {
-            txbit(bitpos);
+            // Slave mode
+            if (bitcnt == 8) {
+                bitcnt = 0;
+                finished = false;
+                shift_in = 0;
+                oldsck = SCK;
+            } else {
+                /* Set initial bit for CPHA==0 */
+                if (!(spcr&CPHA)) {
+                    txbit(bitpos);
+                }
             }
-        }
-        if (SCK!=oldsck) { // edge detection
-            bool leading=false; // leading edge clock?
-            if (spcr&CPOL) {
-            // leading edge is falling edge
-            leading=!SCK;
-            } else leading=SCK;
+            if (SCK != oldsck) { // edge detection
+                bool leading = false; // leading edge clock?
+                if (spcr&CPOL) {
+                    // leading edge is falling edge
+                    leading = ! SCK;
+                } else
+                    leading = SCK;
 
-            // determine whether we should sample or setup
-            bool sample=leading ^ ((spcr&CPHA)!=0);
+                // determine whether we should sample or setup
+                bool sample = leading ^ ((spcr&CPHA)!=0);
 
-            if (sample)
-            rxbit(bitpos);
-            else
-            txbit(bitpos);
+                if (sample)
+                    rxbit(bitpos);
+                else
+                    txbit(bitpos);
 
-            if (!leading) {
-            bitcnt++;
-            finished=(bitcnt==8);
+                if (!leading) {
+                    bitcnt++;
+                    finished = (bitcnt==8);
+                }
             }
-        }
-        trxend();
-        oldsck=SCK;
+            trxend();
+            oldsck = SCK;
         }
     }
     clkcnt++;
-    }
     return 0;
 }
 
