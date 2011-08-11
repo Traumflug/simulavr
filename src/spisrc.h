@@ -3,6 +3,8 @@
 #include <fstream>
 #include "avrdevice.h"
 
+/** Reads stimuli from file and outputs data via SPI to nets provided to constructor.
+Simulates SPI clock rate 10 kHz. */
 class SpiSource : public SimulationMember {
 	private:
 		Pin				_ss;	// Output to AVR

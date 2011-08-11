@@ -112,12 +112,12 @@ void HWPort::CalcOutputs(void) { //Calculate the new output value to be transmit
                 workingPort |= port & actualBit;
         }
 
-        if(workingDdr & actualBit) { //Ddr is output
+        if(workingDdr & actualBit) { // DDR is set to output (1)
             if(workingPort & actualBit) //Port is High
                 p[actualBitNo].outState = Pin::HIGH;
             else
                 p[actualBitNo].outState = Pin::LOW;
-        } else { //ddr is low
+        } else { // DDR is input (0)
             if(workingPort & actualBit)
                 p[actualBitNo].outState = Pin::PULLUP;
             else 

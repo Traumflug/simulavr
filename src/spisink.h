@@ -4,6 +4,7 @@
 
 // This class monitors the /SS, SCLK, and MISO pin of the AVR and
 // prints the results one byte at a time to stdout.
+// PetrH: Implemented using simulated polling (each 1 us). TODO: Rewrite.
 class SpiSink : public SimulationMember {
 	private:
 		unsigned char	_port;

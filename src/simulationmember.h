@@ -29,8 +29,8 @@
 #include "systemclocktypes.h"
 
 /** Any class which is needs to be notified at certain time implements this.
-It usually calls SystemClock::Add(this) and SimulationMember::Step() will be
-called later. People, please avoid polling. */
+* Implementor usually calls SystemClock::Add(this) and its SimulationMember::Step()
+* will be called later. People, please avoid polling. */
 class SimulationMember {
     public:
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0)=0;
