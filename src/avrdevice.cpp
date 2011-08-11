@@ -256,9 +256,11 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     flagXMega(false) {
     dump_manager = DumpManager::Instance();
     dump_manager->registerAvrDevice(this);
+	DebugRecentJumpsIndex = 0;
     
     TraceValue* pc_tracer=trace_direct(&coreTraceGroup, "PC", &cPC);
     coreTraceGroup.RegisterTraceValue(new TwiceTV(coreTraceGroup.GetTraceValuePrefix()+"PCb",  pc_tracer));
+	trace_on = 0;
     
     data = new Data; //only the symbol container
 
@@ -357,11 +359,6 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
 
 //do a single core step, (0)->a real hardware step, (1) until the uC finish the opcode! 
 int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_ns) {
-    int bpFlag = 0;
-    int hwWait = 0;
-
-    //    do {
-
     if (cpuCycles<=0)
         cPC=PC;
     if(trace_on == 1) {
@@ -374,7 +371,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
             traceOut << " " ;
     }
     
-    hwWait = 0;
+    int hwWait = 0;
     vector<Hardware *>::iterator ii;
     vector<Hardware *>::iterator end;
     end = hwCycleList.end();
@@ -395,12 +392,11 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
             if(BP.end() != find(BP.begin(), BP.end(), PC)) {
                 if(trace_on)
                     traceOut << "Breakpoint found at 0x" << hex << PC << dec << endl;
-                bpFlag = BREAK_POINT;
                 if(nextStepIn_ns != 0)
                     *nextStepIn_ns=clockFreq;
                 untilCoreStepFinished = !((cpuCycles > 0) || (hwWait > 0));
                 dump_manager->cycle();
-                return bpFlag;
+                return BREAK_POINT;
             }
 
             if(EP.end() != find(EP.begin(), EP.end(), PC)) {
@@ -408,7 +404,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                     cout << "Simulation finished!" << endl;
                 SystemClock::Instance().stop();
                 dump_manager->cycle();
-                return bpFlag;
+                return 0;
             }
 
             if(newIrqPc != 0xffffffff) {
@@ -452,20 +448,15 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                 }
                 // report changes on status
                 statusRegister->trigger_change();
-                
-                // cpuCycles=(*(Flash->DecodedMem[PC]))();
             }
 
-            if(cpuCycles < 0)
-                bpFlag = cpuCycles;
-            if(bpFlag != BREAK_POINT)
+            if(cpuCycles != BREAK_POINT)
                 PC++;
 
             if(((status->I) == 1) && (newIrqPc == 0xffffffff)) {
                 newIrqPc = irqSystem->GetNewPc(actualIrqVector); //If any interrupt is pending get new PC 
                 noDirectIrqJump = 1;
             }
-
         }
     } else { //cpuCycles>0
         if(trace_on == 1)
@@ -475,20 +466,16 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
     if(nextStepIn_ns != 0)
         *nextStepIn_ns = clockFreq;
 
+	int bpFlag = cpuCycles;
     cpuCycles--;
     if(trace_on == 1) {
         traceOut << endl;
         sysConHandler.TraceNextLine();
     }
 
-    //if (untilCoreStepFinished == false) { //we wait not until end so reply the finish state
     untilCoreStepFinished = !((cpuCycles > 0) || (hwWait > 0));
     dump_manager->cycle();
     return bpFlag;
-    //}
-    //} while ( untilCoreStepFinished && ((cpuCycles>0) || (hwWait>0)));
-
-    //return bpFlag;
 }
 
 void AvrDevice::Reset() {
