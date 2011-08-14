@@ -54,9 +54,9 @@ class DecodedInstruction {
         //! Performs instruction and write out instruction mnemonic for trace
         virtual int Trace() = 0;
 		//! If this instruction modifies a R0-R31 register then return its number, otherwise -1.
-		unsigned char GetModifiedR() const {return -1;}
+		virtual unsigned char GetModifiedR() const {return -1;}
 		//! If this instruction modifies a pair of R0-R31 registers then ...
-		unsigned char GetModifiedRHi() const {return -1;}
+		virtual unsigned char GetModifiedRHi() const {return -1;}
 };
 
 //! Translates an opcode to a instance of DecodedInstruction
