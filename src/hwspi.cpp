@@ -35,10 +35,10 @@
 //configuration
 #define SPIE 0x80
 #define SPE  0x40
-#define DORD 0x20
+#define DORD 0x20  ///< "When the DORD bit is written to one, the LSB of the data word is transmitted first."
 #define MSTR 0x10
-#define CPOL 0x08
-#define CPHA 0x04
+#define CPOL 0x08  ///< "When this bit is written to one, SCK is high when idle."
+#define CPHA 0x04  ///< When this bit is written to one, output is setup at leading edge and input is sampled trailing edge.
 #define SPR1 0x02
 #define SPR0 0x01
 
@@ -125,12 +125,12 @@ void HWSpi::SetSPCR(unsigned char val) {
             MISO.SetAlternateDdr(0); //always input
             MOSI.SetUseAlternatePortIfDdrSet(1);
 
-        /* according to the graphics in the atmega8 datasheet, p.132
+            /* according to the graphics in the atmega8 datasheet, p.132
            (10/06), MOSI is high when idle. FIXME: check whether
            this applies to real hardware. */
-        MOSI.SetAlternatePort(1);
+            MOSI.SetAlternatePort(1);
             SCK.SetUseAlternatePortIfDdrSet(1);
-        SCK.SetAlternatePort(spcr & CPOL);
+            SCK.SetAlternatePort(spcr & CPOL);
         } else { //slave
             MISO.SetUseAlternatePortIfDdrSet(1);
             MOSI.SetUseAlternateDdr(1);
@@ -142,12 +142,12 @@ void HWSpi::SetSPCR(unsigned char val) {
         } 
     } else { //Spi is off so unset alternate pin functions
 
-    /* FIXME: Check whether these will be really tied
+        /* FIXME: Check whether these will be really tied
        to reset state as long as the SPI is off. Check
        the switch on/off behaviour of the SPI interface! */
-    bitcnt=8;
-    finished=false;
-    core->RemoveFromCycleList(this);
+        bitcnt=8;
+        finished=false;
+        core->RemoveFromCycleList(this);
         MOSI.SetUseAlternatePortIfDdrSet(0);
         MISO.SetUseAlternatePortIfDdrSet(0);
         SCK.SetUseAlternatePortIfDdrSet(0);
