@@ -24,6 +24,7 @@
  *  $Id$
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include "hwspi.h"
 #include "flash.h"
@@ -129,8 +130,10 @@ void HWSpi::SetSPCR(unsigned char val) {
            (10/06), MOSI is high when idle. FIXME: check whether
            this applies to real hardware. */
             MOSI.SetAlternatePort(1);
-            SCK.SetUseAlternatePortIfDdrSet(1);
             SCK.SetAlternatePort(spcr & CPOL);
+            assert(SCK.GetPin().outState == ((spcr & CPOL) ? Pin::HIGH : Pin::LOW));
+            SCK.SetUseAlternatePortIfDdrSet(1);
+            assert(SCK.GetPin().outState == ((spcr & CPOL) ? Pin::HIGH : Pin::LOW));
         } else { //slave
             MISO.SetUseAlternatePortIfDdrSet(1);
             MOSI.SetUseAlternateDdr(1);
