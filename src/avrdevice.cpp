@@ -475,7 +475,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
 
     untilCoreStepFinished = !((cpuCycles > 0) || (hwWait > 0));
     dump_manager->cycle();
-    return bpFlag;
+    return (bpFlag < 0) ? bpFlag : 0;
 }
 
 void AvrDevice::Reset() {
