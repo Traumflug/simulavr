@@ -87,10 +87,8 @@ void HWPort::CalcPin(void) {
 }
 
 void HWPort::CalcOutputs(void) { //Calculate the new output value to be transmitted to the environment
-    unsigned char actualBit = 0x01;
-    unsigned char actualBitNo = 0;
-
-    do { //calc all bits
+    for(int actualBitNo = 0; actualBitNo < portSize; actualBitNo++) {
+        unsigned char actualBit = 1 << actualBitNo;
         unsigned char workingPort = 0;
         unsigned char workingDdr = 0;
 
@@ -123,11 +121,7 @@ void HWPort::CalcOutputs(void) { //Calculate the new output value to be transmit
             else 
                 p[actualBitNo].outState = Pin::TRISTATE;
         }
-
-        actualBit <<= 1;
-        actualBitNo++;
-        
-    } while(actualBitNo < portSize); // as long as all bits are calculated
+    }
     
     CalcPin(); //now transfer the result also to all HWPort::pin instances
 } //end of Calc()
