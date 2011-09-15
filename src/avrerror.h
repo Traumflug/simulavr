@@ -28,7 +28,7 @@
 
 #include <iostream>
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(SWIG)
 #define ATTRIBUTE_NORETURN __declspec(noreturn)
 #define ATTRIBUTE_PRINTF(string_arg, first_arg)
 #elif defined(__GNUC__)
