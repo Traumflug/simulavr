@@ -35,6 +35,7 @@
 
 #if defined(_MSC_VER) || defined(HAVE_SYS_MINGW)
 #include <winsock2.h>
+#undef GetCurrentTime  // defined by winbase.h, clashes with SystemClock::GetCurrentTime()
 #include <sys/types.h>
 #define ssize_t size_t
 #else
