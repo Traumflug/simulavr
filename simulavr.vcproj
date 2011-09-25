@@ -161,6 +161,79 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="ReleasePythonLibrary|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="src/msvc/;&quot;$(InputDir)\src&quot;;src/"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;"
+				RuntimeLibrary="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				DisableSpecificWarnings="4355;"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="Ws2_32.lib"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="C:\Python27\libs"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -647,6 +720,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ui\keyboard.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ui\lcd.cpp"
 				>
 			</File>
@@ -703,6 +780,28 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\simulavr_wrap.cxx"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleasePythonLibrary|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories="C:\Python27\include"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\src\specialmem.cpp"
 				>
 			</File>
@@ -750,6 +849,30 @@
 		<File
 			RelativePath=".\doc\_templates\layout.html"
 			>
+		</File>
+		<File
+			RelativePath=".\src\simulavr.i"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				ExcludedFromBuild="true"
+				>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				ExcludedFromBuild="true"
+				>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="ReleasePythonLibrary|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="Processing SWIG interface file"
+					CommandLine="C:\Users\petr\Desktop\swigwin-2.0.4\swig.exe -c++ -D_MSC_VER -python $(InputPath)&#x0D;&#x0A;"
+					Outputs="$(InputDir)$(InputName)_wrap.cxx"
+				/>
+			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>
