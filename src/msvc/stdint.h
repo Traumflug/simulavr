@@ -33,7 +33,11 @@
 #error "Use this header only with Microsoft Visual C++ compilers!"
 #endif // _MSC_VER ]
 
-#ifndef _MSC_STDINT_H_ // [
+#if _MSC_VER == 1600
+#  include <c:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdint.h>
+#elif _MSC_VER == 1700
+#  include <c:\Program Files\Microsoft Visual Studio 11.0\VC\include\stdint.h>
+#elif !defined _MSC_STDINT_H_ // [
 #define _MSC_STDINT_H_
 
 #if _MSC_VER > 1000
