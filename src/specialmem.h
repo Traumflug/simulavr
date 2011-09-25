@@ -66,7 +66,7 @@ class RWReadFromFile: public RWMemoryMember {
     unsigned char get() const;
     void set(unsigned char);
 
-    mutable std::istream &is;
+    std::istream &is;
     mutable std::ifstream ifs;
 };
 
