@@ -29,7 +29,14 @@
 #include "specialmem.h"
 #include "ui/scope.h"
 #include "avrerror.h"
-    
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+#   pragma message ("If link fails because of missing pythonXY_d.lib then")
+#   pragma message ("you need to edit simulavr_wrap.cxx and")
+#   pragma message ("find #include <Python.h> and replace with #include <io.h>,")
+#   pragma message ("and #undef _DEBUG and #include <Python.h>, and #define _DEBUG")
+#endif
+
 SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %}
 
