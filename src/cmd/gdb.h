@@ -31,6 +31,7 @@
 
 #if defined(HAVE_SYS_MINGW) || defined(_MSC_VER)
 #   include <winsock2.h>
+#   undef GetCurrentTime  // defined by winbase.h, clashes with SystemClock::GetCurrentTime()
 #   include <sys/types.h>
 #else
 #   include <sys/socket.h>

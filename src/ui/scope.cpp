@@ -24,13 +24,6 @@
  */
 
 #include "scope.h"
-
-#ifdef HAVE_SYS_MINGW
-    // this is necessary, because with including winsock2.h GetCurrentTime gets
-    // redefined as GetTickCount. So, we have it here to reset!
-#   undef GetCurrentTime
-#endif
-
 #include "systemclock.h"
 
 
