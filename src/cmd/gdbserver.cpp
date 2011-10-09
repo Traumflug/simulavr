@@ -985,22 +985,17 @@ void GdbServer::gdb_break_point(const char *pkt) {
     char t = *pkt++;
     pkt++;                      /* skip over first ',' */
 
-    //cout << "###############################################" << endl;
-
     gdb_get_addr_len( pkt, ',', '\0', &addr, &len );
 
     switch (t) {
         case '0':               /* software breakpoint */
-            /* addr/2 since addr refers to PC */
-            if ( (addr/2) >= core->Flash->GetSize() )
+            /* Both `addr' and GetSize() are in bytes. */
+            if ( addr >= core->Flash->GetSize() )
             {
                 avr_warning( "Attempt to set break at invalid addr\n" );
                 gdb_send_reply( "E01" );
                 return;
             }
-
-
-
 
             if (z == 'z') 
             {
@@ -1501,9 +1496,6 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
                     connState = false;
                     core->DeleteAllBreakpoints();
                     return 0; 
-
-                    break;
-
             } //end switch GDB_RETURN_VALUE
 
             if (runMode == GDB_RET_SINGLE_STEP || runMode == GDB_RET_CONTINUE) {
