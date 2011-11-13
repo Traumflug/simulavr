@@ -372,12 +372,9 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
     }
     
     int hwWait = 0;
-    vector<Hardware *>::iterator ii;
-    vector<Hardware *>::iterator end;
-    end = hwCycleList.end();
-
-    for(ii = hwCycleList.begin(); ii != end; ii++) {
-        if (((*ii)->CpuCycle()) > 0)
+    for(unsigned i = 0; i < hwCycleList.size(); i++) {
+        Hardware * p = hwCycleList[i];
+        if (p->CpuCycle() > 0)
             hwWait = 1;
     }
 
@@ -394,7 +391,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                     traceOut << "Breakpoint found at 0x" << hex << PC << dec << endl;
                 if(nextStepIn_ns != 0)
                     *nextStepIn_ns=clockFreq;
-                untilCoreStepFinished = !((cpuCycles > 0) || (hwWait > 0));
+                untilCoreStepFinished = !(cpuCycles > 0);
                 dump_manager->cycle();
                 return BREAK_POINT;
             }
