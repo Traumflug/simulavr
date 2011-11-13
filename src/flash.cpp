@@ -136,8 +136,8 @@ bool AvrFlash::LooksLikeContextSwitch(unsigned int addr) const
 	avr_op_OUT * out_instr = dynamic_cast<avr_op_OUT*>(instr);
 	if(out_instr == NULL)
 		return false;
-	bool is_SPL = (out_instr->ioreg == 0x3d);  // or 0x5d
-	bool is_SPH = (out_instr->ioreg == 0x3e);  // or 0x5d
+	bool is_SPL = (out_instr->ioreg == 0x3d);  // SPL register (0x5d)
+	bool is_SPH = (out_instr->ioreg == 0x3e);  // SPH register (0x5e)
 	if(! is_SPH && ! is_SPL)
 		return false;
 
