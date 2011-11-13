@@ -75,10 +75,6 @@ unsigned char HWAcomp::GetAcsr() {
     return acsr;
 }
 
-unsigned int HWAcomp::CpuCycle() {
-    return 0;
-}
-
 void HWAcomp::PinStateHasChanged(Pin *p) {
     bool oldComp=(acsr & ACO);
 

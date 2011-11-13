@@ -46,7 +46,6 @@ class HWAcomp: public Hardware, public HasPinNotifyFunction, public TraceValueRe
         HWAcomp(AvrDevice *core, HWIrqSystem *irqsys, PinAtPort ain0, PinAtPort ain1, unsigned int irqVec);
         unsigned char GetAcsr();
         void SetAcsr(unsigned char val);
-        unsigned int CpuCycle();
         void Reset(); 
         //bool IsIrqFlagSet(unsigned int vec);
         void ClearIrqFlag(unsigned int vec);
