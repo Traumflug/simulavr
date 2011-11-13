@@ -41,7 +41,8 @@ class Hardware {
         virtual ~Hardware() {};
 
         /*! Called for each AVR cycle when this hardware has registered itself
-          as a receiver for AVR clocks. */
+          as a receiver for AVR clocks. Returns nonzero if instructions should
+          not be executed (e.g. a Flash write is in progress). */
         virtual unsigned int CpuCycle(void) { return 0; }
 
         /*! Implement the hardware's reset functionality here. The default
