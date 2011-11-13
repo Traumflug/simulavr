@@ -370,22 +370,20 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
         for (int len = sym.length(); len < 30;len++)
             traceOut << " " ;
     }
-    
-    int hwWait = 0;
+
+	bool hwWait = false;
     for(unsigned i = 0; i < hwCycleList.size(); i++) {
         Hardware * p = hwCycleList[i];
         if (p->CpuCycle() > 0)
-            hwWait = 1;
+            hwWait = true;
     }
 
-    if(cpuCycles <= 0) {
+    if(hwWait) {
+        if(trace_on)
+            traceOut << "CPU-Hold by IO-Hardware ";
+	} else if(cpuCycles <= 0) {
 
-        if(hwWait != 0) {
-            if(trace_on)
-                traceOut << "CPU-Hold by IO-Hardware ";
-        } else {
             //check for enabled breakpoints here
-
             if(BP.end() != find(BP.begin(), BP.end(), PC)) {
                 if(trace_on)
                     traceOut << "Breakpoint found at 0x" << hex << PC << dec << endl;
@@ -447,32 +445,32 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                 statusRegister->trigger_change();
             }
 
-            if(cpuCycles != BREAK_POINT)
+            if(cpuCycles != BREAK_POINT) {
                 PC++;
+                cpuCycles--;
+            }
 
             if(((status->I) == 1) && (newIrqPc == 0xffffffff)) {
                 newIrqPc = irqSystem->GetNewPc(actualIrqVector); //If any interrupt is pending get new PC 
                 noDirectIrqJump = 1;
             }
-        }
     } else { //cpuCycles>0
         if(trace_on == 1)
             traceOut << "CPU-waitstate";
+        cpuCycles--;
     }
 
-    if(nextStepIn_ns != 0)
+    if(nextStepIn_ns != NULL)
         *nextStepIn_ns = clockFreq;
 
-	int bpFlag = cpuCycles;
-    cpuCycles--;
     if(trace_on == 1) {
         traceOut << endl;
         sysConHandler.TraceNextLine();
     }
 
-    untilCoreStepFinished = !((cpuCycles > 0) || (hwWait > 0));
+    untilCoreStepFinished = !((cpuCycles > 0) || hwWait);
     dump_manager->cycle();
-    return (bpFlag < 0) ? bpFlag : 0;
+    return (cpuCycles < 0) ? cpuCycles : 0;
 }
 
 void AvrDevice::Reset() {
