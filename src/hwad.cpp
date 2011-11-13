@@ -235,9 +235,9 @@ unsigned int HWAd::CpuCycle() {
 
                     } else if ( clk== 13*2) {
                         //calc sample to go to 10 bit value
-			if(admux->GetAdmux() & ADLAR){
-				adSample <<= (16-10); // Left-justify sample
-			}
+                        if(admux->GetAdmux() & ADLAR){
+                            adSample <<= (16-10); // Left-justify sample
+                        }
 
                         if (adchLocked) {
                             if (core->trace_on) {
@@ -266,10 +266,6 @@ unsigned int HWAd::CpuCycle() {
                     break;
 
             } // end of switch state
-
-
-
-
         }
 
     } else { //ad not enabled
