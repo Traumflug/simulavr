@@ -56,7 +56,7 @@ HWEeprom::HWEeprom(AvrDevice *_core,
     if(irqSystem)
         irqSystem->DebugVerifyInterruptVector(irqVectorNo, this);
 
-    // in a "fresh" device eeprom is intialized to 0xff like flash too
+    // in a "fresh" device eeprom is initialized to 0xff like flash too
     for(unsigned int tt = 0; tt < size; tt++)
         myMemory[tt] = 0xff;
 
@@ -142,7 +142,7 @@ void HWEeprom::SetEecr(unsigned char newval) {
                 cpuHoldCycles = 4;
                 assert(eear < size);
                 eedr = myMemory[eear];
-                eecr &= ~CTRL_READ; // reset read bit isn't decribed in document!
+                eecr &= ~CTRL_READ; // reset read bit isn't described in document!
                 core->AddToCycleList(this);
                 if(core->trace_on == 1)
                     traceOut << " EEPROM: Read = 0x" << hex << (unsigned int)eedr << dec;
@@ -156,17 +156,17 @@ void HWEeprom::SetEecr(unsigned char newval) {
             eecr |= CTRL_ENABLE;
             // read will be processed immediately
             if((eecr & CTRL_READ) == CTRL_READ) {
-                cpuHoldCycles = 4;
+                cpuHoldCycles = 4;  // Datasheet: "When the EEPROM is read, the CPU is halted for four cycles"
                 assert(eear < size);
                 eedr = myMemory[eear];
-                eecr &= ~CTRL_READ; // reset read bit isn't decribed in document!
+                eecr &= ~CTRL_READ; // reset read bit isn't described in document!
                 if(core->trace_on == 1)
                     traceOut << " EEPROM: Read = 0x" << hex << (unsigned int)eedr << dec;
                 break; // to ignore possible write request!
             }
             // start write operation
             if((eecr & CTRL_WRITE) == CTRL_WRITE) {
-                cpuHoldCycles = 2;
+				cpuHoldCycles = 2;  // Datasheet: "When EEWE has been set, the CPU is halted for two cycles"
                 // abort enable state, switch to write state
                 opMode = eecr & CTRL_MODES;
                 opAddr = eear;
