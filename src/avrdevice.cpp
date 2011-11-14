@@ -371,7 +371,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
             traceOut << " " ;
     }
 
-	bool hwWait = false;
+    bool hwWait = false;
     for(unsigned i = 0; i < hwCycleList.size(); i++) {
         Hardware * p = hwCycleList[i];
         if (p->CpuCycle() > 0)
@@ -381,7 +381,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
     if(hwWait) {
         if(trace_on)
             traceOut << "CPU-Hold by IO-Hardware ";
-	} else if(cpuCycles <= 0) {
+    } else if(cpuCycles <= 0) {
 
             //check for enabled breakpoints here
             if(BP.end() != find(BP.begin(), BP.end(), PC)) {
@@ -411,13 +411,9 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                     //Funktor* fkt=new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
                     stack->SetReturnPoint(stack->GetStackPointer(),
                                           IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector).clone());
-
-                    //pushing the stack
-                    unsigned long val = PC;
-                    stack->PushAddr(val);
+                    stack->PushAddr(PC);
                     cpuCycles = 4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
                     status->I = 0; //irq started so remove I-Flag from SREG
-
                     PC = newIrqPc - 1;   //we add a few lines later 1 so we sub here 1 :-)
                     newIrqPc = 0xffffffff;
                 } else {
