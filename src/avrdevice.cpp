@@ -253,7 +253,9 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     flagMOVWInstruction(true),
     flagTiny10(false),
     flagTiny1x(false),
-    flagXMega(false) {
+    flagXMega(false),
+    instructionSEIJustEnabledInterrupts(false)
+{
     dump_manager = DumpManager::Instance();
     dump_manager->registerAvrDevice(this);
 	DebugRecentJumpsIndex = 0;
@@ -402,7 +404,10 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                 return 0;
             }
 
-            if(newIrqPc != 0xffffffff) {
+            if(instructionSEIJustEnabledInterrupts) {
+                instructionSEIJustEnabledInterrupts = false;
+                // And skip executing the interrupt stuff below.
+            } else if(newIrqPc != 0xffffffff) {
                 if(noDirectIrqJump == 0) {
                     if(trace_on)
                         traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;

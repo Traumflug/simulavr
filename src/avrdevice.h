@@ -92,6 +92,7 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         AddressExtensionRegister *eind; //!< EIND address extension register
         bool abortOnInvalidAccess; //!< Flag, that simulation abort if an invalid access occured, default is false
         TraceValueCoreRegister coreTraceGroup;
+        bool instructionSEIJustEnabledInterrupts;  ///< Almost always false.
 
         bool flagIWInstructions; //!< ADIW and SBIW instructions are available (not on most tiny's!)
         bool flagJMPInstructions; //!< CALL and JMP instructions are available (only on devices with bigger flash)
