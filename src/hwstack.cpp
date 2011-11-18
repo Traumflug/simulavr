@@ -67,7 +67,6 @@ HWStackSram::HWStackSram(AvrDevice *c, int bs, bool initRE):
             this, &HWStackSram::GetSpl, &HWStackSram::SetSpl),
     initRAMEND(initRE) {
     stackCeil = 1 << bs;  // TODO: The number of bits is unable to acurately represent 0x460 ceiling of ATmega8: has 1024 B RAM (0x400) and 32+64 (0x60) registers.
-    mem = c->Sram;
     Reset();
 }
 
@@ -83,7 +82,7 @@ void HWStackSram::Reset() {
 }
 
 void HWStackSram::Push(unsigned char val) {
-    (*mem)[stackPointer] = val;
+    core->SetRWMem(stackPointer, val);
     stackPointer--;
     stackPointer %= stackCeil;
 
@@ -108,10 +107,10 @@ unsigned char HWStackSram::Pop() {
     sph_reg.hardwareChange((stackPointer & 0x00ff00)>>8);
     
     if(core->trace_on == 1)
-        traceOut << "SP=0x" << hex << stackPointer << " 0x" << int((*mem)[stackPointer]) << dec << " ";
+        traceOut << "SP=0x" << hex << stackPointer << " 0x" << int(core->GetRWMem(stackPointer)) << dec << " ";
     m_ThreadList.OnPop();
     CheckReturnPoints();
-    return (*mem)[stackPointer];
+    return core->GetRWMem(stackPointer);
 }
 
 void HWStackSram::PushAddr(unsigned long addr) {

@@ -129,7 +129,6 @@ class HWStack {
 class HWStackSram: public HWStack, public TraceValueRegister {
     
     protected:
-        MemoryOffsets *mem;
         unsigned long stackCeil;
         bool initRAMEND;
         
