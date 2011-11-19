@@ -47,7 +47,6 @@ class HWStack;
 class HWWado;
 class Data;
 class HWIrqSystem;
-class MemoryOffsets;
 class RWMemoryMember;
 class Hardware;
 class DumpManager;
@@ -108,8 +107,6 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         int DebugRecentJumps[20];  ///< Addresses of last few 'call' and 'jump' executed. For debugging.
         int DebugRecentJumpsIndex;  ///< Index to address of the most recent jump
 
-        MemoryOffsets *R;
-        MemoryOffsets *ioreg;
         RWMemoryMember **rw;  ///< The whole memory: R0-R31, IO, Internal RAM.
 
         HWStack *stack;

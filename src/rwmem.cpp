@@ -86,10 +86,6 @@ RWMemoryMember::~RWMemoryMember() {
         delete tv;
 }
 
-RWMemoryMember& MemoryOffsets::operator[](unsigned int externOffset) const {
-    return *(rwHandler[myOffset+externOffset]);
-}
-
 RAM::RAM(TraceValueCoreRegister *_reg, const std::string &name, const size_t number, const size_t maxsize) {
     corereg = _reg;
     if(name.size()) {

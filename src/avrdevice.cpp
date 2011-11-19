@@ -207,8 +207,6 @@ AvrDevice::~AvrDevice() {
     
     // delete rw and other allocated objects
     delete Flash;
-    delete ioreg;
-    delete R;
     delete statusRegister;
     delete status;
     delete [] rw;
@@ -281,16 +279,6 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     statusRegister = new RWSreg(&coreTraceGroup, status);
     if(statusRegister == NULL)
         avr_error("Not enough memory for RWSreg in AvrDevice::AvrDevice");
-    
-    // the Registers also generic to all avr devices
-    R = new MemoryOffsets(0, rw);
-    if(R == NULL)
-        avr_error("Not enough memory for Register [R] in AvrDevice::AvrDevice");
-
-    // offset for the io-space is 0x20 for all avr devices (behind the register file)
-    ioreg = new MemoryOffsets(0x20, rw);
-    if(ioreg == NULL)
-        avr_error("Not enough memory for IoReg in AvrDevice::AvrDevice");
 
     // placeholder for SPM register
     spmRegister = NULL;
@@ -489,7 +477,7 @@ void AvrDevice::DeleteAllBreakpoints() {
 }
 
 void AvrDevice::ReplaceIoRegister(unsigned int offset, RWMemoryMember *newMember) {
-    if (offset >= ioSpaceSize + ioreg->getOffset())
+    if (offset >= ioSpaceSize + registerSpaceSize)
         avr_error("Could not replace register in non existing IoRegisterSpace");
     rw[offset] = newMember;
 }

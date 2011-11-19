@@ -153,27 +153,6 @@ class NotSimulatedRegister : public RWMemoryMember {
         void set(unsigned char);
 };
 
-/** Part of an unified data memory, e.g. R0-31 or IO or Internal RAM.
-  Used for accessing the whole memory in range [myOffset,myOffset+myLength).
-  inside a block of RWMemoryMember objects. */
-class MemoryOffsets {
-    
-    private:
-        unsigned int myOffset;
-        
-    protected:
-        RWMemoryMember **rwHandler;
-        
-    public:
-        MemoryOffsets(unsigned int offset, RWMemoryMember **rw):rwHandler(rw){
-            myOffset=offset;
-        }
-        unsigned getOffset() const { return myOffset; }
-#ifndef SWIG
-        RWMemoryMember &operator[](unsigned int externOffset) const;
-#endif
-};
-
 //! IO register to be specialized for a certain class/hardware
 /*! The template parameter class P specifies the class type in which
   the io register resides. */

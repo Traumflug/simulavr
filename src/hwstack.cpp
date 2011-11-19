@@ -267,7 +267,7 @@ void ThreadList::OnCall()
 	m_on_call_ip = m_core.PC * 2;
 	Thread * old = m_threads[m_cur_thread];
 	for(unsigned int i = 0; i < 32; i++) {
-		old->registers[i] = (*m_core.R)[i];
+		old->registers[i] = m_core.GetCoreReg(i);
 	}
 
 	if(0xc9c <= m_on_call_ip && m_on_call_ip <= 0xca4)
