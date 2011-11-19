@@ -108,7 +108,6 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         int DebugRecentJumps[20];  ///< Addresses of last few 'call' and 'jump' executed. For debugging.
         int DebugRecentJumpsIndex;  ///< Index to address of the most recent jump
 
-        MemoryOffsets *Sram;
         MemoryOffsets *R;
         MemoryOffsets *ioreg;
         RWMemoryMember **rw;  ///< The whole memory: R0-R31, IO, Internal RAM.

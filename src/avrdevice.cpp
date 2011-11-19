@@ -207,7 +207,6 @@ AvrDevice::~AvrDevice() {
     
     // delete rw and other allocated objects
     delete Flash;
-    delete Sram;
     delete ioreg;
     delete R;
     delete statusRegister;
@@ -292,12 +291,6 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     ioreg = new MemoryOffsets(0x20, rw);
     if(ioreg == NULL)
         avr_error("Not enough memory for IoReg in AvrDevice::AvrDevice");
-
-    // the offset for accessing the sram is allways at 0x00 so we can read with
-    // lds also the register file!
-    Sram = new MemoryOffsets(0x00, rw);
-    if(Sram == NULL)
-        avr_error("Not enough memory for Sram in AvrDevice::AvrDevice");
 
     // placeholder for SPM register
     spmRegister = NULL;
