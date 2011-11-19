@@ -1771,7 +1771,8 @@ avr_op_ILLEGAL::avr_op_ILLEGAL(word opcode, AvrDevice *c):
     DecodedInstruction(c) {}
 
 int avr_op_ILLEGAL::operator()() {
-    avr_error("Simulation terminated! IllegalInstruction executed! PC=0x%x", core->PC * 2);
+    avr_error("Illegal opcode '%02x %02x' executed at PC=0x%x (%d)! Simulation terminated!",
+        core->Flash->myMemory[core->PC*2+1], core->Flash->myMemory[core->PC*2], core->PC*2, core->PC);
     return 0;
 }
 
