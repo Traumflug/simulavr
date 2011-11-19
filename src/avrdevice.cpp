@@ -68,8 +68,8 @@ void AvrDevice::Load(const char* fname) {
     actualFilename = fname;
 
 #ifdef _MSC_VER
-    fprintf(stderr, "Fatal: BDF library is not supported on MS Windows\n");
-    assert(false);  // TODO: Port BDF library to MS Windows
+    fprintf(stderr, "Fatal: BFD library is not supported on MS Windows\n");
+    assert(false);  // TODO: Port BFD library to MS Windows
 #else
     bfd *abfd;
     asection *sec;
