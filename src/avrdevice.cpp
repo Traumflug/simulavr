@@ -64,12 +64,97 @@ void AvrDevice::RemoveFromCycleList(Hardware *hw) {
         hwCycleList.erase(element);
 }
 
+#ifdef _MSC_VER
+// Stolen from http://developers.sun.com/solaris/articles/elf.html
+
+#define EI_NIDENT     16
+// Segment types
+#define PT_NULL             0
+#define PT_LOAD             1
+#define PT_NOTE             4
+#define PT_SHLIB            5
+#define PT_PHDR             6
+// Segment flags
+#define PF_X                 1
+#define PF_W                 2
+#define PF_R                 4
+
+typedef uint32_t  Elf32_Addr;
+typedef uint16_t  Elf32_Half;
+typedef uint32_t  Elf32_Off;
+typedef int32_t   Elf32_Sword;
+typedef uint32_t  Elf32_Word;
+
+typedef struct {
+	unsigned char e_ident[EI_NIDENT];    /* ident bytes */
+	Elf32_Half e_type;                   /* file type */ 
+	Elf32_Half e_machine;                /* target machine */
+	Elf32_Word e_version;                /* file version */
+	Elf32_Addr e_entry;                  /* start address */
+	Elf32_Off e_phoff;                   /* phdr file offset */
+	Elf32_Off e_shoff;                   /* shdr file offset */
+	Elf32_Word e_flags;                  /* file flags */
+	Elf32_Half e_ehsize;                 /* sizeof ehdr */
+	Elf32_Half e_phentsize;              /* sizeof phdr */
+	Elf32_Half e_phnum;                  /* number phdrs */
+	Elf32_Half e_shentsize;              /* sizeof shdr */
+	Elf32_Half e_shnum;                  /* number shdrs */
+	Elf32_Half e_shstrndx;               /* shdr string index */
+} Elf32_Ehdr;
+// Segment header
+typedef struct {
+	Elf32_Word p_type; 	/* entry type */
+	Elf32_Off p_offset; 	/* file offset */
+	Elf32_Addr p_vaddr; 	/* virtual address */
+	Elf32_Addr p_paddr; 	/* physical address */
+	Elf32_Word p_filesz;	/* file size */
+	Elf32_Word p_memsz; 	/* memory size */
+	Elf32_Word p_flags; 	/* entry flags */
+	Elf32_Word p_align; 	/* memory/file alignment */
+} Elf32_Phdr;
+#endif
+
 void AvrDevice::Load(const char* fname) {
     actualFilename = fname;
 
 #ifdef _MSC_VER
-    fprintf(stderr, "Fatal: BFD library is not supported on MS Windows\n");
-    assert(false);  // TODO: Port BFD library to MS Windows
+    FILE * f = fopen(fname, "rb");
+    if(f == NULL)
+        avr_error("Could not open file: %s", fname);
+
+    Elf32_Ehdr header;
+    fread(&header, sizeof(header), 1, f);
+    if(header.e_ident[0] != 0x7F || header.e_ident[1] != 'E'
+        || header.e_ident[2] != 'L' || header.e_ident[3] != 'F')
+        avr_error("File '%s' is not an ELF file", fname);
+    // TODO: fix endianity in header
+    if(header.e_machine != 83)
+        avr_error("ELF file '%s' is not for Atmel AVR architecture (%d)", fname, header.e_machine);
+
+    for(int i = 0; i < header.e_phnum; i++) {
+        fseek(f, header.e_phoff + i * header.e_phentsize, SEEK_SET);
+        Elf32_Phdr progHeader;
+        fread(&progHeader, sizeof(progHeader), 1, f);
+        // TODO: fix endianity
+        if(progHeader.p_type != PT_LOAD)
+            continue;
+        if((progHeader.p_flags & PF_X ) == 0 || (progHeader.p_flags & PF_R) == 0)
+            continue;  // must be readable and writable
+        if(progHeader.p_vaddr >= 0x80ffff)
+            continue;  // not into a Flash
+        if(progHeader.p_filesz != progHeader.p_memsz) {
+            avr_error("Segment sizes 0x%x and 0x%x in ELF file '%s' must be the same",
+                progHeader.p_filesz, progHeader.p_memsz);
+        }
+        unsigned char * tmp = new unsigned char[progHeader.p_filesz];
+        fseek(f, progHeader.p_offset, SEEK_SET);
+        fread(tmp, progHeader.p_filesz, 1, f);
+
+        Flash->WriteMem(tmp, progHeader.p_vaddr, progHeader.p_filesz);
+        delete [] tmp;
+    }
+
+    fclose(f);
 #else
     bfd *abfd;
     asection *sec;
@@ -497,6 +582,10 @@ RWMemoryMember* AvrDevice::GetMemRegisterInstance(unsigned int offset) {
 }
 
 void AvrDevice::RegisterTerminationSymbol(const char *symbol) {
+#ifdef _MSC_VER
+    fprintf(stderr, "Fatal: Cannot specify terminating symbol. Loading symbols from ELF file is not implemented\n");
+    assert(false);  // TODO: Implement loading symbols from ELF file
+#endif
     unsigned int epa = Flash->GetAddressAtSymbol(symbol);
     EP.push_back(epa);
 }
