@@ -65,6 +65,8 @@ class ThreadList
     /// Currently running thread. (Thread index used for querying by GDB is in GdbServer.)
     int m_cur_thread;
     AvrDevice & m_core;
+
+    ThreadList& operator=(const ThreadList&);  // not assignable
 public:
 
     ThreadList(AvrDevice & core);

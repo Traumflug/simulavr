@@ -40,6 +40,8 @@
 SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %}
 
+%immutable HWStack::m_ThreadList;
+
 %include "systemclocktypes.h"
 %include "simulationmember.h"
 %include "externaltype.h"
