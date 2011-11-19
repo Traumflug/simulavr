@@ -28,6 +28,7 @@
 #include "avrmalloc.h"
 #include "flash.h"
 #include <assert.h>
+#include <cstdio>  // NULL
 
 using namespace std;
 
