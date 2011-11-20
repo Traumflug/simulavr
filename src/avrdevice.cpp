@@ -473,8 +473,10 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
             if(instructionSEIJustEnabledInterrupts) {
                 instructionSEIJustEnabledInterrupts = false;
                 // And skip executing the interrupt stuff below.
-            } else if(newIrqPc != 0xffffffff) {
-                if(noDirectIrqJump == 0) {
+            } else if(status->I == 1) {
+                unsigned int actualIrqVector;
+                unsigned int newIrqPc = irqSystem->GetNewPc(actualIrqVector);
+                if(newIrqPc != 0xffffffff) {
                     if(trace_on)
                         traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;
 
@@ -486,9 +488,6 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                     cpuCycles = 4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
                     status->I = 0; //irq started so remove I-Flag from SREG
                     PC = newIrqPc - 1;   //we add a few lines later 1 so we sub here 1 :-)
-                    newIrqPc = 0xffffffff;
-                } else {
-                    noDirectIrqJump = 0;
                 }
             }
 
@@ -515,11 +514,6 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
             if(cpuCycles != BREAK_POINT) {
                 PC++;
                 cpuCycles--;
-            }
-
-            if(((status->I) == 1) && (newIrqPc == 0xffffffff)) {
-                newIrqPc = irqSystem->GetNewPc(actualIrqVector); //If any interrupt is pending get new PC 
-                noDirectIrqJump = 1;
             }
     } else { //cpuCycles>0
         if(trace_on == 1)
@@ -553,8 +547,6 @@ void AvrDevice::Reset() {
 
     //init the old static vars from Step()
     cpuCycles = 0;
-    newIrqPc = 0xffffffff;
-    noDirectIrqJump = 0;
 }
 
 void AvrDevice::DeleteAllBreakpoints() {

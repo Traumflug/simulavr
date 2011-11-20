@@ -70,9 +70,6 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         
         /// Count of cycles before next instruction is executed (i.e. countdown)
         int cpuCycles;
-        unsigned int newIrqPc;
-        unsigned int actualIrqVector;
-        int noDirectIrqJump;
         
     public:
         int trace_on;
