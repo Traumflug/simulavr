@@ -156,6 +156,10 @@ void AvrDevice::Load(const char* fname) {
 
     fclose(f);
 #else
+    /* If you do not want to use libbfd, then edit m4/AX_AVR_ENVIRON.m4
+     * and comment out the AVR_BFD_SEARCH_STEP calls and related lines
+     * and adjust the #ifdef condition above. Compile and then link
+     * without -lbfd. */
     bfd *abfd;
     asection *sec;
 
