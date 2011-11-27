@@ -485,9 +485,8 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                         traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;
 
                     irqSystem->IrqHandlerStarted(actualIrqVector);    //what vector we raise?
-                    //Funktor* fkt=new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
-                    stack->SetReturnPoint(stack->GetStackPointer(),
-                                          IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector).clone());
+                    Funktor* fkt = new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
+                    stack->SetReturnPoint(stack->GetStackPointer(), fkt);
                     stack->PushAddr(PC);
                     cpuCycles = 4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
                     status->I = 0; //irq started so remove I-Flag from SREG
