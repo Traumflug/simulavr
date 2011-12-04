@@ -35,6 +35,83 @@
 
 using namespace std;
 
+
+template<typename Key, typename Value>
+MinHeap<Key, Value>::MinHeap()
+{
+	reserve(10);  // vector would free&malloc when we keep inserting and removing only 1 element.
+}
+
+template<typename Key, typename Value>
+void MinHeap<Key, Value>::RemoveMinimum()
+{
+	assert(!empty());
+	Key k = back().first;
+	Value v = back().second;
+	RemoveMinimumAndInsert(k, v);
+	pop_back();
+}
+
+template<typename Key, typename Value>
+bool MinHeap<Key, Value>::ContainsValue(Value v) const
+{
+	for(unsigned i = 0; i < size(); i++)
+	{
+		std::pair<Key,Value> item = (*this)[i];
+		if(item.second == v)
+			return true;
+	}
+	return false;
+}
+
+template<typename Key, typename Value>
+void MinHeap<Key, Value>::Insert(Key k, Value v)
+{
+	resize(size()+1);
+	for(unsigned i = size();;) {
+		unsigned parent = i/2;
+		if(parent == 0 || (*this)[parent-1].first < k) {
+			(*this)[i-1].first = k;
+			(*this)[i-1].second = v;
+			return;
+		}
+		Key k_temp = (*this)[parent-1].first;
+		Value v_temp = (*this)[parent-1].second;
+		(*this)[i-1].first = k_temp;
+		(*this)[i-1].second = v_temp;
+		i = parent;
+	}
+}
+
+template<typename Key, typename Value>
+void MinHeap<Key, Value>::RemoveMinimumAndInsert(Key k, Value v)
+{
+	assert(!empty());
+	unsigned i = 1;
+	for(;;) {
+		unsigned left = 2*i;
+		unsigned right = 2*i + 1;
+		unsigned smallest = i;
+		if(left-1 < size() && (*this)[left-1].first < k)
+			smallest = left;
+		if(right-1 < size() && (*this)[right-1].first < k)
+			smallest = right;
+		if(smallest == i) {
+			(*this)[smallest-1].first = k;
+			(*this)[smallest-1].second = v;
+			return;
+		}
+		Key k_temp = (*this)[smallest-1].first;
+		Value v_temp = (*this)[smallest-1].second;
+		(*this)[smallest-1].first = k;
+		(*this)[smallest-1].second = v;
+		k = k_temp;
+		v = v_temp;
+		i = smallest;
+	}
+}
+
+
 SystemClock::SystemClock() { 
     static int no = 0;
     currentTime = 0; 
@@ -44,8 +121,7 @@ SystemClock::SystemClock() {
 }
 
 void SystemClock::SetTraceModeForAllMembers(int trace_on) {
-    iterator mi;
-    for(mi = begin(); mi != end(); mi++)
+    for(auto mi = syncMembers.begin(); mi != syncMembers.end(); mi++)
     {
         AvrDevice* core = dynamic_cast<AvrDevice*>( mi->second );
         if(core != NULL)
@@ -55,7 +131,7 @@ void SystemClock::SetTraceModeForAllMembers(int trace_on) {
 
 
 void SystemClock::Add(SimulationMember *dev) {
-    insert(pair<SystemClockOffset, SimulationMember*>(currentTime, dev));
+    syncMembers.Insert(currentTime, dev);
 }
 
 void SystemClock::AddAsyncMember(SimulationMember *dev) {
@@ -70,26 +146,26 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
     static vector<SimulationMember*>::iterator ami;
     static vector<SimulationMember*>::iterator amiEnd;
 
-    if(begin() != end()) {
+    if(syncMembers.begin() != syncMembers.end()) {
         // take simulation member and current simulation time from time table
-        SimulationMember * core = begin()->second;
-        currentTime = begin()->first; 
-        erase(begin());
+        SimulationMember * core = syncMembers.begin()->second;
+        currentTime = syncMembers.begin()->first;
         SystemClockOffset nextStepIn_ns = -1;
         
         // do a step on simulation member
         res = core->Step(untilCoreStepFinished, &nextStepIn_ns);
         
         if(nextStepIn_ns == 0) { // insert the next step behind the following!
-            SystemClock::iterator ii = begin();
-            nextStepIn_ns = 1 + ((ii != end()) ? ii->first : currentTime);
+            nextStepIn_ns = 1 + (syncMembers.IsEmpty() ? currentTime : syncMembers.front().first);
         } else if(nextStepIn_ns > 0)
             nextStepIn_ns += currentTime;
         // if nextStepIn_ns is < 0, it means, that this simulation member will not
         // be called anymore!
         
         if(nextStepIn_ns > 0)
-            insert(pair<SystemClockOffset, SimulationMember*>(nextStepIn_ns, core));
+            syncMembers.RemoveMinimumAndInsert(nextStepIn_ns, core);
+		else
+			syncMembers.RemoveMinimum();
 
         // handle async simulation members
         amiEnd = asyncMembers.end();
@@ -103,16 +179,16 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
 }
 
 void SystemClock::Rescedule(SimulationMember *sm, SystemClockOffset newTime) {
-    iterator ii;
+    MinHeap<SystemClockOffset, SimulationMember *>::iterator ii;
 
-    for(ii=begin(); ii != end(); ii++) {
+    for(ii=syncMembers.begin(); ii != syncMembers.end(); ii++) {
         if(ii->second == sm) {
-            erase(ii); 
+            syncMembers.erase(ii); 
             break;
         }
     }
 
-    insert(pair<SystemClockOffset, SimulationMember*>(newTime+currentTime+1, sm));
+    syncMembers.Insert(newTime+currentTime+1, sm);
 }
 
 volatile int breakMessage = false;
@@ -129,7 +205,7 @@ void SystemClock::stop() {
 
 void SystemClock::ResetClock(void) {
     asyncMembers.clear();
-    clear();
+    syncMembers.clear();
     currentTime = 0;
 }
 

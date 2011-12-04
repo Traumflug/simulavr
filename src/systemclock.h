@@ -32,6 +32,23 @@
 #include "avrdevice.h"
 #include "systemclocktypes.h"
 
+/** A heap data structure optimized for obtaining Value of the smallest Key.
+	Example MinHeap<SystemClockOffset, SimulationMember*>. */
+template<typename Key, typename Value>
+class MinHeap : public std::vector<std::pair<Key,Value> >
+{
+public:
+	MinHeap();
+	bool IsEmpty() const { return this->empty(); }
+	Value GetMinimumKey() const { return this->front().first; }
+	Value GetMinimumValue() const { return this->front().second; };
+	void RemoveMinimum();
+	bool ContainsValue(Value v) const;
+	void Insert(Key k, Value v);
+	void RemoveMinimumAndInsert(Key k, Value v);
+};
+
+
 //! Class to store and manage the central simulation time
 /*! This acts as a time table, a simulation member gets a place on this ordered
     table, where it should be called next time, the placement depends on the
@@ -48,9 +65,6 @@
     in gdb. Normal operation/simulation is not affected. (taken over from
     systemclock.cpp, but to check!) */
 class SystemClock
-#ifndef SWIG
-: public std::multimap<SystemClockOffset, SimulationMember *> 
-#endif
 {
     private:
         SystemClock(); //!< Do not this constructor from application code!
@@ -58,6 +72,7 @@ class SystemClock
 
     protected:
         SystemClockOffset currentTime;  //!< time in [ns] since start of simulation
+		MinHeap<SystemClockOffset, SimulationMember *> syncMembers;  //!< earliest first
         std::vector<SimulationMember*> asyncMembers; //!< List of asynchron working simulation members, will be called every step!
         
     public:
