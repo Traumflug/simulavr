@@ -164,8 +164,8 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
         
         if(nextStepIn_ns > 0)
             syncMembers.RemoveMinimumAndInsert(nextStepIn_ns, core);
-		else
-			syncMembers.RemoveMinimum();
+        else
+            syncMembers.RemoveMinimum();
 
         // handle async simulation members
         amiEnd = asyncMembers.end();
