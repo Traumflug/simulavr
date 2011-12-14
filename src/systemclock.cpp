@@ -39,23 +39,23 @@ using namespace std;
 template<typename Key, typename Value>
 MinHeap<Key, Value>::MinHeap()
 {
-	reserve(10);  // vector would free&malloc when we keep inserting and removing only 1 element.
+	this->reserve(10);  // vector would free&malloc when we keep inserting and removing only 1 element.
 }
 
 template<typename Key, typename Value>
 void MinHeap<Key, Value>::RemoveMinimum()
 {
 	assert(!empty());
-	Key k = back().first;
-	Value v = back().second;
+	Key k = this->back().first;
+	Value v = this->back().second;
 	RemoveMinimumAndInsert(k, v);
-	pop_back();
+	this->pop_back();
 }
 
 template<typename Key, typename Value>
 bool MinHeap<Key, Value>::ContainsValue(Value v) const
 {
-	for(unsigned i = 0; i < size(); i++)
+	for(unsigned i = 0; i < this->size(); i++)
 	{
 		std::pair<Key,Value> item = (*this)[i];
 		if(item.second == v)
@@ -67,8 +67,8 @@ bool MinHeap<Key, Value>::ContainsValue(Value v) const
 template<typename Key, typename Value>
 void MinHeap<Key, Value>::Insert(Key k, Value v)
 {
-	resize(size()+1);
-	for(unsigned i = size();;) {
+	resize(this->size()+1);
+	for(unsigned i = this->size();;) {
 		unsigned parent = i/2;
 		if(parent == 0 || (*this)[parent-1].first < k) {
 			(*this)[i-1].first = k;
@@ -92,9 +92,9 @@ void MinHeap<Key, Value>::RemoveMinimumAndInsert(Key k, Value v)
 		unsigned left = 2*i;
 		unsigned right = 2*i + 1;
 		unsigned smallest = i;
-		if(left-1 < size() && (*this)[left-1].first < k)
+		if(left-1 < this->size() && (*this)[left-1].first < k)
 			smallest = left;
-		if(right-1 < size() && (*this)[right-1].first < k)
+		if(right-1 < this->size() && (*this)[right-1].first < k)
 			smallest = right;
 		if(smallest == i) {
 			(*this)[smallest-1].first = k;
@@ -121,7 +121,8 @@ SystemClock::SystemClock() {
 }
 
 void SystemClock::SetTraceModeForAllMembers(int trace_on) {
-    for(auto mi = syncMembers.begin(); mi != syncMembers.end(); mi++)
+    MinHeap<SystemClockOffset, SimulationMember *>::iterator mi;
+    for(mi = syncMembers.begin(); mi != syncMembers.end(); mi++)
     {
         AvrDevice* core = dynamic_cast<AvrDevice*>( mi->second );
         if(core != NULL)
