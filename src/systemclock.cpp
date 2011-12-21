@@ -45,7 +45,7 @@ MinHeap<Key, Value>::MinHeap()
 template<typename Key, typename Value>
 void MinHeap<Key, Value>::RemoveMinimum()
 {
-	assert(!empty());
+	assert(!this->empty());
 	Key k = this->back().first;
 	Value v = this->back().second;
 	RemoveMinimumAndInsert(k, v);
@@ -86,7 +86,7 @@ void MinHeap<Key, Value>::Insert(Key k, Value v)
 template<typename Key, typename Value>
 void MinHeap<Key, Value>::RemoveMinimumAndInsert(Key k, Value v)
 {
-	assert(!empty());
+	assert(!this->empty());
 	unsigned i = 1;
 	for(;;) {
 		unsigned left = 2*i;
