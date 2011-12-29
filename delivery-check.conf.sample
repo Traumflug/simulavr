@@ -10,7 +10,7 @@ CONF_CHECK_PATH=delivery-check
 CONF_BFD_PATH=/usr/i486-linux-gnu/avr
 
 # CONF_WITH_DOXYGEN: configure simulavr build with doxygen to create doxygen documentation too, set to "y" to
-     enable
+#    enable
 CONF_WITH_DOXYGEN=n
 
 # CONF_WITH_TCL: configure simulavr build with tcl to create tcl lib too, set to "y" to enable
