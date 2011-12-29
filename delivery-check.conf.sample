@@ -1,0 +1,26 @@
+# sample configuration for delivery-check script
+# copy this file to delivery-check.conf and edit it TO YOUR CONFIGURATION
+
+# CONF_CHECK_PATH: where script should clone repository and build, install and so one,
+#    path STARTS on parent directory of repository! You must not set absolute paths! 
+CONF_CHECK_PATH=delivery-check
+
+# CONF_BFD_PATH: path, where avr bfd libs are located, if this isn't set, default bfd libs are used. It's reported,
+#    that with default (i386) libs simulavr crashes while loading elf file!
+CONF_BFD_PATH=/usr/i486-linux-gnu/avr
+
+# CONF_WITH_DOXYGEN: configure simulavr build with doxygen to create doxygen documentation too, set to "y" to
+     enable
+CONF_WITH_DOXYGEN=n
+
+# CONF_WITH_TCL: configure simulavr build with tcl to create tcl lib too, set to "y" to enable
+CONF_WITH_TCL=n
+
+# CONF_TCL_CONFIG: path to tcl installation, this path has to contain tclConfig script, necessary, if
+#    CONF_WITH_TCL is set!
+CONF_TCL_CONFIG=/usr/lib/tcl8.5
+
+# CONF_WITH_VERILOG: configure simulavr build with verilog to create verilog lib too, set to "y" to enable
+CONF_WITH_VERILOG=n
+
+# EOF
