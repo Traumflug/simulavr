@@ -715,7 +715,7 @@ int avr_op_ICALL::operator()() {
     core->DebugOnJump();
     core->PC = new_pc - 1;
 
-    return core->PC_size + core->flagXMega ? 0 : 1;
+    return core->PC_size + (core->flagXMega ? 0 : 1);
 }
 
 avr_op_IJMP::avr_op_IJMP(word opcode, AvrDevice *c):
