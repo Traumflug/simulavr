@@ -28,6 +28,7 @@
 #include "flash.h"
 #include "hwwado.h"
 #include "hwsreg.h"
+#include "global.h"
 #include "avrerror.h"
 #include "ioregs.h"
 
@@ -1767,6 +1768,13 @@ int avr_op_WDR::operator()() {
     return 1;
 }
 
+avr_op_BREAK::avr_op_BREAK(word opcode, AvrDevice *c):
+    DecodedInstruction(c) {}
+
+int avr_op_BREAK::operator()() {
+    return BREAK_POINT+1;
+}
+
 avr_op_ILLEGAL::avr_op_ILLEGAL(word opcode, AvrDevice *c):
     DecodedInstruction(c) {}
 
@@ -1996,6 +2004,7 @@ DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core )
             else
                 return new avr_op_ILLEGAL(opcode, core);
         case 0x95A8: return new  avr_op_WDR(opcode, core);                 /* 1001 0101 1010 1000 | WDR */
+        case 0x9598: return new  avr_op_BREAK(opcode, core);               /* 1001 0101 1001 1000 | BREAK */
         default:
                      {
                          /* opcodes with two 5-bit register (Rd and Rr) operands */

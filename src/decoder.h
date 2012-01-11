@@ -2055,7 +2055,25 @@ class avr_op_WDR: public DecodedInstruction
         int Trace();
 };
 
+class avr_op_BREAK: public DecodedInstruction
+{
+    /*
+     * Halts execution
+     *
+     * TODO Check if execution is continuable on a real MCU
+     *
+     * Opcode     : 1001 0101 1001 1000
+     * Usage      : BREAK
+     * Operation  : (see specific hardware specification for BREAK)
+     * Flags      : None
+     * Num Clocks : N/A
+     */
 
+    public:
+        avr_op_BREAK(word opcode, AvrDevice *c);
+        int operator()();
+        int Trace();
+};
 
 class avr_op_ILLEGAL: public DecodedInstruction
 { 

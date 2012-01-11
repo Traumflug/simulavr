@@ -750,6 +750,12 @@ int avr_op_WDR::Trace() {
     return ret;
 }
 
+int avr_op_BREAK::Trace() {
+    traceOut << "BREAK ";
+    int ret = this->operator()();
+    return ret;
+}
+
 int avr_op_ILLEGAL::Trace() {
     traceOut << "Invalid Instruction! ";
     int ret = this->operator()();

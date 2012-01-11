@@ -514,10 +514,8 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                 statusRegister->trigger_change();
             }
 
-            if(cpuCycles != BREAK_POINT) {
-                PC++;
-                cpuCycles--;
-            }
+            PC++;
+            cpuCycles--;
     } else { //cpuCycles>0
         if(trace_on == 1)
             traceOut << "CPU-waitstate";
