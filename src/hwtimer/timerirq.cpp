@@ -129,9 +129,19 @@ unsigned char TimerIRQRegister::set_from_reg(const IOSpecialReg* reg, unsigned c
                 irqsystem->SetIrqFlag(this, lines[idx]->irqvector);
         }
         irqmask = nv;
-    } else
+    } else {
+        // Get all interrupt flags that are actually cleared with this instruction.
+        unsigned char reset = nv & bitmask & irqflags;
+
         // reset flag, if written with 1
-        irqflags ^= nv & bitmask & irqflags;
+        irqflags ^= reset;
+        // Walk through resetting flags beginning with the LSB ...
+        for(unsigned char idx = 0; idx < lines.size(); ++idx)
+            if(reset & (1<<idx))
+                // ... and remove there pending calls from the irq system.
+                ClearIrqFlag(lines[idx]->irqvector);
+    }
+
     return nv;
 }
 
