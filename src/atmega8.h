@@ -38,7 +38,7 @@
 class AvrDevice_atmega8: public AvrDevice {
 
     public:
-		Pin aref;                       //!< analog reference pin
+        Pin aref;                       //!< analog reference pin
         HWPort *portb;                  //!< port B
         HWPort *portc;                  //!< port C
         HWPort *portd;                  //!< port D
