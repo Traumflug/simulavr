@@ -61,6 +61,7 @@ enum {
     FLASH_OFFSET   = 0x00000000,  /* Data in flash has this offset from gdb */
     SRAM_OFFSET    = 0x00800000,  /* Data in sram has this offset from gdb */
     EEPROM_OFFSET  = 0x00810000,  /* Data in eeprom has this offset from gdb */
+    SIGNATURE_OFFSET = 0x00840000,/* Present if application used "#include <avr/signature.h>" */
 
     GDB_BLOCKING_OFF = 0,         /* Signify that a read is non-blocking. */
     GDB_BLOCKING_ON  = 1,         /* Signify that a read will block. */
@@ -948,6 +949,14 @@ void GdbServer::gdb_write_memory(const char *pkt) {
             avr_core_flash_write_lo8( addr, bval );
         }
     }
+	else if ( (addr & MEM_SPACE_MASK) == SIGNATURE_OFFSET && len >= 3)
+	{
+		int sig3 = (hex2nib(*pkt++) << 4) + hex2nib(*pkt++);
+		int sig2 = (hex2nib(*pkt++) << 4) + hex2nib(*pkt++);
+		int sig1 = (hex2nib(*pkt++) << 4) + hex2nib(*pkt++);
+		if (global_debug_on)
+			fprintf(stderr, "Device signature %02x %02x %02x\n", sig1, sig2, sig3);
+	}
     else
     {
         /* gdb asked for memory space which doesn't exist */
