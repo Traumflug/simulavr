@@ -2,7 +2,7 @@
 #  $Id$
 #
 
-SUBDIRS = hwtimer cmd ui
+SUBDIRS = hwtimer cmd ui python
 
 AVR_LIBBFD_LIB=@AVR_LIBBFD_LIB@
 AVR_LIBBFD_INC=@AVR_LIBBFD_INC@
