@@ -196,7 +196,7 @@ fi
 popd > /dev/null
 
 # check dist package
-if [ "$OPT_DOXY" = "y" ]; then
+if [ "$OPT_DIST" = "y" ]; then
   pushd $HOME_DIR/dist > /dev/null
   tar xzf ../repo/simulavr-*.tar.gz
   pushd simulavr* > /dev/null
