@@ -95,7 +95,7 @@ const char Usage[] =
     "-d --device <name>    simulate device <name> \n"
     "-g --gdbserver        listen for GDB connection on TCP port defined by -p\n"
     "-G --gdb-debug        listen for GDB connection and write debug info\n"
-    "   --gdb-stdin        for use with GDB as 'target remote | ./simulavr'"
+    "   --gdb-stdin        for use with GDB as 'target remote | ./simulavr'\n"
     "-m  <nanoseconds>     maximum run time of <nanoseconds>\n"
     "-M                    disable messages for bad I/O and memory references\n"
     "-p  <port>            use <port> for gdb server\n"
