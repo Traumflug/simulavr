@@ -1,0 +1,853 @@
+2009-07-10	Michael Hennebry <hennebry@cableone.net>
+
+	* src/Makefile.am, src/avrfactory.cpp: Add initial support for atmega88
+	and atmega168.
+	* src/atmega168.h, src/atmega668base.cpp, src/atmega668base.h,
+	src/atmega88.h: New files.
+
+2009-05-27	Onno Kortmann <onno@gmx.net>
+
+	* src/avrdevice.cpp: Remove superfluous logic.
+
+2009-05-22	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/Makefile.am, src/string2.cpp, src/string2.h: Add string to
+	unsigned char helper.
+	* src/serialtx.cpp, src/serialtx.h: Add hexadecimal mode so data
+	received does not have to be printable.  May not work completely.
+
+2009-05-22	Michael N. Moran <mike@mnmoran.org>
+
+	* src/hwspi.cpp, src/spisink.cpp, src/spisink.h: (1) The HWSpi was
+	adding itself to the cycle list inappropriately. (2) The SpiSink
+	class, which is used to decode the output of the SPI device, was not
+	working, possibly due to an architectural change in simulavrxx at
+	some point.
+
+2009-05-22	Onno Kortmann <onno@gmx.net>
+
+	* src/atmega128.cpp, src/avrdevice.cpp, src/avrdevice.h,
+	src/hweeprom.cpp, src/hwmegatimer.cpp, src/hwmegax8timer.cpp,
+	src/hwtimer.cpp: Simplify the logic for adding to/removing from
+	the CycleList.  (See associated mailing list posts about the SPI
+	interface, the timer etc, to see how much headache this may cause).
+
+	The current code gives an 'internal error' when any object is added
+	twice to the cycle list. This behaviour needs state-keeping code in
+	the various objects
+
+	This patch is a simpler approach. It ensures that an object is in or
+	out of the cycle list with the avrdevice method calls. All
+	the state-keeping code becomes superfluous.
+
+2009-05-18	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/pin.cpp: Add missing analog values a and A.
+
+2009-05-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/ui.cpp, src/ui.h: Add exit command to ui interpreter. This allows
+	external feedback to shutdown the AVR simulation. This should be
+	useful for automated testing.
+
+2009-05-08	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Add example of using ATMega128 timer.
+
+2009-05-08	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/string2_template.h: Add comment block.
+
+2009-05-08	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/Makefile.am, src/main.cpp: Add wrappers for strtoXX methods so we
+	can better detect errors. Add better parsing of port,offset arguments
+	to detect more errors. Hopefully we will not core dump on bad
+	arguments any longer.
+	* src/string2.cpp, src/string2.h, src/string2_template.h: New files.
+
+2009-05-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/atmega128.cpp: Add RWUcsrc for usart0 and clean up formatting.
+
+2009-04-22	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/hweeprom.h: Fix inconsitent formatting.
+
+2009-04-21	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/atmega128.cpp: Attach pins F6 and F6 to ADMUX.
+	* src/hwad.cpp, src/hwad.h: A few lines had tabs, most of file did not.
+
+2009-04-16	Knut Schwichtenberg <kschwi@web.de>
+
+	* src/hwmega48extirq.cpp: Correct number of pins created in loop.
+
+2009-04-14	Colin Coombs <colin.coombs@cococon.co.uk>
+
+	* src/Makefile.am: Use proper variables so Tcl in non-standard location
+	can be found.
+
+2009-04-13	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/ui.cpp, src/ui.h: AddExternalType must take const char * not C++
+	string to be accessible from Tcl.
+
+2009-04-13	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/adcpin.h: Fix spacing.
+
+2009-04-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/pin.cpp: Return true/false instead of 1/0 for method returning
+	bool.
+
+2009-04-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/hwport.cpp, src/pin.cpp, src/pin.h: Pin values are regular
+	characters not unsigned characters. Fix and remove unnecessary casts.
+
+2009-04-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/serialrx.cpp, src/serialrx.h: Add SetHexOutput() method so
+	there is a way to get raw output through reliably. Tab/spacing was
+	inconsistent so replaced few tabs with spaces.
+
+2009-04-01	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
+
+	* examples/feedback/.cvsignore: Match ELF file name with reality.
+	* examples/atmega48/.cvsignore: (Ditto.)
+
+2009-04-01	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
+
+	* examples/atmega48/main.cpp: replace SIGNAL by ISR, use new-style
+	vector name, drop <avr/signal.h>
+	* examples/spi/main.cpp: (Ditto.)
+
+2009-04-01	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
+
+	* m4/avr_tcl.m4: with_tcl_config_path => with_tcl_config;
+	when checking for several versions of wish, use AC_CHECK_PROGS
+	rather than AC_CHECK_PROG.
+
+2009-03-27	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Add new test to demonstrate how one can externally
+	generate feedback with a program running on the simulator without
+	having a GUI. This is the foundation for system level testing.
+
+2009-03-27	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac, m4/avr_tcl.m4: Move TCL checks into m4 macro.
+
+2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/at4433.cpp, src/hwstack.cpp, src/hwstack.h: Add RWSphFake for AVR
+	models which do not have nor need the sph register since they cannot
+	access more than 0xff bytes of SRAM. But gcc generates accesses to
+	this register and apparently it is benign in real hardware.
+
+2009-03-26	Michael N. Moran <mike@mnmoran.org>
+
+	Patch 4609
+	* src/atmega48.cpp, src/atmega48.h, src/hwmega48extirq.cpp,
+	src/hwmega48extirq.h, src/hwmegax8timer.cpp, src/hwmegax8timer.h,
+	src/hwmegax8timerirq.cpp, src/hwmegax8timerirq.h: New files.
+	* configure.ac, src/Makefile.am, src/at4433.cpp, src/atmega128.cpp,
+	src/avrfactory.cpp, src/hwad.cpp, src/hwad.h, src/main.cpp,
+	src/simulavr.i: Add ATMega48 simulation support.
+
+2009-03-26	Michael N. Moran <mike@mnmoran.org>
+
+	Patch 4595
+	* src/hwspi.cpp, src/hwspi.h, src/pin.cpp: The SPI simulation did not
+	double buffer the RX data register.  This problem was solved by
+	creating a shift register, and only copying the shift register
+	to the SPDR RX register after it is filled with 8 bits.  The bit
+	count for receiving the SPI data was also incorrect (7 instead of 8).
+	Also, the logic for detecting the clock sample point was cleaned-up
+	and verified.
+	  The bug in the Pin class was found when an output glitch was
+	noticed while monitoring the state of a pin. The pin was configured
+	as an input and the associated PORT register was written with a
+	HIGH in preparation for changing the port to an open-drain output.
+	The act of writting the PORT register caused the output to go LOW
+	since the "analogValue" of the pin was less than INT_MAX/2. By
+	simply adding one to the INT_MAX/2 default of the port, this bad
+	behavior stopped. 
+2009-03-26	Michael N. Moran <mike@mnmoran.org>
+
+	Patch 4594
+	* src/at4433.cpp, src/atmega128.cpp, src/atmega128.h, src/hwad.cpp,
+	src/hwad.h, src/hwport.cpp, src/hwport.h: This patch is to add
+	previously unsupported functionality to the ATMega128. In particular,
+	the following features have been added: 
+	  + The analog voltage reference input (AREF) pin.
+	  + The A/D converter section.
+	  + The A/D convert multiplexer section.
+	  + Fixes to the address of SPCR and SPSR spy registers.
+	  + Add watchdog functionality.
+	In the process of adding this functionality, the HWAd class was
+	modified slightly to support the AREF input. This caused a change
+	in its constructor, and thus a small change in the other AVR that
+	used the constructor at4433.cpp.  The ADLAR (left justification)
+	function of the ADC was found to be missing and was fixed
+	(in hwad.cpp) as a part of the ADC testing with my application.
+
+2009-03-26	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/rwmem.cpp: Add trace output for reserved accesses.
+
+2009-03-25	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Add shared framework simulavr.tcl. Switch some of the
+	tests to providing a support file and using the shared Tcl framework.
+
+2009-03-24	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/Makefile.am, src/avrdevice.cpp, src/avrdevice.h,
+	src/avrfactory.cpp, src/avrfactory.h, src/main.cpp, src/pysimulavr.i,
+	src/rwmem.cpp, src/rwmem.h, src/simulavr.i, src/trace.cpp,
+	src/trace.h: More functionality available to Tcl. You should be able
+	to tweak every flag main.cpp can now.
+
+2009-03-24	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/main.cpp, src/trace.cpp: Global variables go in trace.cpp not
+	main.cpp since main.cpp is not in the shared library.
+
+2009-03-23	Michael N. Moran <mike@mnmoran.org>
+
+	* configure.ac, src/Makefile.am, src/simulavr.i: Add SPI support.
+	* src/adcpin.cpp, src/adcpin.h, src/hwpinchange.cpp, src/hwpinchange.h,
+	src/pinmon.cpp, src/pinmon.h, src/spisink.cpp, src/spisink.h,
+	src/spisrc.cpp, src/spisrc.h: New files.
+	  + SpiSource - a class to stimulate the SPI bus using a file
+	  of input vectors.
+	  + SpiSink - a class to monitor the /SS SCLK and MISO SPI signals,
+	  decode the results, and display it on stdout.
+	  + PinMonitor - a class that displays state changes of a pin
+	  on stdout.
+	  + AdcPin - a class to stimulate an analog input pin with
+	  vectors from a file.
+
+2009-03-23	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* doc/simulavr.texinfo, src/at4433.cpp, src/at8515.cpp,
+	src/atmega128.cpp, src/main.cpp, src/rwmem.cpp, src/rwmem.h,
+	src/trace.h: RWReserved now knows its address and reports a more
+	useful message.
+
+2009-03-23	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* regress/avrtest/test_exit.c: Revert accidental commit.
+
+2009-03-23	Onno Kortmann <onno@gmx.net>
+
+	* doc/version.texi, regress/avrtest/test_exit.c, src/avrdevice.cpp,
+	src/rwmem.cpp: Prevent segfault on access to not implemented I/O
+	registers. If verbose, print message on accesses to reserved or
+	non-existent I/O registers.
+
+2009-03-23	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* README, configure.ac, doc/simulavr.texinfo, doc/version.texi,
+	src/.cvsignore, src/Makefile.am, src/kbdgentables.cpp: Add
+	--enable-maintainer-mode. keytrans.h is considered maintainer mode
+	only.
+	* src/keytrans.h: New file.
+
+2009-03-20	Ahmed Baizid <ahmed@baizid.org>
+
+	PR 25939
+	* src/main.cpp: The option --gdbserver requires an argument and this
+	was not specified in the long options structure.
+
+2009-03-20	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
+
+	* examples/Makefile.am: Use builddir rather than objdir, as that's what
+	the auto tools are obviously using.  Use it consistently, so "make
+	distcheck" will work again.
+
+2009-03-18	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* TODO, src/hwspi.cpp: Update.
+
+2009-03-18	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
+
+	* ltmain.sh: Remove autogenerated file.
+	* .cvsignore: Add ltmain.sh.
+
+2009-03-17	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/hwspi.cpp: Fix spelling error.
+
+2009-03-16	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	PR 25877/Configure
+	* src/Makefile.am: Fix dependencies on simulavr_wrap.cxx.
+	* src/simulavr.i: keyboard.h included twice. Fixed.
+
+2009-03-16	Knut Schwichtenberg <kschwi@web.de>
+
+	PR 25878/Simulation
+	* configure.ac: Add examples/atmel_key/checkdebug.tcl.
+	* src/keyboard.cpp: Interface for constructor changed to
+	deprecated format.  If it is std::string format, at runtime the
+	TCL interpreter does not know the interface! Currently we have to
+	live with these warnings. 
+	* src/keyboard.h: Interface modified according to source and
+	change of the class definition.
+	* src/simulavr.i: Missing header files included. 
+
+2009-03-14	Joerg Wunsch <j.gnu@uriah.heep.sax.de>
+
+	bug #25863: --with_bfd not working at configure under suse10.3
+	* m4/AX_AVR_ENVIRON.m4: change all {bfd,libiberty}_path
+	variables to just {bfd,libiberty} so they match their
+	respective -with-xxx option.
+
+2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/main.cpp: Improve verbose message for -T/-B options.
+	* src/simulavr.i: Add keyboard.h
+
+2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* AUTHORS, INSTALL, NEWS, doc/config.texi.in, doc/simulavr.texinfo,
+	doc/version.texi, m4/AX_AVR_ENVIRON.m4, m4/README, m4/ac_pkg_swig.m4,
+	m4/ac_python_devel.m4, m4/avr_local.m4, m4/avr_python.m4,
+	m4/avr_swig.m4, m4/avr_tcl.m4, m4/swig_enable_cxx.m4,
+	m4/swig_multi_module_support.m4, m4/swig_python.m4, regress/README,
+	src/application.cpp, src/application.h, src/at4433.cpp, src/at4433.h,
+	src/at8515.cpp, src/at8515.h, src/atmega128.cpp, src/atmega128.h,
+	src/avrdevice.cpp, src/avrdevice.h, src/avrdevice_impl.h,
+	src/avrerror.cpp, src/avrerror.h, src/avrfactory.cpp,
+	src/avrfactory.h, src/avrmalloc.cpp, src/avrmalloc.h,
+	src/breakpoint.h, src/config_deprecated.h, src/decoder.cpp,
+	src/decoder.h, src/decoder_trace.cpp, src/externaltype.h,
+	src/flash.cpp, src/flash.h, src/funktor.h, src/gdb.h,
+	src/gdbserver.cpp, src/global.h, src/hardware.cpp, src/hardware.h,
+	src/helper.cpp, src/helper.h, src/hwacomp.cpp, src/hwacomp.h,
+	src/hwad.cpp, src/hwad.h, src/hweeprom.cpp, src/hweeprom.h,
+	src/hwextirq.cpp, src/hwextirq.h, src/hwmegaextirq.cpp,
+	src/hwmegaextirq.h, src/hwmegatimer.cpp, src/hwmegatimer.h,
+	src/hwmegatimer0123irq.cpp, src/hwmegatimer0123irq.h, src/hwport.cpp,
+	src/hwport.h, src/hwspi.cpp, src/hwspi.h, src/hwsreg.cpp,
+	src/hwsreg.h, src/hwstack.cpp, src/hwstack.h, src/hwtimer.cpp,
+	src/hwtimer.h, src/hwtimer01irq.cpp, src/hwtimer01irq.h,
+	src/hwuart.cpp, src/hwuart.h, src/hwwado.cpp, src/hwwado.h,
+	src/ioregs.cpp, src/ioregs.h, src/irqsystem.cpp, src/irqsystem.h,
+	src/kbdgentables.cpp, src/keyboard.cpp, src/keyboard.h, src/lcd.cpp,
+	src/lcd.h, src/main.cpp, src/memory.cpp, src/memory.h,
+	src/mysocket.cpp, src/mysocket.h, src/net.cpp, src/net.h,
+	src/pin.cpp, src/pin.h, src/pinatport.cpp, src/pinatport.h,
+	src/pinnotify.h, src/printable.cpp, src/printable.h, src/rwmem.cpp,
+	src/rwmem.h, src/scope.cpp, src/scope.h, src/serialrx.cpp,
+	src/serialrx.h, src/serialtx.cpp, src/serialtx.h,
+	src/simulationmember.h, src/systemclock.cpp, src/systemclock.h,
+	src/systemclocktypes.h, src/trace.cpp, src/trace.h, src/types.h,
+	src/ui.cpp, src/ui.h, src/vpi.cpp, src/python/Makefile.am: Add CVS Id
+	and make spacing consistent at the end of the header comment block.
+	In some .h files moved the inclusion protection ifdef to after the
+	header comment block to be consistent with most of the .h files.
+
+2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* INSTALL, README, configure.ac, doc/simulavr.texinfo,
+	m4/AX_AVR_ENVIRON.m4: Drop -path from all configure arguments.
+
+2009-03-13	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac, regress/Makefile.am, src/main.cpp, src/rwmem.cpp,
+	src/rwmem.h: Add support for special abort and exit devices to
+	provide higher functionality compatability with avrtest. Add new
+	regression test to exercise this functionality.
+	* regress/avrtest/.cvsignore, regress/avrtest/Makefile.am,
+	regress/avrtest/avrtest_help.c, regress/avrtest/avrtest_help.h,
+	regress/avrtest/test_abort.c, regress/avrtest/test_exit.c,
+	regress/avrtest/test_maxruntime.c: New files.
+
+2009-03-12	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac, doc/.cvsignore, doc/simulavr.texinfo, src/main.cpp: Use
+	autoconf to insert version number in documentation and source code.
+	Include version information in usage. Move usage to constant string
+	outside main() and make it fit cleanly into 80 columns. This
+	tightened the main() body.
+	* doc/config.texi.in: New file.
+
+2009-03-12  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* doc/simulavr.info: Remove hardcoded version numbers.
+	* doc/version.texi (UPDATE): New date.
+
+2009-03-12	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* doc/.cvsignore: Account for dropping xx from name.
+
+2009-03-11  Eric B. Weddington  <eric.weddington@atmel.com>
+
+        * configure.ac (AC_INIT): Change name to 'SimulAVR'. Change version name
+        to '0.9cvs'.
+        * doc/Makefile.am (CLEANFILES): Change simulavrxx to simulavr.
+        (info_TEXINFOS): Same.
+        * doc/doc/version.texi (EDITION): Update version name.
+        (VERSION) Same.
+        * src/at4433.cpp: Whitespace changes. Fix spelling and case in error
+        messages.
+        * src/at8515.cpp: Fix spelling and case in error messages.
+        * src/atmega128.cpp: Whitespace changes.
+	* src/avrfactory.cpp (makeDevice): Change device names to lower case
+        to match convention used in other tools.
+	* src/main.cpp (main): Fix spelling in usage. Change device names to
+        lower case to match convention in other tools. Remove duplicated option
+        in call to getopt_long. Whitespace changes. Fixes to verbose messages.
+        Change name of program.
+        * doc/simulavrxx.info: Change name (remove) to...
+        * doc/simulavr.info: ... this new file. Various clean ups.
+        * m4/README: Fix spelling.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* Makefile.am, SUPPORT, make_tarball, src/Makefile.am: make dist
+	appears to put the correct set of files in the tarball.
+	* release_support: Removed.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* m4/AX_AVR_ENVIRON.m4: Move libiberty check in libbfd directory.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Add autotools Makefile.am. Builds but I have no way to
+	test.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Fix typo in tclconfig-path name.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* doc/version.texi, src/Makefile.am: make dist now produces a tarball
+	which compiles completely.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac: First attempt adding DISTCHECK_CONFIGURE_FLAGS.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* m4/AX_AVR_ENVIRON.m4: Look in user specified bfd path for libiberty.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* doc/Makefile.am, configure.ac: Detect when tex is not installed
+	so we can avoid attempting to build the PDF format of the
+	documentation.  With this commit, the CVS tree builds cleanly on
+	Cygwin and can run a "fred" which was built on GNU/Linux.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* doc/simulavr.texinfo: Document -m <nanoseconds> option.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/Makefile.am: Rework a bit so links now on Cygwin.
+
+2009-03-11   	Joerg Wunsch <joerg_wunsch>
+
+	* mr/avr_local.m4: Look in lib64 for libbfd.a and libiberty.a so
+	we find things on 64-bit hosts.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* doc/simulavrxx.texinfo: Add --with-tclconfig-path.
+
+2009-03-11	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/Makefile.am: Generate simulavr_wrap.cxx in build not source
+	tree.
+
+2009-03-10  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* m4/AX_AVR_ENVIRON.m4: simple_ex1 runs on Cygwin.  The problem
+	is related to getopt() being in the Cygwin DLL and in libiberty.a.
+	Linking against libcygwin.a early enough ensures we get the 
+	correct implementation of getopt() and supporting variables.
+
+2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Add --with-tclconfig-path..
+
+2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Drop autoconf requirement to 2.61.
+
+2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac, src/Makefile.am: Use /usr/lib/tclConfig.sh if
+	available. Build a static libsim.a which contains the non-Tcl
+	dependent source for the shared library and the simulavr executable.
+	This avoids the simulavr executable being dependent on Tcl at all.
+
+2009-03-10	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* bootstrap, configure.ac: Add AC_PREREQ to require 2.63. Also require
+	automake 1.10 or newer. It may be possible to use slightly older
+	versions but we know automake 1.8 is too old.
+
+2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Fix issue where NOT have avr-gcc in PATH was not
+	detected.
+
+2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* .cvsignore, doc/.cvsignore, regress/.cvsignore,
+	regress/modules/.cvsignore, regress/test_opcodes/.cvsignore,
+	src/.cvsignore: New files.
+
+2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* config.h, src/Makefile: Removed.  Discussed with Eric Weddington.
+	Autotools version works well enough to clobber these.
+
+2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* doc/simulavrxx.texinfo: Minor corrections.
+	* src/Makefile.am: Remove useless comment.
+
+2009-03-09	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* Makefile.am: Only build examples if AVR cross tools are installed.
+	* configure.ac: Detect libiberty, Tcl, and AVR cross tools in the
+	native environment and react accordingly.  Warn when missing something
+	that disables a feature from being built.
+	* doc/Makefile.am: Add to CLEANFILES.
+	* doc/simulavrxx.texinfo: Reformat. Clean up texinfo.  Fix some
+	spelling and grammar errors.
+	* doc/version.texi: Updated.
+	* m4/AX_AVR_ENVIRON.m4, m4/avr_local.m4: Multiple changes to
+	handle detection of libbfd and libiberty.  Now links on Cygwin.
+	* m4/swig_multi_module_support.m4: Remove obsolete -noruntime flag.
+	* src/Makefile.am: Clean up flags for libiberty and libbfd.
+	* TODO: New file.
+	* Makefile.in, aclocal.m4, config.guess, config.sub, configure,
+	depcomp, install-sh, missing, config/README, config/avr_local.m4,
+	config/avr_python.m4, config/avr_swig.m4, config/avr_tcl.m4,
+	doc/Makefile.in, regress/Makefile.in, regress/modules/Makefile.in,
+	regress/test_opcodes/Makefile.in, src/Makefile.in: Removed.
+	These files are automatically generated and should not be in CVS.
+
+2009-03-06	Klaus Rudolph <lts-rudolph@gmx.de>
+
+	* src/lcd.cpp: bugfix: char output conversion
+
+2009-03-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* VERSION: Updated to simulavrxx-20090305a.
+
+2009-03-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* release_support: New file.
+
+2009-03-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* VERSION: Updated to simulavrxx-20090305.
+
+2009-03-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* SUPPORT, VERSION: New files.
+
+2009-03-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* bootstrap, configure.ac, src/Makefile.am: Add configure argument
+	--disable-tcl and attempt to detect if tcl.h is not available. If it
+	is not available, then
+	* m4/enable-tcl.m4: New file.
+
+2009-03-05	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* bootstrap: Enhance to include bootstrap cleanand help from command
+	line. Fragments from RTEMS bootstrap.
+
+2009-03-04 Onno Kortmann <onno@gmx.net>
+
+	* src/hwtimer.h, bugfix: 16 bit register handling	(P0005)
+
+
+2009-03-04 Onno Kortmann <onno@gmx.net>
+
+	* m4/AX_AVR_ENVIRON.m4: fix for libiberty detection	(P0002)
+
+2009-03-04 Onno Kortmann <onno@gmx.net>
+
+	* m4/AX_AVR_ENVIRON.m4, src/at4433.cpp: correct some typos (P0001)
+
+2009-03-03	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* src/Makefile, src/lcd.cpp, src/lcd.h: Fix spelling error.
+
+2009-03-03	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac, src/Makefile: Add DDD_WITH_ARGS so we are not invoking
+	ddd when it does not exist.
+
+2009-03-03	Knut Schwichtenberg <kschwi@web.de>
+
+	* doc/simulavrxx.texinfo: Improve documentation.
+
+2009-03-03	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* README: Improve.
+
+2009-03-03	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* Makefile.am, configure.ac, regress/Makefile.am, src/Makefile: make
+	check now runs the regression suite. Merved contents of config into
+	m4 so autoconf macros were in one place. Add more .cvsignores now
+	that we have more output.
+	* m4/README, m4/avr_local.m4, m4/avr_python.m4, m4/avr_swig.m4,
+	m4/avr_tcl.m4, regress/.cvsignore, regress/modules/.cvsignore,
+	regress/test_opcodes/.cvsignore: New files.
+	* config/README, config/avr_local.m4, config/avr_python.m4,
+	config/avr_swig.m4, config/avr_tcl.m4: Removed.
+
+2009-03-03	Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* ChangeLog, Makefile.am, README.gdb, configure.ac, doc/Makefile.am,
+	doc/version.texi, examples/Makefile.am, examples/gui.tcl.in,
+	examples/anacomp/Makefile.am, examples/anacomp/check.tcl.in,
+	examples/anacomp/checkdebug.tcl.in, examples/simple_ex1/Makefile.am,
+	m4/AX_AVR_ENVIRON.m4, regress/Makefile.am,
+	regress/modules/Makefile.am, regress/test_opcodes/Makefile.am,
+	src/Makefile, src/Makefile.am: Make the autoconf/make build structure
+	work. Add .cvsignore files.
+	* .cvsignore, ChangeLog-CVS, doc/.cvsignore, examples/.cvsignore,
+	examples/anacomp/.cvsignore, examples/simple_ex1/.cvsignore,
+	src/.cvsignore: New files.
+
+
+2006-03-02    <rivetwa@member.fsf.org>
+
+	* Makefile.am (CONFIG_SUBDIR_NAME): removed doc subdirectory. This
+	way simulavrxx can be build without any fuss on systems without
+	the tools used to produce documentation.
+
+	Now you must do something like "make doc" to get documentation.
+
+2005-10-27    <rivetwa@member.fsf.org>
+	* configure.ac
+	* config/avr_local.m4
+	* config/avr_swig.m4
+
+	bugfix: should use "=" for test, not "==". Thanks Joerg Wunsch for
+	the bug #14791. 
+
+2005-10-23 <lts-rudolph@gmx.de>
+	* src/hwextirq.cpp
+	* src/atmega128.cpp
+
+	bugfix watchdog in mega128, thanks Mike! #4509 patch added
+	bugfix for extirq (INT1), bug found from Lars Noschinski, Thanks!
+
+
+2005-07-25 <lts-rudolph@gmx.de>
+	* src/hwuart.cpp
+	* src/serialrx.cpp
+	* src/serialrx.h
+	* src/serialtx.cpp
+	* src/serialtx.h
+
+	bugfix for my changes in #4147-4152
+	thanks to Artur Abels for very fast review
+
+2005-07-18 <lts-rudolph@gmx.de>
+	* src/decoder.h
+	* src/externaltype.h
+	* src/funktor.h
+	* src/hwmegatimer.h
+	* src/hwuart.cpp
+	* src/net.cpp
+	* src/net.h
+	* src/pin.cpp
+	* src/pin.h
+	* src/pinnotify.h
+	* src/rwmem.h
+	* src/serialrx.cpp
+	* src/serialrx.h
+	* src/serialtx.cpp
+	* src/serialtx.h
+	* src/simulationmember.h
+
+	adding all patches from #4147-4152 with minor changes
+	thanks to Artur Abels!
+
+2005-05-22 <lts-rudolph@mx.de>
+	* src/avrdevice.cpp 
+	* src/avrdevice.h 
+	* src/main.cpp 
+	* src/rwmem.cpp 
+	* src/rwmem.h
+	* src/simulavr.i 
+	* src/at8515special.cpp (deleted)
+	* src/at8515special.h (deleted)
+
+	the old at8515special devices which have a hard coded file name to write 
+	into a file are replaced by a more generic solution. Any core could
+	be expanded by an RWReadFromPipe or RWWriteToPipe special register.
+	For details look inside rwmem.h or main.h for an example.
+
+2005-05-16 <lts-rudolph@gmx.de>
+	* src/avrdevice.cpp: Bugfix: rawsize -> size
+
+	* src/<nearly all files>: Bugfix: RWMemoryMembers constructor
+	inits now 'core', needed for all traces
+
+	* src/<some files>: Remove trace outputs if tracing
+	is not enabled
+
+	* src/hwuart.cpp: Bugfix: clear UDRE irq by writing UDR
+	Bugfix: only init HWUsart once (parent
+	allready inits the usart
+
+	Bugfix: irq handling in usart
+
+	Thanks to Jakob Schwendner for the bugreports in u(s)art!                
+
+2005-03-13 <lts-rudolph@gmx.de>
+	* src/avrdevice.cpp: Bugfix: _cooked_size -> rawsize
+	Bug #12295 fixed
+
+2005-03-03    <no.mail@please.com>
+
+	* examples/anacomp/Makefile.am (do_python): Added do_python target
+
+2005-03-03    <rivetwa@member.fsf.org>
+
+	* configure.ac: Added src/python/Makefile 
+	* src/python/Makefile.am: created. (hack to make $(distdir)/src/python)
+
+2005-02-26    <rivetwa@member.fsf.org>
+
+	* src/Makefile.am: (elonen's patch) Accepted the addition of SWIG
+	generated Python bindings.
+
+	* examples/anacomp/checkdebug.py: ported from Klaus's TCL version.
+
+
+2005-02-23    <rivetwa@member.fsf.org>
+
+	* doc/Makefile.am: Added default pdf and info  generation rule
+
+	* Added $(srcdir)checkdebug.gdb.in->$(distdiri)checkdebug.gdb change
+
+2005-02-09    <rivetwa@member.fsf.org>
+
+	* doc/simulavrxx.texinfo: Minor updated to spelling and word
+	choice. Minor problems remain. (version/update fields not setup)
+
+	* INSTALL (bootstrap): Updated bootstrap notes
+
+	* configure.ac: (Russell Shaw patch) Incorporated use of
+	tclConfig.sh to gather information about TCL, as well as several
+	modifications to check for more tools and features. Cleaned up
+	quoting and replaced my silly "echo" with AC_MSG_NOTICE, for
+	example. Thanks Russell!
+
+	* bootstrap: some nice mods also courtesy of Russell Shaw (check
+	that automake, libtool and autoconf are available)
+
+2005-02-08   <rivetwa@member.fsf.org>
+
+	* src/Makefile.am: (Oled Batrashev patch) Added flow in of
+	TCL_INCLUDE_SPEC variable, added to CPPFLAGS. Thanks again Oleg!
+
+2005-02-08    <rivetwa@member.fsf.org>
+
+	* configure.ac: (Oleg Batrashev patch) Added flow of
+	TCL_INCLUDE_SPEC to Makefile, added warning message if swig is not
+	found. Thanks Oleg!
+
+2005-02-08        <rivetwa@member.fsf.org>
+
+	* updated bootstrap for my needs, commented INSTALL to reflect
+	that this may not be exactly right for all platforms.
+
+2005-02-04    <rivetwa@member.fsf.org>
+
+	* Added documentation support. Try "make pdf" and "make info" now ;-).
+	* Cleaned up macro quoting.
+
+2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
+	Add additional debug output in case of termination 
+	* src/avrdevice.cpp 
+
+2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
+	Bugfix: PC now has only as many bits as needed for flash size
+	* src/decoder.cpp 
+
+2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
+	remove old unused source lines
+	* src/flash.cpp 
+
+2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
+	Bugfix: systemclocktypes was unknown to simulavr.so
+	* src/simulavr.i
+
+2005-01-02 Klaus Rudolph <lts-rudolph@gmx.de>
+	adding usart to atmega128, not complete: synchronos mode missing
+	double/tripple rx buffer missing
+	* src/atmega128.cpp 
+	* src/atmega128.h 
+	* src/hwuart.cpp 
+	* src/hwuart.h
+
+2004-12-24    <rivetwa@member.fsf.org>
+
+	* Added make_tarball and changed Makefile.am to work arround
+	failure of make distcheck (complained about depcomp not being
+	cleaned up???)
+
+2004-12-24  Klaus Rudolph  <lts-rudolph@gmx.de>
+	Cleanup for swig warnings
+	* src/avrdevice.h 
+	* src/main.cpp
+	* src/mysocket.h
+	* src/net.h
+	* src/pin.h
+	* src/serialtx.h
+	* src/simulavr.i
+	* src/systemclock.h
+
+2004-12-23(2)  Klaus Rudolph  <lts-rudolph@gmx.de> 
+
+	Remove private testcode
+	* main.cpp
+	* main3.cpp removed!
+	* Makefile.am
+
+2004-12-23  Klaus Rudolph  <lts-rudolph@gmx.de>
+
+	First version of Change log, not of simulavrxx :-)
+	* ChangeLog 
+	* INSTALL
+	* AUTHORS
+
+	Bugfix: Simulation terminates or runs in trouble after internal
+	time exceeds "long" variable. Fixed: use long long
+	* src/avrdevice.cpp 
+	* src/avrdevice.h 
+	* src/hwwado.cpp 
+	* src/hwwado.h 
+	* src/irqsystem.h 
+	* src/keyboard.cpp 
+	* src/keyboard.h 
+	* src/main3.cpp 
+	* src/main.cpp 
+	* src/systemclock.cpp 
+	* src/systemclock.h 
+	* src/trace.cpp 
+	* src/trace.h 
+
