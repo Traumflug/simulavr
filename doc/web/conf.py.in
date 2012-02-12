@@ -23,7 +23,7 @@ unused_docs = ['index', 'tclgui', 'helpwanted', 'platform', 'examples',
 
 # General substitutions.
 project = 'Simulavr'
-copyright = '2004-2010, Bill Rivet, Thomas Klepp'
+copyright = '2004-2012, Bill Rivet, Thomas Klepp'
 
 # The default replacements for |version| and |release|, also used in various
 # other places throughout the built documents.

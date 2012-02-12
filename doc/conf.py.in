@@ -38,7 +38,7 @@ master_doc = 'manual'
 
 # General information about the project.
 project = u'Simulavr'
-copyright = u'2001 - 2010, see Copyright chapter'
+copyright = u'2001 - 2012, see Copyright chapter'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -180,7 +180,7 @@ pdf_documents = [
     ('manual',
      u'manual',
      u'Simulavr - an AVR simulation framework',
-     u'Authors and copyright: 2001 - 2010, see Copyright chapter'),
+     u'Authors and copyright: 2001 - 2012, see Copyright chapter'),
 ]
 
 # A comma-separated list of custom stylesheets. Example:

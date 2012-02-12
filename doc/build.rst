@@ -3,23 +3,29 @@ Building and Installing
 
 .. note::
 
-  Examples in this chapter refer to a version 0.10, please replace this with your
+  Examples in this chapter refer to a version 1.0.0, please replace this with your
   current version!
+
+Build
+-----
   
 simulavr uses GNU auto tools. This means that, given a tarball, for
-version 0.10, for example, you should be able to use the following
+version 1.0.0, for example, you should be able to use the following
 steps to build and install simulavr::
 
-  tar zxvf simulavr-0.10.tar.gz
-  cd simulavr-0.10
+  tar zxvf simulavr-1.0.0.tar.gz
+  cd simulavr-1.0.0
   ./configure <configure options>
   make
   make install
 
-This will build ``simulavr`` and, if switched on by configure options,
+This will build ``simulavr`` and, if switched on by configure options (see below),
 some extension modules and libraries. It installs simulavr itself, libraries and
 some examples and the ``simulavr.info`` in documentation directory
 ``$prefix/share/doc/simulavr``.
+
+Install
+-------
 
 If you want to install ``simulavr.pdf`` too, you can do that after the normal
 installation::
@@ -44,7 +50,7 @@ Python interface will not be installed by ``make-install...``, because a right
 installation depends on the actual python installation. To support the installation
 of python module there is a ``setup.py`` in ``src`` directory::
 
-  cd simulavr-0.10/src
+  cd simulavr-1.0.0/src
   python setup.py install
 
 If you want to create a egg-package from this python module, you have to install
@@ -56,29 +62,31 @@ For more possibilities on installing python interface, please see python
 documentation (distutils package) and documentation for setuptools python
 package.
 
+Prerequsites
+------------
+
 simulavr does rely on a few other GNU tools. In particular, it relies
 on libbfd from binutils, and by libbfd's dependency, it also relies on
 libiberty.
 
-I have found it useful to install my hand-configured-installed
-files in one area. That way I can put the AVR-tools in my path only when
-I'm working on AVR related work.  For reference, here is how I could
-install AVR tools to ``/home/user/install``::
+Here is a list of tools, which are needed by building configure script, run
+configure and run make:
 
-  mkdir b-binutils
-  tar jxvf binutils-2.19.tar.bz2
-  cd b-binutils
-  ../binutils-2.19/configure --enable-install-libbfd \
-     --prefix=/home/user/install --target=avr
-  make && make install
+- make (all not to old versions should work, known to work with 3.81, ubuntu 10.04)
+- autoconf (version >= 2.63, known to work with 2.65, ubuntu 10.04)
+- automake (version >= 1.10, known to work with 1.11.1, ubuntu 10.04)
+- libtool (version >= 2.2, known to work with 2.2.6b, ubuntu 10.04)
+- SWIG (version >= 1.3.18, known to work with 1.3.40, ubuntu 10.04), needed if you want to
+  create tcl or python extensions or to run examples
+- gcc (version known to work with 4.4.3, ubuntu 10.04)
+- avr-gcc, avr-binutils, avr-libc (works with 4.3.4, 2.20, 1.6.7, ubuntu 10.04) for creating
+  avr programs for examples
+- tcl and tk, needed, if you want to create tcl interface
+- python (version >= 2.4.0, known to work with 2.6.5, ubuntu 10.04), needed if you want to
+  create python interface, run examples and/or ``make check``
 
-Then I configure/install simulavr as follows::
-
-  tar zxvf simulavr-@value{VERSION}.tar.gz
-  cd simulavr-@value{VERSION}
-  ./configure --prefix=/home/user/install
-  make
-  make install
+Configure options
+-----------------
 
 Ideally this is all you should need to build/install simulavr. Below are some
 of the configure options.
@@ -150,6 +158,29 @@ things from libbfd, so it should be possible to use the system libbfd (and
 libiberty). But I have seen cases, where building simulavr against this system
 libbfd was successfull and running simulavr with a AVR elf file end in a
 segmentation fault. Then it's necessary to use a special AVR binutils build.
+
+Hint: where to install
+----------------------
+
+I have found it useful to install my hand-configured-installed
+files in one area. That way I can put the AVR-tools in my path only when
+I'm working on AVR related work.  For reference, here is how I could
+install AVR tools to ``/home/user/install``::
+
+  mkdir b-binutils
+  tar jxvf binutils-2.19.tar.bz2
+  cd b-binutils
+  ../binutils-2.19/configure --enable-install-libbfd \
+     --prefix=/home/user/install --target=avr
+  make && make install
+
+Then I configure/install simulavr as follows::
+
+  tar zxvf simulavr-@value{VERSION}.tar.gz
+  cd simulavr-@value{VERSION}
+  ./configure --prefix=/home/user/install
+  make
+  make install
 
 How to build simulavr on MingW/Windows
 --------------------------------------

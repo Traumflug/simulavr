@@ -22,11 +22,31 @@ Simulation options
 
 ``-d <device name>, --device <device name>``
   tell simulavr, what type of device it has to simulate. The following devices
-  are supported: at90s8515, at90s4433, atmega128, atmega48, atmega88, atmega168,
-  atmega8, atmega16, atmega32, atmega328, attiny2313.
-  To find out, which devices are supported with your current installation, use
-  the --help option.
-  
+  are supported for version 1.0: (to find out, which devices are supported with
+  your current installation, use the ``--help`` option)
+
+  - at90can128
+  - at90can32
+  - at90can64
+  - at90s4433
+  - at90s8515
+  - atmega128
+  - atmega1284a
+  - atmega16
+  - atmega164a
+  - atmega168
+  - atmega32
+  - atmega324a
+  - atmega328
+  - atmega48
+  - atmega644a
+  - atmega8
+  - atmega88
+  - attiny2313
+
+  **Attention:** some devices doesn't support all peripheral parts of controller. (for
+  example CAN peripheral in at90can... devices) Ports and timer are mostly implemented.
+
 ``-f <name>, --file <name>``
   load ELF-file <name> for simulation in simulated target.
   
@@ -42,6 +62,11 @@ Simulation options
 GDB options
 -----------
 
+.. note::
+
+   Do not run simulavr with `-p`-option unattended and also not with admin rights. This
+   could be a security hole for your system!
+
 ``-g, --gdbserver``
   running as avr-gdb-server
   
@@ -56,6 +81,9 @@ GDB options
   
 ``-p <port>``
   change <port> for avr-gdb server to port. Default is port 1212.
+  
+``--gdb-stdin``
+  for use with GDB as ``target remote | ./simulavr``
   
 Control options
 ---------------

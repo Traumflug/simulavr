@@ -3,7 +3,7 @@ Building and Installing
 
 .. note::
 
-  Examples in this chapter refer to a version 0.10, please replace this with your
+  Examples in this chapter refer to a version 1.0.0, please replace this with your
   current version!
   
 This chapter describes, how you can build an install simulavr from a tarball under
@@ -21,13 +21,20 @@ make, python (at least 2.4, for regression tests, some examples, python interfac
 tcl/tk (for tcl interface and some examples), doxygen (if you want to generate
 api documentation), verilog (if you want to build verilog interface).
 
+Here is a short list of tools, which are necessary to run configure script and to
+build and install simulavr: (for more see manual)
+
+- make (all not to old versions should work, known to work with 3.81, ubuntu 10.04)
+- libtool (version >= 2.2, known to work with 2.2.6b, ubuntu 10.04)
+- gcc (version known to work with 4.4.3, ubuntu 10.04)
+
 Do the build
 ------------
 
-Assume, that you have downloaded ``simulavr-0.10.tar.gz``, unpack it::
+Assume, that you have downloaded ``simulavr-1.0.0.tar.gz``, unpack it::
 
-  tar zxvf simulavr-0.10.tar.gz
-  cd simulavr-0.10
+  tar zxvf simulavr-1.0.0.tar.gz
+  cd simulavr-1.0.0
   
 Now you are ready to run ``configure``::
   
@@ -88,7 +95,7 @@ Python interface will not be installed by ``make-install...``, because a right
 installation depends on the actual python installation. To support the installation
 of python module there is a ``setup.py`` in ``src`` directory::
 
-  cd simulavr-0.10/src
+  cd simulavr-1.0.0/src
   python setup.py install
 
 If you want to create a egg-package from this python module, you have to install
