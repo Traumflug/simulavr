@@ -43,6 +43,9 @@
 #include "avrerror.h"
 #include "helper.h"
 
+/* for preprocessor symbol HAVE_SYS_MINGW */
+#include "config.h"
+
 #ifdef _MSC_VER
 #  define snprintf _snprintf
 #endif
@@ -175,7 +178,14 @@ void SystemConsoleHandler::vffatal(const char *file, int line, const char *fmt, 
 
 void SystemConsoleHandler::AbortApplication(int code) {
     if(useExitAndAbort) {
+#if defined(HAVE_SYS_MINGW) || defined(_MSC_VER)
+        /* TODO: changed because of problems on windows7 with abort call, with abort it will bring up a
+           message box and break regression test. It will also irritate user. There is a call _set_abort_behavior
+           reported on MSDN, which could help, but in the moment not available in my MSys. */
+        exit(3);
+#else
         abort();
+#endif
     } else {
         throw -code;
     }
