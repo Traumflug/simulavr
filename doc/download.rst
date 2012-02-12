@@ -37,7 +37,7 @@ risk!)
 Release 1.0.0
 -------------
 
-**Release date:** february 2012.
+**Release date:** february 12th, 2012.
 
 .. list-table::
    :widths: 10 10
@@ -63,11 +63,16 @@ Release 1.0.0
    * - `simulavr-1.0-api-documentation.tar.gz <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0-api-documentation.tar.gz>`__
        and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0-api-documentation.tar.gz.sig>`__
      - Doxygen API documentation in html format.
-   * - `pysimulavr-1.0.0-py2.6.egg <http://download.savannah.nongnu.org/releases/simulavr/pysimulavr-1.0.0-py2.6.egg>`__
-       and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/pysimulavr-1.0.0-py2.6.egg.sig>`__
-     - Python egg for python 2.6, install it with easy_install or pip. Should also work on python 2.4 to 2.7. Dosn't
-       need simulavr installation. (an egg is a zip container, you can also unpack it with unzip anywhere in your
-       python environment)
+   * - `pysimulavr-1.0.0-linux32-py2.6-.egg <http://download.savannah.nongnu.org/releases/simulavr/pysimulavr-1.0.0-linux32-py2.6.egg>`__
+       and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/pysimulavr-1.0.0-linux32-py2.6.egg.sig>`__
+     - Python egg for python 2.6 on linux, install it with easy_install or pip. Should also work on python 2.4 to
+       2.7. Dosn't need simulavr installation. (an egg is a zip container, you can also unpack it with unzip
+       anywhere in your python environment)
+   * - `pysimulavr-1.0.0-win7-32bit-py2.6-.egg <http://download.savannah.nongnu.org/releases/simulavr/pysimulavr-1.0.0-win7-32bit-py2.6.egg>`__
+       and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/pysimulavr-1.0.0-win7-32bit-py2.6.egg.sig>`__
+     - Python egg for python 2.6 on win7, install it with easy_install or pip. Should also work on python 2.4 to
+       2.7. Dosn't need simulavr installation. (an egg is a zip container, you can also unpack it with unzip
+       anywhere in your python environment)
 
 Older versions
 --------------
