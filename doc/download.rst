@@ -45,31 +45,31 @@ Release 1.0.0
   
    * - Package
      - Description
-   * - `simulavr-1.0.0.tar.gz <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0.0.tar.gz>`__
+   * - `simulavr-1.0.0.tar.gz <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0.0.tar.gz>`__ (990k)
        and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0.0.tar.gz.sig>`__
      - Source tarball for all systems, see build instructions for usage
-   * - `manual-1.0.pdf <http://download.savannah.nongnu.org/releases/simulavr/manual-1.0.pdf>`__ and
+   * - `manual-1.0.pdf <http://download.savannah.nongnu.org/releases/simulavr/manual-1.0.pdf>`__ (1.1M) and
        `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/manual-1.0.pdf.sig>`__
      - Manual in pdf format
    * - `simulavr-1.0.0-binary-linux32.tar.gz <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0.0-binary-linux32.tar.gz>`__
-       and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0.0-binary-linux32.tar.gz.sig>`__ 
+       (17M) and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0.0-binary-linux32.tar.gz.sig>`__ 
      - Binary for linux, built on ubuntu 10.04 32bit, but should work on mostly all linux distributions.
        Install it somewhere you want in your home path or with root rights to sytem root to make it
        accessible for all users. Includes api documentation, man pages, header files and examples
    * - `simulavr-1.0.0-binary-win7-32bit.tar.gz <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0.0-binary-win7-32bit.tar.gz>`__
-       and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0.0-binary-win7-32bit.tar.gz.sig>`__
+       (6.4M) and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0.0-binary-win7-32bit.tar.gz.sig>`__
      - Binary for windows, built with MSys for Windows7 32bit. Install it anywhere in your system, for example in a
        subdirectory on programs path
    * - `simulavr-1.0-api-documentation.tar.gz <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0-api-documentation.tar.gz>`__
-       and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0-api-documentation.tar.gz.sig>`__
+       (195M) and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/simulavr-1.0-api-documentation.tar.gz.sig>`__
      - Doxygen API documentation in html format.
-   * - `pysimulavr-1.0.0-linux32-py2.6-.egg <http://download.savannah.nongnu.org/releases/simulavr/pysimulavr-1.0.0-linux32-py2.6.egg>`__
-       and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/pysimulavr-1.0.0-linux32-py2.6.egg.sig>`__
+   * - `pysimulavr-1.0.0-linux32-py2.6.egg <http://download.savannah.nongnu.org/releases/simulavr/pysimulavr-1.0.0-linux32-py2.6.egg>`__
+       (1.2M) and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/pysimulavr-1.0.0-linux32-py2.6.egg.sig>`__
      - Python egg for python 2.6 on linux, install it with easy_install or pip. Should also work on python 2.4 to
        2.7. Dosn't need simulavr installation. (an egg is a zip container, you can also unpack it with unzip
        anywhere in your python environment)
    * - `pysimulavr-1.0.0-win7-32bit-py2.6-.egg <http://download.savannah.nongnu.org/releases/simulavr/pysimulavr-1.0.0-win7-32bit-py2.6.egg>`__
-       and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/pysimulavr-1.0.0-win7-32bit-py2.6.egg.sig>`__
+       (3.7M) and `gpg signature <http://download.savannah.nongnu.org/releases/simulavr/pysimulavr-1.0.0-win7-32bit-py2.6.egg.sig>`__
      - Python egg for python 2.6 on win7, install it with easy_install or pip. Should also work on python 2.4 to
        2.7. Dosn't need simulavr installation. (an egg is a zip container, you can also unpack it with unzip
        anywhere in your python environment)
