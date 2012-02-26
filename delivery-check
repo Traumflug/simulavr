@@ -14,6 +14,9 @@ if [ ! -f "delivery-check.conf" ]; then
 fi
 source delivery-check.conf
 SHOW_COMMIT_MAX=20
+if [ ! -z "$CONF_SHOW_COMMIT_MAX" ]; then
+  SHOW_COMMIT_MAX=$CONF_SHOW_COMMIT_MAX
+fi
 
 function printHelp() {
   cat <<EOD
@@ -106,7 +109,11 @@ function runConfCmd() {
   if [ "$OPT_VERILOG" = "y" -a "$CONF_WITH_VERILOG" = "y" ]; then
     C="$C --enable-verilog"
   fi
-  $C
+  if [ ! -z "$CONF_PYTHON_LDFLAGS" ]; then
+    $C PYTHON_LDFLAGS='$CONF_PYTHON_LDFLAGS'
+  else
+    $C
+  fi
   if [ ! $? = 0 ]; then
     error "run 'configure' failed" 4
   fi
