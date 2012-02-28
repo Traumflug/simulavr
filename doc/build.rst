@@ -77,13 +77,24 @@ configure and run make:
 - automake (version >= 1.10, known to work with 1.11.1, ubuntu 10.04)
 - libtool (version >= 2.2, known to work with 2.2.6b, ubuntu 10.04)
 - SWIG (version >= 1.3.18, known to work with 1.3.40, ubuntu 10.04), needed if you want to
-  create tcl or python extensions or to run examples
+  create tcl or python extensions or to run examples, **attention:** SWIG 1.3.x, not SWIG 2.0.x,
+  see below!
 - gcc (version known to work with 4.4.3, ubuntu 10.04)
 - avr-gcc, avr-binutils, avr-libc (works with 4.3.4, 2.20, 1.6.7, ubuntu 10.04) for creating
   avr programs for examples
 - tcl and tk, needed, if you want to create tcl interface
 - python (version >= 2.4.0, known to work with 2.6.5, ubuntu 10.04), needed if you want to
-  create python interface, run examples and/or ``make check``
+  create python interface, run examples and/or ``make check``, **attention:** not python 3.x,
+  see below!
+
+**Attention:**
+
+- On simulavr 1.0 build does run only with SWIG 1.3.x (last version is 1.3.40), SWIG 2.0.x
+  is supported with upcoming version 1.1. If you want to use SWIG 2.0.x with simulavr 1.0, then
+  you have to replace the line 30 "AC_PROG_SWIG(1.3.18)" in file configure.ac with
+  "AC_PROG_SWIG(2.0.0)". Then run ``./bootstrap``, ``./configure ...`` and ``make`` again.
+- Python 3 isn't supported yet. Use python 2.x, last 2.x version is 2.7.2. Will be changed
+  in next versions!
 
 Configure options
 -----------------
@@ -216,4 +227,9 @@ How to build simulavr on MingW/Windows
   to the right name from **your** installation, for python 2.6.x it is for example
   ``python26`` Don't use configure option ``--enable-python=X:/PYPATH/python``,
   because there is a bug in m4 scripts.
+* If you get a linker error, which reports, that symbols like ``libintl_...`` are not
+  found, then you have to install at first libintl-...-dev package. (part of gettext
+  packages!) Then run configure again with ``EXTRA_LIBS='-L/mingw/lib -lintl'``, where the
+  path ``/mingw/lib`` is the path to ``libintl.a``. This is only necessary, if this linker
+  error's are shown. (depending on what version of gettext you've used)
 

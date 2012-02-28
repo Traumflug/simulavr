@@ -27,7 +27,12 @@ fi
 LT_INIT
 LT_PREREQ([2.2])
 AC_PROG_CXX
-AC_PROG_SWIG(1.3.18)
+AC_PROG_SWIG(2.0.0)
+if test "x$SWIG_LIB" = "x"; then
+  # fall back to SWIG version 1.3.x in case of SWIG 2.0.x not found!
+  AC_MSG_NOTICE([Don't worry, we can try to find SWIG 1.3.x!])
+  AC_PROG_SWIG(1.3.18)
+fi
 SWIG_ENABLE_CXX
 SWIG_MULTI_MODULE_SUPPORT
 AM_CONDITIONAL([USE_SWIG],[test "x$SWIG" != 'x'])
@@ -64,6 +69,8 @@ if test "$ac_sys_check_uname_o" = "Msys"; then
   AVR_CHECK_WINSOCK
   # libtool links to libz by default, but on MSYS/MingW this is on other place
   AVR_CHECK_ZLIB_MSYS
+  # add extra libs setting, if set on commandline, but only on msys
+  AC_SUBST([EXTRA_LIBS])
 fi
 
 ## Check for the XML files in src/fab/atmel-xml. This just checks for the

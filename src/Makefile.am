@@ -36,7 +36,7 @@ nodist_lib_pysimulavr_la_SOURCES=pysimulavr_wrap.cpp
 lib_pysimulavr_la_CPPFLAGS=$(PYTHON_CPPFLAGS) $(PYTHON_XTRA_INC)
 lib_pysimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 lib_pysimulavr_la_LIBADD= libsim.la \
-  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty
+  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty $(EXTRA_LIBS)
 
 pysimulavr_wrap.cpp: $(PYTHON_MODUL_INTERFACE)
 	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_XTRA_INC) -o $@ $?
@@ -45,7 +45,8 @@ $(PYTHON_MODUL_LIB): lib_pysimulavr.la
 if SYS_MINGW
 	$(CXX) -shared -o $(PYTHON_MODUL_LIB) \
 		$(addprefix .libs/,$(lib_pysimulavr_la_OBJECTS:.lo=.o)) .libs/libsim.a \
-		-lstdc++ -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty $(PYTHON_LDFLAGS)
+		-lstdc++ -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty \
+		$(EXTRA_LIBS) $(PYTHON_LDFLAGS)
 else
 	cp .libs/lib_pysimulavr.so $(PYTHON_MODUL_LIB)
 endif
@@ -87,7 +88,7 @@ libsim_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 nodist_libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
 libsimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz \
-  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty
+  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty $(EXTRA_LIBS)
 
 pkginclude_HEADERS = \
   adcpin.h application.h at4433.h at8515.h atmega128.h atmega16_32.h attiny2313.h \
@@ -106,7 +107,7 @@ nodist_pkginclude_HEADERS =  $(FAB_HEADER)
 simulavr_SOURCES = cmd/main.cpp cmd/dumpargs.cpp
 simulavr_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) \
   -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty \
-  $(LIBWSOCK_FLAGS)
+  $(EXTRA_LIBS) $(LIBWSOCK_FLAGS)
 
 if USE_VERILOG
 VPI_LIB=avr.vpi
@@ -114,7 +115,7 @@ libavrvpi_la_SOURCES = vpi.cpp cmd/dumpargs.cpp
 libavrvpi_la_DEPENDENCIES = $(libsim_la_OBJECTS)
 libavrvpi_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 libavrvpi_la_LIBADD= $(libsim_la_OBJECTS) $(LIBZ_FLAGS) \
-  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty
+  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty $(EXTRA_LIBS)
 libavrvpi_la_CXXFLAGS = $(AM_CXXFLAGS)
 
 $(VPI_LIB): libavrvpi.la

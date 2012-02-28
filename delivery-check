@@ -110,10 +110,12 @@ function runConfCmd() {
     C="$C --enable-verilog"
   fi
   if [ ! -z "$CONF_PYTHON_LDFLAGS" ]; then
-    $C PYTHON_LDFLAGS='$CONF_PYTHON_LDFLAGS'
-  else
-    $C
+    PARAM_PYTHON_LDFLAGS="PYTHON_LDFLAGS=\"$CONF_PYTHON_LDFLAGS\""
   fi
+  if [ ! -z "$CONF_EXTRA_LIBS" ]; then
+    PARAM_EXTRA_LIBS="EXTRA_LIBS=\"$CONF_EXTRA_LIBS\""
+  fi
+  $C $PARAM_PYTHON_LDFLAGS $PARAM_EXTRA_LIBS
   if [ ! $? = 0 ]; then
     error "run 'configure' failed" 4
   fi
