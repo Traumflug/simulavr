@@ -55,13 +55,11 @@ void test_pin(void)
    }
 
 // Delay in 1/10's of a millisecond
-void msleep(INT16U ms)
-    { /* This loop does not work with optimization != 0. Therefore we use
-         avr-libc _delay routines K. Schwichtenberg
-	INT16S i,j;
-	for (i = 1; i < ms; i++)
-		for (j = 1; j < ONETENTH_MS; j++); / * to give 1/10 ms*/
-        _delay_ms(ms); // Changed K. Schwichtenberg
+// Does not work with -O0, use -O1, even for debugging.
+void msleep(INT16U ms10)
+    {
+        for( ; ms10; --ms10)
+            _delay_ms(0.1);
     }
 
 //------------------------------------------------------------
