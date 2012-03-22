@@ -269,11 +269,6 @@ void ThreadList::OnCall()
 	for(unsigned int i = 0; i < 32; i++) {
 		old->registers[i] = m_core.GetCoreReg(i);
 	}
-
-	if(0xc9c <= m_on_call_ip && m_on_call_ip <= 0xca4)
-		fprintf(stderr, "Pripravit se ke startu: proc_switch()\n");
-	if(0x80a <= m_on_call_ip && m_on_call_ip <= 0x810)
-		fprintf(stderr, "Pripravit se ke startu: asm_switch_context()\n");
 }
 
 void ThreadList::OnSPRead(int SP_value)
