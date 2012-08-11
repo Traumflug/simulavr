@@ -93,9 +93,9 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
           &portf.GetPin(7))
 {
     flagJMPInstructions = (flash_bytes > 8U * 1024U) ? true : false;
-    irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 26);
+    irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 37);
 
-    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 23, HWEeprom::DEVMODE_EXTENDED); 
+    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 26, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 16);
 
     RegisterPin("AREF", &aref);
@@ -116,8 +116,8 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
     extirq01->registerIrq(8, 7, new ExternalIRQSingle(eicrb_reg, 6, 2, GetPin("E7")));
     
     timerIrq0 = new TimerIRQRegister(this, irqSystem, 0);
-    timerIrq0->registerLine(0, new IRQLine("TOV0",  16));
-    timerIrq0->registerLine(1, new IRQLine("OCF0A", 15));
+    timerIrq0->registerLine(0, new IRQLine("TOV0",  17));  // TIMER0 OVF
+    timerIrq0->registerLine(1, new IRQLine("OCF0A", 16));  // TIMER0 COMP
     
     timer0 = new HWTimer8_1C(this,
                              new PrescalerMultiplexerExt(&prescaler013, PinAtPort(&portd, 7)),
@@ -127,11 +127,11 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
                              new PinAtPort(&portb, 7));
 
     timerIrq1 = new TimerIRQRegister(this, irqSystem, 1);
-    timerIrq1->registerLine(0, new IRQLine("TOV1",  14));
-    timerIrq1->registerLine(1, new IRQLine("OCF1A", 13));
-    timerIrq1->registerLine(2, new IRQLine("OCF1B", 12));
-    timerIrq1->registerLine(3, new IRQLine("OCF1C", 11));
-    timerIrq1->registerLine(5, new IRQLine("ICF1",  10));
+    timerIrq1->registerLine(0, new IRQLine("TOV1",  15));  // TIMER1 OVF
+    timerIrq1->registerLine(1, new IRQLine("OCF1A", 12));  // TIMER1 COMPA
+    timerIrq1->registerLine(2, new IRQLine("OCF1B", 13));  // TIMER1 COMPB
+    timerIrq1->registerLine(3, new IRQLine("OCF1C", 14));  // TIMER1 COMPC
+    timerIrq1->registerLine(5, new IRQLine("ICF1",  11));  // TIMER1 CAPT
     
     inputCapture1 = new ICaptureSource(PinAtPort(&portd, 4));
     timer1 = new HWTimer16_3C(this,
@@ -148,8 +148,8 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
                                inputCapture1);
     
     timerIrq2 = new TimerIRQRegister(this, irqSystem, 2);
-    timerIrq2->registerLine(0, new IRQLine("TOV2",  9));
-    timerIrq2->registerLine(1, new IRQLine("OCF2A", 7));
+    timerIrq2->registerLine(0, new IRQLine("TOV2",  10));  // TIMER2 OVF
+    timerIrq2->registerLine(1, new IRQLine("OCF2A", 9));  // TIMER2 COMP
     
     timer2 = new HWTimer8_1C(this,
                              new PrescalerMultiplexer(&prescaler2),
@@ -159,11 +159,11 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
                              new PinAtPort(&portb, 4));
 
     timerIrq3 = new TimerIRQRegister(this, irqSystem, 3);
-    timerIrq3->registerLine(0, new IRQLine("TOV3",  30));
-    timerIrq3->registerLine(1, new IRQLine("OCF3A", 27));
-    timerIrq3->registerLine(2, new IRQLine("OCF3B", 28));
-    timerIrq3->registerLine(3, new IRQLine("OCF3C", 29));
-    timerIrq3->registerLine(5, new IRQLine("ICF3",  26));
+    timerIrq3->registerLine(0, new IRQLine("TOV3",  31));  // TIMER3 OVF
+    timerIrq3->registerLine(1, new IRQLine("OCF3A", 28));  // TIMER3 COMPA
+    timerIrq3->registerLine(2, new IRQLine("OCF3B", 29));  // TIMER3 COMPB
+    timerIrq3->registerLine(3, new IRQLine("OCF3C", 30));  // TIMER3 COMPC
+    timerIrq3->registerLine(5, new IRQLine("ICF3",  27));  // TIMER3 CAPT
 
     inputCapture3 = new ICaptureSource(PinAtPort(&porte, 7));
     timer3 = new HWTimer16_3C(this,
@@ -195,16 +195,16 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
 
     wado = new HWWado(this);
 
-    acomp = new HWAcomp(this, irqSystem, PinAtPort(&porte, 2), PinAtPort(&porte, 3), 23);
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(&porte, 2), PinAtPort(&porte, 3), 24);
 
     usart0 = new HWUsart(this,
                          irqSystem,
                          PinAtPort(&porte,1),    // TXD
                          PinAtPort(&porte,0),    // RXD
                          PinAtPort(&porte,2),   // XCK
-                         20,   // RX complete vector
-                         21,   // UDRE vector
-                         22,   // TX complete vector
+                         21,   // RX complete vector
+                         22,   // UDRE vector
+                         23,   // TX complete vector
                          0);
 
     usart1 = new HWUsart(this,
@@ -212,9 +212,9 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
                          PinAtPort(&portd,3),    // TXD
                          PinAtPort(&portd,2),    // RXD
                          PinAtPort(&portd,5),   // XCK
-                         31,   // RX complete vector
-                         32,   // UDRE vector
-                         33,   // TX complete vector
+                         32,   // RX complete vector
+                         33,   // UDRE vector
+                         34,   // TX complete vector
                          1);
 
 
