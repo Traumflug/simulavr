@@ -287,8 +287,8 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     rw[0x30]= & portd->pin_reg;
 
     rw[0x2f]= & spi->spdr_reg;
-    rw[0x2e]= & spi->spcr_reg;
-    rw[0x2d]= & spi->spsr_reg;
+    rw[0x2e]= & spi->spsr_reg;
+    rw[0x2d]= & spi->spcr_reg;
 
     rw[0x2c]= & usart0->udr_reg;
     rw[0x2b]= & usart0->ucsra_reg;
