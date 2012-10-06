@@ -45,8 +45,23 @@ public:
 	Value GetMinimumValue() const { return this->front().second; };
 	void RemoveMinimum();
 	bool ContainsValue(Value v) const;
-	void Insert(Key k, Value v);
-	void RemoveMinimumAndInsert(Key k, Value v);
+	void Insert(Key k, Value v) {
+		resize(this->size()+1);
+		InsertInternal(k, v, this->size());
+	}
+	void RemoveMinimumAndInsert(Key k, Value v) {
+		RemoveAtPositionAndInsertInternal(k, v, 0);
+	}
+	void RemoveAtPositionAndInsert(Key k, Value v, unsigned pos) {
+		if(k < (*this)[pos-1].first)
+			InsertInternal(k, v, pos);
+		else
+			RemoveAtPositionAndInsertInternal(k, v, pos);
+	}
+protected:
+	// These are internal because a bad value of `pos' could violate the binary heap invariant.
+	void InsertInternal(Key k, Value v, unsigned pos);
+	void RemoveAtPositionAndInsertInternal(Key k, Value v, unsigned pos);
 };
 
 

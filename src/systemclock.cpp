@@ -66,10 +66,9 @@ bool MinHeap<Key, Value>::ContainsValue(Value v) const
 }
 
 template<typename Key, typename Value>
-void MinHeap<Key, Value>::Insert(Key k, Value v)
+void MinHeap<Key, Value>::InsertInternal(Key k, Value v, unsigned pos)
 {
-	resize(this->size()+1);
-	for(unsigned i = this->size();;) {
+	for(unsigned i = pos;;) {
 		unsigned parent = i/2;
 		if(parent == 0 || (*this)[parent-1].first < k) {
 			(*this)[i-1].first = k;
@@ -85,10 +84,10 @@ void MinHeap<Key, Value>::Insert(Key k, Value v)
 }
 
 template<typename Key, typename Value>
-void MinHeap<Key, Value>::RemoveMinimumAndInsert(Key k, Value v)
+void MinHeap<Key, Value>::RemoveAtPositionAndInsertInternal(Key k, Value v, unsigned pos)
 {
-	assert(!this->empty());
-	unsigned i = 1;
+	assert(pos < this->size());
+	unsigned i = pos + 1;
 	for(;;) {
 		unsigned left = 2*i;
 		unsigned right = 2*i + 1;
