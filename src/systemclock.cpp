@@ -28,6 +28,7 @@
 #include "simulationmember.h"
 #include "helper.h"
 #include "application.h"
+#include "avrdevice.h"
 #include "avrerror.h"
 
 #include "signal.h"

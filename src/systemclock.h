@@ -29,8 +29,9 @@
 #include <map>
 #include <vector>
 
-#include "avrdevice.h"
 #include "systemclocktypes.h"
+
+class SimulationMember;
 
 /** A heap data structure optimized for obtaining Value of the smallest Key.
 	Example MinHeap<SystemClockOffset, SimulationMember*>. */
