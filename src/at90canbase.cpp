@@ -238,7 +238,11 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
     rw[0xc1]= & usart0->ucsrb_reg;
     rw[0xc0]= & usart0->ucsra_reg;
     /* 0xbd - 0xbf reserved */
-    /* 0xb8 - 0xbc Twin Wire TODO */
+    rw[0xBC]= new NotSimulatedRegister("TWI register TWCR not simulated");
+    rw[0xBB]= new NotSimulatedRegister("TWI register TWDR not simulated");
+    rw[0xBA]= new NotSimulatedRegister("TWI register TWAR not simulated");
+    rw[0xB9]= new NotSimulatedRegister("TWI register TWSR not simulated");
+    rw[0xB8]= new NotSimulatedRegister("TWI register TWBR not simulated");
     /* 0xb7 reserved */
     rw[0xb6]= & assr_reg;
     /* 0xb4 - 0xb5 reserved */
