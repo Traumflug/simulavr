@@ -94,7 +94,7 @@ void MinHeap<Key, Value>::RemoveMinimumAndInsert(Key k, Value v)
 		unsigned smallest = i;
 		if(left-1 < this->size() && (*this)[left-1].first < k)
 			smallest = left;
-		if(right-1 < this->size() && (*this)[right-1].first < k)
+		if(right-1 < this->size() && (*this)[right-1].first < k && (*this)[right-1].first < (*this)[left-1].first)
 			smallest = right;
 		if(smallest == i) {
 			(*this)[smallest-1].first = k;
@@ -103,10 +103,8 @@ void MinHeap<Key, Value>::RemoveMinimumAndInsert(Key k, Value v)
 		}
 		Key k_temp = (*this)[smallest-1].first;
 		Value v_temp = (*this)[smallest-1].second;
-		(*this)[smallest-1].first = k;
-		(*this)[smallest-1].second = v;
-		k = k_temp;
-		v = v_temp;
+		(*this)[i-1].first = k_temp;
+		(*this)[i-1].second = v_temp;
 		i = smallest;
 	}
 }
