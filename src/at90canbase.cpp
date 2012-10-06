@@ -92,6 +92,7 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
           &portf.GetPin(6),
           &portf.GetPin(7))
 {
+    flagELPMInstructions = true;
     flagJMPInstructions = (flash_bytes > 8U * 1024U) ? true : false;
     irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 37);
 
