@@ -40,7 +40,7 @@ class MinHeap : public std::vector<std::pair<Key,Value> >
 public:
 	MinHeap();
 	bool IsEmpty() const { return this->empty(); }
-	Value GetMinimumKey() const { return this->front().first; }
+	Key GetMinimumKey() const { return this->front().first; }
 	Value GetMinimumValue() const { return this->front().second; };
 	void RemoveMinimum();
 	bool ContainsValue(Value v) const;
