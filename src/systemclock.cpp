@@ -178,12 +178,11 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
 }
 
 void SystemClock::Rescedule(SimulationMember *sm, SystemClockOffset newTime) {
-    MinHeap<SystemClockOffset, SimulationMember *>::iterator ii;
 
-    for(ii=syncMembers.begin(); ii != syncMembers.end(); ii++) {
-        if(ii->second == sm) {
-            syncMembers.erase(ii); 
-            break;
+    for(unsigned i = 0; i < syncMembers.size(); i++) {
+        if(syncMembers[i].second == sm) {
+            syncMembers.RemoveAtPositionAndInsert(newTime+currentTime+1, sm, i);
+            return;
         }
     }
 
