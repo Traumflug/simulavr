@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include "helper.h"
 #include "traceval.h"
+#include "avrdevice.h"
 #include "avrerror.h"
 #include "systemclock.h"
 
@@ -36,7 +37,7 @@ using namespace std;
 TraceValue::TraceValue(size_t bits,
                        const std::string &__name,
                        const int __index,
-                       void *_shadow) :
+                       const void *_shadow) :
     b(bits),
     _name(__name),
     _index(__index),
@@ -111,13 +112,13 @@ void TraceValue::cycle() {
         unsigned nv;
         switch (b) {
         case 1:
-            nv=*(bool*)shadow; break;
+            nv = *(const bool*) shadow; break;
         case 8:
-            nv=*(uint8_t*)shadow; break;
+            nv = *(const uint8_t*) shadow; break;
         case 16:
-            nv=*(uint16_t*)shadow; break;
+            nv = *(const uint16_t*) shadow; break;
         case 32:
-            nv=*(uint32_t*)shadow; break;
+            nv = *(const uint32_t*) shadow; break;
         default:
             avr_error("Internal error: Unsupported number of bits in TraceValue::cycle().");
         }
@@ -726,31 +727,28 @@ TraceSet DumpManager::load(const string &istr) {
     return load(is);
 }
 
-TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, bool *val) {
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, const bool *val) {
     TraceValue *tv=new TraceValue(1, t->GetTraceValuePrefix() + name,
                                   -1, val);
     t->RegisterTraceValue(tv);
     return tv;
 }
 
-TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint8_t
-*val) {
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, const uint8_t*val) {
     TraceValue* tv=new TraceValue(8, t->GetTraceValuePrefix() + name,
                                   -1, val);
     t->RegisterTraceValue(tv);
     return tv;
 }
 
-TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint16_t
-*val) {
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, const uint16_t*val) {
     TraceValue* tv=new TraceValue(16, t->GetTraceValuePrefix() + name,
                                   -1, val);
     t->RegisterTraceValue(tv);
     return tv;
 }
 
-TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint32_t
-*val) {
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, const uint32_t*val) {
     TraceValue* tv=new TraceValue(32, t->GetTraceValuePrefix() + name,
                                   -1, val);
     t->RegisterTraceValue(tv);

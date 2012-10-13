@@ -106,7 +106,7 @@ class TraceValue {
         TraceValue(size_t bits,
                    const std::string &_name,
                    const int __index=-1,
-                   void* shadow=0);
+                   const void* shadow=0);
     
         //! Give number of bits for this value. Max 32.
         size_t bits() const;
@@ -191,7 +191,7 @@ class TraceValue {
         const unsigned b;
     
         //! shadow reg, if used
-        void *shadow;
+        const void *shadow;
     
         //! The value itself
         unsigned v;
@@ -511,18 +511,18 @@ class TraceValueCoreRegister: public TraceValueRegister {
 
 //! Register a directly traced bool value
 /*! \return pointer to the new registered TraceValue */
-TraceValue *trace_direct(TraceValueRegister *t, const std::string &name, bool *val);
+TraceValue *trace_direct(TraceValueRegister *t, const std::string &name, const bool *val);
 
 //! Register a directly traced byte value
 /*! \return pointer to the new registered TraceValue */
-TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint8_t *val);
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, const uint8_t *val);
 
 //! Register a directly traced 16bit word value
 /*! \return pointer to the new registered TraceValue */
-TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint16_t *val);
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, const uint16_t *val);
 
 //! Register a directly traced 32bit word value
 /*! \return pointer to the new registered TraceValue */
-TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, uint32_t *val);
+TraceValue* trace_direct(TraceValueRegister *t, const std::string &name, const uint32_t *val);
 
 #endif
