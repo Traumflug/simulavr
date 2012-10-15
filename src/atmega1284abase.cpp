@@ -166,9 +166,9 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
                              timerIrq2->getLine("OCF2B"),
                              new PinAtPort(&portd, 6));
 
-	gpior0_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR0");
-	gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
-	gpior2_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR2");
+    gpior0_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR0");
+    gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
+    gpior2_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR2");
 
     ad = new HWAd(this, &admux, irqSystem, aref, 24);
     spi = new HWSpi(this,
@@ -283,17 +283,17 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
     rw[0x57]= new NotSimulatedRegister("Self-programming register SPMCSR not simulated");
     // 0x56 reserved
     rw[0x55]= new NotSimulatedRegister("MCU register MCUCR not simulated");
-	rw[0x54]= new NotSimulatedRegister("MCU register MCUSR not simulated");
+    rw[0x54]= new NotSimulatedRegister("MCU register MCUSR not simulated");
     rw[0x53]= new NotSimulatedRegister("MCU register SMCR not simulated");
-	// 0x52 reserved
-	rw[0x51]= new NotSimulatedRegister("On-chip debug register OCDR not simulated");
+    // 0x52 reserved
+    rw[0x51]= new NotSimulatedRegister("On-chip debug register OCDR not simulated");
     rw[0x50]= new NotSimulatedRegister("ADC register ADCSRA not simulated");
     // 0x4F reserved
     rw[0x4E]= & spi->spdr_reg;
     rw[0x4D]= & spi->spsr_reg;
     rw[0x4C]= & spi->spcr_reg;
-	rw[0x4B]= gpior2_reg;
-	rw[0x4A]= gpior1_reg;
+    rw[0x4B]= gpior2_reg;
+    rw[0x4A]= gpior1_reg;
     // 0x49 reserved
     rw[0x48]= & timer0->ocrb_reg;
     rw[0x47]= & timer0->ocra_reg;

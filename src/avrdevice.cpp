@@ -86,31 +86,31 @@ typedef int32_t   Elf32_Sword;
 typedef uint32_t  Elf32_Word;
 
 typedef struct {
-	unsigned char e_ident[EI_NIDENT];    /* ident bytes */
-	Elf32_Half e_type;                   /* file type */ 
-	Elf32_Half e_machine;                /* target machine */
-	Elf32_Word e_version;                /* file version */
-	Elf32_Addr e_entry;                  /* start address */
-	Elf32_Off e_phoff;                   /* phdr file offset */
-	Elf32_Off e_shoff;                   /* shdr file offset */
-	Elf32_Word e_flags;                  /* file flags */
-	Elf32_Half e_ehsize;                 /* sizeof ehdr */
-	Elf32_Half e_phentsize;              /* sizeof phdr */
-	Elf32_Half e_phnum;                  /* number phdrs */
-	Elf32_Half e_shentsize;              /* sizeof shdr */
-	Elf32_Half e_shnum;                  /* number shdrs */
-	Elf32_Half e_shstrndx;               /* shdr string index */
+    unsigned char e_ident[EI_NIDENT];    /* ident bytes */
+    Elf32_Half e_type;                   /* file type */ 
+    Elf32_Half e_machine;                /* target machine */
+    Elf32_Word e_version;                /* file version */
+    Elf32_Addr e_entry;                  /* start address */
+    Elf32_Off e_phoff;                   /* phdr file offset */
+    Elf32_Off e_shoff;                   /* shdr file offset */
+    Elf32_Word e_flags;                  /* file flags */
+    Elf32_Half e_ehsize;                 /* sizeof ehdr */
+    Elf32_Half e_phentsize;              /* sizeof phdr */
+    Elf32_Half e_phnum;                  /* number phdrs */
+    Elf32_Half e_shentsize;              /* sizeof shdr */
+    Elf32_Half e_shnum;                  /* number shdrs */
+    Elf32_Half e_shstrndx;               /* shdr string index */
 } Elf32_Ehdr;
 // Segment header
 typedef struct {
-	Elf32_Word p_type; 	/* entry type */
-	Elf32_Off p_offset; 	/* file offset */
-	Elf32_Addr p_vaddr; 	/* virtual address */
-	Elf32_Addr p_paddr; 	/* physical address */
-	Elf32_Word p_filesz;	/* file size */
-	Elf32_Word p_memsz; 	/* memory size */
-	Elf32_Word p_flags; 	/* entry flags */
-	Elf32_Word p_align; 	/* memory/file alignment */
+    Elf32_Word p_type;   /* entry type */
+    Elf32_Off p_offset;  /* file offset */
+    Elf32_Addr p_vaddr;  /* virtual address */
+    Elf32_Addr p_paddr;  /* physical address */
+    Elf32_Word p_filesz; /* file size */
+    Elf32_Word p_memsz;  /* memory size */
+    Elf32_Word p_flags;  /* entry flags */
+    Elf32_Word p_align;  /* memory/file alignment */
 } Elf32_Phdr;
 #endif
 
@@ -344,11 +344,11 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
 {
     dump_manager = DumpManager::Instance();
     dump_manager->registerAvrDevice(this);
-	DebugRecentJumpsIndex = 0;
+    DebugRecentJumpsIndex = 0;
     
     TraceValue* pc_tracer=trace_direct(&coreTraceGroup, "PC", &cPC);
     coreTraceGroup.RegisterTraceValue(new TwiceTV(coreTraceGroup.GetTraceValuePrefix()+"PCb",  pc_tracer));
-	trace_on = 0;
+    trace_on = 0;
     
     data = new Data; //only the symbol container
 
@@ -585,7 +585,7 @@ void AvrDevice::RegisterTerminationSymbol(const char *symbol) {
 
 void AvrDevice::DebugOnJump()
 {
-	const int COUNT = sizeof DebugRecentJumps / sizeof DebugRecentJumps[0];
+    const int COUNT = sizeof DebugRecentJumps / sizeof DebugRecentJumps[0];
     DebugRecentJumpsIndex = (DebugRecentJumpsIndex + 1) % COUNT;
     DebugRecentJumps[DebugRecentJumpsIndex] = PC * 2;
     int next = (DebugRecentJumpsIndex + 1) % COUNT;
