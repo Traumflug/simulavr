@@ -34,6 +34,8 @@
 #include "hwtimer/timerprescaler.h"
 #include "hwtimer/hwtimer.h"
 
+#include "ioregs.h" // only for rampz
+
 /*! AvrDevice class for ATmega164A/164PA/324A/324PA/644A/644PA/1284/1284P.
 The only difference of ATmega164PA/324PA/644PA/1284P flavor is it has
 a BODS bit in MCUCR. (We do not simulate the register anyway.)

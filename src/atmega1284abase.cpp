@@ -93,12 +93,15 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
           &porta.GetPin(6),
           &porta.GetPin(7)) // TODO: Differential inputs, 1.1V ref, GND input
 { 
+    flagELPMInstructions = true;
+
     irqSystem = new HWIrqSystem(this, 4, 31);
 
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 25, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 16);
 
     RegisterPin("AREF", &aref);
+    rampz = new AddressExtensionRegister(this, "RAMPZ", 1);
 
     eicra_reg = new IOSpecialReg(&coreTraceGroup, "EICRA");
     eimsk_reg = new IOSpecialReg(&coreTraceGroup, "EIMSK");
@@ -279,7 +282,9 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
-    // 0x58 - 0x5c reserved
+    // 0x5c reserved
+    rw[0x5b]= & rampz->ext_reg;
+    // 0x58 - 0x5a reserved
     rw[0x57]= new NotSimulatedRegister("Self-programming register SPMCSR not simulated");
     // 0x56 reserved
     rw[0x55]= new NotSimulatedRegister("MCU register MCUCR not simulated");

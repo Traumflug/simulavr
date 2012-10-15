@@ -41,9 +41,8 @@
 using std::auto_ptr;
 
 /*! AVRDevice class for AT90CAN/32/64/128
-  \todo This device isn't completely implemented. There is no
-  boot loader section support for >= ATMega88, only normal interrupt vector
-  start address supported, incomplete usart registers (and maybe more ...) 
+  \todo This device isn't completely implemented. Some peripherals are
+  not completed or missed.
   \todo Timer2 needs the external clocking bits
   */
 class AvrDevice_at90canbase: public AvrDevice {
