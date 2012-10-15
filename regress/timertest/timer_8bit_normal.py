@@ -3,10 +3,12 @@ from vcdtestutil import VCDTestCase, VCDTestLoader, mSec
 class TestCase(VCDTestCase):
   
   p2irq = {
-    "atmega128": "IRQ.VECTOR16",
-    "at90s4433": "IRQ.VECTOR6",
-    "at90s8515": "IRQ.VECTOR7",
-    "atmega48":  "IRQ.VECTOR16",
+    "atmega128":  "IRQ.VECTOR16",
+    "at90s4433":  "IRQ.VECTOR6",
+    "at90s8515":  "IRQ.VECTOR7",
+    "atmega48":   "IRQ.VECTOR16",
+    "attiny2313": "IRQ.VECTOR6",
+    "attiny25":   "IRQ.VECTOR5",
   }
   
   def setUp(self):
