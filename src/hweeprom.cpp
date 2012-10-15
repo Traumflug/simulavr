@@ -166,7 +166,7 @@ void HWEeprom::SetEecr(unsigned char newval) {
             }
             // start write operation
             if((eecr & CTRL_WRITE) == CTRL_WRITE) {
-				cpuHoldCycles = 2;  // Datasheet: "When EEWE has been set, the CPU is halted for two cycles"
+                cpuHoldCycles = 2;  // Datasheet: "When EEWE has been set, the CPU is halted for two cycles"
                 // abort enable state, switch to write state
                 opMode = eecr & CTRL_MODES;
                 opAddr = eear;
