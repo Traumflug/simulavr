@@ -230,4 +230,107 @@ void FlashProgramming::SetSpmcr(unsigned char v) {
     //cout << "spmcr=0x" << hex << (unsigned int)spmcr_val << "," << action << "," << spm_opr << endl;
 }
 
+AvrFuses::AvrFuses(void):
+    fuseBitsSize(2),
+    fuseBits(0xfffffffd),
+    nrwwAddr(0),
+    nrwwSize(0),
+    bitPosBOOTRST(-1),
+    bitPosBOOTSZ(-1),
+    flagBOOTRST(true),
+    valueBOOTSZ(0)
+{
+    // do nothing!
+}
+
+void AvrFuses::SetFuseConfiguration(int size, unsigned long defvalue) {
+    fuseBitsSize = size;
+    fuseBits = defvalue;
+}
+
+bool AvrFuses::LoadFuses(const unsigned char *buffer, int size) {
+    int fSize = ((fuseBitsSize - 1) / 8) + 1;
+
+    // check buffer size
+    if(fSize != size)
+        return false;
+
+    // store fuse values
+    fuseBits = 0;
+    for(int i = (fSize - 1); i >= 0; --i) {
+        fuseBits <<= 8;
+        fuseBits |= buffer[i];
+    }
+
+    // update fuse values for some fuse bits
+    if(bitPosBOOTRST != -1 && bitPosBOOTRST < fuseBitsSize)
+        flagBOOTRST = ((fuseBits >> bitPosBOOTRST) & 0x1) == 0x1;
+    if(bitPosBOOTSZ != -1 && bitPosBOOTSZ < fuseBitsSize)
+        valueBOOTSZ = (fuseBits >> bitPosBOOTSZ) & 0x3;
+
+    return true;
+}
+
+void AvrFuses::SetBootloaderConfig(unsigned addr, int size, int bPosBOOTSZ, int bPosBOOTRST) {
+    nrwwAddr = addr;
+    nrwwSize = size;
+    bitPosBOOTSZ = bPosBOOTSZ;
+    bitPosBOOTRST = bPosBOOTRST;
+}
+
+unsigned int AvrFuses::GetBLSStart(void) {
+    unsigned int addr = nrwwAddr;
+    unsigned int size = nrwwSize;
+
+    if(addr == 0)
+        // if SPM functionality enabled and no rww functionality available, full flash is
+        // used as nrww area, so "BLS" starts from flash start
+        return 0;
+    if(valueBOOTSZ == 0)
+        return addr;
+    size >>= 1;
+    addr += size;
+    if(valueBOOTSZ == 1)
+        return addr;
+    size >>= 1;
+    addr += size;
+    if(valueBOOTSZ == 2)
+        return addr;
+    size >>= 1;
+    return addr + size;
+}
+
+unsigned int AvrFuses::GetResetAddr(void) {
+    if(flagBOOTRST)
+        return 0;
+    else
+        return GetBLSStart();
+}
+
+AvrLockBits::AvrLockBits(void):
+    lockBitsSize(2),
+    lockBits(0xff)
+{
+    // do nothing!
+}
+
+void AvrLockBits::SetLockBitsConfiguration(int size) {
+    lockBitsSize = size;
+}
+
+bool AvrLockBits::LoadLockBits(const unsigned char *buffer, int size) {
+    int lBSize = 1; // current not more than 8 bit!
+    // check buffer size
+    if(lBSize != size)
+        return false;
+    // load lock bits
+    lockBits = buffer[0];
+    return true;
+}
+
+void AvrLockBits::SetLockBits(unsigned char bits) {
+    // bits can only set to 0, not back to 1 by this operation! Unused bits are set to 1.
+    lockBits = (lockBits & bits) | ~((1 << lockBitsSize) - 1);
+}
+
 // EOF

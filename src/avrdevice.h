@@ -80,7 +80,9 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         word cPC;
         int PC_size;
         AvrFlash *Flash;
-        FlashProgramming * spmRegister;
+        FlashProgramming *spmRegister;
+        AvrFuses fuses;
+        AvrLockBits lockbits;
         HWEeprom *eeprom;
         Data *data;  ///< a hack for symbol look-up
         HWIrqSystem *irqSystem;
@@ -131,7 +133,12 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         /*! Does nothing if the part is not in the cycle list. */
         void RemoveFromCycleList(Hardware *hw);
     
-        void Load(const char* n);
+        void Load(const char* n); //!< Load flash, eeprom, signature, fuses from elf file, wrapper for LoadBFD or LoadSimpleELF
+#ifndef _MSC_VER
+        void LoadBFD(void); //!< Load flash, eeprom, signature, fuses from elf file by BFD lib
+#else
+        void LoadSimpleELF(void); //!< Load flash, eeprom, signature, fuses from elf file "handmade" (for MSC)
+#endif
         void ReplaceIoRegister(unsigned int offset, RWMemoryMember *);
         bool ReplaceMemRegister(unsigned int offset, RWMemoryMember *);
         RWMemoryMember *GetMemRegisterInstance(unsigned int offset);
