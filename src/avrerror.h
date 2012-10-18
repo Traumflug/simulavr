@@ -84,16 +84,16 @@ class SystemConsoleHandler {
             ATTRIBUTE_PRINTF(4, 5);
         
         //! Aborts application: uses abort or exception depending on useExitAndAbort
-		ATTRIBUTE_NORETURN
+        ATTRIBUTE_NORETURN
         void AbortApplication(int code);
         //! Exits application: uses exit or exception depending on useExitAndAbort
-		ATTRIBUTE_NORETURN
+        ATTRIBUTE_NORETURN
         void ExitApplication(int code);
         
     protected:
         bool useExitAndAbort; //!< Flag, if exit/abort have to be used instead of exceptions
-        char formatStringBuffer[128]; //!< Buffer for format strings to format a message
-        char messageStringBuffer[512]; //!< Buffer for built message string itself
+        char formatStringBuffer[192]; //!< Buffer for format strings to format a message
+        char messageStringBuffer[768]; //!< Buffer for built message string itself, 4 times bigger than formatStringBuffer
         std::ostream *msgStream; //!< Stream, where normal messages are sent to
         std::ostream *wrnStream; //!< Stream, where warning and error messages are sent to
         std::ostream *traceStream; //!< Stream for trace output

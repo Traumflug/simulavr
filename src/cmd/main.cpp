@@ -44,6 +44,8 @@ using namespace std;
 #include "flash.h"
 #include "avrdevice.h"
 #include "avrfactory.h"
+#include "avrsignature.h"
+#include "avrreadelf.h"
 #include "gdb.h"
 #include "ui/ui.h"
 #include "systemclock.h"
@@ -332,8 +334,37 @@ int main(int argc, char *argv[]) {
     DumpManager *dman = DumpManager::Instance();
     dman->SetSingleDeviceApp();
     
-    /* now we create the device */
+    /* check, if devicename is given or get it out from elf file, if given */
+    unsigned int sig;
+    if(devicename == "unknown") {
+        // option -d | --device not given
+        if(filename != "unknown") {
+            // filename given, try to get signature
+            sig = ELFGetSignature(filename.c_str());
+            if(sig != -1) {
+                // signature in elf found, try to get devicename
+                std::map<unsigned int, std::string>::iterator cur  = AvrSignatureToNameMap.find(sig);
+                if(cur != AvrSignatureToNameMap.end()) {
+                    // devicename found
+                    devicename = cur->second;
+                } else {
+                    avr_warning("unknown signature in elf file '%s': 0x%x", filename.c_str(), sig);
+                }
+            }
+        }
+    }
+
+    /* now we create the device and set device name and signature */
     AvrDevice *dev1 = AvrFactory::instance().makeDevice(devicename.c_str());
+    std::map<std::string, unsigned int>::iterator cur  = AvrNameToSignatureMap.find(devicename);
+    if(cur != AvrNameToSignatureMap.end()) {
+        // signature found
+        sig = cur->second;
+    } else {
+        avr_warning("signature for device '%s' not found", devicename.c_str());
+        sig = -1;
+    }
+    dev1->SetDeviceNameAndSignature(devicename, sig);
     
     /* We had to wait with dumping the available tracing values
       until the device has been created! */

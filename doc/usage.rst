@@ -43,7 +43,20 @@ Simulation options
   - atmega8
   - atmega88
   - attiny2313
+  - attiny25
+  - attiny45
+  - attiny85
 
+  This option is mandatory, if an elf file isn't given or elf file dosn't contain device
+  signature. To put device signature to elf file you can insert the following line to
+  your source code (but only once!)::
+  
+    #include <avr/signature.h>
+  
+  If this option is given and device signature will be found in elf file, then the given
+  signature by device name is compared to signature in elf file. If this isn't equal,
+  then simulavr stops with an error message.
+  
   **Attention:** some devices doesn't support all peripheral parts of controller. (for
   example CAN peripheral in at90can... devices) Ports and timer are mostly implemented.
 

@@ -13,6 +13,7 @@
   #include "rwmem.h"
   #include "hwsreg.h"
   #include "avrfactory.h"
+  #include "avrreadelf.h"
   #include "memory.h"
   #include "flash.h"
   #include "hweeprom.h"
@@ -30,6 +31,7 @@
   #include "atmega668base.h"
   #include "atmega16_32.h"
   #include "attiny2313.h"
+  #include "attiny25_45_85.h"
   
 %}
 
@@ -165,5 +167,6 @@ namespace std {
 %include "atmega668base.h"
 %include "atmega16_32.h"
 %include "attiny2313.h"
+%include "attiny25_45_85.h"
 
 // EOF

@@ -62,7 +62,9 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         static const unsigned int registerSpaceSize;
         const unsigned int iRamSize;
         const unsigned int eRamSize;
-        
+        unsigned int devSignature; //!< hold the device signature for this core
+        std::string devName; //!< hold the device name, which this core simulate
+
     protected:
         SystemClockOffset clockFreq;  ///< Period of a tick (1/F_OSC) in [ns]
         std::map < std::string, Pin *> allPins;
@@ -70,7 +72,7 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         
         /// Count of cycles before next instruction is executed (i.e. countdown)
         int cpuCycles;
-        
+
     public:
         int trace_on;
         Breakpoints BP;
@@ -81,8 +83,8 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         int PC_size;
         AvrFlash *Flash;
         FlashProgramming *spmRegister;
-        AvrFuses fuses;
-        AvrLockBits lockbits;
+        AvrFuses *fuses;
+        AvrLockBits *lockbits;
         HWEeprom *eeprom;
         Data *data;  ///< a hack for symbol look-up
         HWIrqSystem *irqSystem;
@@ -134,11 +136,6 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         void RemoveFromCycleList(Hardware *hw);
     
         void Load(const char* n); //!< Load flash, eeprom, signature, fuses from elf file, wrapper for LoadBFD or LoadSimpleELF
-#ifndef _MSC_VER
-        void LoadBFD(void); //!< Load flash, eeprom, signature, fuses from elf file by BFD lib
-#else
-        void LoadSimpleELF(void); //!< Load flash, eeprom, signature, fuses from elf file "handmade" (for MSC)
-#endif
         void ReplaceIoRegister(unsigned int offset, RWMemoryMember *);
         bool ReplaceMemRegister(unsigned int offset, RWMemoryMember *);
         RWMemoryMember *GetMemRegisterInstance(unsigned int offset);
@@ -162,7 +159,13 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
 
         //! Return filename from loaded program
         const std::string &GetFname(void) { return actualFilename; }
-        
+        //! Return device name
+        const std::string &GetDeviceName(void) { return devName; }
+        //! Return device signature
+        unsigned int GetDeviceSignature(void) { return devSignature; }
+        //! Set device signature and name
+        void SetDeviceNameAndSignature(const std::string &name, unsigned int signature);
+
         //! Get configured total memory space size
         unsigned int GetMemTotalSize(void) { return totalIoSpace; }
         //! Get configured IO memory space size
@@ -201,6 +204,9 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
 
         //! When a call/jump/cond-jump instruction was executed. For debugging.
         void DebugOnJump();
+
+        friend void ELFLoad(const AvrDevice * core);
+
 };
 
 #endif

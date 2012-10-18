@@ -52,7 +52,7 @@ AvrDevice* AvrFactory::makeDevice(const char *in) {
     for(unsigned int i = 0; i < devname.size(); i++)
         devname[i] = tolower(devname[i]);
     if(devname == "unknown")
-        avr_error("Device type not specified, use --device TYPE", in);
+        avr_error("Device type not specified, use -d | --device TYPE or insert '#insert <avr/signature.h>' into your source to specify device signature");
     AVRDeviceMap::iterator i = devmap.find(devname);
     if(i == devmap.end())
         avr_error("Invalid device specification: %s", in);

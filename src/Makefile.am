@@ -72,7 +72,7 @@ libsim_la_SOURCES = \
   atmega16_32.cpp attiny2313.cpp externalirq.cpp \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp flashprog.cpp hardware.cpp helper.cpp cmd/gdbserver.cpp \
-  hwacomp.cpp hwad.cpp hweeprom.cpp \
+  hwacomp.cpp hwad.cpp hweeprom.cpp avrsignature.cpp avrreadelf.cpp \
   hwtimer/timerprescaler.cpp hwtimer/prescalermux.cpp \
   hwtimer/timerirq.cpp hwpinchange.cpp hwport.cpp hwspi.cpp hwsreg.cpp \
   hwtimer/icapturesrc.cpp hwstack.cpp hwtimer/hwtimer.cpp hwuart.cpp hwwado.cpp \
@@ -100,7 +100,7 @@ pkginclude_HEADERS = \
   hwport.h hwspi.h hwsreg.h hwstack.h hwuart.h hwwado.h ioregs.h irqsystem.h \
   memory.h net.h pin.h pinatport.h pinnotify.h pinmon.h printable.h rwmem.h \
   simulationmember.h spisrc.h spisink.h specialmem.h systemclock.h \
-  systemclocktypes.h traceval.h types.h
+  systemclocktypes.h traceval.h types.h avrsignature.h avrreadelf.h
 
 nodist_pkginclude_HEADERS =  $(FAB_HEADER)
 
