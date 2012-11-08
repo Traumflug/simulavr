@@ -1,0 +1,98 @@
+/* CSS styles for report files */
+body {
+  font-family: sans-serif;
+  font-size: 10pt;
+}
+h1 {
+  color: #6666ff;
+  text-align: center;
+}
+h2 {
+  color: #6666ff;
+}
+div.result {
+  font-size: 12pt;
+  margin-left: 10px;
+}
+span.result-success {
+  color: green;
+  font-weight: bold;
+  padding-left: 5px;
+}
+span.result-failed {
+  color: red;
+  font-weight: bold;
+  padding-left: 5px;
+}
+table.tbl-overview {
+  margin-top: 20px;
+  margin-left: 10px;
+  font-family: sans-serif;
+  font-size: 10pt;
+}
+table.tbl-overview caption {
+  text-align: left;
+  color: #6666ff;
+  font-size: 150%;
+  font-weight: bold;
+}
+td.tbl-header {
+  font-weight: bold;
+  padding-left: 10px;
+  padding-right: 10px;
+  vertical-align: top;
+}
+td.tbl-data {
+  padding-left: 10px;
+  padding-right: 10px;
+  vertical-align: top;
+}
+.right-align {
+  text-align: right;
+}
+div.backlink {
+  margin-left: 15px;
+  margin-bottom: 5px;
+}
+div.emphasized {
+  margin-top: 10px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+div.preformat {
+  font-family: monospace;
+  margin-left: 15px;
+}
+/* CSS styles for formatcode.js */
+span.quotation {
+  color: #000080;
+}
+span.comment {
+  color: #808080;
+}
+span.emphasized {
+  font-weight: bold;
+}
+span.linenumbers {
+  background-color: #e0e0e0;
+  color: black;
+  border-right: solid 3px #40c040;
+  padding-right: 7px;
+  margin-right: 7px;
+}
+span.keyword {
+  font-weight: bold;
+  color: blue;
+  background-color: #f0f0f0;
+}
+span.warning {
+  font-weight: bold;
+  color: orange;
+  background-color: #fff8e0;
+}
+span.error {
+  font-weight: bold;
+  color: red;
+  background-color: #fff0f0;
+}
+/* EOF */

@@ -1,9 +1,15 @@
 # sample configuration for delivery-check script
 # copy this file to delivery-check.conf and edit it TO YOUR CONFIGURATION
 
+# CONF_REPO_URL: url, from where the repo will be cloned
+CONF_REPO_URL=git://git.savannah.nongnu.org/simulavr.git
+
+# CONF_REPO_BRANCH: branch in source repo, which will be cloned, normally "master"
+CONF_REPO_BRANCH=master
+
 # CONF_CHECK_PATH: where script should clone repository and build, install and so one,
-#    path STARTS on parent directory of repository! You must not set absolute paths! 
-CONF_CHECK_PATH=delivery-check
+#    You have to set absolute paths! 
+CONF_CHECK_PATH=$HOME/delivery-check
 
 # CONF_BFD_PATH: path, where avr bfd libs are located, if this isn't set, default bfd libs are used. It's reported,
 #    that with default (i386) libs simulavr crashes while loading elf file!
