@@ -69,7 +69,7 @@ void MinHeap<Key, Value>::InsertInternal(Key k, Value v, unsigned pos)
 {
     for(unsigned i = pos;;) {
         unsigned parent = i/2;
-        if(parent == 0 || (*this)[parent-1].first < k) {
+        if(parent == 0 || (*this)[parent-1].first <= k) {
             (*this)[i-1].first = k;
             (*this)[i-1].second = v;
             return;
