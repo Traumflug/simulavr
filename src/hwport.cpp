@@ -140,6 +140,7 @@ void HWPort::SetPin(unsigned char val) {
     if(portToggleFeature) {
         port ^= val;
         CalcOutputs();
+        port_reg.hardwareChange(port);
     } else
         avr_warning("Writing of 'PORT%s.PIN' (with %d) is not supported.", myName.c_str(), val);
 }

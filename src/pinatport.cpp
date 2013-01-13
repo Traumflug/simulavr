@@ -74,7 +74,6 @@ void PinAtPort::SetAlternatePort(bool val) {
     unsigned char *adr=&port->alternatePort;
     SetVal(adr, val);
     port->CalcOutputs();
-    port->port_reg.hardwareChange(port->alternatePort);
 }
 
 void PinAtPort::SetUseAlternatePort(bool val) {
@@ -90,31 +89,31 @@ void PinAtPort::SetUseAlternatePortIfDdrSet(bool val) {
 }
 
 bool PinAtPort::GetPort() {
-    return (port->port)>>pinNo;
+    return (port->port >> pinNo) & 1;
 }
 
 bool PinAtPort::GetDdr() {
-    return (port->ddr)>>pinNo;
+    return (port->ddr >> pinNo) & 1;
 }
 
 bool PinAtPort::GetAlternateDdr(){
-    return (port->alternateDdr)>>pinNo;
+    return (port->alternateDdr >> pinNo) & 1;
 }
 
 bool PinAtPort::GetUseAlterateDdr() {
-    return (port->useAlternateDdr)>>pinNo;
+    return (port->useAlternateDdr >> pinNo) & 1;
 } 
 
 bool PinAtPort::GetAlternatePort() {
-    return (port->alternatePort)>>pinNo;
+    return (port->alternatePort >> pinNo) & 1;
 }
 
 bool PinAtPort::GetUseAlternatePort() {
-    return (port->useAlternatePort)>>pinNo;
+    return (port->useAlternatePort >> pinNo) & 1;
 }
 
 bool PinAtPort::GetUseAlternatePortIfDdrSet() {
-    return (port->useAlternatePortIfDdrSet)>>pinNo;
+    return (port->useAlternatePortIfDdrSet >> pinNo) & 1;
 }
 
 PinAtPort::operator bool() {
