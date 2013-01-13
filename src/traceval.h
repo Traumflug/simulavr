@@ -107,7 +107,8 @@ class TraceValue {
                    const std::string &_name,
                    const int __index=-1,
                    const void* shadow=0);
-    
+        virtual ~TraceValue() {}
+
         //! Give number of bits for this value. Max 32.
         size_t bits() const;
     
@@ -177,6 +178,9 @@ class TraceValue {
           flags. */
         virtual void dump(Dumper &d);
         
+        /*! Give back VCD coding of a bit */
+        virtual char VcdBit(int bitNo) const;
+
     protected:
         //! Clear all access flags
         void clear_flags();
@@ -205,6 +209,17 @@ class TraceValue {
         /*! Note that it must additionally be enabled in the particular
           Dumper. */
         bool _enabled;
+};
+
+class TraceValueOutput: public TraceValue {
+
+    public:
+        /*! Generate a new uninitialized trace value of pin output driver */
+        TraceValueOutput(const std::string &_name): TraceValue(1, _name) {}
+
+        /*! Give back VCD coding of pin output driver  */
+        virtual char VcdBit(int bitNo) const;
+
 };
 
 class AvrDevice;
@@ -453,7 +468,7 @@ class TraceValueRegister {
             if(_tvr_scopename.length() > 0)
                 _tvr_scopeprefix += _tvr_scopename + ".";
         }
-        ~TraceValueRegister();
+        virtual ~TraceValueRegister();
         
         //! Returns the scope prefix
         const std::string GetTraceValuePrefix(void) { return _tvr_scopeprefix; }

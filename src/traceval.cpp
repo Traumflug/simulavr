@@ -121,6 +121,7 @@ void TraceValue::cycle() {
             nv = *(const uint32_t*) shadow; break;
         default:
             avr_error("Internal error: Unsupported number of bits in TraceValue::cycle().");
+            break;
         }
         if (v!=nv) {
             f|=CHANGE;
@@ -143,6 +144,26 @@ void TraceValue::dump(Dumper &d) {
         d.markChange(this);
     }
     f=0;
+}
+
+char TraceValue::VcdBit(int bitNo) const {
+    if (_written)
+        return (v & (1 << bitNo)) ? '1' : '0';
+    else
+        return 'x';
+}
+
+char TraceValueOutput::VcdBit(int bitNo) const {
+    unsigned val = value();
+    if(written()) {
+        if(val == Pin::TRISTATE)
+            return 'z';
+        if((val == Pin::HIGH) || (val == Pin::PULLUP))
+            return '1';
+        if(val == Pin::LOW)
+            return '0';
+    }
+    return 'x';
 }
 
 TraceValueRegister::~TraceValueRegister() {
@@ -361,14 +382,9 @@ bool WarnUnknown::enabled(const TraceValue *t) const {
 
 void DumpVCD::valout(const TraceValue *v) {
     osbuffer << 'b';
-    if (v->written()) {
-        unsigned val=v->value();
-        for (int i=v->bits()-1; i>=0; i--) 
-            osbuffer << ((val&(1<<i)) ? '1' : '0');
-    } else {
-        for (int i=0; i < v->bits(); i++)
-            osbuffer << 'x';
-    }
+    for (int i = v->bits()-1; i >= 0; i--)
+        osbuffer << v->VcdBit(i);
+
 }
 
 void DumpVCD::flushbuffer(void) {

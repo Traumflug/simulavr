@@ -63,13 +63,14 @@ class HWPort: public Hardware, public TraceValueRegister {
         unsigned char useAlternatePortIfDdrSet; 
         
         Pin p[8]; //!< the port pins, e.g. the final IO stages
+        TraceValue* pintrace[8]; //!< trace channel to trace output driver state
         int portSize; //!< how much bits does this port have [1..8]
         unsigned char portMask; //!< mask out unused bits, if necessary
         bool portToggleFeature; //!< controls functionality of SetPin method (write to PIN toggles port register)
         
     public:
         HWPort(AvrDevice *core, const std::string &name, bool portToggle = false, int size = 8);
-        ~HWPort() {}
+        ~HWPort();
         
         void CalcOutputs(void);  //!< Calculate the new output value to be transmitted to the environment
         std::string GetPortString(void); //!< returns a string representation of output states

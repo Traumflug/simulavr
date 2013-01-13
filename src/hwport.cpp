@@ -47,14 +47,28 @@ HWPort::HWPort(AvrDevice *core, const string &name, bool portToggle, int size):
         size = 8;
     portSize = size;
     portMask = (unsigned char)((1 << size) - 1);
-    
-    Reset();
 
-    for(int tt = 0; tt < portSize; tt++) { 
+    for(int tt = 0; tt < portSize; tt++) {
+        // register pin to give access to pin by name
         string dummy = name + (char)('0' + tt);
         core->RegisterPin(dummy, &p[tt]);
+        // connect to output pin
         p[tt].mask = 1 << tt;
         p[tt].pinOfPort= &pin;
+        // register pin output trace
+        string tname = GetTraceValuePrefix() + name + (char)('0' + tt) + "-Out";
+        pintrace[tt] = new TraceValueOutput(tname);
+        pintrace[tt]->set_written(Pin::TRISTATE); // initial output driver state is tristate
+        RegisterTraceValue(pintrace[tt]);
+    }
+
+    Reset();
+}
+
+HWPort::~HWPort() {
+    for(int tt = portSize - 1; tt >= 0; tt--) {
+        UnregisterTraceValue(pintrace[tt]);
+        delete pintrace[tt];
     }
 }
 
@@ -79,14 +93,14 @@ Pin& HWPort::GetPin(unsigned char pinNo) {
 }
 
 void HWPort::CalcPin(void) {
-    //calculating the value for register "pin" from the Pin p[] array
+    // calculating the value for register "pin" from the Pin p[] array
     pin = 0;
     for(int tt = 0; tt < portSize; tt++) {
         if(p[tt].CalcPin()) pin |= (1 << tt);
     }
 }
 
-void HWPort::CalcOutputs(void) { //Calculate the new output value to be transmitted to the environment
+void HWPort::CalcOutputs(void) { // Calculate the new output value to be transmitted to the environment
     for(int actualBitNo = 0; actualBitNo < portSize; actualBitNo++) {
         unsigned char actualBit = 1 << actualBitNo;
         unsigned char workingPort = 0;
@@ -111,20 +125,26 @@ void HWPort::CalcOutputs(void) { //Calculate the new output value to be transmit
         }
 
         if(workingDdr & actualBit) { // DDR is set to output (1)
-            if(workingPort & actualBit) //Port is High
+            if(workingPort & actualBit) { // Port is High
                 p[actualBitNo].outState = Pin::HIGH;
-            else
+                pintrace[actualBitNo]->change(Pin::HIGH);
+            } else {
                 p[actualBitNo].outState = Pin::LOW;
+                pintrace[actualBitNo]->change(Pin::LOW);
+            }
         } else { // DDR is input (0)
-            if(workingPort & actualBit)
+            if(workingPort & actualBit) {
                 p[actualBitNo].outState = Pin::PULLUP;
-            else 
+                pintrace[actualBitNo]->change(Pin::PULLUP);
+            } else {
                 p[actualBitNo].outState = Pin::TRISTATE;
+                pintrace[actualBitNo]->change(Pin::TRISTATE);
+            }
         }
     }
     
-    CalcPin(); //now transfer the result also to all HWPort::pin instances
-} //end of Calc()
+    CalcPin(); // now transfer the result also to all HWPort::pin instances
+}
 
 string HWPort::GetPortString(void) {
     string dummy;
