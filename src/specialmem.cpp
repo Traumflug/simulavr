@@ -78,11 +78,13 @@ RWExit::RWExit(TraceValueRegister *registry,
 
 void RWExit::set(unsigned char c) {
     cerr << "Exiting at simulated program request" << endl;
+    DumpManager::Instance()->stopApplication();
     sysConHandler.ExitApplication(c); 
 }
 
 unsigned char RWExit::get() const {
     cerr << "Exiting at simulated program request" << endl;
+    DumpManager::Instance()->stopApplication();
     sysConHandler.ExitApplication(0); 
     return 0;
 }
@@ -93,11 +95,13 @@ RWAbort::RWAbort(TraceValueRegister *registry,
 
 void RWAbort::set(unsigned char c) {
     cerr << "Aborting at simulated program request" << endl;
+    DumpManager::Instance()->stopApplication();
     sysConHandler.AbortApplication(c);
 }
 
 unsigned char RWAbort::get() const {
     cerr << "Aborting at simulated program request" << endl;
+    DumpManager::Instance()->stopApplication();
     sysConHandler.AbortApplication(0);
     return 0;
 }
