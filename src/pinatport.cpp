@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003 Klaus Rudolph
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@
  *
  *  $Id$
  */
-
 
 #include "pinatport.h"
 #include "hwport.h"
@@ -52,7 +51,6 @@ void PinAtPort::SetPort(bool val) {
 int PinAtPort::GetAnalog() const {
     return port->p[pinNo].GetAnalog();
 }
-
 
 void PinAtPort::SetDdr(bool val) {
     unsigned char *adr=&port->ddr;
@@ -123,7 +121,6 @@ PinAtPort::operator bool() {
     return ((port->GetPin())>>pinNo)&0x01;
 } //we must use GetPin to recalculate the Pin from p[] array
 
-
 void PinAtPort::SetVal( unsigned char *adr, bool val) {
     if (val) {
         *adr|=(1<<pinNo);
@@ -131,4 +128,3 @@ void PinAtPort::SetVal( unsigned char *adr, bool val) {
         *adr&=~(1<<pinNo);
     }
 }
-

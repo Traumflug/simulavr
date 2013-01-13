@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
+ * Copyright (C) 2001, 2002, 2003 Klaus Rudolph
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,79 +36,77 @@
 
 using namespace std;
 
-
 template<typename Key, typename Value>
 MinHeap<Key, Value>::MinHeap()
 {
-	this->reserve(10);  // vector would free&malloc when we keep inserting and removing only 1 element.
+    this->reserve(10);  // vector would free&malloc when we keep inserting and removing only 1 element.
 }
 
 template<typename Key, typename Value>
 void MinHeap<Key, Value>::RemoveMinimum()
 {
-	assert(!this->empty());
-	Key k = this->back().first;
-	Value v = this->back().second;
-	RemoveMinimumAndInsert(k, v);
-	this->pop_back();
+    assert(!this->empty());
+    Key k = this->back().first;
+    Value v = this->back().second;
+    RemoveMinimumAndInsert(k, v);
+    this->pop_back();
 }
 
 template<typename Key, typename Value>
 bool MinHeap<Key, Value>::ContainsValue(Value v) const
 {
-	for(unsigned i = 0; i < this->size(); i++)
-	{
-		std::pair<Key,Value> item = (*this)[i];
-		if(item.second == v)
-			return true;
-	}
-	return false;
+    for(unsigned i = 0; i < this->size(); i++)
+    {
+        std::pair<Key,Value> item = (*this)[i];
+        if(item.second == v)
+            return true;
+    }
+    return false;
 }
 
 template<typename Key, typename Value>
 void MinHeap<Key, Value>::InsertInternal(Key k, Value v, unsigned pos)
 {
-	for(unsigned i = pos;;) {
-		unsigned parent = i/2;
-		if(parent == 0 || (*this)[parent-1].first < k) {
-			(*this)[i-1].first = k;
-			(*this)[i-1].second = v;
-			return;
-		}
-		Key k_temp = (*this)[parent-1].first;
-		Value v_temp = (*this)[parent-1].second;
-		(*this)[i-1].first = k_temp;
-		(*this)[i-1].second = v_temp;
-		i = parent;
-	}
+    for(unsigned i = pos;;) {
+        unsigned parent = i/2;
+        if(parent == 0 || (*this)[parent-1].first < k) {
+            (*this)[i-1].first = k;
+            (*this)[i-1].second = v;
+            return;
+        }
+        Key k_temp = (*this)[parent-1].first;
+        Value v_temp = (*this)[parent-1].second;
+        (*this)[i-1].first = k_temp;
+        (*this)[i-1].second = v_temp;
+        i = parent;
+    }
 }
 
 template<typename Key, typename Value>
 void MinHeap<Key, Value>::RemoveAtPositionAndInsertInternal(Key k, Value v, unsigned pos)
 {
-	assert(pos < this->size());
-	unsigned i = pos + 1;
-	for(;;) {
-		unsigned left = 2*i;
-		unsigned right = 2*i + 1;
-		unsigned smallest = i;
-		if(left-1 < this->size() && (*this)[left-1].first < k)
-			smallest = left;
-		if(right-1 < this->size() && (*this)[right-1].first < k && (*this)[right-1].first < (*this)[left-1].first)
-			smallest = right;
-		if(smallest == i) {
-			(*this)[smallest-1].first = k;
-			(*this)[smallest-1].second = v;
-			return;
-		}
-		Key k_temp = (*this)[smallest-1].first;
-		Value v_temp = (*this)[smallest-1].second;
-		(*this)[i-1].first = k_temp;
-		(*this)[i-1].second = v_temp;
-		i = smallest;
-	}
+    assert(pos < this->size());
+    unsigned i = pos + 1;
+    for(;;) {
+        unsigned left = 2*i;
+        unsigned right = 2*i + 1;
+        unsigned smallest = i;
+        if(left-1 < this->size() && (*this)[left-1].first < k)
+            smallest = left;
+        if(right-1 < this->size() && (*this)[right-1].first < k && (*this)[right-1].first < (*this)[left-1].first)
+            smallest = right;
+        if(smallest == i) {
+            (*this)[smallest-1].first = k;
+            (*this)[smallest-1].second = v;
+            return;
+        }
+        Key k_temp = (*this)[smallest-1].first;
+        Value v_temp = (*this)[smallest-1].second;
+        (*this)[i-1].first = k_temp;
+        (*this)[i-1].second = v_temp;
+        i = smallest;
+    }
 }
-
 
 SystemClock::SystemClock() { 
     static int no = 0;
@@ -127,7 +125,6 @@ void SystemClock::SetTraceModeForAllMembers(int trace_on) {
             core->trace_on = trace_on;
     }
 } 
-
 
 void SystemClock::Add(SimulationMember *dev) {
     syncMembers.Insert(currentTime, dev);
@@ -224,7 +221,6 @@ void SystemClock::Endless() {
     Application::GetInstance()->PrintResults();
 }
 
-
 void SystemClock::Run(SystemClockOffset maxRunTime) {
     int steps = 0;
     
@@ -266,4 +262,3 @@ SystemClock& SystemClock::Instance() {
     static SystemClock obj;
     return obj;
 }
-
