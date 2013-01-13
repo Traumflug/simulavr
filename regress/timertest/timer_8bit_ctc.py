@@ -7,8 +7,8 @@ class TestCase(VCDTestCase):
     "atmega48":  "IRQ.VECTOR7",
   }
   p2pin = {
-    "atmega128": 0x80,
-    "atmega48":  0x08,
+    "atmega128": "PORTB.B7-Out",
+    "atmega48":  "PORTB.B3-Out",
   }
   ocra_value = 124
   prescaler = 64
@@ -19,7 +19,7 @@ class TestCase(VCDTestCase):
     self.setClock(4000000)
     self.processor = self.getProcessorType()
     self.tcmp = self.p2irq[self.processor]
-    self.pinVal = self.p2pin[self.processor]
+    self.pinName = self.p2pin[self.processor]
     
   def test_00(self):
     """simulation time [0..8ms]"""
@@ -34,7 +34,7 @@ class TestCase(VCDTestCase):
     self.assertEqual(p.firstedge.intValue, 0)
     p = self.getVariable("TIMER2.OCRA")
     self.assertEqual(p.firstedge.intValue, self.ocra_value)
-    p = self.getVariable("PORTB.PORT")
+    p = self.getVariable(self.pinName)
     self.assertEqual(p.firstedge.intValue, 0)
 
   def test_02(self):
@@ -90,17 +90,17 @@ class TestCase(VCDTestCase):
     tp = self.tClock * self.prescaler
     t0 = ctr.firstedge.internalTime - tp
     dtc = tp * (self.ocra_value + 1)
-    p = self.getVariable("PORTB.PORT")
+    p = self.getVariable(self.pinName)
     # check occurence and value of first toggle change
     pe = p.getNextEdge(p.firstedge)
-    self.assertEqual(pe.intValue, self.pinVal)
+    self.assertEqual(pe.intValue, 1)
     self.assertEqual(pe.internalTime, t0 + dtc)
     # check occurence and value of following toggle changes
     pe = p.getNextEdge(pe)
     self.assertEqual(pe.intValue, 0)
     self.assertEqual(pe.internalTime, t0 + (2 * dtc))
     pe = p.getNextEdge(pe)
-    self.assertEqual(pe.intValue, self.pinVal)
+    self.assertEqual(pe.intValue, 1)
     self.assertEqual(pe.internalTime, t0 + (3 * dtc))
     
 if __name__ == '__main__':

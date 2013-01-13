@@ -6,7 +6,6 @@ class TestCase(VCDTestCase):
   ocrb_value = 0x27f
   prescaler = 1
   max_irq_delay = 6
-  pinVal = 0x10
   
   def setUp(self):
     self.getVCD()
@@ -34,7 +33,7 @@ class TestCase(VCDTestCase):
     self.assertEqual(p.firstedge.intValue, self.ocrb_value >> 8)
     p = self.getVariable("TIMER3.OCRBL")
     self.assertEqual(p.firstedge.intValue, self.ocrb_value & 0xff)
-    p = self.getVariable("PORTE.PORT")
+    p = self.getVariable("PORTE.E4-Out")
     self.assertEqual(p.firstedge.intValue, 0)
 
   def test_02(self):
@@ -113,10 +112,10 @@ class TestCase(VCDTestCase):
     t0 = ctr.firstedge.internalTime - tp
     dtc = tp * (self.ocra_value + 1)
     dtcmp = tp * (self.ocrb_value + 1)
-    p = self.getVariable("PORTE.PORT")
+    p = self.getVariable("PORTE.E4-Out")
     # check occurence of set pin at compare match
     pe = p.getNextEdge(p.firstedge)
-    self.assertEqual(pe.intValue, self.pinVal)
+    self.assertEqual(pe.intValue, 1)
     self.assertEqual(pe.internalTime, t0 + dtcmp)
     # check occurence of reset pin at timer reset
     pe = p.getNextEdge(pe)
@@ -124,7 +123,7 @@ class TestCase(VCDTestCase):
     self.assertEqual(pe.internalTime, t0 + dtc)
     # check next period
     pe = p.getNextEdge(pe)
-    self.assertEqual(pe.intValue, self.pinVal)
+    self.assertEqual(pe.intValue, 1)
     self.assertEqual(pe.internalTime, t0 + dtc + dtcmp)
     pe = p.getNextEdge(pe)
     self.assertEqual(pe.intValue, 0)
