@@ -47,8 +47,11 @@ class AvrDevice_attinyX5: public AvrDevice {
 
         IOSpecialReg      *gtccr_reg;   //!< GTCCR IO register
         HWPrescaler       *prescaler0;  //!< prescaler unit for timer 0 (10 bit w. reset/sync and only sys clock)
-        HWTimer8_2C*      timer0;       //!< timer 0 unit
-        TimerIRQRegister* timer01irq;   //!< timer interrupt unit for timer 0 and 1
+        HWTimer8_2C       *timer0;      //!< timer 0 unit
+        TimerIRQRegister  *timer01irq;  //!< timer interrupt unit for timer 0 and 1
+
+        IOSpecialReg      *pllcsr_reg;  //!< PLLCSR IO register
+        HWTimerTinyX5     *timer1;      //!< timer 1 unit
 
         /*! Creates the device for ATMega48/88/168/328
           @param ram_bytes how much SRAM does the device own

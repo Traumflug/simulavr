@@ -28,6 +28,10 @@
 #include "timerprescaler.h"
 #include "hwtimer.h"
 #include "../helper.h"
+#include "systemclock.h"
+
+#include <cstdlib>
+#include <time.h>
 
 using namespace std;
 
@@ -1278,4 +1282,592 @@ void HWTimer16_3C::Reset() {
     tccrb_val = 0;
 }
 
+//! Step time in ns for async clock by pll
+/*! Because system clock steps are counted in ns, we have to calculate so many steps to get
+ * over all steps a time in ns without fraction. For 64MHz, e.g. 15,625 ns period, this step
+ * time without fraction is 125ns, e.g. 8 different steps. For LSM mode and 32MHz we take
+ * every 2 values together for one step.
+ */
+const int HWTimerTinyX5_nextdelay[8] = { 16, 15, 16, 16, 15, 16, 15, 16 };
 
+HWTimerTinyX5::HWTimerTinyX5(AvrDevice *core,
+        IOSpecialReg *gtccr,
+        IOSpecialReg *pllcsr,
+        IRQLine* tov,
+        IRQLine* tocra,
+        PinAtPort* ocra_out,
+        PinAtPort* ocra_outinv,
+        IRQLine* tocrb,
+        PinAtPort* ocrb_out,
+        PinAtPort* ocrb_outinv):
+    Hardware(core),
+    TraceValueRegister(core, "TIMER1"),
+    core(core),
+    tccr_reg(this, "TCCR1",
+             this, &HWTimerTinyX5::Get_TCCR, &HWTimerTinyX5::Set_TCCR),
+    tcnt_reg(this, "TCNT1",
+             this, &HWTimerTinyX5::Get_TCNT, &HWTimerTinyX5::Set_TCNT),
+    tocra_reg(this, "OCR1A",
+              this, &HWTimerTinyX5::Get_OCRA, &HWTimerTinyX5::Set_OCRA),
+    tocrb_reg(this, "OCR1B",
+              this, &HWTimerTinyX5::Get_OCRB, &HWTimerTinyX5::Set_OCRB),
+    tocrc_reg(this, "OCR1C",
+              this, &HWTimerTinyX5::Get_OCRC, &HWTimerTinyX5::Set_OCRC),
+    dtps1_reg(this, "DTPS1",
+              this, &HWTimerTinyX5::Get_DTPS1, &HWTimerTinyX5::Set_DTPS1),
+    dt1a_reg(this, "DT1A",
+             this, &HWTimerTinyX5::Get_DT1A, &HWTimerTinyX5::Set_DT1A),
+    dt1b_reg(this, "DT1B",
+             this, &HWTimerTinyX5::Get_DT1B, &HWTimerTinyX5::Set_DT1B),
+    timerOverflowInt(tov),
+    timerOCRAInt(tocra),
+    timerOCRBInt(tocrb),
+    ocra_unit(ocra_out, ocra_outinv),
+    ocrb_unit(ocrb_out, ocrb_outinv)
+{
+    // gtccr and pllcsr register
+    gtccrRegister = gtccr;
+    gtccrRegister->connectSRegClient(this);
+    pllcsrRegister = pllcsr;
+    pllcsrRegister->connectSRegClient(this);
+
+    // create TraceValue for counter itself and for prescaler
+    counterTrace = new TraceValue(8, GetTraceValuePrefix() + "Counter");
+    RegisterTraceValue(counterTrace);
+    counterTrace->set_written(0);
+    prescalerTrace = new TraceValue(14, GetTraceValuePrefix() + "Prescaler");
+    RegisterTraceValue(prescalerTrace);
+    prescalerTrace->set_written(0);
+    dTPrescalerTrace = new TraceValue(3, GetTraceValuePrefix() + "DeadTimePrescaler");
+    RegisterTraceValue(dTPrescalerTrace);
+    dTPrescalerTrace->set_written(0);
+
+    // connect to core to get core cycles
+    core->AddToCycleList(this);
+
+    // pre initialization for async mode, starts with sync mode
+    asyncClock_async = false;
+    asyncClock_step = -1;
+
+    // reset internal values
+    Reset();
+}
+
+HWTimerTinyX5::~HWTimerTinyX5() {
+    delete dTPrescalerTrace;
+    delete prescalerTrace;
+    delete counterTrace;
+}
+
+void HWTimerTinyX5::Reset() {
+    counter = 0;
+    tcnt_out_val = tcnt_in_val = 0;
+    tov_internal_flag = tocra_internal_flag = tocrb_internal_flag = false;
+    prescaler = 0;
+    dtprescaler = 0;
+    tccr_inout_val.Reset(0);
+    cfg_prescaler = 0;
+    cfg_mode = TMODE_NORMAL;
+    cfg_com_a = cfg_com_b = 0;
+    cfg_ctc = false;
+    ocra_inout_val.Reset(0);
+    ocra_internal_val = 0;
+    ocrb_inout_val.Reset(0);
+    ocrb_internal_val = 0;
+    ocrc_inout_val.Reset(0xff);
+    dtps1_inout_val = 0;
+    dt1a_inout_val.Reset(0);
+    dt1b_inout_val.Reset(0);
+    gtccr_in_val.Reset(0);
+    asyncClock_pll = asyncClock_plllock = false;
+
+    ocra_unit.Reset();
+    ocrb_unit.Reset();
+
+    SetPrescalerClock(false); // reset prescaler to sync. clock mode, if necessary!
+}
+
+int HWTimerTinyX5::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_ns) {
+    if(asyncClock_async) {
+        *nextStepIn_ns = HWTimerTinyX5_nextdelay[asyncClock_step];
+        asyncClock_step++;
+        if(asyncClock_lsm) {
+            *nextStepIn_ns += HWTimerTinyX5_nextdelay[asyncClock_step];
+            asyncClock_step++;
+        }
+        if(asyncClock_step == 8) asyncClock_step = 0;
+        // process prescaler and timer
+        TimerCounter();
+        // dump_manager->cycle() needed to get correct trace display
+        DumpManager::Instance()->cycle();
+        // transfer input register values to real used operation registers (pll clock delay 1 step in async mode)
+        TransferInputValues();
+    } else {
+        // switch to sync clock
+        asyncClock_step = -1; // this activates timer calculation in CpuCycle()
+        *nextStepIn_ns = -1; // this removes timer from syncMembers list
+    }
+    return 0;
+}
+
+unsigned int HWTimerTinyX5::CpuCycle() {
+    // transfer output register values to readable register by core
+    TransferOutputValues();
+    // if sync mode ...
+    if(asyncClock_step == -1) {
+        // transfer input register values to real used operation registers (system clock delay 1 step in sync mode)
+        TransferInputValues();
+        // count prescaler, if sync. mode, e.g. timer clock is system clock
+        TimerCounter();
+    }
+
+    // control pll state
+    if(asyncClock_pll) {
+        if(!asyncClock_plllock && (SystemClock::Instance().GetCurrentTime() >= asyncClock_locktime))
+            asyncClock_plllock = true;
+    }
+    return 0;
+}
+
+void HWTimerTinyX5::TimerCounter(void) {
+    // if prescaler mux gets a pulse ...
+    if(PrescalerMux()) {
+        // count pulse for timer
+        counter++;
+        // detect counter overflow (== OCRC + 1 or 0xff + 1!) ...
+        if((counter > 0xff) ||
+            (((cfg_mode != TMODE_NORMAL) || cfg_ctc) && ((counter - 1) == (unsigned char)ocrc_inout_val))) {
+            counter = 0;
+            // set TOV1 event but not in CTC mode!
+            if((cfg_mode != TMODE_NORMAL) || !cfg_ctc)
+                tov_internal_flag = true;
+            // load compare values for OCR1A and OCR1B in PWM mode
+            if(cfg_mode != TMODE_NORMAL) {
+                ocra_compare = ocra_internal_val;
+                ocrb_compare = ocrb_internal_val;
+            }
+            // trigger pin change (reset)
+            ocra_unit.TimerEvent(false);
+            ocrb_unit.TimerEvent(false);
+        }
+        // detect OCR1A event ...
+        if(counter == ocra_compare) {
+            // set OCF1A event
+            tocra_internal_flag = true;
+            // trigger pin change
+            if(!(cfg_mode & TMODE_PWMA) || (ocra_compare < ocrc_inout_val))
+                // no compare pin change, if PWM and OCRB == OCRC
+                ocra_unit.TimerEvent(true);
+        }
+        // detect OCR1B event ...
+        if(counter == ocrb_compare) {
+            // set OCF1B event
+            tocrb_internal_flag = true;
+            // trigger pin change
+            if(!(cfg_mode & TMODE_PWMB) || (ocrb_compare < ocrc_inout_val))
+                // no compare pin change, if PWM and OCRB == OCRC
+                ocrb_unit.TimerEvent(true);
+        }
+        counterTrace->change(counter);
+    }
+    // handle DeadTimePrescaler-Mux ...
+    if(DeadTimePrescalerMux()) {
+        // handle dead time counter
+        ocra_unit.DTClockCycle();
+        ocrb_unit.DTClockCycle();
+    }
+}
+
+bool HWTimerTinyX5::PrescalerMux(void) {
+    // count prescaler, free running
+    prescaler++;
+    if(prescaler == 0x4000) prescaler = 0; // prescaler with = 14 bit
+    prescalerTrace->change(prescaler);
+    // select prescaler tap
+    switch(cfg_prescaler) {
+    case 0: // no clock, counter stop
+        return false;
+
+    case 1: // every clock
+        return true;
+
+    case 2: // CKx2
+        return (bool)((prescaler % 2) == 0);
+
+    case 3: // CKx4
+        return (bool)((prescaler % 4) == 0);
+
+    case 4: // CKx8
+        return (bool)((prescaler % 8) == 0);
+
+    case 5: // CKx16
+        return (bool)((prescaler % 16) == 0);
+
+    case 6: // CKx32
+        return (bool)((prescaler % 32) == 0);
+
+    case 7: // CKx64
+        return (bool)((prescaler % 64) == 0);
+
+    case 8: // CKx128
+        return (bool)((prescaler % 128) == 0);
+
+    case 9: // CKx256
+        return (bool)((prescaler % 256) == 0);
+
+    case 10: // CKx512
+        return (bool)((prescaler % 512) == 0);
+
+    case 11: // CKx1024
+        return (bool)((prescaler % 1024) == 0);
+
+    case 12: // CKx2048
+        return (bool)((prescaler % 2048) == 0);
+
+    case 13: // CKx4096
+        return (bool)((prescaler % 4096) == 0);
+
+    case 14: // CKx8192
+        return (bool)((prescaler % 8192) == 0);
+
+    case 15: // CKx16384
+        return (bool)((prescaler % 16384) == 0);
+    }
+}
+
+bool HWTimerTinyX5::DeadTimePrescalerMux(void) {
+    // count prescaler, freerunning
+    dtprescaler++;
+    if(dtprescaler == 0x8) dtprescaler = 0; // dead time prescaler with = 3 bit
+    dTPrescalerTrace->change(dtprescaler);
+    // select dead time prescaler tap
+    switch(cfg_dtprescaler) {
+    case 0: // every clock
+        return true;
+
+    case 1: // CKx2
+        return (bool)((dtprescaler % 2) == 0);
+
+    case 2: // CKx4
+        return (bool)((dtprescaler % 4) == 0);
+
+    case 3: // CKx8
+        return (bool)((dtprescaler % 8) == 0);
+    }
+}
+
+unsigned char HWTimerTinyX5::set_from_reg(const IOSpecialReg *reg, unsigned char nv) {
+    if(reg == gtccrRegister) {
+        // check prescaler reset bit [bit1]
+        if((nv & 0x02) == 0x02) {
+            nv &= ~0x02; // reset bit immediately
+            prescaler = 0; // reset prescaler
+        }
+        gtccr_in_val = nv;
+    } else if(reg == pllcsrRegister) {
+        // reflect and control pll state
+        bool pll = (nv & 0x02) == 0x02;
+        if(asyncClock_pll) {
+            if(!pll) {
+                asyncClock_pll = false;
+                asyncClock_plllock = false;
+            }
+        } else {
+            if(pll) {
+                asyncClock_pll = true;
+                asyncClock_plllock = false;
+                // delay about 100µs, uses rand() function, but this is ok here, we don't need
+                // real random values, just a "jitter", results in a delay 100µs +- 1µs!
+                // (but because data sheet dosn't tell anything about time deviation, this
+                // is a assumption and to prove!)
+                srand(time(NULL));
+                unsigned long delay = 100000 + rand() % 2000 - 1000;
+                asyncClock_locktime = SystemClock::Instance().GetCurrentTime() + delay;
+            }
+        }
+        // get clock source for timer 1 [bit7 = LSM, bit2 = PCKE]
+        asyncClock_lsm = (nv & 0x80) == 0x80;
+        SetPrescalerClock((nv & 0x04) == 0x04);
+    }
+    return nv;
+}
+
+unsigned char HWTimerTinyX5::get_from_client(const IOSpecialReg *reg, unsigned char v) {
+    if(reg == pllcsrRegister) {
+        if(asyncClock_plllock)
+            v |= 0x01;
+        else
+            v &= ~0x01;
+    }
+    if(reg == gtccrRegister) {
+        v &= ~0x0c; // FOC1A and FOC1B will be read back as 0 in every case
+    }
+    return v;
+}
+
+void HWTimerTinyX5::SetPrescalerClock(bool pcke) {
+    if(pcke) {
+        // Async clock enabled?
+        if(!asyncClock_async) {
+            asyncClock_async = true;
+            asyncClock_step = 0; // this disabled also timer calculation in CpuCycle() to be secure
+            SystemClock::Instance().Add(this); // now the async clock is activated
+        } else {
+            if(asyncClock_lsm) asyncClock_step &= ~1; // on lsm async mode we take every second step
+        }
+    } else {
+        // Sync clock enabled?
+        if(asyncClock_step >= 0) {
+            // switch to sync clock
+            asyncClock_async = false; // disable is delayed to next call of Step()
+        }
+    }
+}
+
+void HWTimerTinyX5::TransferInputValues(void) {
+    // settings from TCCR
+    if(tccr_inout_val.ClockAndChanged()) {
+        cfg_prescaler = tccr_inout_val & 0x0f;
+        if((tccr_inout_val & 0x40) == 0x40)
+            cfg_mode |= TMODE_PWMA;
+        else
+            cfg_mode &= ~TMODE_PWMA;
+        cfg_com_a = (tccr_inout_val >> 4) & 0x3;
+        ocra_unit.SetOCRMode((tccr_inout_val & 0x40) == 0x40, (tccr_inout_val >> 4) & 0x3);
+        // set ctc mode, this is only possible, if counter counts till OCR1C value!
+        cfg_ctc = (tccr_inout_val & 0x80) == 0x80;
+    }
+    // settings from GTCCR
+    if(gtccr_in_val.ClockAndChanged()) {
+        cfg_com_b = (gtccr_in_val >> 4) & 0x3;
+        if((gtccr_in_val & 0x40) == 0x40)
+            cfg_mode |= TMODE_PWMB;
+        else
+            cfg_mode &= ~TMODE_PWMB;
+        ocrb_unit.SetOCRMode((gtccr_in_val & 0x40) == 0x40, (gtccr_in_val >> 4) & 0x3);
+        if(gtccr_in_val & 0x04) {
+            ocra_unit.ForceEvent();
+            gtccr_in_val.MaskOutSync(0x04);
+        }
+        if(gtccr_in_val & 0x08) {
+            ocrb_unit.ForceEvent();
+            gtccr_in_val.MaskOutSync(0x08);
+        }
+    }
+    // OCRA settings
+    if(ocra_inout_val.ClockAndChanged()) {
+        if(cfg_mode != TMODE_NORMAL)
+            // take over value on timer overflow
+            ocra_internal_val = ocra_inout_val;
+        else
+            // take over value immediately
+            ocra_compare = ocra_inout_val;
+    }
+    // OCRB settings
+    if(ocrb_inout_val.ClockAndChanged()) {
+        if(cfg_mode != TMODE_NORMAL)
+            // take over value on timer overflow
+            ocrb_internal_val = ocrb_inout_val;
+        else
+            // take over value immediately
+            ocrb_compare = ocrb_inout_val;
+    }
+    // OCRC settings
+    ocrc_inout_val.ClockAndChanged();
+    // timer update
+    if(tcnt_set_flag) {
+        counter = tcnt_in_val;
+        tcnt_set_flag = false;
+    }
+    // settings from DTPS1
+    cfg_dtprescaler = dtps1_inout_val & 0x03;
+    // settings from DT1A
+    if(dt1a_inout_val.ClockAndChanged())
+        ocra_unit.SetDeadTime((dt1a_inout_val >> 4) & 0x0f, dt1a_inout_val & 0x0f);
+    // settings from DT1B
+    if(dt1b_inout_val.ClockAndChanged())
+        ocrb_unit.SetDeadTime((dt1b_inout_val >> 4) & 0x0f, dt1b_inout_val & 0x0f);
+}
+
+void HWTimerTinyX5::TransferOutputValues(void) {
+    // counter value TCNT
+    if(asyncClock_step == -1)
+        // in sync mode
+        tcnt_out_val = counter;
+    else
+        // in async mode
+        tcnt_out_val = tcnt_out_async_tmp;
+    tcnt_out_async_tmp = counter;
+    // TOV interrupt
+    if(tov_internal_flag) {
+        tov_internal_flag = false;
+        timerOverflowInt->fireInterrupt();
+    }
+    // OCFxA interrupt
+    if(tocra_internal_flag) {
+        tocra_internal_flag = false;
+        timerOCRAInt->fireInterrupt();
+    }
+    // OCFxB interrupt
+    if(tocrb_internal_flag) {
+        tocrb_internal_flag = false;
+        timerOCRBInt->fireInterrupt();
+    }
+}
+
+TimerTinyX5_OCR::TimerTinyX5_OCR(PinAtPort* pinOut, PinAtPort* pinOutInv) {
+    outPin = pinOut;
+    outPinInv = pinOutInv;
+
+    Reset();
+}
+
+void TimerTinyX5_OCR::Reset() {
+    ocrComMode = 0;
+    ocrPWM = false;
+    ocrOut = false;
+    dtHigh = 0;
+    dtLow = 0;
+    dtCounter = 0;
+}
+
+void TimerTinyX5_OCR::DTClockCycle() {
+    if(dtCounter > 0) {
+        dtCounter--;
+        if(dtCounter == 0) {
+            // dead time arrived, set output or inverted output
+            if(ocrOut)
+                outPin->SetAlternatePort(ocrOut);
+            else
+                outPinInv->SetAlternatePort(!ocrOut);
+        }
+    }
+}
+
+void TimerTinyX5_OCR::SetOCRMode(bool isPWM, int comMode) {
+    // if switch output on, then get value of out pin (for toggle function)
+    if((ocrComMode == 0) && (comMode != 0)) {
+        ocrOut = outPin->GetPort();
+    }
+    // enable/disable alternate port pin
+    if(ocrComMode != comMode) {
+        if(comMode > 0) {
+            // connect normal pin
+            outPin->SetUseAlternatePortIfDdrSet(true);
+            outPin->SetAlternatePort(ocrOut);
+            if(isPWM && comMode == 1) {
+                // connect inverted pin
+                outPinInv->SetUseAlternatePortIfDdrSet(true);
+                outPinInv->SetAlternatePort(!ocrOut);
+            }
+        } else {
+            // disconnect both pins
+            outPin->SetUseAlternatePortIfDdrSet(false);
+            outPinInv->SetUseAlternatePortIfDdrSet(false);
+        }
+    }
+    // store values
+    ocrComMode = comMode;
+    ocrPWM = isPWM;
+}
+
+void TimerTinyX5_OCR::SetPWM(bool isCompareEvent) {
+    bool out = ocrOut;
+    if(ocrPWM) {
+        // in PWM mode
+        if(isCompareEvent) {
+            switch(ocrComMode) {
+            case 0:
+                // output is disabled, do not change pin
+                break;
+
+            case 1:
+            case 2:
+                // clear on compare
+                out = false;
+                break;
+
+            case 3:
+                // set on compare
+                out = true;
+                break;
+            }
+        } else {
+            switch(ocrComMode) {
+            case 0:
+                // output is disabled, do not change pin
+                break;
+
+            case 1:
+            case 2:
+                // set on overflow
+                out = true;
+                break;
+
+            case 3:
+                // clear on overflow
+                out = false;
+                break;
+            }
+        }
+        SetDeadTime(out);
+    } else {
+        // in normal mode (only compare event)
+        if(isCompareEvent) {
+            switch(ocrComMode) {
+            case 0:
+                // output is disabled, do not change pin
+                break;
+
+            case 1:
+                // toggle output
+                if(out)
+                    out = false;
+                else
+                    out = true;
+                break;
+
+            case 2:
+                // clear pin
+                out = false;
+                break;
+
+            case 3:
+                // set pin
+                out = true;
+                break;
+            }
+            SetDeadTime(out);
+        }
+    }
+}
+
+void TimerTinyX5_OCR::SetDeadTime(bool pwmValue) {
+    if((ocrComMode == 1) && ocrPWM) {
+        // dead time generator is only active in mode 1 and PWM
+        if(pwmValue && !ocrOut) {
+            // rising edge
+            if(dtHigh > 0)
+                dtCounter = dtHigh + 1;
+            else {
+                // no dead time, set output immediately
+                outPin->SetAlternatePort(pwmValue);
+            }
+            outPinInv->SetAlternatePort(!pwmValue);
+        } else if(!pwmValue && ocrOut) {
+            // falling edge
+            if(dtLow > 0)
+                dtCounter = dtLow + 1;
+            else {
+                // no dead time, set inverted output immediately
+                outPinInv->SetAlternatePort(!pwmValue);
+            }
+            outPin->SetAlternatePort(pwmValue);
+        }
+    } else
+        // set output immediately
+        outPin->SetAlternatePort(pwmValue);
+    ocrOut = pwmValue;
+}
+
+// EOF

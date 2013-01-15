@@ -676,4 +676,248 @@ class HWTimer16_3C: public HWTimer16 {
         void Reset(void);
 };
 
+//! PWM output unit for timer 1 on ATtiny25/45/85
+/*! Supports the different output control modes for a OCR unit on timer 1 in
+ *  ATtiny25/45/85 devices, contains also implementation of dead time generator
+ */
+class TimerTinyX5_OCR {
+    private:
+        PinAtPort* outPin;           //!< normal output pin for OCR unit
+        PinAtPort* outPinInv;        //!< inverted output pin for OCR unit
+
+        int ocrComMode;              //!< COM mode
+        bool ocrPWM;                 //!< flag, if OCR unit is in PWM mode
+        bool ocrOut;                 //!< OCR status before dead time generator
+        int dtHigh;                  //!< dead time raise delay
+        int dtLow;                   //!< dead time fall delay
+        int dtCounter;               //!< dead time counter
+
+        //! Calculate output pin value (before dead time generator)
+        void SetPWM(bool isCompareEvent);
+
+        //! Calculate output pin value after dead time generator
+        void SetDeadTime(bool pwmValue);
+
+    public:
+        TimerTinyX5_OCR(PinAtPort* pinOut, PinAtPort* pinOutInv);
+
+        //! Reset internal states on device reset
+        void Reset();
+
+        //! Run one clock cycle from dead time prescaler
+        void DTClockCycle();
+
+        //! OCR event
+        void TimerEvent(bool isCompareEvent) { SetPWM(isCompareEvent); }
+
+        //! Manual change of OCR unit by force bit
+        void ForceEvent() { /* only, if unit isn't in PWM mode */ if(!ocrPWM) SetPWM(true); }
+
+        //! Configure dead time counter
+        void SetDeadTime(int highTime, int lowTime) { dtHigh = highTime; dtLow = lowTime; }
+
+        //! Configure OCR mode
+        void SetOCRMode(bool isPWM, int comMode);
+};
+
+//! Helper class to simulate transfer of register values from bus area to timer async area
+/*! This isn't a exact simulation, because it delays the register settings only for one
+  clock cycle. As shown on datasheet it's 1 1/2 clock in sync mode and 1 to 2 clocks in
+  async mode! */
+class HWTimerTinyX5_SyncReg {
+    private:
+        unsigned char inValue; //!< input register value
+        unsigned char regValue; //!< valid register value inside sync area
+
+    public:
+        HWTimerTinyX5_SyncReg() { Reset(0); }
+
+        //! perform a reset to set valid reset values without clock
+        void Reset(unsigned char v) { inValue = regValue = v; }
+
+        //! assign new register value
+        unsigned char operator=(unsigned char v) { inValue = v; return v; }
+
+        //! read register value inside sync area
+        operator unsigned char() { return regValue; }
+
+        //! read register value on input area
+        unsigned char GetBusValue(void) { return inValue; }
+
+        //! check after one clock, if register value has changed
+        bool ClockAndChanged(void) { if(inValue != regValue) { regValue = inValue; return true; } return false; }
+
+        //! Mask out a value inside sync area and do not force a change event
+        void MaskOutSync(unsigned char mask) { inValue &= ~mask; regValue = inValue; }
+};
+
+//! timer unit for timer 1 on ATtiny25/45/85
+/*! Timer1 on ATtiny25/45/85 is an async timer, which can be clocked till 64MHz by pll
+  from system clock. */
+class HWTimerTinyX5: public Hardware,
+    public TraceValueRegister,
+    public SimulationMember,
+    public IOSpecialRegClient {
+
+    private:
+        TraceValue* counterTrace;     //!< TraceValue instance for counter itself
+        TraceValue* prescalerTrace;   //!< TraceValue instance for prescaler
+        TraceValue* dTPrescalerTrace; //!< TraceValue instance for dead time prescaler
+
+        // counter and prescaler
+        unsigned long counter;     //!< THE timer counter
+        unsigned long prescaler;   //!< THE prescaler counter
+        unsigned char dtprescaler; //!< dead time prescaler counter
+
+        // input/output values for TCCR, OCRx and input value for GTCCR
+        HWTimerTinyX5_SyncReg tccr_inout_val;  //!< register value TCCR1
+        HWTimerTinyX5_SyncReg ocra_inout_val;  //!< register value OCRA
+        HWTimerTinyX5_SyncReg ocrb_inout_val;  //!< register value OCRB
+        HWTimerTinyX5_SyncReg ocrc_inout_val;  //!< register value OCRC
+        HWTimerTinyX5_SyncReg gtccr_in_val;    //!< input register value GTCCR
+        unsigned char dtps1_inout_val;         //!< register value DTPS1
+        HWTimerTinyX5_SyncReg dt1a_inout_val;  //!< register value DT1A
+        HWTimerTinyX5_SyncReg dt1b_inout_val;  //!< register value DT1B
+
+        // output and input register for TCNT
+        unsigned char tcnt_out_val;       //!< output register value for TCNT
+        unsigned char tcnt_out_async_tmp; //!< temporary register value for TCNT in async mode
+        unsigned char tcnt_in_val;        //!< input register value for TCNT
+        bool tcnt_set_flag;               //!< flag to signal, that a new counter value was set
+        bool tov_internal_flag;           //!< TOV flag is set, have to be delayed by 1 CK
+        bool tocra_internal_flag;         //!< OCFxA flag is set, have to be delayed by 1 CK
+        bool tocrb_internal_flag;         //!< OCFxB flag is set, have to be delayed by 1 CK
+
+        // internal values for TCCR, OCRx
+        unsigned char ocra_internal_val;  //!< internal (async) register value for OCRA1
+        unsigned long ocra_compare;       //!< active compare value for OCR A unit
+        TimerTinyX5_OCR ocra_unit;        //!< OCR control unit for OCR channel A
+        unsigned char ocrb_internal_val;  //!< internal (async) register value for OCRB1
+        unsigned long ocrb_compare;       //!< active compare value for OCR B unit
+        TimerTinyX5_OCR ocrb_unit;        //!< OCR control unit for OCR channel B
+        int cfg_prescaler;                //!< internal (async) prescaler setting
+        int cfg_dtprescaler;              //!< internal (async) dead time prescaler setting
+        int cfg_mode;                     //!< internal (async) timer mode setting
+        bool cfg_ctc;                     //!< internal (async) flag for clear timer counter
+        int cfg_com_a;                    //!< internal (async) setting for compare output modul A
+        int cfg_com_b;                    //!< internal (async) setting for compare output modul B
+
+        enum TMODEtype {
+            TMODE_NORMAL = 0x0, //!< timer in normal mode, upcounting from 0x0 to 0xff or 0 to OCRC (CTC mode)
+            TMODE_PWMA = 0x1,   //!< timer in PWM mode, upcounting from 0 to OCRC, PWM A active
+            TMODE_PWMB = 0x2    //!< timer in PWM mode, upcounting from 0 to OCRC, PWM B active
+        };
+
+        // variables for async mode and pll
+        int  asyncClock_step;                  //!< step counter for step delays. -1, if not in async mode
+        bool asyncClock_async;                 //!< mode switch for async mode
+        bool asyncClock_lsm;                   //!< mode switch for lsm mode (32MHz clock)
+        bool asyncClock_pll;                   //!< pll is switched on
+        bool asyncClock_plllock;               //!< pll frequency is locked
+        SystemClockOffset asyncClock_locktime; //!< time, when pll is locked
+
+    protected:
+        AvrDevice *core;              //!< pointer to device core
+        IOSpecialReg* gtccrRegister;  //!< instance of GTCCR register
+        IOSpecialReg* pllcsrRegister; //!< instance of PLLCSR register
+        IOSpecialReg* dtps1Register;  //!< instance of DTPS1 register
+        IOSpecialReg* dt1aRegister;   //!< instance of DT1A register
+        IOSpecialReg* dt1bRegister;   //!< instance of DT1B register
+        IRQLine* timerOverflowInt;    //!< irq line for overflow interrupt
+        IRQLine* timerOCRAInt;        //!< irq line for output compare A interrupt
+        IRQLine* timerOCRBInt;        //!< irq line for output compare B interrupt
+
+        //! Register access to set counter register
+        void Set_TCNT(unsigned char val) { tcnt_in_val = val; tcnt_set_flag = true; }
+        //! Register access to read counter register
+        unsigned char Get_TCNT() { return tcnt_out_val; }
+
+        //! Register access to set control register
+        void Set_TCCR(unsigned char val) { tccr_inout_val = val; }
+        //! Register access to read control register
+        unsigned char Get_TCCR() { return tccr_inout_val.GetBusValue(); }
+
+        //! Register access to set output compare register A
+        void Set_OCRA(unsigned char val) { ocra_inout_val = val; }
+        //! Register access to read output compare register A
+        unsigned char Get_OCRA() { return ocra_inout_val.GetBusValue(); }
+
+        //! Register access to set output compare register B
+        void Set_OCRB(unsigned char val) { ocrb_inout_val = val; }
+        //! Register access to read output compare register B
+        unsigned char Get_OCRB() { return ocrb_inout_val.GetBusValue(); }
+
+        //! Register access to set output compare register C
+        void Set_OCRC(unsigned char val) { ocrc_inout_val = val; }
+        //! Register access to read output compare register C
+        unsigned char Get_OCRC() { return ocrc_inout_val.GetBusValue(); }
+
+        //! Register access to set dead time prescaler
+        void Set_DTPS1(unsigned char val) { dtps1_inout_val = val; }
+        //! Register access to read dead time prescaler
+        unsigned char Get_DTPS1() { return dtps1_inout_val; }
+
+        //! Register access to set dead time value for channel A
+        void Set_DT1A(unsigned char val) { dt1a_inout_val = val; }
+        //! Register access to read dead time value for channel A
+        unsigned char Get_DT1A() { return dt1a_inout_val.GetBusValue(); }
+
+        //! Register access to set dead time value for channel B
+        void Set_DT1B(unsigned char val) { dt1b_inout_val = val; }
+        //! Register access to read dead time value for channel B
+        unsigned char Get_DT1B() { return dt1b_inout_val.GetBusValue(); }
+
+        //! IO register interface set method, see IOSpecialRegClient
+        unsigned char set_from_reg(const IOSpecialReg *reg, unsigned char nv);
+        //! IO register interface get method, see IOSpecialRegClient
+        unsigned char get_from_client(const IOSpecialReg *reg, unsigned char v);
+
+        //! Set clock source for prescaler
+        void SetPrescalerClock(bool pcke);
+
+        //! Count function, contains prescaler, multiplexer and counter functionality
+        void TimerCounter(void);
+
+        //! Prescaler multiplex function, returns true, if a count pulse is happen
+        bool PrescalerMux(void);
+
+        //! Dead time prescaler multiplex function, returns true, if a count pulse is happen
+        bool DeadTimePrescalerMux(void);
+
+        //! Transfer register input to internal register set
+        void TransferInputValues(void);
+
+        //! Transfer internal register values (if needed) to by core readable register
+        void TransferOutputValues(void);
+
+    public:
+        IOReg<HWTimerTinyX5> tccr_reg;  //!< control register
+        IOReg<HWTimerTinyX5> tcnt_reg;  //!< counter register
+        IOReg<HWTimerTinyX5> tocra_reg; //!< OCR register channel A
+        IOReg<HWTimerTinyX5> tocrb_reg; //!< OCR register channel B
+        IOReg<HWTimerTinyX5> tocrc_reg; //!< OCR register channel C
+        IOReg<HWTimerTinyX5> dtps1_reg; //!< dead time generator prescaler register
+        IOReg<HWTimerTinyX5> dt1a_reg;  //!< dead time generator register channel A
+        IOReg<HWTimerTinyX5> dt1b_reg;  //!< dead time generator register channel B
+
+        HWTimerTinyX5(AvrDevice *core,
+                      IOSpecialReg *gtccr,
+                      IOSpecialReg *pllcsr,
+                      IRQLine* tov,
+                      IRQLine* tocra,
+                      PinAtPort* ocra_out,
+                      PinAtPort* ocra_outinv,
+                      IRQLine* tocrb,
+                      PinAtPort* ocrb_out,
+                      PinAtPort* ocrb_outinv);
+        ~HWTimerTinyX5();
+
+        //! Performs the async clocking, if necessary
+        int Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_ns);
+        //! Perform a reset of this unit
+        void Reset();
+        //! Process timer/counter unit operations by CPU cycle
+        unsigned int CpuCycle();
+};
+
 #endif

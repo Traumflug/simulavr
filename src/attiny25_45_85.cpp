@@ -75,7 +75,7 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
     gpior2_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR2");
     
-    // GTCCR register an timer 0
+    // GTCCR register and timer 0
     gtccr_reg = new IOSpecialReg(&coreTraceGroup, "GTCCR");
     prescaler0 = new HWPrescaler(this, "0", gtccr_reg, 0, 7);
 
@@ -96,6 +96,19 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
                              timer01irq->getLine("OCF0B"),
                              new PinAtPort(portb, 1));
 
+    // PLLCSR register and timer 1
+    pllcsr_reg = new IOSpecialReg(&coreTraceGroup, "PLLCSR");
+    timer1 = new HWTimerTinyX5(this,
+                               gtccr_reg,
+                               pllcsr_reg,
+                               timer01irq->getLine("TOV1"),
+                               timer01irq->getLine("OCF1A"),
+                               new PinAtPort(portb, 1),
+                               new PinAtPort(portb, 0),
+                               timer01irq->getLine("OCF1B"),
+                               new PinAtPort(portb, 4),
+                               new PinAtPort(portb, 3));
+
     // IO register set
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
@@ -112,21 +125,21 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     rw[0x53]= & timer0->tccrb_reg;
     rw[0x52]= & timer0->tcnt_reg;
     //rw[0x51] reserved
-    //rw[0x50] reserved
+    rw[0x50]= & timer1->tccr_reg;
 
-    //rw[0x4f] reserved
-    //rw[0x4e] reserved
-    //rw[0x4d] reserved
-    //rw[0x4c] reserved
-    //rw[0x4b] reserved
+    rw[0x4f]= & timer1->tcnt_reg;
+    rw[0x4e]= & timer1->tocra_reg;
+    rw[0x4d]= & timer1->tocrc_reg;
+    rw[0x4c]= gtccr_reg;
+    rw[0x4b]= & timer1->tocrb_reg;
     rw[0x4a]= & timer0->tccra_reg;
     rw[0x49]= & timer0->ocra_reg;
     rw[0x48]= & timer0->ocrb_reg;
-    //rw[0x47] reserved
+    rw[0x47]= pllcsr_reg;
     //rw[0x46] reserved
-    //rw[0x45] reserved
-    //rw[0x44] reserved
-    //rw[0x43] reserved
+    rw[0x45]= & timer1->dt1a_reg;
+    rw[0x44]= & timer1->dt1b_reg;
+    rw[0x43]= & timer1->dtps1_reg;
     //rw[0x42] reserved
     //rw[0x41] reserved
     //rw[0x40] reserved
