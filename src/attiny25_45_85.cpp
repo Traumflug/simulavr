@@ -42,6 +42,8 @@ AVR_REGISTER(attiny85, AvrDevice_attiny85);
 
 AvrDevice_attinyX5::~AvrDevice_attinyX5() {
     // destroy subsystems in reverse order, you've created it in constructor
+    delete timer1;
+    delete pllcsr_reg;
     delete timer0;
     delete timer01irq;
     delete prescaler0;
