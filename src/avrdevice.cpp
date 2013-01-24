@@ -144,7 +144,8 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     flagTiny10(false),
     flagTiny1x(false),
     flagXMega(false),
-    instructionSEIJustEnabledInterrupts(false)
+    deferIrq(false),
+    newIrqPc(0xffffffff)
 {
     dump_manager = DumpManager::Instance();
     dump_manager->registerAvrDevice(this);
@@ -280,13 +281,10 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                 return 0;
             }
 
-            if(instructionSEIJustEnabledInterrupts) {
-                instructionSEIJustEnabledInterrupts = false;
+            if(deferIrq && ( newIrqPc != 0xffffffff )) {
+                deferIrq = false;
                 // And skip executing the interrupt stuff below.
-            } else if(status->I == 1) {
-                unsigned int actualIrqVector;
-                unsigned int newIrqPc = irqSystem->GetNewPc(actualIrqVector);
-                if(newIrqPc != 0xffffffff) {
+
                     if(trace_on)
                         traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;
 
@@ -297,6 +295,14 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                     cpuCycles = 4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
                     status->I = 0; //irq started so remove I-Flag from SREG
                     PC = newIrqPc - 1;   //we add a few lines later 1 so we sub here 1 :-)
+
+            } else if(status->I == 1) {
+                newIrqPc = irqSystem->GetNewPc(actualIrqVector);
+
+                if(newIrqPc != 0xffffffff) {
+                   deferIrq = true; // do always one instruction before entering irq vect
+                   if(trace_on)
+                      traceOut << "IRQ prepared for addr " << hex << newIrqPc << dec << endl;
                 }
             }
 

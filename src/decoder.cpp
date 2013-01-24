@@ -323,13 +323,8 @@ avr_op_BSET::avr_op_BSET(word opcode, AvrDevice *c):
     Kbit(get_sreg_bit(opcode)) {}
 
 int avr_op_BSET::operator()() {
-    bool interruptsWereEnabled = status->I;
     *(status) = *(status) | 1 << Kbit;
     
-    /* "When using the SEI instruction to enable interrupts, the instruction
-       following SEI will be executed before any pending interrupts" - datasheet */
-    if(!interruptsWereEnabled && status->I)
-        core->instructionSEIJustEnabledInterrupts = true;
     return 1;
 }
 
