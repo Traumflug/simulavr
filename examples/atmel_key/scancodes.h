@@ -15,7 +15,7 @@
 
 // Unshifted characters
 
-static char unshifted[][2]  __attribute__ ((progmem)) = {
+static char const unshifted[][2]  __attribute__ ((progmem)) = {
 0x0d,9,
 0x0e,'`',
 0x15,'q',
@@ -87,7 +87,7 @@ static char unshifted[][2]  __attribute__ ((progmem)) = {
 };
 
 // Shifted characters
-prog_char shifted[][2] = {
+prog_char const shifted[][2] = {
 0x0d,9,
 0x0e,'~',
 0x15,'Q',

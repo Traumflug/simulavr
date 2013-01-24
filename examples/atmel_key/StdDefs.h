@@ -63,8 +63,8 @@ void print_hexbyte(unsigned char i);
    #define UART_BAUD_REG_H      UBRR0H
    #define UART_CONTROL_REG     UCSR0B
    #define UART_STATUS_REG      UCSR0A
-   #define UART_RCV_INT_VECTOR  SIG_UART0_RECV
-   #define UART_REG_EMPTY_INT_VECTOR  SIG_UART0_DATA
+   #define UART_RCV_INT_VECTOR  USART0_RX_vect
+   #define UART_REG_EMPTY_INT_VECTOR  USART0_UDRE_vect
    #define UART_DATA_REG        UDR0
 #elif DEVICE_NAME == ATMEGA163
    #define UART_BAUD_REG        UBRR
