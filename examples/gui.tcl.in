@@ -8,16 +8,15 @@ namespace import itcl::*
 
 proc locateInDirs {name dirs} {
 
-  foreach dir ${dirs}  {
-     set toTest ${dir}/${name}
-     if { [file exists ${toTest}] } {
-       return ${toTest}
-     }
-  }
-  error "unable to locate ${name}"
+    foreach dir ${dirs}  {
+        set toTest ${dir}/${name}
+        if { [file exists ${toTest}] } {
+            return ${toTest}
+        }
+    }
+    error "unable to locate ${name}"
 }
 
-#load the avr-simulator package
 class Kbd {
     protected {
         variable parent
@@ -34,9 +33,9 @@ class Kbd {
             if { ! [info exists GuiDir] } { set GuiDir "" }
             set prefix "@prefix@"
             set kbdImage [locateInDirs kbd.xbm \
-               [list ${GuiDir} . .. examples \
-                  ../@srcdir@ @srcdir@ \
-                  @datadir@ /usr/share]]
+                    [list ${GuiDir} . .. examples \
+                        ../@srcdir@ @srcdir@ \
+                        @datadir@ /usr/share]]
             image create bitmap kbd -file ${kbdImage}
 
             button $win.b -image kbd
@@ -56,9 +55,10 @@ class Kbd {
             $parent SendToSimulator $objname B$key
         }
 
-        
+
     }
 }
+
 
 class Scope {
     protected {
@@ -67,6 +67,19 @@ class Scope {
         variable objname
         variable noOfChannels
         variable value
+        variable xvalue 
+        variable actIdx
+
+        variable sizex
+        variable sizey
+
+        #for all channels 
+        variable minx
+        variable maxx
+
+        #for each channel a seperate val
+        variable miny
+        variable maxy
     }
 
     public {
@@ -76,31 +89,160 @@ class Scope {
             set objname $_objname
             set noOfChannels $_noOfChannels
 
+            set minx 0
+            set maxx 0
 
-            canvas $win.c
+            set sizex 100
+            set sizey 100
+
+            for { set cnt 0 } { $cnt < $_noOfChannels} { incr cnt } {
+                set actIdx($cnt) 0
+
+                set miny($cnt) 0
+                set maxy($cnt) 0
+            }
+
+
+            canvas $win.c 
             pack $win.c
 
         }
 
+        method DrawChannel { channel } {
+            set anzValues [expr $actIdx($channel) -1]
+
+            if {$anzValues > 2} {
+
+                set xrange [expr $maxx - $minx]
+                set yrange($channel) [expr $maxy($channel) - $miny($channel) ]
+                puts "Versuche Kanal $channel mit yrange $yrange($channel) max: $maxy($channel) min: $miny($channel)"
+
+                for { set cnt 0 } { $cnt < $anzValues } { incr cnt } {
+                    set a [expr ( $value($channel,$cnt) - $miny($channel)) ]
+                    set b [ expr $a * (20 * ($channel+1) ) ]
+                    set c [ expr $b /  $yrange($channel) ]
+                    puts "Ber: $a $b $c miny $miny($channel)"
+                    set val [expr ( $value($channel,$cnt) - $miny($channel) ) * (20 * ($channel+1)) / $yrange($channel)  ] 
+
+                    set aa [expr ( $xvalue($channel,$cnt) - $minx) ]
+                    set bb [expr $aa  * $sizex  ]
+                    set cc [expr $bb / $xrange ]
+
+                    puts "Berx: $aa $bb $cc  minx: $minx range: $xrange"
+
+
+
+                    set xval [expr ( $xvalue($channel,$cnt) - $minx) * $sizex / $xrange]
+
+                    lappend coords $xval $val
+
+
+                    #puts "Channel $channel cnt: $cnt val: $val"
+                    #update
+                }  ;  #for
+
+                puts $coords
+                $win.c create line $coords
+            } 
+        }
+
         method Redraw { } {
-            set l [array names value]
+            puts "##################### Redraw ###################################"
+
+            #now draw the channels
+
+            for { set cnt 0 } { $cnt < $noOfChannels} { incr cnt } {
+                DrawChannel $cnt
+            }
+
+
+
+
+            #set l [array names value]
             #puts "l: $l"
 
-            set len [llength $l]
+            #set len [llength $l]
 
-            for { set ii 0 } { $ii < $len } { incr ii } {
-                #puts "[lindex $l $ii]"
-                set tmp $value([lindex $l $ii])
-                #puts "[lindex $l $ii] value: $tmp"
+            #for { set ii 0 } { $ii < $len } { incr ii } {
+                #    puts "[lindex $l $ii]"
+                #    set tmp $value([lindex $l $ii])
+                #    puts "[lindex $l $ii] value: $tmp"
+            #}
+        }
+
+        method PrintOut { zeit } {
+            puts -nonewline "$zeit ,"
+            for { set cnt 0 } { $cnt < $noOfChannels} { incr cnt } {
+                set idx [expr $actIdx($cnt) -1]
+                if {$idx > 1} {
+                    puts -nonewline "$value($cnt,$idx) ,"
+                } else {
+                    puts -nonewline "0 ,"
+                }
+
             }
+            puts ";"
         }
 
-        method ChangeValue { time channel v } {
-            puts "Scope Change Value aufgerufen mit $time $channel $v"
-            set value($channel,$time) $v
-            Redraw
+
+
+        method ChangeValue { time channel val } {
+            #puts "Scope Change Value aufgerufen mit $time $channel $val"
+            set idx $actIdx($channel) 
+            #puts "Idx fuer Kanal $channel ist $idx"
+            set value($channel,$idx) $val
+            set xvalue($channel,$idx) $time
+            incr actIdx($channel)
+
+            if { $time > $maxx} { set maxx $time }
+            if { $time < $minx} { set minx $time }
+
+            if { $val > $maxy($channel) } { set maxy($channel) $val }
+            if { $val < $miny($channel) } { set miny($channel) $val }
+
+            #Redraw
+            PrintOut $time
         }
 
+    }
+}
+
+class TraceControl {
+    protected {
+        variable parent
+        variable win
+        variable objname
+        variable traceOn
+    }
+
+    public {
+        constructor {  _parent _objname _win } {
+            set parent $_parent
+            set objname $_objname
+            set win $_win
+            set traceOn 0
+
+            puts "Trace Control"
+            puts "parent $parent"
+            puts "objname $objname"
+            puts "win $win"
+
+
+            button $win.$objname -text "Trace: $objname" -command "$this ToggleControl" -background red
+            pack $win.$objname
+        }
+
+        method ToggleControl { } {
+            if { $traceOn == 0 } {
+                set traceOn 1
+                $win.$objname configure -background red
+            } else {
+                set traceOn 0
+                $win.$objname configure -background green
+            }
+
+            $parent SendToSimulator $objname $traceOn
+        }
     }
 }
 
@@ -153,20 +295,21 @@ class SerialTx {
             set objname $_objname 
 
             frame $win.$objname
-            
+
 
             frame $win.$objname.tx
+            label $win.$objname.tx.name -text $objname
             text $win.$objname.tx.text -width 40 -height 6
             label $win.$objname.tx.status -text "Serial transmitter of PC"
             label $win.$objname.tx.pin -text "-----------" 
 
-            #bind $win.$objname.tx.text <<Modified>> "puts Hallo"
-            bind $win.$objname.tx.text <KeyPress> "$this NewCharEntered %K %A"
+            bind $win.$objname.tx.text <KeyPress> "$this NewCharEntered %A"
+            bind $win.$objname.tx.text <Button-2> "$this GetStringFromSelection "
 
             frame $win.$objname.config
             label $win.$objname.config.baudrate -text "-----------"
 
-            pack $win.$objname.tx $win.$objname.tx.text $win.$objname.tx.status $win.$objname.tx.pin 
+            pack $win.$objname.tx $win.$objname.tx.name $win.$objname.tx.text $win.$objname.tx.status $win.$objname.tx.pin 
             pack $win.$objname.config $win.$objname.config.baudrate
 
             pack $win.$objname
@@ -174,21 +317,24 @@ class SerialTx {
 
         }
 
-        method NewCharEntered { c a}  {
-            #puts "$c   |$a|   " 
+        method GetStringFromSelection {} {
+            NewStringEntered [selection get]
+        }
 
-            if { "$a" != ""}  {
-# Handle any character
-              $parent SendToSimulator $objname $a
+        method NewStringEntered { str } {
+            foreach buchstabe [split $str {} ] { NewCharEntered $buchstabe }
+        }
+
+        method NewCharEntered { c }  {
+            set trans ""
+
+            if { $c == "space" || $c == " " } {
+                set trans __space__
             } else {
-# Handle the special characters
-              switch $c {
-                     "Return" { set $a "\n"}
-              }
-              if { "$a" != ""}  {
-                $parent SendToSimulator $objname $a
-              }
+                if { $c != "" } { set trans $c }
             }
+
+            if { $trans != "" } { $parent SendToSimulator $objname $trans }
         }
 
     }
@@ -211,8 +357,9 @@ class SerialRx {
 
 
             frame $win.$objname
-            
+
             frame $win.$objname.rx
+            label $win.$objname.rx.name -text $objname
             text $win.$objname.rx.text -width 40 -height 6
             label $win.$objname.rx.status -text "Serial receiver of PC"
             label $win.$objname.rx.pin -text "-----------"
@@ -220,14 +367,25 @@ class SerialRx {
             frame $win.$objname.config
             label $win.$objname.config.baudrate -text "-----------"
 
-            pack $win.$objname.rx $win.$objname.rx.text $win.$objname.rx.status $win.$objname.rx.pin
+            pack $win.$objname.rx $win.$objname.rx.name $win.$objname.rx.text $win.$objname.rx.status $win.$objname.rx.pin
             pack $win.$objname.config $win.$objname.config.baudrate
 
             pack $win.$objname
         }
 
         method ChangeValue { c } {
-            $win.$objname.rx.text insert end $c
+            switch $c {
+                __SPACE__ {  $win.$objname.rx.text insert end " " }
+                __SEMICOLON__ { $win.$objname.rx.text insert end ";" }
+                __CR__ { }
+                __LF__  { $win.$objname.rx.text insert end "\n" }
+                __DOUBLE_QUOTE__ { $win.$objname.rx.text insert end "\"" }
+                __SINGLE_QUOTE__ { $win.$objname.rx.text insert end "\'" }
+                __DOLLAR__ { $win.$objname.rx.text insert end "\'"  }
+
+                default { $win.$objname.rx.text insert end $c }
+            }
+
         }
     }
 
@@ -249,7 +407,7 @@ class Lcd {
             set parent $_parent
             set win $_win
             set objname $_objname 
-            
+
             #label $win.t -width $xsize -height $ysize
             #pack $win.t
 
@@ -292,7 +450,7 @@ class Lcd {
             }
             if {$cursor_x < $xsize} {
                 if { $cursor_y < $ysize} {
-                
+
                     $win.$objname.y$cursor_y.x$cursor_x configure -background blue 
                 }
             }
@@ -300,7 +458,7 @@ class Lcd {
     }
 }
 
-            
+
 
 
 class Net {
@@ -317,8 +475,6 @@ class Net {
             set parent $_parent
             set win $_win
             set objname $_objname
-
-            #puts "Ich bin this: $this extern objname : $objname"
 
             frame $win.$objname -borderwidth 2 -relief solid
             pack $win.$objname -side left
@@ -417,7 +573,7 @@ class AnalogNet {
 
 class Master {
     protected {
-       variable sock
+        variable sock
     }
 
     public {
@@ -441,8 +597,8 @@ class Master {
 
                 #puts "offset: $offset    rest: $sub"
 
-               # create class objName parent win objName
-                
+                # create class objName parent win objName
+
                 set front [lrange $x 1 2] 
                 set back [lrange $x 3 end]
                 set objName [lindex $x 2]
@@ -456,8 +612,11 @@ class Master {
                     }
 
                     set {
-                        #puts "[lindex $readList 1] ChangeValue [lindex $readList 2]" 
-                        eval "[lindex $readList 1] ChangeValue [lindex $readList 2]"
+                        if { [lindex $readList 2] == "__semicolon__" } {
+                            eval "[lindex $readList 1] ChangeValue \";\""
+                        } else {
+                            eval "[lindex $readList 1] ChangeValue [lindex $readList 2]"
+                        }
                         puts -nonewline $sock "__ack X "
                     }
 
@@ -471,7 +630,7 @@ class Master {
 
                 #puts -nonewline $sock "__ack X "
                 flush $sock
-                
+
 
             } else {
                 puts "Error condition in io input handler"
@@ -490,15 +649,15 @@ class Master {
 
 # create a server socket 
 socket -server NewConnection 7777
-    
-    
+
+
 proc NewConnection { _sock _address _port } {
     puts "New Connection on GUI Server established!"
     puts "Socket: $_sock  from Address $_address  and port $_port"
     Master guiMaster_$_sock $_sock
 }
 
-    
+
 
 
 
