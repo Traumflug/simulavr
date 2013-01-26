@@ -59,7 +59,6 @@ class Kbd {
     }
 }
 
-
 class Scope {
     protected {
         variable parent
@@ -329,7 +328,7 @@ class SerialTx {
             set trans ""
 
             if { $c == "space" || $c == " " } {
-                set trans __space__
+                set trans __SPACE__
             } else {
                 if { $c != "" } { set trans $c }
             }
