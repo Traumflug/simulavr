@@ -135,6 +135,7 @@ class OpenDrain: public Pin {
         virtual Pin GetPin();
         void RegisterNet(Net *n) { pin->RegisterNet(n);}
         virtual ~OpenDrain() {}
+        void SetInState ( const Pin &p) { pin->SetInState(*pin); } // mirror out to in value
 };
 
 #endif
