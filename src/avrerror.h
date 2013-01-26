@@ -101,7 +101,7 @@ class SystemConsoleHandler {
         bool traceEnabled; //!< flag, true if trace is enabled
         bool traceToFile; //!< flag, true if trace writes to filestream
         std::string traceFilename; //!< file name for trace file (will be appended with file count!)
-        unsigned int traceLinesOnFile; //!< how much lines will be written on one trace file
+        unsigned int traceLinesOnFile; //!< how much lines will be written on one trace file 0->means endless
         unsigned int traceLines; //!< how much lines are written on current trace file
         int traceFileCount; //!< Counter for trace files
         

@@ -108,9 +108,9 @@ void SystemConsoleHandler::StopTrace(void) {
 void SystemConsoleHandler::TraceNextLine(void) {
     if(!traceEnabled || !traceToFile)
         return;
-    
+
     traceLines++;
-    if(traceLines >= traceLinesOnFile) {
+    if( ( traceLinesOnFile ) && ( traceLines >= traceLinesOnFile)) {
         traceFileCount++;
         traceLines = 0;
         

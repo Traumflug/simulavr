@@ -102,6 +102,9 @@ const char Usage[] =
     "-M                    disable messages for bad I/O and memory references\n"
     "-p  <port>            use <port> for gdb server\n"
     "-t --trace <file>     enable trace outputs to <file>\n"
+    "-l --linestotrace <number>\n"
+    "                      maximum number of lines in each trace file.\n"
+    "                      0 means endless. Attention: if you use gdb & trace, please use always 0!\n"
     "-n --nogdbwait        do not wait for gdb connection\n"
     "-F --cpufrequency     set the cpu frequency to <Hz> \n"
     "-s --irqstatistic     prints statistic informations about irq usage after simulation\n"
@@ -144,6 +147,7 @@ int main(int argc, char *argv[]) {
     int userinterface_flag = 0;
     unsigned long long fcpu = 4000000;
     unsigned long long maxRunTime = 0;
+    unsigned long long linestotrace = 1000000;
     UserInterface *ui;
     
     unsigned long writeToPipeOffset = 0x20;
@@ -168,6 +172,7 @@ int main(int argc, char *argv[]) {
             {"gdbserver", 0, 0, 'g'},
             {"gdb-debug", 0, 0, 'G'},
             {"debug-gdb", 0, 0, 'G'},
+            {"linestotrace", 1, 0, 'l'},
             {"maxruntime", 1, 0, 'm'},
             {"nogdbwait", 0, 0, 'n'},
             {"trace", 1, 0, 't'},
@@ -185,7 +190,7 @@ int main(int argc, char *argv[]) {
             {0, 0, 0, 0}
         };
         
-        c = getopt_long(argc, argv, "a:e:f:d:gGm:p:t:uxyzhvnisF:R:W:VT:B:c:o:", long_options, &option_index);
+        c = getopt_long(argc, argv, "a:e:f:d:gGm:p:t:uxyzhvnisF:R:W:VT:B:c:o:l:", long_options, &option_index);
         if(c == -1)
             break;
         
@@ -236,7 +241,14 @@ int main(int argc, char *argv[]) {
                     printf("Running with CPU frequency: %1.4f MHz (%lld Hz)\n",
                            fcpu/1000000.0, fcpu);
                 break;
-            
+
+            case 'l':
+                if(!StringToUnsignedLongLong( optarg, &linestotrace, NULL, 10)) {
+                    cerr << "linestotrace is not a number" << endl;
+                    exit(1);
+                }
+                break;
+
             case 'm':
                 if(!StringToUnsignedLongLong( optarg, &maxRunTime, NULL, 10)) {
                     cerr << "maxRunTime is not a number" << endl;
@@ -292,8 +304,9 @@ int main(int argc, char *argv[]) {
             
             case 't':
                 if(global_verbose_on)
-                    cout << "Running in Trace Mode" << endl;
-                sysConHandler.SetTraceFile(optarg, 1000000);
+                    cout << "Running in Trace Mode with maximum " << linestotrace << " lines per file" << endl;
+
+                sysConHandler.SetTraceFile(optarg, linestotrace);
                 break;
             
             case 'v':
