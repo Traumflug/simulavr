@@ -26,6 +26,7 @@ GTEST_CXXFLAGS= \
 OBJ_UNITTEST= \
 				  session_001/unittest001.o \
 				  session_irq_check/unittest_irq.o \
+				  session_io_pin/unittest_io_pin.o \
 				  gtest_main.o
 
 SIMULAVR_PATH=../..
@@ -49,6 +50,9 @@ ut: $(ALL_OBJ)
 %.atmega32.o: %.s
 	avr-gcc -Wa,--gstabs,-D -xassembler-with-cpp -mmcu=atmega32 $< -o $@
 
+%.atmega128.o: %.s
+	avr-gcc -Wa,--gstabs,-D -xassembler-with-cpp -mmcu=atmega128 $< -o $@
+
 %.atmega32.o: %.c
 	avr-gcc -mmcu=atmega32 -O2 $< -o $@
 
@@ -60,6 +64,7 @@ AVR_OBJ= \
 			session_irq_check/tc1.atmega32.o \
 			session_irq_check/tc2.atmega32.o \
 			session_irq_check/tc3.atmega32.o \
+			session_io_pin/tc1.atmega128.o
 			
 
 

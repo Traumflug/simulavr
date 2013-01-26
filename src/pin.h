@@ -33,7 +33,13 @@
 /*! \todo OpenDrain class is disabled for the moment. I think, this functionality,
   to "wrap" a normal pin isn't right implemented and could be made more clear.
   And maybe it is useless, because to handle easily by normal Pin class. */
-#define DISABLE_OPENDRAIN 1
+
+/*! I enable this functionality again, cause I need it :-)
+  It is maybe unclear how it works but it works in my use case. So please leave
+  the code until it is replaced and the unit tests still work.
+  If in doubt: please feel free to ask me ( Klaus Rudolph)
+  */
+//#define DISABLE_OPENDRAIN 1
 
 class Net;
 #ifndef DISABLE_OPENDRAIN
