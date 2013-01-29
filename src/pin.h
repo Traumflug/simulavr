@@ -82,7 +82,7 @@ class Pin {
 
         Pin(void); //!< common constructor, initial output state is tristate
         Pin(const Pin& p); //!< copy constructor, copy values but no refs to Net or HWPort
-#ifndef DISABLE_OPENDRAIN
+#ifndef XXX_DISABLE_OPENDRAIN
         Pin(const OpenDrain &od); //!< copy constructor, if we take values from OpenDrain pin
 #endif
         Pin(T_Pinstate ps); //!< copy constructor from pin state
@@ -123,19 +123,11 @@ class Pin {
 //! Open drain Pin class, a special pin with open drain behavior
 class OpenDrain: public Pin {
     protected:
-        Pin *pin;
+        Pin *pin;        // the connected pin, which control input
 
     public:
-        OpenDrain(Pin *p) { pin=p;}
-#ifndef SWIG
-        virtual operator bool() const;
-        virtual Pin operator+ (const Pin& p);
-        virtual Pin operator+= (const Pin& p);
-#endif
+        OpenDrain(Pin *p);
         virtual Pin GetPin();
-        void RegisterNet(Net *n) { pin->RegisterNet(n);}
-        virtual ~OpenDrain() {}
-        void SetInState ( const Pin &p) { pin->SetInState(*pin); } // mirror out to in value
 };
 
 #endif

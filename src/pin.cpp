@@ -333,29 +333,17 @@ Pin Pin::operator+ (const Pin& p) {
 
 #ifndef DISABLE_OPENDRAIN
 
-Pin OpenDrain::operator+= (const Pin& p) {
-    *pin= *this+p;
-    return *this;
-}
-
 Pin OpenDrain::GetPin() {
-    bool res=(bool) *pin;
-    if (res==0) return Pin(TRISTATE);
-    else return Pin(LOW); 
+    // get back state of output side
+    bool input = (bool)*pin;
+    if(input)
+        return Pin(LOW);
+    else
+        return Pin(TRISTATE);
 }
 
-Pin OpenDrain::operator +(const Pin &p) {
-    Pin dummy; 
-    bool parent=(bool)*pin;
-    if (parent==0) dummy=Pin(TRISTATE);    //if the result 
-    else dummy=Pin(LOW);
-
-    return dummy+p;
-}
-
-OpenDrain::operator bool() const
-{ 
-    return 0;
+OpenDrain::OpenDrain(Pin *p) {
+    pin = p;
 }
 
 #endif
