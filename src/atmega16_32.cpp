@@ -73,7 +73,7 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
                                              unsigned flash_bytes,
                                              unsigned ee_bytes,
                                              unsigned nrww_start,
-											 bool atmega16):
+                                             bool atmega16):
     AvrDevice(64 ,          // I/O space above General Purpose Registers
               ram_bytes,    // RAM size
               0,            // External RAM size
