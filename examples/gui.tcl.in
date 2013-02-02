@@ -381,6 +381,8 @@ class SerialRx {
                 __DOUBLE_QUOTE__ { $win.$objname.rx.text insert end "\"" }
                 __SINGLE_QUOTE__ { $win.$objname.rx.text insert end "\'" }
                 __DOLLAR__ { $win.$objname.rx.text insert end "\'"  }
+                __COMMA__ { $win.$objname.rx.text insert end ";" }
+                __MINUS__ { $win.$objname.rx.text insert end "-" }
 
                 default { $win.$objname.rx.text insert end $c }
             }

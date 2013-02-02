@@ -181,6 +181,7 @@ void SerialRx::CharReceived(unsigned char c){
             case ',': os << "__COMMA__" ; break;
             case 0x27: os << "__SINGLE_QUOTE__" ; break;
             case '$': os << "__DOLLAR__"; break;
+            case '-': os << "__MINUS__"; break;
             default: 
                       if ( isprint(c) )
                       {
