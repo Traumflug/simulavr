@@ -105,6 +105,72 @@ class GPIORegister: public RWMemoryMember, public Hardware {
         unsigned char value;
 };
 
+//! Implement CLKPR register
+class CLKPRRegister: public RWMemoryMember, public Hardware {
+
+    public:
+        CLKPRRegister(AvrDevice *core,
+                      TraceValueRegister *registry);
+
+        // from Hardware
+        void Reset(void);
+        unsigned int CpuCycle(void);
+
+    protected:
+        unsigned char get() const { return value; }
+        void set(unsigned char v);
+
+    private:
+        AvrDevice *_core;
+        unsigned char value;
+        unsigned char activate;
+};
+
+//! Implement XDIV register
+class XDIVRegister: public RWMemoryMember, public Hardware {
+
+    public:
+        XDIVRegister(AvrDevice *core,
+                     TraceValueRegister *registry);
+
+        // from Hardware
+        void Reset(void) { value = 0; }
+
+    protected:
+        unsigned char get() const { return value; }
+        void set(unsigned char v);
+
+    private:
+        unsigned char value;
+};
+
+//! Implement OSCCAL register
+class OSCCALRegister: public RWMemoryMember, public Hardware {
+
+    public:
+        // select type of oscillator, see AVR053 application note!
+        enum {
+            OSCCAL_V3 = 0, //!< oscillator version 3.x and older, 8bit, one range
+            OSCCAL_V4 = 1, //!< oscillator version 4.x, 7bit, one range
+            OSCCAL_V5 = 2  //!< oscillator version 5.x, 8bit, two ranges
+        };
+
+        OSCCALRegister(AvrDevice *core,
+                       TraceValueRegister *registry,
+                       int cal);
+
+        // from Hardware
+        void Reset(void);
+
+    protected:
+        unsigned char get() const { return value; }
+        void set(unsigned char v);
+
+    private:
+        unsigned char value;
+        int cal_type;
+};
+
 //! One byte in any AVR RAM
 /*! Allows clean read and write accesses and simply has one stored byte. */
 class RAM : public RWMemoryMember {
@@ -245,6 +311,10 @@ class IOSpecialRegClient {
         //! @param v the internal saved register value (but maybe changed by other clients)
         //! @return v, if nothing is changed or your changed value
         virtual unsigned char get_from_client(const IOSpecialReg* reg, unsigned char v)=0;
+
+    public:
+        virtual ~IOSpecialRegClient() {}
+
 };
 
 //! IO register, which holds configuration for more than one hardware unit

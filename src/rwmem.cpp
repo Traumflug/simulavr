@@ -29,6 +29,8 @@
  * io-data space, internal and external sram
  */
 
+#include <cstdio>
+
 #include "avrerror.h"
 #include "traceval.h"
 #include "avrdevice.h"
@@ -80,14 +82,113 @@ unsigned char RWMemoryMember::operator=(const RWMemoryMember &mm) {
     return v;
 }
 
-
 RWMemoryMember::~RWMemoryMember() {
     if (tv)
         delete tv;
 }
 
+CLKPRRegister::CLKPRRegister(AvrDevice *core,
+                             TraceValueRegister *registry):
+        Hardware(core),
+        _core(core),
+        RWMemoryMember(registry, "CLKPR") {
+    if(_core->fuses->GetFuseBit(AvrFuses::FB_CKDIV8))
+        value = 3;
+    else
+        value = 0;
+    activate = 0;
+
+    // connect to core to get core cycles
+    core->AddToCycleList(this);
+}
+
+void CLKPRRegister::Reset(void) {
+    if(_core->fuses->GetFuseBit(AvrFuses::FB_CKDIV8))
+        value = 3;
+    else
+        value = 0;
+    activate = 0;
+}
+
+unsigned int CLKPRRegister::CpuCycle(void) {
+    // control clock set activation
+    if(activate > 0) {
+        activate--;
+        value &= 0x7f; // reset CLKPCE, if set
+    }
+    return 0;
+}
+
+void CLKPRRegister::set(unsigned char v) {
+    if(v == 0x80) {
+        // set activation period
+        if(activate == 0) activate = 4;
+    } else if((v & 0x80) == 0) {
+        if(activate > 0) {
+            string buf = "<invalid>";
+            unsigned char i = v & 0x0f;
+            if(i <= 8)
+                buf = "CKx" + int2str(1 << i);
+            // set clock prescaler
+            avr_warning("CLKPR: change clock prescaler to %s (0x%x)", buf.c_str(), i);
+        }
+    }
+    value = v;
+}
+
+XDIVRegister::XDIVRegister(AvrDevice *core,
+                             TraceValueRegister *registry):
+        Hardware(core),
+        RWMemoryMember(registry, "XDIV") {
+    Reset();
+}
+
+void XDIVRegister::set(unsigned char v) {
+    bool old_enbl = (value & 0x80) == 0x80, new_enbl = (v & 0x80) == 0x80;
+    if(new_enbl) {
+        if(!old_enbl) {
+            // enable clock divider
+            avr_warning("XDIV: clock divider enabled, CKx%d", 129 - (v & 0x7f));
+            // if XDIVEN == 1, XDIV[6:0] are only changeable, if XDIVEN == 0 before!
+            value = v;
+        }
+    } else {
+        if(old_enbl)
+            // disable clock divider
+            avr_warning("XDIV: clock divider disabled, CKx1");
+        value = v;
+    }
+}
+
+OSCCALRegister::OSCCALRegister(AvrDevice *core,
+                             TraceValueRegister *registry,
+                             int cal):
+        Hardware(core),
+        RWMemoryMember(registry, "OSCCAL"),
+        cal_type(cal){
+    Reset();
+}
+
+void OSCCALRegister::Reset(void) {
+    // set factory calibration value, the used value is just a interpolation from datasheet!
+    // The real value could differ from device to device.
+    if(cal_type == OSCCAL_V3)
+        value = 85;
+    else
+        value = 42;
+}
+
+void OSCCALRegister::set(unsigned char v) {
+    if(cal_type == OSCCAL_V4)
+        v &= 0x7f;
+    if(value != v)
+        avr_warning("OSCCAL: change oscillator calibration value to 0x%x", v);
+    value = v;
+}
+
 RAM::RAM(TraceValueCoreRegister *_reg, const std::string &name, const size_t number, const size_t maxsize) {
     corereg = _reg;
+    value = 0xaa;
     if(name.size()) {
         tv = new TraceValue(8, corereg->GetTraceValuePrefix() + name, number);
         if(!corereg) {
@@ -111,8 +212,8 @@ InvalidMem::InvalidMem(AvrDevice* _c, int _a):
 unsigned char InvalidMem::get() const {
     string s = "Invalid read access from IO[0x" + int2hex(addr) + "], PC=0x" + int2hex(core->PC * 2);
     if(core->abortOnInvalidAccess)
-        avr_error(s.c_str());
-    avr_warning(s.c_str());
+        avr_error("%s", s.c_str());
+    avr_warning("%s", s.c_str());
     return 0;
 }
 
@@ -120,23 +221,21 @@ void InvalidMem::set(unsigned char c) {
     string s = "Invalid write access to IO[0x" + int2hex(addr) +
         "]=0x" + int2hex(c) + ", PC=0x" + int2hex(core->PC * 2);
     if(core->abortOnInvalidAccess)
-        avr_error(s.c_str());
-    avr_warning(s.c_str());
+        avr_error("%s", s.c_str());
+    avr_warning("%s", s.c_str());
 }
 
 NotSimulatedRegister::NotSimulatedRegister(const char * message_on_access_)
     : message_on_access(message_on_access_)  {}
 
 unsigned char NotSimulatedRegister::get() const {
-    avr_warning(message_on_access);
+    avr_warning("%s", message_on_access);
     return 0;
 }
 
 void NotSimulatedRegister::set(unsigned char c) {
-    avr_warning(message_on_access);
+    avr_warning("%s", message_on_access);
 }
-
-
 
 IOSpecialReg::IOSpecialReg(TraceValueRegister *registry, const std::string &name):
     RWMemoryMember(registry, name)
@@ -157,3 +256,4 @@ void IOSpecialReg::set(unsigned char val) {
     value = val;
 }
 
+// EOF

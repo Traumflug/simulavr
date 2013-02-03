@@ -415,6 +415,7 @@ int main(int argc, char *argv[]) {
     
     if(filename != "unknown" ) {
         dev1->Load(filename.c_str());
+        dev1->Reset(); // reset after load data from file to activate fuses and lockbits
     }
     
     //if we have a file we can check out for termination lines.

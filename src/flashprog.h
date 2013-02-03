@@ -110,6 +110,10 @@ class AvrFuses {
         int valueBOOTSZ;        //!< value of BOOTSZ fuse bits
 
     public:
+        enum {
+            FB_CKDIV8 = 7   //!< lfuse: CKDIV8 bit
+        };
+
         AvrFuses(void);
         //! Configure fuses
         void SetFuseConfiguration(int size, unsigned long defvalue);
@@ -117,6 +121,8 @@ class AvrFuses {
         bool LoadFuses(const unsigned char *buffer, int size);
         //! Get fuse byte by index
         unsigned char GetFuseByte(int index) { return (fuseBits >> (index * 8)) & 0xff; }
+        //! Get fuse bit by bit index, starts with 0 on lfuse bit 0, bit = 0 means true!
+        bool GetFuseBit(int index) { return !(bool)((fuseBits >> index) & 0x1); }
         //! Get count of fuse bytes available
         int GetFuseByteSize(void) { return (fuseBitsSize / 8) + 1; }
         //! Set bootloader support configuration
