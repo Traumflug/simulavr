@@ -78,6 +78,8 @@ protected:
     GPIORegister*       gpior0_reg;  //!< general purpose IO register
     GPIORegister*       gpior1_reg;  //!< general purpose IO register
     GPIORegister*       gpior2_reg;  //!< general purpose IO register
+    CLKPRRegister*      clkpr_reg;   //!< CLKPR IO register
+    OSCCALRegister*     osccal_reg;  //!< OSCCAL IO register
 
 public:
     AvrDevice_atmega1284Abase(unsigned ram_bytes, unsigned flash_bytes,

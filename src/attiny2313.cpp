@@ -57,6 +57,8 @@ AvrDevice_attiny2313::~AvrDevice_attiny2313() {
     delete portd;
     delete portb;
     delete porta;
+    delete osccal_reg;
+    delete clkpr_reg;
     delete stack;
     delete eeprom;
     delete irqSystem;
@@ -70,9 +72,12 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
 {
     flagJMPInstructions = false;
     flagMULInstructions = false;
+    fuses->SetFuseConfiguration(17, 0xffdf64);
     irqSystem = new HWIrqSystem(this, 2, 19); //2 bytes per vector, 19 vectors
     eeprom = new HWEeprom(this, irqSystem, 128, 17, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 8);
+    clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
+    osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V4);
     porta = new HWPort(this, "A", true, 3);
     portb = new HWPort(this, "B", true);
     portd = new HWPort(this, "D", true, 7);
@@ -145,7 +150,7 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     //rw[0x54] MCUSR
     rw[0x53]= & timer0->tccrb_reg;
     rw[0x52]= & timer0->tcnt_reg;
-    //rw[0x51] OSCCAL
+    rw[0x51]= osccal_reg;
     rw[0x50]= & timer0->tccra_reg;
     rw[0x4f]= & timer1->tccra_reg; 
     rw[0x4e]= & timer1->tccrb_reg;
@@ -156,7 +161,7 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     rw[0x49]= & timer1->ocrb_h_reg;
     rw[0x48]= & timer1->ocrb_l_reg;
     //rw[0x47] reserved
-    //rw[0x46] CLKPR
+    rw[0x46]= clkpr_reg;
     rw[0x45]= & timer1->icr_h_reg;
     rw[0x44]= & timer1->icr_l_reg;
     rw[0x43]= gtccr_reg;

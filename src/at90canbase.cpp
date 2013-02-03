@@ -35,31 +35,36 @@ AVR_REGISTER(at90can64, AvrDevice_at90can64);
 AVR_REGISTER(at90can128, AvrDevice_at90can128);
 
 AvrDevice_at90canbase::~AvrDevice_at90canbase() {
-    delete extirq01;
-    delete eicra_reg;
-    delete eicrb_reg;
-    delete eimsk_reg;
-    delete eifr_reg;
-    delete ad;
-    delete spi;
-    delete acomp;
-    delete usart0;
     delete usart1;
-    delete timerIrq0;
-    delete timer0;
-    delete inputCapture1;
-    delete timerIrq1;
-    delete timer1;
-    delete timerIrq2;
-    delete timer2;
-
+    delete usart0;
+    delete acomp;
+    delete wado;
+    delete spi;
+    delete ad;
+    delete gpior2_reg;
+    delete gpior1_reg;
+    delete gpior0_reg;
+    delete timer3;
     delete inputCapture3;
     delete timerIrq3;
-    delete timer3;
-
-    delete gpior0_reg;
-    delete gpior1_reg;
-    delete gpior2_reg;
+    delete timer2;
+    delete timerIrq2;
+    delete timer1;
+    delete inputCapture1;
+    delete timerIrq1;
+    delete timer0;
+    delete timerIrq0;
+    delete extirq01;
+    delete eifr_reg;
+    delete eimsk_reg;
+    delete eicrb_reg;
+    delete eicra_reg;
+    delete rampz;
+    delete osccal_reg;
+    delete clkpr_reg;
+    delete stack;
+    delete eeprom;
+    delete irqSystem;
 }
 
 AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
@@ -93,10 +98,13 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
           &portf.GetPin(7))
 {
     flagELPMInstructions = true;
+    fuses->SetFuseConfiguration(20, 0xff9962);
     irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 37);
 
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 26, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 16);
+    clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
+    osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V4);
 
     RegisterPin("AREF", &aref);
     rampz = new AddressExtensionRegister(this, "RAMPZ", 1);
@@ -291,13 +299,12 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
     rw[0x6F]= & timerIrq1->timsk_reg;
     rw[0x6E]= & timerIrq0->timsk_reg;
     /* 0x6b-0x6d Reserved */
-    /* rw[0x6A]= eicrb_reg; XXX */
+    rw[0x6A]= eicrb_reg;
     rw[0x69]= eicra_reg;
-    /*rw[0x68]= pcicr_reg; XXX */
     /* 0x67-0x68 Reserved */
-    /* 0x66 OSCCAL TODO */
+    rw[0x66]= osccal_reg;
     /* 0x62-0x65 Reserved */
-    /* 0x61 CLKPR TODO */
+    rw[0x61]= clkpr_reg;
     rw[0x60]= & wado->wdtcr_reg;
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;

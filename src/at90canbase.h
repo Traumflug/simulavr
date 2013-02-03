@@ -86,6 +86,8 @@ class AvrDevice_at90canbase: public AvrDevice {
         GPIORegister* gpior0_reg;
         GPIORegister* gpior1_reg;
         GPIORegister* gpior2_reg;
+        CLKPRRegister* clkpr_reg;       //!< CLKPR IO register
+        OSCCALRegister *osccal_reg;     //!< OSCCAL IO register
         
     public:
         

@@ -64,6 +64,7 @@ AvrDevice_atmega16_32::~AvrDevice_atmega16_32() {
     delete portc;
     delete portb;
     delete porta;
+    delete osccal_reg;
     delete stack;
     delete eeprom;
     delete irqSystem;
@@ -80,9 +81,11 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
               flash_bytes), // Flash Size
     aref()
 {
+    fuses->SetFuseConfiguration(16, 0x99e1);
     irqSystem = new HWIrqSystem(this, 4, 21); //4 bytes per vector, 21 vectors
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, atmega16 ? 15 : 17);
     stack = new HWStackSram(this, atmega16 ? 11 : 12);
+    osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V3);
     porta = new HWPort(this, "A");
     portb = new HWPort(this, "B");
     portc = new HWPort(this, "C");
@@ -177,7 +180,7 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     rw[0x54] = mcucsr_reg;
     rw[0x53]= & timer0->tccr_reg;
     rw[0x52]= & timer0->tcnt_reg;
-    //rw[0x51] OSCCAL/OCDR
+    rw[0x51]= osccal_reg; // Attention! OCDR register isn't simulated!
     rw[0x50]= sfior_reg;
     rw[0x4f]= & timer1->tccra_reg; 
     rw[0x4e]= & timer1->tccrb_reg;

@@ -44,6 +44,8 @@ class AvrDevice_attinyX5: public AvrDevice {
         GPIORegister *gpior0_reg;       //!< GPIOR0 Register
         GPIORegister *gpior1_reg;       //!< GPIOR1 Register
         GPIORegister *gpior2_reg;       //!< GPIOR2 Register
+        CLKPRRegister *clkpr_reg;       //!< CLKPR IO register
+        OSCCALRegister *osccal_reg;     //!< OSCCAL IO register
 
         IOSpecialReg      *gtccr_reg;   //!< GTCCR IO register
         HWPrescaler       *prescaler0;  //!< prescaler unit for timer 0 (10 bit w. reset/sync and only sys clock)

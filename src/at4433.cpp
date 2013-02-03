@@ -42,6 +42,7 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
     flagJMPInstructions = false;
     flagMULInstructions = false;
     flagMOVWInstruction = false;
+    fuses->SetFuseConfiguration(6, 0xda);
     irqSystem = new HWIrqSystem(this, 2, 14);
     eeprom= new HWEeprom(this, irqSystem, 256, 12); //we use a eeprom with irq here
     stack = new HWStackSram(this, 8);

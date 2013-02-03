@@ -47,6 +47,7 @@ class AvrDevice_atmega8: public AvrDevice {
         IOSpecialReg *gifr_reg;         //!< GIFR IO register
         IOSpecialReg *mcucr_reg;        //!< MCUCR IO register
         IOSpecialReg *mcucsr_reg;       //!< MCUCSR IO register
+        OSCCALRegister *osccal_reg;     //!< OSCCAL IO register
 
         HWAdmux *admux;                 //!< ADC multiplexer unit
         HWAd *ad;                       //!< ADC unit

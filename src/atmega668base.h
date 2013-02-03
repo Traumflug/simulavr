@@ -75,6 +75,8 @@ class AvrDevice_atmega668base: public AvrDevice {
         GPIORegister*       gpior0_reg;  //!< general purpose IO register
         GPIORegister*       gpior1_reg;  //!< general purpose IO register
         GPIORegister*       gpior2_reg;  //!< general purpose IO register
+        CLKPRRegister*      clkpr_reg;   //!< CLKPR IO register
+        OSCCALRegister*     osccal_reg;  //!< OSCCAL IO register
 
     public:
         

@@ -57,6 +57,8 @@ class AvrDevice_atmega128: public AvrDevice {
         IOSpecialReg *eicrb_reg;        //!< EICRB IO register
         IOSpecialReg *eimsk_reg;        //!< EIMSK IO register
         IOSpecialReg *eifr_reg;         //!< EIFR IO register
+        XDIVRegister *xdiv_reg;         //!< XDIV IO register
+        OSCCALRegister *osccal_reg;     //!< OSCCAL IO register
 
         HWAdmux *admux;                 //!< adc multiplexer unit
         HWAd *ad;                       //!< adc unit

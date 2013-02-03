@@ -42,6 +42,7 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
     flagJMPInstructions = false;
     flagMULInstructions = false;
     flagMOVWInstruction = false;
+    fuses->SetFuseConfiguration(2, 0xdf);
     irqSystem = new HWIrqSystem(this, 2, 13);
     eeprom= new HWEeprom(this, NULL, 512, 0);
     stack = new HWStackSram(this, 16);

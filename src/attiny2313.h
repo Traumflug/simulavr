@@ -47,6 +47,8 @@ class AvrDevice_attiny2313: public AvrDevice {
         GPIORegister *gpior0_reg;       //!< GPIOR0 Register
         GPIORegister *gpior1_reg;       //!< GPIOR1 Register
         GPIORegister *gpior2_reg;       //!< GPIOR2 Register
+        CLKPRRegister *clkpr_reg;       //!< CLKPR IO register
+        OSCCALRegister *osccal_reg;     //!< OSCCAL IO register
         
         ExternalIRQHandler *extirq;     //!< external interrupt support
         IOSpecialReg *gimsk_reg;        //!< GIMSK IO register

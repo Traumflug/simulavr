@@ -62,6 +62,8 @@ AvrDevice_atmega1284Abase::~AvrDevice_atmega1284Abase() {
     delete eifr_reg;
     delete eimsk_reg;
     delete eicra_reg;
+    delete osccal_reg;
+    delete clkpr_reg;
     delete stack;
     delete eeprom;
     delete irqSystem;
@@ -94,11 +96,14 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
           &porta.GetPin(7)) // TODO: Differential inputs, 1.1V ref, GND input
 { 
     flagELPMInstructions = true;
+    fuses->SetFuseConfiguration(19, 0xff9962);
 
     irqSystem = new HWIrqSystem(this, 4, 31);
 
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 25, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 16);
+    clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
+    osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
 
     RegisterPin("AREF", &aref);
     rampz = new AddressExtensionRegister(this, "RAMPZ", 1);
@@ -272,12 +277,12 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
     rw[0x69]= eicra_reg;
     rw[0x68]= pcicr_reg;
     // 0x67 reserved
-    rw[0x66]= new NotSimulatedRegister("MCU register OSCCAL not simulated");
+    rw[0x66]= osccal_reg;
     // 0x65 reserved
     rw[0x64]= new NotSimulatedRegister("MCU register PRR not simulated");
     // 0x63 reserved
     // 0x62 reserved
-    rw[0x61]= new NotSimulatedRegister("MCU register CLKPR not simulated");
+    rw[0x61]= clkpr_reg;
     rw[0x60]= new NotSimulatedRegister("MCU register WDTCSR not simulated");
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;

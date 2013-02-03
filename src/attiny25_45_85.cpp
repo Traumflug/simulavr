@@ -52,6 +52,8 @@ AvrDevice_attinyX5::~AvrDevice_attinyX5() {
     delete gpior1_reg;
     delete gpior0_reg;
     delete portb;
+    delete osccal_reg;
+    delete clkpr_reg;
     delete stack;
     delete eeprom;
     delete irqSystem;
@@ -67,9 +69,12 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
 {
     flagJMPInstructions = false;
     flagMULInstructions = false;
+    fuses->SetFuseConfiguration(17, 0xffdf62);
     irqSystem = new HWIrqSystem(this, 2, 15); // 2 bytes per vector, 15 vectors
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 6, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 12);
+    clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
+    osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
     
     portb = new HWPort(this, "B", true, 6);
 
@@ -126,7 +131,7 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     //rw[0x54] reserved
     rw[0x53]= & timer0->tccrb_reg;
     rw[0x52]= & timer0->tcnt_reg;
-    //rw[0x51] reserved
+    rw[0x51]= osccal_reg;
     rw[0x50]= & timer1->tccr_reg;
 
     rw[0x4f]= & timer1->tcnt_reg;
@@ -138,7 +143,7 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     rw[0x49]= & timer0->ocra_reg;
     rw[0x48]= & timer0->ocrb_reg;
     rw[0x47]= pllcsr_reg;
-    //rw[0x46] reserved
+    rw[0x46]= clkpr_reg;
     rw[0x45]= & timer1->dt1a_reg;
     rw[0x44]= & timer1->dt1b_reg;
     rw[0x43]= & timer1->dtps1_reg;

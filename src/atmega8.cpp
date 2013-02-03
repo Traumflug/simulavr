@@ -42,10 +42,12 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
             8 * 1024), // Flash Size
     aref()
 {
+    fuses->SetFuseConfiguration(16, 0xd9e1);
     irqSystem = new HWIrqSystem(this, 2, 19); //2 bytes per vector, 19 vectors
     eeprom = new HWEeprom(this, irqSystem, 512, 15);
     HWStackSram * stack_ram = new HWStackSram(this, 11); // Stack Pointer data space used 11 Bit wide.
     stack = stack_ram;
+    osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V3);
     portb = new HWPort(this, "B");
     portc = new HWPort(this, "C");
     portd = new HWPort(this, "D");
@@ -194,7 +196,7 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
     rw[0x54] = mcucsr_reg;
     rw[0x53] = &timer0->tccr_reg;
     rw[0x52] = &timer0->tcnt_reg;
-//  rw[0x51] OSCCAL/OCDR
+    rw[0x51] = osccal_reg;
     rw[0x50] = sfior_reg;
     rw[0x4f] = &timer1->tccra_reg;
     rw[0x4e] = &timer1->tccrb_reg;
@@ -271,6 +273,7 @@ AvrDevice_atmega8::~AvrDevice_atmega8() {
     delete portd;
     delete portc;
     delete portb;
+    delete osccal_reg;
     delete stack;
     delete eeprom;
     delete irqSystem;

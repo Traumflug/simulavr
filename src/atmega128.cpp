@@ -70,6 +70,8 @@ AvrDevice_atmega128::~AvrDevice_atmega128() {
     delete portc;
     delete portb;
     delete porta;
+    delete osccal_reg;
+    delete xdiv_reg;
     delete stack;
     delete eeprom;
     delete irqSystem;
@@ -80,9 +82,12 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     aref()
 {
     flagELPMInstructions = true;
+    fuses->SetFuseConfiguration(18, 0xfd99e1);
     irqSystem = new HWIrqSystem(this, 4, 35); //4 bytes per vector, 35 vectors
     eeprom = new HWEeprom( this, irqSystem, 4096, 22); 
     stack = new HWStackSram(this, 16);
+    xdiv_reg = new XDIVRegister(this, &coreTraceGroup);
+    osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V3);
     porta = new HWPort(this, "A");
     portb = new HWPort(this, "B");
     portc = new HWPort(this, "C");
@@ -223,6 +228,8 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     rw[0x79]= & timer1->ocrc_h_reg;
     rw[0x78]= & timer1->ocrc_l_reg;
     
+    rw[0x6f]= osccal_reg;
+
     rw[0x6a]= eicra_reg;
     
     rw[0x65]= & portg->port_reg;
@@ -235,7 +242,7 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
-    
+    rw[0x5c]= xdiv_reg;
     rw[0x5b]= & rampz->ext_reg;
 
     rw[0x5a]= eicrb_reg;

@@ -60,6 +60,8 @@ AvrDevice_atmega668base::~AvrDevice_atmega668base() {
     delete eifr_reg;
     delete eimsk_reg;
     delete eicra_reg;
+    delete osccal_reg;
+    delete clkpr_reg;
     delete stack;
     delete eeprom;
     delete irqSystem;
@@ -93,10 +95,22 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
           &adc7)
 { 
     flagJMPInstructions = (flash_bytes > 8U * 1024U) ? true : false;
+    if(flash_bytes > 4U * 1024U) {
+        if(flash_bytes > 16U * 1024U)
+            // atmega328
+            fuses->SetFuseConfiguration(19, 0xffd962);
+        else
+            // atmega88, atmega168
+            fuses->SetFuseConfiguration(19, 0xf9df62);
+    } else
+        // atmega48
+        fuses->SetFuseConfiguration(17, 0xffdf62);
     irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 26);
     
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 23, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 16);
+    clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
+    osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
 
     RegisterPin("AREF", &aref);
     RegisterPin("ADC6", &adc6);
@@ -249,12 +263,12 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x69]= eicra_reg;
     rw[0x68]= pcicr_reg;
     // 0x67 reserved
-    rw[0x66]= new NotSimulatedRegister("MCU register OSCCAL not simulated");
+    rw[0x66]= osccal_reg;
     // 0x65 reserved
     rw[0x64]= new NotSimulatedRegister("MCU register PRR not simulated");
     // 0x63 reserved
     // 0x62 reserved
-    rw[0x61]= new NotSimulatedRegister("MCU register CLKPR not simulated");
+    rw[0x61]= clkpr_reg;
     rw[0x60]= new NotSimulatedRegister("MCU register WDTCSR not simulated");
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
