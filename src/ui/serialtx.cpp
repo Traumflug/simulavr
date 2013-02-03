@@ -51,7 +51,7 @@ Pin* SerialTxBuffered::GetPin(const char* name)
 }
 
 int SerialTxBuffered::Step(
-  bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns)
+        bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns)
 {
     switch (txState) {
         case TX_SEND_STARTBIT:
@@ -82,7 +82,7 @@ int SerialTxBuffered::Step(
             //all we measures are in ns !;
             *timeToNextStepIn_ns=(SystemClockOffset)1e9/baudrate;
             break;
-            
+
         case TX_STOPPING:
             if (inputBuffer.size()>0) { //another char to send!
                 txState=TX_SEND_STARTBIT;
@@ -140,18 +140,25 @@ SerialTx::SerialTx(UserInterface *ui, const char *name, const char *baseWindow)
 }
 
 void SerialTx::SetNewValueFromUi(const string &s) {
+    cout << "SerialTx::SetNewValueFromUi >" << s << "<" << endl;
     if ( receiveInHex ) {
-       unsigned char value;
-       bool          rc;
-       rc = StringToUnsignedChar( s.c_str(), &value, NULL, 16 );
-       if ( !rc ) {
-         cerr << "SerialTx::SetNewValueFromUi:: bad conversion" << endl;
-       } else {
-         // cerr << "SerialTx::Send " << hex << (unsigned int) value << endl;
-         Send(value);
-       }
+        unsigned char value;
+        bool          rc;
+        rc = StringToUnsignedChar( s.c_str(), &value, NULL, 16 );
+        if ( !rc ) {
+            cerr << "SerialTx::SetNewValueFromUi:: bad conversion" << endl;
+        } else {
+            // cerr << "SerialTx::Send " << hex << (unsigned int) value << endl;
+            Send(value);
+        }
     } else {
-      for(int i=0; i < s.length(); i++)
-        Send(s[i]);
+        if (s == "__SPACE__")  { Send(' '); }
+        else 
+        {
+            for(int i=0; i < s.length(); i++)
+            {
+                Send(s[i]);
+            }
+        }
     }
 }

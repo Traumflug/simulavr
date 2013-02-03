@@ -33,7 +33,13 @@
 /*! \todo OpenDrain class is disabled for the moment. I think, this functionality,
   to "wrap" a normal pin isn't right implemented and could be made more clear.
   And maybe it is useless, because to handle easily by normal Pin class. */
-#define DISABLE_OPENDRAIN 1
+
+/*! I enable this functionality again, cause I need it :-)
+  It is maybe unclear how it works but it works in my use case. So please leave
+  the code until it is replaced and the unit tests still work.
+  If in doubt: please feel free to ask me ( Klaus Rudolph)
+  */
+//#define DISABLE_OPENDRAIN 1
 
 class Net;
 #ifndef DISABLE_OPENDRAIN
@@ -76,7 +82,7 @@ class Pin {
 
         Pin(void); //!< common constructor, initial output state is tristate
         Pin(const Pin& p); //!< copy constructor, copy values but no refs to Net or HWPort
-#ifndef DISABLE_OPENDRAIN
+#ifndef XXX_DISABLE_OPENDRAIN
         Pin(const OpenDrain &od); //!< copy constructor, if we take values from OpenDrain pin
 #endif
         Pin(T_Pinstate ps); //!< copy constructor from pin state
@@ -117,18 +123,11 @@ class Pin {
 //! Open drain Pin class, a special pin with open drain behavior
 class OpenDrain: public Pin {
     protected:
-        Pin *pin;
+        Pin *pin;        // the connected pin, which control input
 
     public:
-        OpenDrain(Pin *p) { pin=p;}
-#ifndef SWIG
-        virtual operator bool() const;
-        virtual Pin operator+ (const Pin& p);
-        virtual Pin operator+= (const Pin& p);
-#endif
+        OpenDrain(Pin *p);
         virtual Pin GetPin();
-        void RegisterNet(Net *n) { pin->RegisterNet(n);}
-        virtual ~OpenDrain() {}
 };
 
 #endif

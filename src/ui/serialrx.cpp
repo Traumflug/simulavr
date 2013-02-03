@@ -151,38 +151,50 @@ long SerialRxBuffered::Size(){
 
 
 SerialRx::SerialRx(UserInterface *_ui, const char *_name, const char *baseWindow):
-ui(_ui), name(_name)  {
-    rx.RegisterCallback(this);
+    ui(_ui), name(_name)  {
+        rx.RegisterCallback(this);
 
-    ostringstream os;
-    os << "create SerialRx " << name  << " " << baseWindow << endl;
-    ui->Write(os.str());
-    ui->AddExternalType(name, this);
-    Reset();
-
-    /*
-    ui->SendUiNewState(name, 't');
-    ui->SendUiNewState(name, 'e');
-    ui->SendUiNewState(name, 's');
-    ui->SendUiNewState(name, 't');
-    */
-}
+        ostringstream os;
+        os << "create SerialRx " << name  << " " << baseWindow << endl;
+        ui->Write(os.str());
+        ui->AddExternalType(name, this);
+        Reset();
+    }
 
 void SerialRx::CharReceived(unsigned char c){
     ostringstream os;
 
     os << "set" << " " << name << " ";
-    if (sendInHex) {
+    if (sendInHex) 
+    {
         os << hex << "0x" << (unsigned int)c;
-    } else if (isprint(c)) {
-        if (isspace(c)) {
-            os << '_';
-        } else {
-            os << c;
+    } 
+    else
+    {
+        switch ( c )
+        {
+            case 0x0a: os << "__LF__" ; break;
+            case 0x0d: os << "__CR__" ; break;
+            case ';':  os << "__SEMICOLON__" ; break;
+            case ' ':  os << "__SPACE__" ; break;
+            case 0x22: os << "__DOUBLE_QUOTE__"; break;
+            case ',': os << "__COMMA__" ; break;
+            case 0x27: os << "__SINGLE_QUOTE__" ; break;
+            case '$': os << "__DOLLAR__"; break;
+            case '-': os << "__MINUS__"; break;
+            default: 
+                      if ( isprint(c) )
+                      {
+                          os << c ;
+                      }
+                      else
+                      {
+                          os << hex << "0x" << (unsigned int)c;
+                      }
         }
-    } else {
-        os << "0x" << (unsigned int)c;
+
     }
+
 
     os << endl;
     ui->Write(os.str());

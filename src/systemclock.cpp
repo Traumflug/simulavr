@@ -205,6 +205,7 @@ void SystemClock::ResetClock(void) {
 }
 
 void SystemClock::Endless() {
+    breakMessage = false;        // if we run a second loop, clear break before entering loop
     int steps = 0;
     
     signal(SIGINT, OnBreak);

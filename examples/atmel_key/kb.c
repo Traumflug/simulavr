@@ -36,7 +36,7 @@ void init_kb(void)
     bitcount = 11;
 }
 
-SIGNAL(SIG_INTERRUPT0)
+SIGNAL(INT0_vect)
 {
     static unsigned char data;                // Holds the received scan code
 

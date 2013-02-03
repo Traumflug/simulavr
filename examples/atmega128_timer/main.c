@@ -5,7 +5,7 @@
 volatile int timer2_ticks;
 
 /* Every ~ms */
-ISR(SIG_OUTPUT_COMPARE2)
+ISR(TIMER2_COMP_vect)
 {                               /* Every ~1ms */
    timer2_ticks++;
 }
