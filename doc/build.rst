@@ -82,10 +82,16 @@ configure and run make:
 - gcc (version known to work with 4.4.3, ubuntu 10.04)
 - avr-gcc, avr-binutils, avr-libc (works with 4.3.4, 2.20, 1.6.7, ubuntu 10.04) for creating
   avr programs for examples
-- tcl and tk, needed, if you want to create tcl interface
+- tcl and tk, needed, if you want to create tcl interface, at least version 8.2 (known to
+  work with 8.5)
+- if you want to run tcl examples, then sometimes you need to Itcl package, which has to be
+  compatible with tcl / tk version!
 - python (version >= 2.4.0, known to work with 2.6.5, ubuntu 10.04), needed if you want to
   create python interface, run examples and/or ``make check``, **attention:** not python 3.x,
   see below!
+- if you want to configure and run google test cases in regression test, then you need
+  google test library as source / header files, installed in a available directory. You
+  need at least version 1.6.0.
 
 **Attention:**
 
@@ -128,6 +134,11 @@ of the configure options.
 ``--with-tclconfig``
   If configure tells you it can't find ``tclConfig.sh``, try
   ``--with-tclconfig=/your/path/``.
+
+``--with-gtest``
+  If you want to run google test cases in regression tests, then you have to configure
+  the path, where google test library files are to find, for example:
+  ``--with-gtest=/some/where/gtest-1.6.0``.
 
 ``--enable-maintainer-mode``
   If specified on the configure command, the generated Makefiles will

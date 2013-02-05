@@ -127,6 +127,27 @@ DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN([Simulavr], [simulavr.doxy], )
 
 ####
+# support for google test
+####
+AC_MSG_CHECKING([google test library])
+AC_ARG_WITH([gtest],
+  [AS_HELP_STRING([--with-gtest=path  directory with google test library files])],
+  [if test ! -d ${with_gtest} -o ! -f ${with_gtest}/include/gtest/gtest.h -o ! -f ${with_gtest}/src/gtest.cc ; then
+     AC_MSG_ERROR([(${with_gtest}) is not a directory with google test library files])
+     with_gtest=
+     AC_MSG_RESULT([NOT available])
+   else
+     AC_MSG_RESULT([available])
+   fi
+  ],
+  [with_gtest=
+   AC_MSG_RESULT([NOT configured])
+  ]
+)
+AM_CONDITIONAL([GTEST_USE], [test x"${with_gtest}" != x])
+AC_SUBST([GTEST_LIB_PATH],[${with_gtest}])
+
+####
 # definitions for distcheck
 ####
 ## We have to propagate all the configure flags we want to use when
@@ -152,7 +173,7 @@ AC_CONFIG_FILES([
   Makefile src/Makefile src/hwtimer/Makefile src/cmd/Makefile src/ui/Makefile
   src/python/Makefile src/setup.py doc/Makefile doc/conf.py doc/web/Makefile
   doc/web/conf.py doc/config.texi regress/Makefile regress/modules/Makefile
-  regress/test_opcodes/Makefile regress/avrtest/Makefile
+  regress/test_opcodes/Makefile regress/avrtest/Makefile regress/gtest/Makefile
   regress/timertest/Makefile regress/extinttest/Makefile
   examples/verilog/Makefile examples/Makefile examples/anacomp/Makefile
   examples/atmega48/Makefile examples/atmega128_timer/Makefile
