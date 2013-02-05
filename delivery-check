@@ -111,6 +111,9 @@ function runConfCmd() {
   if [ "$OPT_TCL" = "y" -a "$CONF_WITH_TCL" = "y" -a ! -z "$CONF_TCL_CONFIG" ]; then
     C="$C --with-tclconfig=$CONF_TCL_CONFIG"
   fi
+  if [ ! -z "$CONF_GTEST_PATH" -a -d "$CONF_GTEST_PATH" ]; then
+    C="$C --with-gtest=$CONF_GTEST_PATH"
+  fi
   C="$C --enable-python"
   if [ "$OPT_DOXY" = "y" -a "$CONF_WITH_DOXYGEN" = "y" ]; then
     C="$C --enable-doxygen-doc"
