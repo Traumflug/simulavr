@@ -10,7 +10,8 @@ EXTRA_DIST = timertest.cfg timertest.template timer_16_extn.py timer_16_extp.py 
     timer_16bit_icap.c timer_16bit_normal.py timer_16bit_normal.sig \
     timer_16bit_normal_90.sig timer_8bit.c timer_8bit_ctc.c timer_8bit_ctc.py \
     timer_8bit_ctc.sig timer_8bit_normal.py timer_8bit_normal.sig \
-    timer_8bit_normal_90.sig
+    timer_8bit_normal_90.sig timer_tX5_8bit.c timer_tX5_8bit_ctc.py \
+    timer_tX5_8bit_normal.py timer_tX5_8bit_pwm.py
 
 export PYTHONPATH=$(srcdir)/../modules:$(srcdir)/../../src
 
