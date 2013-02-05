@@ -51,7 +51,8 @@ CLEANFILES = */*.o
 # design under test rules
 if GTEST_USE
 noinst_PROGRAMS = dut
-dut_SOURCES = $(OBJS_UNITTEST) $(GTEST_OBJS)
+dut_SOURCES = $(OBJS_UNITTEST)
+nodist_dut_SOURCES = $(GTEST_OBJS)
 dut_LDADD = -lpthread $(SIMULAVR_LIB) $(AVR_LIBIBERTY_LIB) $(AVR_LIBBFD_LIB) -lz
 dut_DEPENDENCIES = $(SIMULAVR_LIB)
 endif
