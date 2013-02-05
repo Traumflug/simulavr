@@ -42,14 +42,31 @@ fi
 HAVE_TCL_SHELLS=yes
 
 ## Some of the examples include GUIs written in Wish
-AC_PATH_PROGS(TCL_WISH, wish wish8.4 wish8.3 wish8.2 )
+if test ! x"${TCL_VERSION}" = x ; then
+  AC_PATH_PROG(TCL_WISH, [wish${TCL_VERSION}])
+else
+  TCL_WISH=no
+fi
+test "${TCL_WISH}" = no && AC_MSG_WARN([prefered version wish${TCL_VERSION} not found])
+if test "${TCL_WISH}" = no ; then
+  AC_PATH_PROGS(TCL_WISH, wish wish8.5 wish8.4 wish8.3 wish8.2 )
+fi
 test "${TCL_WISH}" = no && AC_MSG_WARN([wish not found])
 AM_CONDITIONAL([HAVE_WISH], [test x$TCL_WISH != x])
 AC_SUBST([TCL_WISH])
 test x$TCL_WISH = x && HAVE_TCL_SHELLS=no
 
 ## Some of the examples include feedback modules written in Tclsh
-AC_PATH_PROG(TCL_SHELL, tclsh )
+if test ! x"${TCL_VERSION}" = x ; then
+  AC_PATH_PROG(TCL_SHELL, [tclsh${TCL_VERSION}])
+else
+  TCL_SHELL=no
+fi
+test "${TCL_SHELL}" = no && AC_MSG_WARN([prefered version tclsh${TCL_VERSION} not found])
+if test "${TCL_SHELL}" = no ; then
+  AC_PATH_PROGS(TCL_SHELL, tclsh tclsh8.5 tclsh8.4 tclsh8.3 tclsh8.2 )
+fi
+test "${TCL_SHELL}" = no && AC_MSG_WARN([tclsh not found])
 AM_CONDITIONAL([HAVE_TCLSH], [test x$TCL_SHELL != x])
 AC_SUBST([TCL_SHELL])
 test x$TCL_SHELL = x && HAVE_TCL_SHELLS=no
