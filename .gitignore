@@ -2,7 +2,7 @@
 *.o
 *.lo
 avr.vpi
-*.in
+Makefile.in
 Debug/
 Release/
 simulavr-*.tar.gz

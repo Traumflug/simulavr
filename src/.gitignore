@@ -7,6 +7,7 @@ avr_AT*.h
 # files created by configure
 Makefile
 config.h
+config.h.in
 
 # files created by make
 simulavr
