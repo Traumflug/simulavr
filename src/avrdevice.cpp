@@ -26,7 +26,6 @@
 #include "avrdevice.h"
 #include "traceval.h"
 #include "helper.h"
-#include "global.h"     //only 2 defines here... please move that sometimes womewhere TODO XXX
 #include "irqsystem.h"  //GetNewPc
 #include "systemclock.h"
 #include "avrerror.h"

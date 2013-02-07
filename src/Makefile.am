@@ -92,10 +92,9 @@ libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz \
 
 pkginclude_HEADERS = \
   adcpin.h application.h at4433.h at8515.h atmega128.h atmega16_32.h attiny2313.h \
-  at90canbase.h atmega8.h attiny25_45_85.h \
-  atmega668base.h atmega1284abase.h avrdevice.h externalirq.h hardware.h helper.h global.h \
-  avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h breakpoint.h string2.h \
-  config_deprecated.h decoder.h externaltype.h flash.h flashprog.h hwdecls.h \
+  at90canbase.h atmega8.h attiny25_45_85.h atmega668base.h atmega1284abase.h avrdevice.h \
+  externalirq.h hardware.h helper.h avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h \
+  string2.h decoder.h externaltype.h flash.h flashprog.h hwdecls.h \
   funktor.h hwacomp.h hwad.h hweeprom.h string2_template.h hwpinchange.h \
   hwport.h hwspi.h hwsreg.h hwstack.h hwuart.h hwwado.h ioregs.h irqsystem.h \
   memory.h net.h pin.h pinatport.h pinnotify.h pinmon.h printable.h rwmem.h \

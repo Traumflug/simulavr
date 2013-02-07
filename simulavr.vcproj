@@ -308,14 +308,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\breakpoint.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\config_deprecated.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\decoder.h"
 				>
 			</File>
@@ -353,10 +345,6 @@
 			</File>
 			<File
 				RelativePath=".\src\getopt\getopt.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\global.h"
 				>
 			</File>
 			<File

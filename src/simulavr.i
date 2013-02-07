@@ -40,6 +40,12 @@
 SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %}
 
+%include "std_vector.i"
+
+namespace std {
+   %template(DWordVector) vector<dword>;
+};
+
 %immutable HWStack::m_ThreadList;
 
 %include "systemclocktypes.h"

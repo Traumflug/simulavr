@@ -33,6 +33,7 @@
 * will be called later. People, please avoid polling. */
 class SimulationMember {
     public:
+        virtual ~SimulationMember() { }
         /// Return nonzero if a breakpoint was hit.
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0)=0;
 };

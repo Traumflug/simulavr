@@ -17,8 +17,6 @@
   #include "memory.h"
   #include "flash.h"
   #include "hweeprom.h"
-  #include "breakpoint.h"
-  #include "global.h"
   #include "avrerror.h"
   #include "pysimulationmember.h"
   #include "hwport.h"
@@ -145,7 +143,6 @@ namespace std {
 
 %include "flash.h"
 %include "hweeprom.h"
-%include "breakpoint.h"
 
 %extend Breakpoints {
   void RemoveBreakpoint(unsigned bp) {
@@ -157,7 +154,6 @@ namespace std {
   }
 }
 
-%include "global.h"
 %include "avrerror.h"
 
 // to get devices registered (automatically on linux, but necessary on windows)

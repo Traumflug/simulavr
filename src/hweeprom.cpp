@@ -24,7 +24,6 @@
  */
 
 #include "hweeprom.h"
-#include "global.h"
 #include "avrdevice.h"
 #include "systemclock.h"
 #include "irqsystem.h"

@@ -30,12 +30,22 @@
 #include "simulationmember.h"
 #include "pin.h"
 #include "net.h"
-#include "breakpoint.h"
 #include "traceval.h"
 #include "flashprog.h"
 
 #include <string>
 #include <map>
+#include <vector>
+#include <algorithm>
+#include "types.h" // for dword
+
+// transfered from global.h
+#define BREAK_POINT    -2
+#define INVALID_OPCODE -1
+
+// transfered from breakpoint.h
+class Breakpoints: public std::vector<dword> { };
+class Exitpoints: public std::vector<dword> { };
 
 // from hwsreg.h, but not included, because of circular include with this header
 class HWSreg;

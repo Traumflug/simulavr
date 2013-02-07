@@ -40,7 +40,6 @@ using namespace std;
 
 #include "config.h"
 
-#include "global.h"
 #include "flash.h"
 #include "avrdevice.h"
 #include "avrfactory.h"

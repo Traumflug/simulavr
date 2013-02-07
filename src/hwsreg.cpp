@@ -24,7 +24,6 @@
  */
 
 #include "hwsreg.h"
-#include "global.h"
 
 #include <iostream>
 using namespace std;
