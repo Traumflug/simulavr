@@ -40,8 +40,6 @@ using namespace std;
 #include "avrmalloc.h"
 #include "avrerror.h"
 #include "types.h"
-#include "global.h"
-#include "breakpoint.h"
 #include "systemclock.h"
 
 /* only for compilation ... later to be removed */

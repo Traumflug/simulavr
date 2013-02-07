@@ -28,7 +28,6 @@
 #include "flash.h"
 #include "hwwado.h"
 #include "hwsreg.h"
-#include "global.h"
 #include "avrerror.h"
 #include "ioregs.h"
 
