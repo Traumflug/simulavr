@@ -165,7 +165,7 @@ unsigned char avr_op_ADIW::GetModifiedR() const {
     return Rl;
 }
 unsigned char avr_op_ADIW::GetModifiedRHi() const {
-	return Rh;
+    return Rh;
 }
 int avr_op_ADIW::operator()() {
     word rd = (core->GetCoreReg(Rh) << 8) + core->GetCoreReg(Rl);
@@ -1405,7 +1405,7 @@ unsigned char avr_op_SBIW::GetModifiedR() const {
     return R1;
 }
 unsigned char avr_op_SBIW::GetModifiedRHi() const {
-	return R1 + 1;
+    return R1 + 1;
 }
 int avr_op_SBIW::operator()() {
     byte rdl = core->GetCoreReg(R1);

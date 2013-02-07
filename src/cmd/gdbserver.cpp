@@ -392,8 +392,8 @@ const char* GdbServer::gdb_last_reply( const char *reply )
             return last_reply;
     }
 
-	if(last_reply == reply)
-		return reply;  // we must not delete the reply
+    if(last_reply == reply)
+        return reply;  // we must not delete the reply
     avr_free( last_reply );
     last_reply = avr_strdup( reply );
 
@@ -1261,7 +1261,7 @@ int GdbServer::gdb_parse_packet(const char *pkt) {
             } else if(strcmp(pkt, "qC") == 0) {
                 int thread_id = core->stack->m_ThreadList.GetCurrentThreadForGDB();
                 if (global_debug_on)
-				    fprintf(stderr, "gdb  get current thread: %d\n", thread_id);
+                    fprintf(stderr, "gdb  get current thread: %d\n", thread_id);
                 char reply[100];
                 snprintf( reply, sizeof(reply), "QC%02x", thread_id);
                 gdb_send_reply( reply );
