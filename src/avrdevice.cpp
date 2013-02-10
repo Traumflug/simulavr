@@ -197,7 +197,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     }      
 
     /* Create invalid registers in I/O space which will fail on access (to
-       make simulavrxx more robust!)  In all well implemented devices, these
+       make simulavr more robust!)  In all well implemented devices, these
        should be overwritten by the particular device type. But accessing such
        a register will at least notify the user that there is an unimplemented
        feature or reserved register. */
@@ -237,7 +237,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     }
 }
 
-//do a single core step, (0)->a real hardware step, (1) until the uC finish the opcode! 
+// do a single core step, (0)->a real hardware step, (1) until the uC finish the opcode!
 int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_ns) {
     if (cpuCycles<=0)
         cPC=PC;
@@ -283,19 +283,26 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
             }
 
             if(deferIrq && ( newIrqPc != 0xffffffff )) {
+                /* Every IRQ is delayed of one cycle. Normally this happens (see datasheet)
+                 * only after a SEI instruction or after a RETI. But because of
+                 * "pipelining" (first cycle is fetch instruction, second is processing)
+                 * it's never possible to raise an interrupt with a instruction from
+                 * inside the controller immediately after fetching (and processing here
+                 * in simulavr) this instruction. Only a external source or peripherals
+                 * could do that. Hold this in mind, if you try to measure processing time!
+                 */
                 deferIrq = false;
-                // And skip executing the interrupt stuff below.
 
-                    if(trace_on)
-                        traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;
+                if(trace_on)
+                    traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;
 
-                    irqSystem->IrqHandlerStarted(actualIrqVector);    //what vector we raise?
-                    Funktor* fkt = new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
-                    stack->SetReturnPoint(stack->GetStackPointer(), fkt);
-                    stack->PushAddr(PC);
-                    cpuCycles = 4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
-                    status->I = 0; //irq started so remove I-Flag from SREG
-                    PC = newIrqPc - 1;   //we add a few lines later 1 so we sub here 1 :-)
+                irqSystem->IrqHandlerStarted(actualIrqVector);    //what vector we raise?
+                Funktor* fkt = new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
+                stack->SetReturnPoint(stack->GetStackPointer(), fkt);
+                stack->PushAddr(PC);
+                cpuCycles = 4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
+                status->I = 0; //irq started so remove I-Flag from SREG
+                PC = newIrqPc - 1;   //we add a few lines later 1 so we sub here 1 :-)
 
             } else if(status->I == 1) {
                 newIrqPc = irqSystem->GetNewPc(actualIrqVector);
@@ -314,7 +321,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                     string s = os.str();
                     if(trace_on)
                         traceOut << s << endl;
-                    avr_error(s.c_str());
+                    avr_error("%s", s.c_str());
                 }
 
                 DecodedInstruction *de = (Flash->GetInstruction(PC));
@@ -359,7 +366,7 @@ void AvrDevice::Reset() {
     PC = 0; cPC=0;
     *status = 0;
 
-    //init the old static vars from Step()
+    // init the old static vars from Step()
     cpuCycles = 0;
 }
 
