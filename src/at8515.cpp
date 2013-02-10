@@ -61,8 +61,6 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
 
     uart= new HWUart( this, irqSystem, PinAtPort(portd,1), PinAtPort(portd, 0),9,10,11) ;
 
-    acomp= new HWAcomp(this, irqSystem, PinAtPort(portb,2), PinAtPort(portb, 3),12);
-
     wado= new HWWado(this);
 
     prescaler = new HWPrescaler(this, "01");
@@ -88,6 +86,9 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
                                timer01irq->getLine("ICF1"),
                                inputCapture1,
                                true);
+
+    // analog comparator: no bandgap, no ADC-connection
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(portb,2), PinAtPort(portb, 3), 12, NULL, timer1, NULL, NULL, false);
 
     gimsk_reg = new IOSpecialReg(&coreTraceGroup, "GIMSK");
     gifr_reg = new IOSpecialReg(&coreTraceGroup, "GIFR");
@@ -164,13 +165,13 @@ AvrDevice_at90s8515::~AvrDevice_at90s8515() {
     delete mcucr_reg;
     delete gifr_reg;
     delete gimsk_reg;
+    delete acomp;
     delete timer1;
     delete inputCapture1;
     delete timer0;
     delete timer01irq;
     delete prescaler;
     delete wado;
-    delete acomp;
     delete uart;
     delete spi;
     delete portd;

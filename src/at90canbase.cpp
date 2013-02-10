@@ -203,7 +203,7 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
 
     wado = new HWWado(this);
 
-    acomp = new HWAcomp(this, irqSystem, PinAtPort(&porte, 2), PinAtPort(&porte, 3), 24);
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(&porte, 2), PinAtPort(&porte, 3), 24, ad, timer1, NULL, timer3);
 
     usart0 = new HWUsart(this,
                          irqSystem,

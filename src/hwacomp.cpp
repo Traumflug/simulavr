@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,87 +26,160 @@
 #include "hwacomp.h"
 
 #include "irqsystem.h"
+#include "hwad.h"
+#include "hwtimer.h"
 
-#define ACD 0x80
-#define ACO 0x20
-#define ACI 0x10
-#define ACIE 0x08
-#define ACIC 0x04
-#define ACIS1 0x02
-#define ACIS0 0x01
-
-
-HWAcomp::HWAcomp(AvrDevice *core, HWIrqSystem *irqsys, PinAtPort ain0, PinAtPort ain1, unsigned int _irqVec):
+HWAcomp::HWAcomp(AvrDevice *core,
+                 HWIrqSystem *irqsys,
+                 PinAtPort ain0,
+                 PinAtPort ain1,
+                 unsigned int _irqVec,
+                 HWAd *_ad,
+                 BasicTimerUnit *_timerA,
+                 IOSpecialReg *_sfior,
+                 BasicTimerUnit *_timerB,
+                 bool _useBG):
     Hardware(core),
     TraceValueRegister(core, "ACOMP"),
     irqSystem(irqsys),
-    pinAin0(ain0), pinAin1(ain1),
+    pinAin0(ain0),
+    pinAin1(ain1),
     acsr_reg(this, "ACSR", this, &HWAcomp::GetAcsr, &HWAcomp::SetAcsr),
-    irqVec(_irqVec)
+    irqVec(_irqVec),
+    timerA(_timerA),
+    timerB(_timerB),
+    enabled(true),
+    useBG(_useBG),
+    ad(_ad),
+    sfior(_sfior),
+    acme_sfior(false)
 {
+    // just check right assignment of IRQ vector number
     irqSystem->DebugVerifyInterruptVector(irqVec, this);
+    // register callback for pin changes
     ain0.GetPin().RegisterCallback(this);
     ain1.GetPin().RegisterCallback(this);
+    // vcc voltage and bandgap reference voltage
+    v_cc = &(core->v_supply);
+    v_bg = &(core->v_bandgap);
+    // register to timer for input capture source, if available
+    if(timerA != NULL)
+        timerA->RegisterACompForICapture(this);
+    if(timerB != NULL)
+        timerB->RegisterACompForICapture(this);
+
     Reset();
 }
 
 
-void HWAcomp::Reset(){
-    acsr=0;
+void HWAcomp::Reset() {
+    acsr = 0;
+    enabled = true;
+    acme_sfior = false; // this assumes, that SFIOR register is also reseted
+    if(GetIn0() > GetIn1())
+        acsr |= ACO;
 }
 
 void HWAcomp::SetAcsr(unsigned char val) {
-    unsigned char old= acsr&0x30; 
-    acsr=val&0x9f; //Bits 5 & 6 are read only for 4433 that is not ok TODO XXX
-    acsr|= old;
-    if (val & ACI) {
-        acsr &=~ACI; // reset ACI if ACI in val is set 1
+    unsigned char old = acsr & (ACO|ACI);
+    bool old_acic = (acsr & ACIC) == ACIC;
+    if(!useBG)
+        val &= ~ACBG; // delete ACBG bit, if not available
+    // store data
+    acsr = val & ~(ACO|ACI); // mask out new bits
+    acsr |= old; // and restore old bits
+    if(val & ACI)
+        acsr &= ~ACI; // reset ACI if ACI in val is set to 1
+    enabled = (acsr & ACD) == 0; // disabled, if ACD is 1!
+    // reflect ACIC state to timer, if available
+    bool acic = (acsr & ACIC) == ACIC;
+    if(acic != old_acic) {
+        if(timerA != NULL)
+            timerA->SetACIC(acic);
+        if(timerB != NULL)
+            timerB->SetACIC(acic);
     }
-
-    if ( (acsr & ( ACI | ACIE) ) == ( ACI | ACIE) ) {
-        irqSystem->SetIrqFlag(this, irqVec);
-    } else {
-        irqSystem->ClearIrqFlag(irqVec);
+    // if interrupt enabled and ACI is asserted, then fire interrupt
+    if(enabled) {
+        if((acsr & ( ACI|ACIE)) == (ACI|ACIE))
+            irqSystem->SetIrqFlag(this, irqVec);
+        else
+            irqSystem->ClearIrqFlag(irqVec);
     }
-
 }
 
-unsigned char HWAcomp::GetAcsr() {
-    return acsr;
+float HWAcomp::GetIn0(void) {
+    if(useBG && ((acsr & ACBG) == ACBG))
+        return v_bg->GetRawAnalog();
+    else
+        return pinAin0.GetAnalogValue(v_cc->GetRawAnalog());
+}
+
+float HWAcomp::GetIn1(void) {
+    float vcc = v_cc->GetRawAnalog();
+    if(isSetACME())
+        return ad->GetADMuxValue(vcc);
+    else
+        return pinAin1.GetAnalogValue(vcc);
 }
 
 void HWAcomp::PinStateHasChanged(Pin *p) {
-    bool oldComp=(acsr & ACO);
-
+    // get old comparator state and IRQ mode
+    bool old = (acsr & ACO);
+    unsigned char irqmode = acsr & (ACIS1|ACIS0);
     
-    if (pinAin0.GetAnalog()>pinAin1.GetAnalog()) { //set comperator 1
-        if (oldComp==false) { //not set before
-            acsr|=ACO;
-            //do the irq TODO
-            unsigned char irqMask= acsr & (ACIS1|ACIS0);
-            if ( (irqMask==0) || (irqMask==( ACIS1 | ACIS0) ) ) { //toggle or rising
-                acsr|=ACI;
-                if (acsr&ACIE) irqSystem->SetIrqFlag(this, irqVec);
+    // if unit is disabled (to save power), do not check state
+    if(!enabled)
+        return;
+
+    // calculate state
+    if(GetIn0() > GetIn1()) {
+        // set output to high
+        if(old == false) {
+            // rising edge
+            acsr |= ACO;
+            // fire IRQ, if necessary
+            if((irqmode == 0) || (irqmode == (ACIS1|ACIS0))) {
+                acsr |= ACI;
+                if(acsr & ACIE) irqSystem->SetIrqFlag(this, irqVec);
             }
         }
-    } else { //set comperator 0
-        if (oldComp==true) { //ACO was set before
-            acsr&=~ACO;
-            //do the irq
-            unsigned char irqMask= acsr & (ACIS1|ACIS0);
-            if ( (irqMask==0) || (irqMask==( ACIS1 ) )) { //toggle or falling
-                acsr|=ACI;
-                if (acsr&ACIE) irqSystem->SetIrqFlag(this, irqVec);
+    } else {
+        // set output to low
+        if (old == true) {
+            // falling edge
+            acsr &= ~ACO;
+            // fire IRQ, if necessary
+            if((irqmode == 0) || (irqmode == ACIS1)) {
+                acsr |= ACI;
+                if(acsr & ACIE) irqSystem->SetIrqFlag(this, irqVec);
             }
         }
     }
-
 }
 
 void HWAcomp::ClearIrqFlag(unsigned int vector){
-    if (vector==irqVec) {
-        acsr&=~ACI;
+    if (vector == irqVec) {
+        acsr &= ~ACI;
         irqSystem->ClearIrqFlag(irqVec);
     }
 }
 
+unsigned char HWAcomp::set_from_reg(const IOSpecialReg* reg, unsigned char nv) {
+    // check, if ACME bit is set
+    acme_sfior = (nv & 0x08) == 0x08;
+    return nv;
+}
+
+bool HWAcomp::isSetACME(void) {
+    // ACME feature is only available, if a ADC exists and ADC isn't enabled!
+    if(ad != NULL && !ad->IsADEnabled()) {
+        // check from SFIOR register, if available
+        if(sfior != NULL)
+            return acme_sfior;
+        // or check from ADC unit (there in ADCSRB register)
+        return ad->IsSetACME();
+    } else
+        // otherwise ACME isn't available or not enabled
+        return false;
+}

@@ -569,6 +569,11 @@ unsigned int BasicTimerUnit::CpuCycle() {
     return 0;
 }
 
+void BasicTimerUnit::RegisterACompForICapture(HWAcomp *acomp) {
+    if(icapSource != NULL)
+        icapSource->RegisterAComp(acomp);
+}
+
 HWTimer8::HWTimer8(AvrDevice *core,
                    PrescalerMultiplexer *p,
                    int unit,

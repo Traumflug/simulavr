@@ -103,6 +103,14 @@ class HWAd: public Hardware, public TraceValueRegister {
 	    adch_reg,
 	    adcl_reg,
 	    adcsr_reg;
+
+	    // interface for analog comparator, in the moment only dummy implementation
+	    //! Check, if ADC is enabled
+	    bool IsADEnabled(void) { return false; }
+	    //! Check, if ACME bit is set, return false, if not available
+	    bool IsSetACME(void) { return false; }
+	    //! Get analog value from ADC multiplexer
+	    float GetADMuxValue(float vcc) { return 0.0; }
 };
 #endif
 

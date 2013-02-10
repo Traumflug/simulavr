@@ -43,6 +43,7 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
     flagMULInstructions = false;
     flagMOVWInstruction = false;
     fuses->SetFuseConfiguration(6, 0xda);
+    v_bandgap.SetAnalogValue(1.22); // reference voltage is 1.22V!
     irqSystem = new HWIrqSystem(this, 2, 14);
     eeprom= new HWEeprom(this, irqSystem, 256, 12); //we use a eeprom with irq here
     stack = new HWStackSram(this, 8);
@@ -61,8 +62,6 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
     spi= new HWSpi(this, irqSystem, PinAtPort( portb, 3), PinAtPort( portb, 4), PinAtPort( portb, 5), PinAtPort(portb, 2),/*irqvec*/ 7, false);
     
     uart= new HWUart( this, irqSystem, PinAtPort(portd,1), PinAtPort(portd, 0),8,9,10) ;
-    
-    acomp= new HWAcomp(this, irqSystem, PinAtPort(portd, 6), PinAtPort(portd, 7), 13);
     
     wado= new HWWado(this);
 
@@ -86,6 +85,9 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
                               timer01irq->getLine("ICF1"),
                               inputCapture1);
     
+    // analog comparator: no ADC-connection
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(portd, 6), PinAtPort(portd, 7), 13, NULL, timer1);
+
     gimsk_reg = new IOSpecialReg(&coreTraceGroup, "GIMSK");
     gifr_reg = new IOSpecialReg(&coreTraceGroup, "GIFR");
     mcucr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCR");
@@ -166,13 +168,13 @@ AvrDevice_at90s4433::~AvrDevice_at90s4433() {
     delete mcucr_reg;
     delete gifr_reg;
     delete gimsk_reg;
+    delete acomp;
     delete timer1;
     delete inputCapture1;
     delete timer0;
     delete timer01irq;
     delete prescaler;
     delete wado;
-    delete acomp;
     delete uart;
     delete spi;
     delete ad;

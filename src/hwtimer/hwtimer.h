@@ -177,6 +177,12 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
         
         //! Process timer/counter unit operations by CPU cycle
         virtual unsigned int CpuCycle();
+
+        //! register analog comparator unit for input capture source
+        void RegisterACompForICapture(HWAcomp *acomp);
+
+        //! reflect ACIC flag to input capture source
+        void SetACIC(bool acic) { if(icapSource != NULL) icapSource->SetACIC(acic); }
 };
 
 //! Extends BasicTimerUnit to provide common support to all types of 8Bit timer units

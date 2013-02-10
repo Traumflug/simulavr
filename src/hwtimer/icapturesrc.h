@@ -28,17 +28,28 @@
 
 #include "../pinatport.h"
 
+class HWAcomp;
+
 //! Class, which provides input capture source for 16bit timers
 class ICaptureSource {
     
     protected:
         PinAtPort capturePin;
+        HWAcomp *acomp;
+        bool acic;
   
     public:
         ICaptureSource(PinAtPort cp);
+        virtual ~ICaptureSource() { }
         
         //! Returns the digital input state of input capture source(s)
         virtual bool GetSourceState(void);
+
+        //! Register analog comparator
+        void RegisterAComp(HWAcomp *_acomp) { acomp = _acomp; }
+
+        //! Reflect ACIC flag state
+        void SetACIC(bool _acic) { acic = _acic; }
 };
 
 #endif

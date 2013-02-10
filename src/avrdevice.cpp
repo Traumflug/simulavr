@@ -144,7 +144,9 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     flagTiny1x(false),
     flagXMega(false),
     deferIrq(false),
-    newIrqPc(0xffffffff)
+    newIrqPc(0xffffffff),
+    v_supply(5.0),  // assume 5V supply voltage
+    v_bandgap(1.1)  // assume a bandgap ref unit with 1.1V
 {
     dump_manager = DumpManager::Instance();
     dump_manager->registerAvrDevice(this);

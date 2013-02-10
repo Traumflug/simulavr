@@ -105,6 +105,8 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         bool deferIrq;  ///< Almost always false.
         unsigned int newIrqPc;
         unsigned int actualIrqVector; 
+        Pin v_supply; //!< represents supply voltage level, needed for analog peripherals
+        Pin v_bandgap; //!< represents bandgap (ref) voltage level, needed for analog peripherals
 
         bool flagIWInstructions; //!< ADIW and SBIW instructions are available (not on most tiny's!)
         bool flagJMPInstructions; //!< CALL and JMP instructions are available (only on devices with bigger flash)

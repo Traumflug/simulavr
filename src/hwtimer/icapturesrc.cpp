@@ -24,11 +24,17 @@
  */
 
 #include "icapturesrc.h"
+#include "hwacomp.h"
 
 ICaptureSource::ICaptureSource(PinAtPort cp):
-    capturePin(cp) {}
+    capturePin(cp),
+    acomp(NULL),
+    acic(false) {}
 
 bool ICaptureSource::GetSourceState(void) {
-    return (bool)capturePin;
+    if(acic && acomp != NULL)
+        return acomp->GetACO();
+    else
+        return (bool)capturePin;
 }
         
