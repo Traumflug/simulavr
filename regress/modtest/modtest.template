@@ -1,0 +1,16 @@
+# template makefile for timertests
+
+SIMULAVR=../../src/simulavr$(EXEEXT)
+
+test: %(targets)s
+	$(PYTHON) -m regress_unittest $^
+
+%(rules)s
+
+define compile-and-link
+$(AVR_GCC) $($(basename $(notdir $@))_CCOPTS) -o $@ $^
+endef
+
+include Makefile
+
+# EOF

@@ -79,6 +79,18 @@ class SimTestLoader(TestLoader):
       testCaseNames = ["runTest"]
     return self.suiteClass([testCaseClass(m, self.elffile) for m in testCaseNames])
 
+class PyTestLoader(TestLoader):
+  
+  def __init__(self, modname):
+    TestLoader.__init__(self)
+    self.modname = modname
+    
+  def loadTestsFromTestCase(self, testCaseClass):
+    testCaseNames = self.getTestCaseNames(testCaseClass)
+    if not testCaseNames and hasattr(testCaseClass, "runTest"):
+      testCaseNames = ["runTest"]
+    return self.suiteClass([testCaseClass(m, self.modname) for m in testCaseNames])
+
 class SimTestCase(TestCase):
   
   def __init__(self, methodName, elfName):
@@ -120,5 +132,16 @@ class SimTestCase(TestCase):
     
   def assertWordValue(self, label, value):
     self.assertEqual(self.sim.getWordByName(self.dev, label), value)
+    
+class PyTestCase(TestCase):
+  
+  def __init__(self, methodName, modulName):
+    TestCase.__init__(self, methodName)
+    self.modulName = modulName
+    
+  def shortDescription(self):
+    md = TestCase.shortDescription(self)
+    if md is None: md = self._testMethodName
+    return self.modulName + "::" + md
     
 # EOF

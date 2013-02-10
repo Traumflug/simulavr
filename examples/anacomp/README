@@ -12,7 +12,7 @@ make dogdb
 
 do:
 Executing "make do" starts a simple gui and enables the user to enter
-analog values (0 .. MAX_INT) in the input fields. After entering a new
+analog values (0.0 .. 5.0) in the input fields. After entering a new
 analog value in ain0 or ain1, you must press the update button!  
 
 At this point, the output of the analog comparator will be used to

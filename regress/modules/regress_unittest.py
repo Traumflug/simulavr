@@ -2,10 +2,13 @@ from unittest import TextTestRunner, TestSuite
 from sys import argv, stderr, exit
 
 from vcdtestutil import VCDTestLoader
-from simtestutil import SimTestLoader
+from simtestutil import SimTestLoader, PyTestLoader
 
 def parseTargetName(name):
-  l = name.split(".")[0].split("_")
+  n = name.split(".")
+  l = n[0].split("_")
+  if len(l) == 1 and n[1].lower() == "py":
+    return l[0] # just a python file
   return "_".join(l[:-1])
   
 def parseTargetType(name):
@@ -14,6 +17,7 @@ def parseTargetType(name):
 targetLoader = {
   "vcd": VCDTestLoader,
   "elf": SimTestLoader,
+  "py":  PyTestLoader,
 }
 
 def getTests(targets):

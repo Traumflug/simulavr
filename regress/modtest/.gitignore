@@ -1,0 +1,5 @@
+modtest.makefile
+*.pyc
+*.elf
+*.vcd
+

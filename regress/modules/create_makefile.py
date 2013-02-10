@@ -96,11 +96,15 @@ def create_rules(config):
                   signals = cfg_get_default(name, "signals", name),
                   simopts = cfg_get_default(name, "simopts", ""),
                   shellopts = cfg_get_default(name, "shellopts", ""))
-      for p in config.get(name, "processors").split():
-        d = dict(processor = p)
-        d.update(data)
-        rules.append(config.get("_rule_", "rule", False, d))
-        targets.append(config.get(name, "target", False, d))
+      processors = config.get(name, "processors").strip()
+      if len(processors) > 0:
+        for p in processors.split():
+          d = dict(processor = p)
+          d.update(data)
+          rules.append(config.get("_rule_", "rule", False, d))
+          targets.append(config.get(name, "target", False, d))
+      else:
+          targets.append(config.get(name, "target"))
     except Exception, e:
       print >> stderr, str(e)
   return dict(rules = "\n".join(rules), targets = " ".join(targets))
