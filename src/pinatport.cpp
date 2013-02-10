@@ -52,6 +52,10 @@ int PinAtPort::GetAnalog() const {
     return port->p[pinNo].GetAnalog();
 }
 
+float PinAtPort::GetAnalogValue(float vcc) {
+    return port->p[pinNo].GetAnalogValue(vcc);
+}
+
 void PinAtPort::SetDdr(bool val) {
     unsigned char *adr=&port->ddr;
     SetVal(adr, val);

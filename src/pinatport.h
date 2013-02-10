@@ -59,6 +59,8 @@ class PinAtPort {
 
         operator bool(); 
         int GetAnalog() const;
+        // get pin analog voltage level
+        float GetAnalogValue(float vcc);
 
     protected:
         void SetVal( unsigned char *adr, bool val);
