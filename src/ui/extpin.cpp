@@ -62,9 +62,11 @@ void ExtPin::SetNewValueFromUi(const string& s) {
 
 void ExtAnalogPin::SetNewValueFromUi(const string& s) {
     outState= ANALOG;
-    analogValue=atol(s.c_str());
+
+    //analogValue=atol(s.c_str());
+    //connectedTo->CalcNet();
     
-    connectedTo->CalcNet();
+    SetAnalogValue(atof(s.c_str()));
 }
 
 

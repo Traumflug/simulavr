@@ -60,8 +60,10 @@ int AdcPin::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
     char* p = lineBuffer;
     unsigned long delayInNs = strtoul(p, &p, 0);
     int analogValue = (int)strtol(p, &p, 0);
-
-    _analogPin.setAnalogValue(analogValue);
+    if(analogValue > 5000000) // limit to 5000000 = 5.0V
+                              // this isn't correct, because it dosn't respect real Vcc level
+        analogValue = 5000000;
+    _analogPin.setAnalogValue(0.000001 * analogValue);
 
     *timeToNextStepIn_ns = delayInNs;
 

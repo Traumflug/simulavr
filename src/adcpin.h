@@ -37,9 +37,10 @@ class AdcAnalogPin: public Pin {
     
     public:
         //! Set the analog value and propagte through Net.
-        inline void setAnalogValue(int value) throw() {
-            analogValue = value;
-            connectedTo->CalcNet();
+        inline void setAnalogValue(float value) throw() {
+            //analogValue = value;
+            //connectedTo->CalcNet();
+            SetAnalogValue(value);
         }
         
 };
