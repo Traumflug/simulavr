@@ -59,6 +59,14 @@ class SimulavrAdapter(object):
     v = (dev.getRWMem(addr) << 8) + v
     return v
     
+  def getLongByName(self, dev, label):
+    addr = dev.data.GetAddressAtSymbol(label) + 3
+    v = 0
+    for i in range(4):
+      v = (v << 8) + dev.getRWMem(addr)
+      addr -= 1
+    return v
+
   def getByteByName(self, dev, label):
     addr = dev.data.GetAddressAtSymbol(label)
     return dev.getRWMem(addr)
