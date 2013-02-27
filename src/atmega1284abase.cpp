@@ -333,9 +333,9 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
     rw[0x25]= & portb.port_reg;
     rw[0x24]= & portb.ddr_reg;
     rw[0x23]= & portb.pin_reg;
-    rw[0x25]= & porta.port_reg;
-    rw[0x24]= & porta.ddr_reg;
-    rw[0x23]= & porta.pin_reg;
+    rw[0x22]= & porta.port_reg;
+    rw[0x21]= & porta.ddr_reg;
+    rw[0x20]= & porta.pin_reg;
 
     Reset();
 }
