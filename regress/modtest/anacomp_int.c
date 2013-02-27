@@ -3,6 +3,7 @@
 
 #include <avr/io.h>
 
+volatile unsigned char isr_count = 0;
 volatile unsigned char in_loop = 0;
 
 void init(void) {
@@ -10,7 +11,7 @@ void init(void) {
     DDRB = 0x01;
 #ifdef PROC_at90s4433
     // set bandgap ref to AIN0
-    ACSR = _BV(AINBG);
+    ACSR = _BV(AINBG) | _BV(ACIE);
 #else
 #ifdef PROC_at90s8515
     // AIN0 from external source
@@ -30,6 +31,13 @@ void set_port(void) {
     }
 }
 
+ISR(SIG_COMPARATOR) {
+    // set port according to comparator output
+    set_port();
+    // count isr counter
+    isr_count++;
+}
+
 int main(void) {
 
     init();
@@ -37,9 +45,22 @@ int main(void) {
     // set port to initial state depending on ACO
     set_port();
 
+    // reset ACIF to not to trigger interrupt immediately after sei
+#ifdef PROC_at90s4433
+    ACSR = _BV(AINBG) | _BV(ACIE) | _BV(ACI);
+#else
+#ifdef PROC_at90s8515
+    ACSR = _BV(ACIE) | _BV(ACI);
+#else
+    ACSR = _BV(ACBG) | _BV(ACIE) | _BV(ACI);
+#endif
+#endif
+    
+    // enable interrupts
+    sei();
+
     do {
         in_loop = 1;
-        set_port();
     } while(1); // do forever
 }
 
