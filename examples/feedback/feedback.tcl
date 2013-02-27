@@ -81,7 +81,7 @@ switch ${extensionPoint} {
     set aRef [new_AdcAnalogPin]
     $aRef SetOutState $Pin_ANALOG
     $netAref Add $aRef
-    $aRef setAnalogValue 5000000
+    $aRef setAnalogValue 5.0
 
     # F0/ADC0
     if { ${verbose} == 1 } { puts "Adding ADC0" }

@@ -110,7 +110,7 @@ class SerialRx {
     method WriteADCs { base } {
       for {set adc 0} {$adc <= 7} {incr adc} {
         $parent SendToSimulator [format "adc%d" $adc] \
-           [format "%d" [expr 100000 * (($adc + $base) % 8)]]
+           [format "%f" [expr 0.5 * (($adc + $base) % 8)]]
       }
     }
 
