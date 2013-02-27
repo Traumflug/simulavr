@@ -42,7 +42,8 @@ class BasicTimerUnit;
 class HWAcomp: public Hardware,
                public HasPinNotifyFunction,
                public TraceValueRegister,
-               public IOSpecialRegClient {
+               public IOSpecialRegClient,
+               public AnalogSignalChange {
 
     protected:
         HWIrqSystem *irqSystem; //!< connection to IRQ controller
@@ -91,6 +92,7 @@ class HWAcomp: public Hardware,
                 IOSpecialReg *_sfior = NULL,
                 BasicTimerUnit *_timerB = NULL,
                 bool _useBG = true);
+        ~HWAcomp();
 
         //! Get method for ACSR register
         unsigned char GetAcsr() { return acsr; }
@@ -108,6 +110,9 @@ class HWAcomp: public Hardware,
         float GetIn1(void);
         //! Return last state of analog comparator (assume, that this is correct, if unit is disabled)
         bool GetACO(void) { return ((acsr & ACO) == ACO); }
+        // Interface for notify signal change in ADC multiplexer
+        void NotifySignalChanged(void);
+
 };
 
 #endif

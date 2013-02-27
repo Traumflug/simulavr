@@ -34,6 +34,14 @@ class Net;
 
 #define REL_FLOATING_POTENTIAL 0.55
 
+/** Notify a change on analog pin (for analog comparator) */
+class AnalogSignalChange {
+    public:
+        virtual ~AnalogSignalChange() {}
+
+        virtual void NotifySignalChanged(void)=0;
+};
+
 //! Implements "real" analog value as float.
 /*! Problem is, that the Vcc level isn't
     normally not known and so it's not possible to calculate correct value. So, here

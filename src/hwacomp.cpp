@@ -67,10 +67,20 @@ HWAcomp::HWAcomp(AvrDevice *core,
         timerA->RegisterACompForICapture(this);
     if(timerB != NULL)
         timerB->RegisterACompForICapture(this);
+    // register to ad to get signal changes from ADC multiplexer
+    if(ad != NULL)
+        ad->RegisterNotifyClient(this);
+    // register for SFIOR, if set
+    if(sfior != NULL)
+        sfior->connectSRegClient(this);
 
     Reset();
 }
 
+HWAcomp::~HWAcomp() {
+    if(ad != NULL)
+        ad->UnregisterNotifyClient();
+}
 
 void HWAcomp::Reset() {
     acsr = 0;
@@ -83,11 +93,16 @@ void HWAcomp::Reset() {
 void HWAcomp::SetAcsr(unsigned char val) {
     unsigned char old = acsr & (ACO|ACI);
     bool old_acic = (acsr & ACIC) == ACIC;
+    bool old_bg = (acsr & ACBG) == ACBG;
     if(!useBG)
         val &= ~ACBG; // delete ACBG bit, if not available
     // store data
     acsr = val & ~(ACO|ACI); // mask out new bits
     acsr |= old; // and restore old bits
+    // if AIN0 source is changed, calculate comparator state
+    bool bg = (acsr & ACBG) == ACBG;
+    if(old_bg != bg)
+        PinStateHasChanged(NULL);
     if(val & ACI)
         acsr &= ~ACI; // reset ACI if ACI in val is set to 1
     enabled = (acsr & ACD) == 0; // disabled, if ACD is 1!
@@ -158,6 +173,12 @@ void HWAcomp::PinStateHasChanged(Pin *p) {
     }
 }
 
+void HWAcomp::NotifySignalChanged(void) {
+    // just start notify functionality
+    if(isSetACME())
+        PinStateHasChanged(NULL);
+}
+
 void HWAcomp::ClearIrqFlag(unsigned int vector){
     if (vector == irqVec) {
         acsr &= ~ACI;
@@ -168,6 +189,8 @@ void HWAcomp::ClearIrqFlag(unsigned int vector){
 unsigned char HWAcomp::set_from_reg(const IOSpecialReg* reg, unsigned char nv) {
     // check, if ACME bit is set
     acme_sfior = (nv & 0x08) == 0x08;
+    // check comparator state
+    PinStateHasChanged(NULL);
     return nv;
 }
 
