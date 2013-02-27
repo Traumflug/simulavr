@@ -48,7 +48,6 @@ using std::auto_ptr;
 class AvrDevice_at90canbase: public AvrDevice {
     
     protected:
-        Pin                 aref;        //!< analog reference pin
         HWPort              porta;       //!< port B
         HWPort              portb;       //!< port B
         HWPort              portc;       //!< port C
@@ -65,7 +64,8 @@ class AvrDevice_at90canbase: public AvrDevice {
         IOSpecialReg*       eicrb_reg;   //!< EICRA IO register
         IOSpecialReg*       eimsk_reg;   //!< EIMSK IO register
         IOSpecialReg*       eifr_reg;    //!< EIFR IO register
-        HWAdmux             admux;       //!< adc multiplexer unit
+        HWAdmux*            admux;       //!< adc multiplexer unit
+        HWARef*             aref;        //!< adc reference unit
         HWAd*               ad;          //!< adc unit
         HWSpi*              spi;         //!< spi unit
         HWAcomp*            acomp;       //!< analog compare unit

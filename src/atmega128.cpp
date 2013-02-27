@@ -39,6 +39,7 @@
 AVR_REGISTER(atmega128, AvrDevice_atmega128);
 
 AvrDevice_atmega128::~AvrDevice_atmega128() {
+    delete acomp;
     delete timer3;
     delete inputCapture3;
     delete timer2;
@@ -53,7 +54,6 @@ AvrDevice_atmega128::~AvrDevice_atmega128() {
     delete prescaler123;
     delete prescaler0;
     delete assr_reg;
-    delete sfior_reg;
     delete extirq;
     delete eifr_reg;
     delete eimsk_reg;
@@ -61,7 +61,9 @@ AvrDevice_atmega128::~AvrDevice_atmega128() {
     delete eicra_reg;
     delete spi;
     delete ad;
+    delete aref;
     delete admux;
+    delete sfior_reg;
     delete rampz;
     delete portg;
     delete portf;
@@ -78,8 +80,7 @@ AvrDevice_atmega128::~AvrDevice_atmega128() {
 }
 
 AvrDevice_atmega128::AvrDevice_atmega128():
-    AvrDevice(224, 4096, 0xef00, 256*1024),
-    aref()
+    AvrDevice(224, 4096, 0xef00, 256*1024)
 {
     flagELPMInstructions = true;
     fuses->SetFuseConfiguration(18, 0xfd99e1);
@@ -96,16 +97,16 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     portf = new HWPort(this, "F");
     portg = new HWPort(this, "G");
 
-    RegisterPin("AREF", &aref);
     rampz = new AddressExtensionRegister(this, "RAMPZ", 1);
 
-    admux = new HWAdmux(this,
-          &portf->GetPin(0), &portf->GetPin(1), &portf->GetPin(2),
-          &portf->GetPin(3), &portf->GetPin(4), &portf->GetPin(5),
-          &portf->GetPin(6), &portf->GetPin(7));
+    sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
 
+    admux = new HWAdmuxM16(this, &portf->GetPin(0), &portf->GetPin(1), &portf->GetPin(2),
+                                 &portf->GetPin(3), &portf->GetPin(4), &portf->GetPin(5),
+                                 &portf->GetPin(6), &portf->GetPin(7));
+    aref = new HWARef4(this, HWARef4::REFTYPE_NOBG);
     // vector 21 ADConversion Complete
-    ad = new HWAd(this, admux, irqSystem, aref, 21);
+    ad = new HWAd(this, HWAd::AD_M128, irqSystem, 21, admux, aref);
 
     spi = new HWSpi(this, irqSystem,
             PinAtPort(portb, 2), PinAtPort(portb, 3), PinAtPort(portb, 1),
@@ -125,7 +126,6 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     extirq->registerIrq(7, 6, new ExternalIRQSingle(eicrb_reg, 4, 2, GetPin("E6")));
     extirq->registerIrq(8, 7, new ExternalIRQSingle(eicrb_reg, 6, 2, GetPin("E7")));
   
-    sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
     assr_reg = new IOSpecialReg(&coreTraceGroup, "ASSR");
     prescaler0 = new HWPrescalerAsync(this, "0", PinAtPort(portg, 4), assr_reg, 3, sfior_reg, 1, 7);
     prescaler123 = new HWPrescaler(this, "123", sfior_reg, 0, 7);
@@ -196,6 +196,8 @@ AvrDevice_atmega128::AvrDevice_atmega128():
                             timer3irq->getLine("ICF3"),
                             inputCapture3);
   
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(porte, 2), PinAtPort(porte, 3), 23, ad, timer1, sfior_reg);
+
     rw[0x9d]= & usart1->ucsrc_reg;
     rw[0x9c]= & usart1->udr_reg;
     rw[0x9b]= & usart1->ucsra_reg;
@@ -301,10 +303,9 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     rw[0x2b]= & usart0->ucsra_reg;
     rw[0x2a]= & usart0->ucsrb_reg;
     rw[0x29]= & usart0->ubrr_reg;
-
-    rw[0x27]= & admux->admux_reg;
-    
-    rw[0x26]= & ad->adcsr_reg;
+    rw[0x28]= & acomp->acsr_reg;
+    rw[0x27]= & ad->admux_reg;
+    rw[0x26]= & ad->adcsra_reg;
     rw[0x25]= & ad->adch_reg;
     rw[0x24]= & ad->adcl_reg;
 

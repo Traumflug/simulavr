@@ -52,12 +52,10 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
     portc= new HWPort(this, "C");
     portd= new HWPort(this, "D");
 
-    porty= new HWPort(this, "Y");   //AREF on pin 0 ("Y0") 
-
-    admux= new HWAdmux(this,
-          &portc->GetPin(0), &portc->GetPin(1), &portc->GetPin(2),
-          &portc->GetPin(3), &portc->GetPin(4), &portc->GetPin(5),0,0);
-    ad= new HWAd( this, admux, irqSystem, porty->GetPin(0), 11); //vec 11 ADConversion Complete
+    admux = new HWAdmux6(this, &portc->GetPin(0), &portc->GetPin(1), &portc->GetPin(2),
+                               &portc->GetPin(3), &portc->GetPin(4), &portc->GetPin(5));
+    aref = new HWARefPin(this);
+    ad = new HWAd(this, HWAd::AD_4433, irqSystem, 11, admux, aref); // vec 11 ADConversion Complete
     
     spi= new HWSpi(this, irqSystem, PinAtPort( portb, 3), PinAtPort( portb, 4), PinAtPort( portb, 5), PinAtPort(portb, 2),/*irqvec*/ 7, false);
     
@@ -123,7 +121,7 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
 
     rw[0x41]= & wado->wdtcr_reg;
 
-    // 0x3f: only 256 bytes EEProm here :-) [RWEearh(this, eeprom)]
+    rw[0x3f]= new NotSimulatedRegister("EEARH register doesn't exist here");
     rw[0x3e] = & eeprom->eearl_reg;
     rw[0x3d] = & eeprom->eedr_reg;
     rw[0x3c] = & eeprom->eecr_reg;
@@ -153,8 +151,8 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
 
     rw[0x28]= & acomp->acsr_reg;
 
-    rw[0x27]= & admux->admux_reg;
-    rw[0x26]= & ad->adcsr_reg;
+    rw[0x27]= & ad->admux_reg;
+    rw[0x26]= & ad->adcsra_reg;
     rw[0x25]= & ad->adch_reg;
     rw[0x24]= & ad->adcl_reg;
 
@@ -178,8 +176,8 @@ AvrDevice_at90s4433::~AvrDevice_at90s4433() {
     delete uart;
     delete spi;
     delete ad;
+    delete aref;
     delete admux;
-    delete porty;
     delete portd;
     delete portc;
     delete portb;

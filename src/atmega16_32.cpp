@@ -41,6 +41,7 @@ AVR_REGISTER(atmega16, AvrDevice_atmega16);
 AVR_REGISTER(atmega32, AvrDevice_atmega32);
 
 AvrDevice_atmega16_32::~AvrDevice_atmega16_32() {
+    delete acomp;
     delete timer2;
     delete timer1;
     delete inputCapture1;
@@ -58,6 +59,7 @@ AvrDevice_atmega16_32::~AvrDevice_atmega16_32() {
     delete gicr_reg;
     delete spi;
     delete ad;
+    delete aref;
     delete admux;
     delete spmRegister;
     delete portd;
@@ -78,8 +80,7 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     AvrDevice(64 ,          // I/O space above General Purpose Registers
               ram_bytes,    // RAM size
               0,            // External RAM size
-              flash_bytes), // Flash Size
-    aref()
+              flash_bytes)  // Flash Size
 {
     fuses->SetFuseConfiguration(16, 0x99e1);
     irqSystem = new HWIrqSystem(this, 4, 21); //4 bytes per vector, 21 vectors
@@ -97,14 +98,13 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     // Analog Comparator not implemented yet, vectors 16/18
     // Store Program Memory Ready not implemented yet, vectors 21/21
 
-    RegisterPin("AREF", &aref);
+    sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
 
-    admux = new HWAdmux(this,
-                        &porta->GetPin(0), &porta->GetPin(1), &porta->GetPin(2),
-                        &porta->GetPin(3), &porta->GetPin(4), &porta->GetPin(5),
-                        &porta->GetPin(6), &porta->GetPin(7));
-
-    ad = new HWAd(this, admux, irqSystem, aref, atmega16 ? 14 : 16);
+    admux = new HWAdmuxM16(this, &porta->GetPin(0), &porta->GetPin(1), &porta->GetPin(2),
+                                 &porta->GetPin(3), &porta->GetPin(4), &porta->GetPin(5),
+                                 &porta->GetPin(6), &porta->GetPin(7));
+    aref = new HWARef4(this, HWARef4::REFTYPE_NOBG);
+    ad = new HWAd_SFIOR(this, HWAd::AD_M16, irqSystem, atmega16 ? 14 : 16, admux, aref, sfior_reg);
 
     spi = new HWSpi(this, irqSystem,
                     PinAtPort(portb, 5), PinAtPort(portb, 6), PinAtPort(portb, 7),
@@ -119,7 +119,6 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     extirq->registerIrq(2, 7, new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3")));  // INT1
     extirq->registerIrq(atmega16 ? 18 : 3, 5, new ExternalIRQSingle(mcucsr_reg, 6, 1, GetPin("B2")));  // INT2
     
-    sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
     assr_reg = new IOSpecialReg(&coreTraceGroup, "ASSR");
     prescaler01 = new HWPrescaler(this, "01", sfior_reg, 0);
     prescaler2 = new HWPrescalerAsync(this, "2", PinAtPort(portc, 6),
@@ -166,6 +165,8 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
                              timer012irq->getLine("OCF2"),
                              new PinAtPort(portd, 7));
     
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(portb, 2), PinAtPort(portb, 3), atmega16 ? 16 : 18, ad, timer1, sfior_reg);
+
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
@@ -221,9 +222,9 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     rw[0x2b]= & usart->ucsra_reg;
     rw[0x2a]= & usart->ucsrb_reg;
     rw[0x29]= & usart->ubrr_reg;
-    //rw[0x28] ACSR
-    rw[0x27]= & admux->admux_reg;
-    rw[0x26]= & ad->adcsr_reg;
+    rw[0x28]= & acomp->acsr_reg;
+    rw[0x27]= & ad->admux_reg;
+    rw[0x26]= & ad->adcsra_reg;
     rw[0x25]= & ad->adch_reg;
     rw[0x24]= & ad->adcl_reg;
     //rw[0x23] TWDR

@@ -40,7 +40,8 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
             1024, // RAM size
             0, // External RAM size
             8 * 1024), // Flash Size
-    aref()
+    adc6(),
+    adc7()
 {
     fuses->SetFuseConfiguration(16, 0xd9e1);
     irqSystem = new HWIrqSystem(this, 2, 19); //2 bytes per vector, 19 vectors
@@ -49,7 +50,7 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
     stack = stack_ram;
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V3);
     portb = new HWPort(this, "B");
-    portc = new HWPort(this, "C");
+    portc = new HWPort(this, "C", false, 7);
     portd = new HWPort(this, "D");
 
     spmRegister = new FlashProgramming(this, // defined device
@@ -57,23 +58,20 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
             0xC000, // No Read-While-Write section starts at 0xC00
             FlashProgramming::SPM_MEGA_MODE); //
 
-    RegisterPin("AREF", &aref);
+    sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
 
-    admux = new HWAdmux(this,
-            &portc->GetPin(0), // ADC0
-            &portc->GetPin(1), // ADC1
-            &portc->GetPin(2), // ADC2
-            &portc->GetPin(3), // ADC3
-            &portc->GetPin(4), // ADC4
-            &portc->GetPin(5), // ADC5
-            &portc->GetPin(19), // ADC6 only TQFP version
-            &portc->GetPin(22)); // ADC7 only TQFP version
+    admux = new HWAdmuxM8(this, &portc->GetPin(0), // ADC0
+                                &portc->GetPin(1), // ADC1
+                                &portc->GetPin(2), // ADC2
+                                &portc->GetPin(3), // ADC3
+                                &portc->GetPin(4), // ADC4
+                                &portc->GetPin(5), // ADC5
+                                &adc6,             // ADC6 only TQFP version
+                                &adc7);            // ADC7 only TQFP version
 
-    ad = new HWAd(this,
-            admux,
-            irqSystem,
-            aref,
-            14); // Interrupt Vector ADC Conversion Complete
+    aref = new HWARef4(this, HWARef4::REFTYPE_NOBG);
+
+    ad = new HWAd(this, HWAd::AD_M8, irqSystem, 14, admux, aref); // Interrupt Vector ADC Conversion Complete
 
     spi = new HWSpi(this,
             irqSystem,
@@ -108,9 +106,6 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
     extirq->registerIrq(2, // INT1 External Interrupt Request 1
             7, // GICR Bit 7 - INT1: External Interrupt Request 1 Enable
             new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3"))); // INT1
-
-    sfior_reg = new IOSpecialReg(&coreTraceGroup,
-            "SFIOR");
 
     assr_reg = new IOSpecialReg(&coreTraceGroup,
             "ASSR");
@@ -182,6 +177,8 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
             timer012irq->getLine("OCF2"),
             new PinAtPort(portb, 3)); // OC2
 
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(portd, 6), PinAtPort(portd, 7), 16, ad, timer1, sfior_reg);
+
     rw[0x5f] = statusRegister;
     rw[0x5e] = &stack_ram->sph_reg;
     rw[0x5d] = &stack_ram->spl_reg;
@@ -237,9 +234,9 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
     rw[0x2b] = &usart->ucsra_reg;
     rw[0x2a] = &usart->ucsrb_reg;
     rw[0x29] = &usart->ubrr_reg;
-//  rw[0x28] ACSR
-    rw[0x27] = &admux->admux_reg;
-    rw[0x26] = &ad->adcsr_reg;
+    rw[0x28] = &acomp->acsr_reg;
+    rw[0x27] = &ad->admux_reg;
+    rw[0x26] = &ad->adcsra_reg;
     rw[0x25] = &ad->adch_reg;
     rw[0x24] = &ad->adcl_reg;
 //  rw[0x23] TWDR
@@ -251,6 +248,7 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
 }
 
 AvrDevice_atmega8::~AvrDevice_atmega8() {
+    delete acomp;
     delete timer2;
     delete timer1;
     delete inputCapture1;
@@ -260,7 +258,6 @@ AvrDevice_atmega8::~AvrDevice_atmega8() {
     delete prescaler2;
     delete prescaler01;
     delete assr_reg;
-    delete sfior_reg;
     delete extirq;
     delete mcucsr_reg;
     delete mcucr_reg;
@@ -268,7 +265,9 @@ AvrDevice_atmega8::~AvrDevice_atmega8() {
     delete gicr_reg;
     delete spi;
     delete ad;
+    delete aref;
     delete admux;
+    delete sfior_reg;
     delete spmRegister;
     delete portd;
     delete portc;

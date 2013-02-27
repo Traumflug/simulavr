@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,14 +40,12 @@ class HWMcucr;
 //! AVRDevice class for AT90S4433
 class AvrDevice_at90s4433: public AvrDevice {
     
-    private:
-        HWPort *porty; //we need an analog pin (aref)
-        
     public:
         HWPort *portb;                  //!< port B
         HWPort *portc;                  //!< port C
         HWPort *portd;                  //!< port D
         HWAdmux *admux;                 //!< adc multiplexer unit
+        HWARef *aref;                   //!< adc reference unit
         HWAd *ad;                       //!< adc unit
         HWSpi *spi;                     //!< spi unit
         HWUart *uart;                   //!< uart unit
@@ -67,4 +65,3 @@ class AvrDevice_at90s4433: public AvrDevice {
 };
 
 #endif
-

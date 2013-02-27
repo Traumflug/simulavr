@@ -39,7 +39,10 @@ AvrDevice_atmega668base::~AvrDevice_atmega668base() {
     delete usart0;
     delete wado;
     delete spi;
+    delete acomp;
     delete ad;
+    delete aref;
+    delete admux;
     delete gpior2_reg;
     delete gpior1_reg;
     delete gpior0_reg;
@@ -74,7 +77,6 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
               ram_bytes,    // RAM size
               0,            // External RAM size
               flash_bytes), // Flash Size
-    aref(),
     adc6(),
     adc7(),
     portb(this, "B", true),
@@ -83,16 +85,7 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     assr_reg(&coreTraceGroup, "ASSR"),
     gtccr_reg(&coreTraceGroup, "GTCCR"),
     prescaler01(this, "01", &gtccr_reg, 0, 7),
-    prescaler2(this, "2", PinAtPort(&portb, 6), &assr_reg, 5, &gtccr_reg, 1, 7),
-    admux(this,
-          &portc.GetPin(0),
-          &portc.GetPin(1),
-          &portc.GetPin(2),
-          &portc.GetPin(3),
-          &portc.GetPin(4),
-          &portc.GetPin(5),
-          &adc6,
-          &adc7)
+    prescaler2(this, "2", PinAtPort(&portb, 6), &assr_reg, 5, &gtccr_reg, 1, 7)
 { 
     flagJMPInstructions = (flash_bytes > 8U * 1024U) ? true : false;
     if(flash_bytes > 4U * 1024U) {
@@ -112,7 +105,6 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
 
-    RegisterPin("AREF", &aref);
     RegisterPin("ADC6", &adc6);
     RegisterPin("ADC7", &adc7);
 
@@ -183,7 +175,21 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
     gpior2_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR2");
 
-    ad = new HWAd(this, &admux, irqSystem, aref, 21);
+    admux = new HWAdmuxM8(this, &portc.GetPin(0), // ADC0
+                                &portc.GetPin(1), // ADC1
+                                &portc.GetPin(2), // ADC2
+                                &portc.GetPin(3), // ADC3
+                                &portc.GetPin(4), // ADC4
+                                &portc.GetPin(5), // ADC5
+                                &adc6,            // ADC6 only TQFP version
+                                &adc7);           // ADC7 only TQFP version
+
+    aref = new HWARef4(this, HWARef4::REFTYPE_BG4);
+
+    ad = new HWAd(this, HWAd::AD_M48, irqSystem, 21, admux, aref); // Interrupt Vector ADC Conversion Complete
+
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(&portd, 6), PinAtPort(&portd, 7), 23, ad, timer1);
+
     spi = new HWSpi(this,
                     irqSystem,
                     PinAtPort(&portb, 3),   // MOSI
@@ -246,9 +252,9 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x7F]= new NotSimulatedRegister("ADC register DIDR1 not simulated");
     rw[0x7E]= new NotSimulatedRegister("ADC register DIDR0 not simulated");
     // 0x7D reserved
-    rw[0x7C]= & admux.admux_reg;
-    rw[0x7B]= new NotSimulatedRegister("ADC register ADCSRB not simulated");
-    rw[0x7A]= & ad->adcsr_reg;
+    rw[0x7C]= & ad->admux_reg;
+    rw[0x7B]= & ad->adcsrb_reg;
+    rw[0x7A]= & ad->adcsra_reg;
     rw[0x79]= & ad->adch_reg;
     rw[0x78]= & ad->adcl_reg;
     // 0x71 - 0x77 reserved
@@ -281,7 +287,7 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x53]= new NotSimulatedRegister("MCU register SMCR not simulated");
     // 0x52 reserved
     // 0x51 reserved
-    rw[0x50]= new NotSimulatedRegister("ADC register ADCSRA not simulated");
+    rw[0x50]= & acomp->acsr_reg;
     // 0x4F reserved
     rw[0x4E]= & spi->spdr_reg;
     rw[0x4D]= & spi->spsr_reg;

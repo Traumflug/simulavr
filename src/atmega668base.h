@@ -29,6 +29,7 @@
 #include "externalirq.h"
 #include "hwuart.h"
 #include "hwad.h"
+#include "hwacomp.h"
 #include "hwport.h"
 #include "hwspi.h"
 #include "hwtimer/timerprescaler.h"
@@ -41,7 +42,6 @@
 class AvrDevice_atmega668base: public AvrDevice {
     
     protected:
-        Pin                 aref;        //!< analog reference pin
         Pin                 adc6;        //!< adc channel 6 input pin
         Pin                 adc7;        //!< adc channel 7 input pin
         HWPort              portb;       //!< port B
@@ -61,8 +61,10 @@ class AvrDevice_atmega668base: public AvrDevice {
         IOSpecialReg*       pcmsk0_reg;  //!< PCIMSK0 IO register
         IOSpecialReg*       pcmsk1_reg;  //!< PCIMSK1 IO register
         IOSpecialReg*       pcmsk2_reg;  //!< PCIMSK2 IO register
-        HWAdmux             admux;       //!< adc multiplexer unit
+        HWAdmux*            admux;       //!< adc multiplexer unit
+        HWARef*             aref;        //!< ADC reference unit
         HWAd*               ad;          //!< adc unit
+        HWAcomp*            acomp;       //!< analog compare unit
         HWSpi*              spi;         //!< spi unit
         HWUsart*            usart0;      //!< usart 0 unit
         TimerIRQRegister*   timerIrq0;   //!< timer interrupt unit for timer 0

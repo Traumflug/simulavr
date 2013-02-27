@@ -116,6 +116,14 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
                                new PinAtPort(portb, 4),
                                new PinAtPort(portb, 3));
 
+    // ADC
+    admux = new HWAdmuxT25(this, &portb->GetPin(5), &portb->GetPin(2), &portb->GetPin(4), &portb->GetPin(3));
+    aref = new HWARef8(this, &portb->GetPin(0));
+    ad = new HWAd(this, HWAd::AD_T25, irqSystem, 8, admux, aref);
+
+    // Analog comparator
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(portb, 0), PinAtPort(portb, 1), 7, ad, NULL);
+
     // IO register set
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
@@ -166,21 +174,21 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     rw[0x33]= gpior2_reg;
     rw[0x32]= gpior1_reg;
     rw[0x31]= gpior0_reg;
-    //rw[0x30] reserved
+    rw[0x30]= new NotSimulatedRegister("USI register USIBR not simulated");
 
-    //rw[0x2f] reserved
-    //rw[0x2e] reserved
-    //rw[0x2d] reserved
+    rw[0x2f]= new NotSimulatedRegister("USI register USIDR not simulated");
+    rw[0x2e]= new NotSimulatedRegister("USI register USISR not simulated");
+    rw[0x2d]= new NotSimulatedRegister("USI register USICR not simulated");
     //rw[0x2c] reserved
     //rw[0x2b] reserved
     //rw[0x2a] reserved
     //rw[0x29] reserved
-    //rw[0x28] reserved
-    //rw[0x27] reserved
-    //rw[0x26] reserved
-    //rw[0x25] reserved
-    //rw[0x24] reserved
-    //rw[0x23] reserved
+    rw[0x28]= &acomp->acsr_reg;
+    rw[0x27]= &ad->admux_reg;
+    rw[0x26]= &ad->adcsra_reg;
+    rw[0x25]= &ad->adch_reg;
+    rw[0x24]= &ad->adcl_reg;
+    rw[0x23]= &ad->adcsrb_reg;
     //rw[0x22] reserved
     //rw[0x21] reserved
     //rw[0x20] reserved

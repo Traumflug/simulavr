@@ -41,6 +41,8 @@ AvrDevice_at90canbase::~AvrDevice_at90canbase() {
     delete wado;
     delete spi;
     delete ad;
+    delete aref;
+    delete admux;
     delete gpior2_reg;
     delete gpior1_reg;
     delete gpior0_reg;
@@ -74,7 +76,6 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
               ram_bytes,    // RAM size
               0,            // External RAM size
               flash_bytes), // Flash Size
-    aref(),
     porta(this, "A", true),
     portb(this, "B", true),
     portc(this, "C", true, 7),
@@ -85,18 +86,7 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
     assr_reg(&coreTraceGroup, "ASSR"),
     gtccr_reg(&coreTraceGroup, "GTCCR"),
     prescaler013(this, "01", &gtccr_reg, 0, 7),
-    prescaler2(this, "2", PinAtPort(&portc, 7), &assr_reg, 5, &gtccr_reg, 1, 7),
-
-    admux(this,
-          &portf.GetPin(0),
-          &portf.GetPin(1),
-          &portf.GetPin(2),
-          &portf.GetPin(3),
-          &portf.GetPin(4),
-          &portf.GetPin(5),
-          &portf.GetPin(6),
-          &portf.GetPin(7))
-{
+    prescaler2(this, "2", PinAtPort(&portc, 7), &assr_reg, 5, &gtccr_reg, 1, 7) {
     flagELPMInstructions = true;
     fuses->SetFuseConfiguration(20, 0xff9962);
     irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 37);
@@ -106,7 +96,6 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
     clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V4);
 
-    RegisterPin("AREF", &aref);
     rampz = new AddressExtensionRegister(this, "RAMPZ", 1);
 
     eicra_reg = new IOSpecialReg(&coreTraceGroup, "EICRA");
@@ -191,7 +180,12 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
     gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
     gpior2_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR2");
 
-    ad = new HWAd(this, &admux, irqSystem, aref, 25);
+    admux = new HWAdmuxM16(this, &portf.GetPin(0), &portf.GetPin(1), &portf.GetPin(2),
+                                 &portf.GetPin(3), &portf.GetPin(4), &portf.GetPin(5),
+                                 &portf.GetPin(6), &portf.GetPin(7));
+    aref = new HWARef4(this, HWARef4::REFTYPE_NOBG);
+    ad = new HWAd(this, HWAd::AD_M164, irqSystem, 25, admux, aref);
+
     spi = new HWSpi(this,
                     irqSystem,
                     PinAtPort(&portb, 2),   // MOSI
@@ -203,7 +197,7 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
 
     wado = new HWWado(this);
 
-    acomp = new HWAcomp(this, irqSystem, PinAtPort(&porte, 2), PinAtPort(&porte, 3), 24, ad, timer1, NULL, timer3);
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(&porte, 2), PinAtPort(&porte, 3), 24, ad, timer1);
 
     usart0 = new HWUsart(this,
                          irqSystem,
@@ -288,8 +282,9 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
     rw[0x81]= & timer1->tccrb_reg;
     rw[0x80]= & timer1->tccra_reg;
     /* 0x7e-0x7f DIDR TODO */
-    rw[0x7C]= & admux.admux_reg;
-    rw[0x7A]= & ad->adcsr_reg;
+    rw[0x7C]= & ad->admux_reg;
+    rw[0x7B]= & ad->adcsrb_reg;
+    rw[0x7A]= & ad->adcsra_reg;
     rw[0x79]= & ad->adch_reg;
     rw[0x78]= & ad->adcl_reg;
     /* 0x76-0x77 reserved */

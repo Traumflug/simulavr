@@ -29,6 +29,7 @@
 #include "externalirq.h"
 #include "hwuart.h"
 #include "hwad.h"
+#include "hwacomp.h"
 #include "hwport.h"
 #include "hwspi.h"
 #include "hwtimer/timerprescaler.h"
@@ -43,7 +44,6 @@ a BODS bit in MCUCR. (We do not simulate the register anyway.)
 class AvrDevice_atmega1284Abase: public AvrDevice {
 
 protected:
-    Pin                 aref;        //!< analog reference pin
     HWPort              porta;       //!< port A
     HWPort              portb;       //!< port B
     HWPort              portc;       //!< port C
@@ -63,8 +63,10 @@ protected:
     IOSpecialReg*       pcmsk1_reg;  //!< PCIMSK1 IO register
     IOSpecialReg*       pcmsk2_reg;  //!< PCIMSK2 IO register
     IOSpecialReg*       pcmsk3_reg;  //!< PCIMSK3 IO register
-    HWAdmux             admux;       //!< adc multiplexer unit
+    HWAdmux*            admux;       //!< adc multiplexer unit
+    HWARef*             aref;        //!< adc reference unit
     HWAd*               ad;          //!< adc unit
+    HWAcomp*            acomp;       //!< analog compare unit
     HWSpi*              spi;         //!< spi unit
     HWUsart*            usart0;      //!< usart 0 unit
     HWUsart*            usart1;      //!< usart 1 unit

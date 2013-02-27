@@ -36,6 +36,7 @@
 #include "hwuart.h"
 #include "hwspi.h"
 #include "hwad.h"
+#include "hwacomp.h"
 #include "pin.h"
 
 #include "ioregs.h" //only for rampz here
@@ -44,7 +45,6 @@
 class AvrDevice_atmega128: public AvrDevice {
     
     public:
-        Pin aref;                       //!< analog reference pin
         HWPort *porta;                  //!< port A
         HWPort *portb;                  //!< port B
         HWPort *portc;                  //!< port C
@@ -61,7 +61,9 @@ class AvrDevice_atmega128: public AvrDevice {
         OSCCALRegister *osccal_reg;     //!< OSCCAL IO register
 
         HWAdmux *admux;                 //!< adc multiplexer unit
+        HWARef* aref;                   //!< adc reference unit
         HWAd *ad;                       //!< adc unit
+        HWAcomp *acomp;                 //!< analog compare unit
 
         IOSpecialReg *assr_reg;         //!< ASSR IO register
         IOSpecialReg *sfior_reg;        //!< SFIOR IO register

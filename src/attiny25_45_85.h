@@ -34,6 +34,8 @@
 #include "hwtimer/hwtimer.h"
 #include "externalirq.h"
 #include "hwuart.h"
+#include "hwad.h"
+#include "hwacomp.h"
 
 //! AVRDevice class for ATTiny25/45/85
 class AvrDevice_attinyX5: public AvrDevice {
@@ -54,6 +56,11 @@ class AvrDevice_attinyX5: public AvrDevice {
 
         IOSpecialReg      *pllcsr_reg;  //!< PLLCSR IO register
         HWTimerTinyX5     *timer1;      //!< timer 1 unit
+
+        HWAdmux           *admux;       //!< adc multiplexer unit
+        HWARef            *aref;        //!< adc reference unit
+        HWAd              *ad;          //!< adc unit
+        HWAcomp           *acomp;       //!< analog compare unit
 
         /*! Creates the device for ATMega48/88/168/328
           @param ram_bytes how much SRAM does the device own

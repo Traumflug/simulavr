@@ -39,6 +39,7 @@
 AVR_REGISTER(attiny2313, AvrDevice_attiny2313);
 
 AvrDevice_attiny2313::~AvrDevice_attiny2313() {
+    delete acomp;
     delete timer1;
     delete inputCapture1;
     delete timer0;
@@ -136,6 +137,8 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
                                timer01irq->getLine("ICF1"),
                                inputCapture1);
     
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(portb, 0), PinAtPort(portb, 1), 10, NULL, timer1);
+
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
@@ -168,7 +171,7 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     rw[0x42]= & timer1->tccrc_reg;
     //rw[0x41]= & wado->wdtcr_reg;
     rw[0x40]= pcmsk_reg;
-    //rw[0x3f] reserved
+    rw[0x3f]= new NotSimulatedRegister("EEARH register doesn't exist here");
     rw[0x3e]= & eeprom->eearl_reg;
     rw[0x3d]= & eeprom->eedr_reg;
     rw[0x3c]= & eeprom->eecr_reg;
@@ -191,7 +194,7 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     rw[0x2b]= & usart->ucsra_reg;
     rw[0x2a]= & usart->ucsrb_reg;
     rw[0x29]= & usart->ubrr_reg;
-    //rw[0x28] ACSR
+    rw[0x28]= & acomp->acsr_reg;
     //rw[0x27] reserved
     //rw[0x26] reserved
     //rw[0x25] reserved

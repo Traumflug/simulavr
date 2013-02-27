@@ -229,12 +229,12 @@ NotSimulatedRegister::NotSimulatedRegister(const char * message_on_access_)
     : message_on_access(message_on_access_)  {}
 
 unsigned char NotSimulatedRegister::get() const {
-    avr_warning("%s", message_on_access);
+    avr_warning("%s (read from register)", message_on_access);
     return 0;
 }
 
 void NotSimulatedRegister::set(unsigned char c) {
-    avr_warning("%s", message_on_access);
+    avr_warning("%s (write to register)", message_on_access);
 }
 
 IOSpecialReg::IOSpecialReg(TraceValueRegister *registry, const std::string &name):

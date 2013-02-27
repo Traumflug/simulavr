@@ -40,10 +40,13 @@ AvrDevice_atmega1284Abase::~AvrDevice_atmega1284Abase() {
     delete usart0;
     delete wado;
     delete spi;
+    delete acomp;
+    delete ad;
+    delete aref;
+    delete admux;
     delete gpior2_reg;
     delete gpior1_reg;
     delete gpior0_reg;
-    delete ad;
     delete timer2;
     delete timerIrq2;
     delete timer1;
@@ -76,7 +79,6 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
               ram_bytes,    // RAM size
               0,            // External RAM size
               flash_bytes), // Flash Size
-    aref(),
     porta(this, "A", true),
     portb(this, "B", true),
     portc(this, "C", true),
@@ -84,16 +86,7 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
     assr_reg(&coreTraceGroup, "ASSR"),
     gtccr_reg(&coreTraceGroup, "GTCCR"),
     prescaler01(this, "01", &gtccr_reg, 0, 7),
-    prescaler2(this, "2", PinAtPort(&portb, 6), &assr_reg, 5, &gtccr_reg, 1, 7),
-    admux(this,
-          &porta.GetPin(0),
-          &porta.GetPin(1),
-          &porta.GetPin(2),
-          &porta.GetPin(3),
-          &porta.GetPin(4),
-          &porta.GetPin(5),
-          &porta.GetPin(6),
-          &porta.GetPin(7)) // TODO: Differential inputs, 1.1V ref, GND input
+    prescaler2(this, "2", PinAtPort(&portb, 6), &assr_reg, 5, &gtccr_reg, 1, 7)
 { 
     flagELPMInstructions = true;
     fuses->SetFuseConfiguration(19, 0xff9962);
@@ -105,7 +98,6 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
     clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
 
-    RegisterPin("AREF", &aref);
     rampz = new AddressExtensionRegister(this, "RAMPZ", 1);
 
     eicra_reg = new IOSpecialReg(&coreTraceGroup, "EICRA");
@@ -178,7 +170,14 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
     gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
     gpior2_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR2");
 
-    ad = new HWAd(this, &admux, irqSystem, aref, 24);
+    admux = new HWAdmuxM16(this, &porta.GetPin(0), &porta.GetPin(1), &porta.GetPin(2),
+                                 &porta.GetPin(3), &porta.GetPin(4), &porta.GetPin(5),
+                                 &porta.GetPin(6), &porta.GetPin(7));
+    aref = new HWARef4(this, HWARef4::REFTYPE_BG3);
+    ad = new HWAd(this, HWAd::AD_M164, irqSystem, 24, admux, aref);
+
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(&portb, 2), PinAtPort(&portb, 3), 23, ad, timer1);
+
     spi = new HWSpi(this,
                     irqSystem,
                     PinAtPort(&portb, 5),   // MOSI
@@ -258,9 +257,9 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
     rw[0x7F]= new NotSimulatedRegister("ADC register DIDR1 not simulated");
     rw[0x7E]= new NotSimulatedRegister("ADC register DIDR0 not simulated");
     // 0x7D reserved
-    rw[0x7C]= & admux.admux_reg;
-    rw[0x7B]= new NotSimulatedRegister("ADC register ADCSRB not simulated");
-    rw[0x7A]= & ad->adcsr_reg;
+    rw[0x7C]= & ad->admux_reg;
+    rw[0x7B]= & ad->adcsrb_reg;
+    rw[0x7A]= & ad->adcsra_reg;
     rw[0x79]= & ad->adch_reg;
     rw[0x78]= & ad->adcl_reg;
     // 0x74, 0x75, 0x76, 0x77 reserved
@@ -297,7 +296,7 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
     rw[0x53]= new NotSimulatedRegister("MCU register SMCR not simulated");
     // 0x52 reserved
     rw[0x51]= new NotSimulatedRegister("On-chip debug register OCDR not simulated");
-    rw[0x50]= new NotSimulatedRegister("ADC register ADCSRA not simulated");
+    rw[0x50]= & acomp->acsr_reg;
     // 0x4F reserved
     rw[0x4E]= & spi->spdr_reg;
     rw[0x4D]= & spi->spsr_reg;
