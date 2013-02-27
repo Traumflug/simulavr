@@ -107,7 +107,7 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
         fuses->SetFuseConfiguration(17, 0xffdf62);
     irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 26);
     
-    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 23, HWEeprom::DEVMODE_EXTENDED); 
+    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 22, HWEeprom::DEVMODE_EXTENDED);
     stack = new HWStackSram(this, 16);
     clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
