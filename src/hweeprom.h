@@ -55,6 +55,7 @@ class HWEeprom: public Hardware, public Memory, public TraceValueRegister {
     public:
         enum {
           DEVMODE_NORMAL = 0,
+          DEVMODE_AT90S,
           DEVMODE_EXTENDED
         };
         

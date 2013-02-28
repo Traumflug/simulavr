@@ -171,7 +171,7 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     rw[0x42]= & timer1->tccrc_reg;
     //rw[0x41]= & wado->wdtcr_reg;
     rw[0x40]= pcmsk_reg;
-    rw[0x3f]= new NotSimulatedRegister("EEARH register doesn't exist here");
+    rw[0x3f]= & eeprom->eearh_reg; // register normally reserved, but used by avr-libc!
     rw[0x3e]= & eeprom->eearl_reg;
     rw[0x3d]= & eeprom->eedr_reg;
     rw[0x3c]= & eeprom->eecr_reg;

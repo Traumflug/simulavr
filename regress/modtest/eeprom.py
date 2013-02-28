@@ -7,7 +7,9 @@ class TestCase(SimTestCase):
   data_write = ( 0x00, 0x66, 0x34, 0x12, 0x55, 0xAA, 0xAA, 0x55)
 
   DELAY = 15000 # run 15 microseconds
-  WDELAY = 9000000 # run 9 milliseconds
+  WDELAY_L = 9000000 # run 9 milliseconds
+  WDELAY_M = 4500000 # run 4.5 milliseconds
+  WDELAY_S = 3900000 # run 3.9 milliseconds
 
   def assertComplete(self):
     c = self.sim.getByteByName(self.dev, "complete")
@@ -26,6 +28,12 @@ class TestCase(SimTestCase):
 
   def test_00(self):
     """check read and write eeprom data"""
+    if self.processorName in ("at90s4433", "at90s8515"):
+      self.WDELAY = self.WDELAY_M
+    elif self.processorName in ("atmega16", "atmega128", "atmega8"):
+      self.WDELAY = self.WDELAY_L
+    else:
+      self.WDELAY = self.WDELAY_S
     self.assertDevice()
     self.assertStartTime()
     # skip initialisation

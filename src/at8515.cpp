@@ -44,7 +44,7 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
     flagMOVWInstruction = false;
     fuses->SetFuseConfiguration(2, 0xdf);
     irqSystem = new HWIrqSystem(this, 2, 13);
-    eeprom= new HWEeprom(this, NULL, 512, 0);
+    eeprom= new HWEeprom(this, NULL, 512, 0, HWEeprom::DEVMODE_AT90S); // no irq available
     stack = new HWStackSram(this, 16);
     
     porta= new HWPort(this, "A");

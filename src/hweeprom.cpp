@@ -64,6 +64,10 @@ HWEeprom::HWEeprom(AvrDevice *_core,
         eraseWriteDelayTime = 8500000LL; // 8.5ms
         eraseDelayTime = 0LL; // isn't available in this op mode!
         writeDelayTime = 0LL; // isn't available in this op mode!
+    } else if(devMode == DEVMODE_AT90S) {
+        eraseWriteDelayTime = 4000000LL; // 4.0ms
+        eraseDelayTime = 0LL; // isn't available in this op mode!
+        writeDelayTime = 0LL; // isn't available in this op mode!
     } else {
         eraseWriteDelayTime = 3400000LL; // 3.4ms
         eraseDelayTime = 1800000LL; // 1.8ms
@@ -71,9 +75,12 @@ HWEeprom::HWEeprom(AvrDevice *_core,
     }
 
     // in normal mode only erase + write in one operation is available
-    if(devMode == DEVMODE_NORMAL)
-        eecr_mask = 0x0f; // without operation mode bits
-    else
+    if((devMode == DEVMODE_NORMAL) || (devMode == DEVMODE_AT90S)) {
+        if(irqSystem == NULL)
+            eecr_mask = 0x07; // without operation mode bits and irq enable
+        else
+            eecr_mask = 0x0f; // without operation mode bits
+    } else
         eecr_mask = 0x3f; // with operation mode bits
     eecr = 0;
     
@@ -109,6 +116,8 @@ void HWEeprom::SetEearl(unsigned char val) {
 }
 
 void HWEeprom::SetEearh(unsigned char val) {
+    if((GetSize() <= 256) && (val != 0))
+        avr_warning("invalid write access: EEARH=0x%02x, EEPROM size <= 256 byte", val);
     eear = ((eear & 0x00ff) + (val << 8)) & eear_mask;
     if(core->trace_on == 1)
         traceOut << "EEAR=0x" << hex << eear << dec;

@@ -45,7 +45,7 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
     fuses->SetFuseConfiguration(6, 0xda);
     v_bandgap.SetAnalogValue(1.22); // reference voltage is 1.22V!
     irqSystem = new HWIrqSystem(this, 2, 14);
-    eeprom= new HWEeprom(this, irqSystem, 256, 12); //we use a eeprom with irq here
+    eeprom= new HWEeprom(this, irqSystem, 256, 12, HWEeprom::DEVMODE_AT90S);
     stack = new HWStackSram(this, 8);
 
     portb= new HWPort(this, "B");
@@ -121,10 +121,10 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
 
     rw[0x41]= & wado->wdtcr_reg;
 
-    rw[0x3f]= new NotSimulatedRegister("EEARH register doesn't exist here");
-    rw[0x3e] = & eeprom->eearl_reg;
-    rw[0x3d] = & eeprom->eedr_reg;
-    rw[0x3c] = & eeprom->eecr_reg;
+    rw[0x3f]= & eeprom->eearh_reg; // register normally reserved, but used by avr-libc!
+    rw[0x3e]= & eeprom->eearl_reg;
+    rw[0x3d]= & eeprom->eedr_reg;
+    rw[0x3c]= & eeprom->eecr_reg;
 
     // 0x3b-0x39: no port a here
 
