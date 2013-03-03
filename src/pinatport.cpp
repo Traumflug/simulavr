@@ -48,10 +48,6 @@ void PinAtPort::SetPort(bool val) {
     port->CalcOutputs();
 }
 
-int PinAtPort::GetAnalog() const {
-    return port->p[pinNo].GetAnalog();
-}
-
 float PinAtPort::GetAnalogValue(float vcc) {
     return port->p[pinNo].GetAnalogValue(vcc);
 }

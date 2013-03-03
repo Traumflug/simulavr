@@ -28,20 +28,6 @@
 #include "pin.h"
 #include "net.h"
 
-enum {
-    //! Analog value for a tristate potential
-    /*! This is the value used to set the analogValue
-       when the pin output is TRISTATE. Originally, the
-       value was simply (INT_MAX/2), but when I was debugging
-       a glitch in a pin used as an open-drain output, I
-       found that Pin::operator bool() chose to convert this
-       to a LOW condition during a CalcNet() using MirroNet.
-       Thus, I added one to the value and the glitch went away.
-       This is probably not the absolute correct fix, but it
-       works for this case. */
-    TRISTATE_ANALOG_VALUE = (INT_MAX / 2) + 1
-};
-
 float AnalogValue::getA(float vcc) {
     switch(dState) {
         case ST_GND:
@@ -60,25 +46,10 @@ float AnalogValue::getA(float vcc) {
     }
 }
 
-int Pin::GetAnalog(void) const {
-    switch (outState) {
-        case ANALOG: 
-            return analogValue; // reflect that we are self a analog value source
+int Pin::GetAnalog(void) {
+    float vcc = 5.0; // assume a fixed Vcc with 5.0V!
 
-        case HIGH:
-        case PULLUP:
-            return INT_MAX;
-
-        case TRISTATE:          // if we are input, then we read the preset analog value
-            return analogValue;
-
-        case LOW:
-        case PULLDOWN:
-            return 0;
-
-        default:
-            return 0;
-    }
+    return (int)(((double)GetAnalogValue(vcc) * INT_MAX) / (double)vcc);
 }
 
 float Pin::GetAnalogValue(float vcc) {
@@ -108,7 +79,6 @@ void Pin::RegisterCallback(HasPinNotifyFunction *h) {
 }
 
 void Pin::SetInState(const Pin &p) { 
-    analogValue = p.analogValue;
     analogVal = p.analogVal;
 
     if(pinOfPort != 0) {
@@ -148,23 +118,19 @@ Pin::Pin(T_Pinstate ps) {
     switch (ps) {
         case HIGH: 
         case PULLUP:
-            analogValue = INT_MAX; 
             analogVal.setD(AnalogValue::ST_VCC);
             break;
 
         case LOW:
         case PULLDOWN:
-            analogValue = 0;
             analogVal.setD(AnalogValue::ST_GND);
             break;
 
         case TRISTATE:
-            analogValue = TRISTATE_ANALOG_VALUE;
             analogVal.setD(AnalogValue::ST_FLOATING);
             break;
 
         default:
-            analogValue = 0;
             analogVal.setD(AnalogValue::ST_GND); // is this right? Which cases use this?
             break;
     }
@@ -176,7 +142,6 @@ Pin::Pin() {
     mask = 0;
     
     outState = TRISTATE;
-    analogValue = TRISTATE_ANALOG_VALUE;
 }
 
 Pin::~Pin() {
@@ -190,7 +155,6 @@ Pin::Pin( unsigned char *parentPin, unsigned char _mask) {
     connectedTo = NULL;
     
     outState = TRISTATE;
-    analogValue = TRISTATE_ANALOG_VALUE;
 }
 
 Pin::Pin(const Pin& p) {
@@ -199,7 +163,6 @@ Pin::Pin(const Pin& p) {
     mask = 0;
     
     outState = p.outState;
-    analogValue = p.analogValue;
     analogVal = p.analogVal;
 }
 
@@ -210,7 +173,6 @@ Pin::Pin(float analog) {
     analogVal.setA(analog);
 
     outState = ANALOG;
-    analogValue = TRISTATE_ANALOG_VALUE; // old analog state is wrong!
 }
 
 void Pin::RegisterNet(Net *n) {
@@ -243,12 +205,21 @@ Pin::operator bool() const {
         return true;
 
     // maybe for TRISTATE not handled complete in simulavr... TODO
-    if((outState==ANALOG) || (outState==TRISTATE)) {
-        if((analogValue > (INT_MAX / 2)) ||
-           analogVal.analogValid())         // this part of condition isn't really correct, because it depends on Vcc level
+    if(outState==TRISTATE) {
+        // fix, because in SetInState the output state of connected pin is only transfered to analogVal!
+        if((analogVal.getD() == AnalogValue::ST_VCC) || (analogVal.getD() == AnalogValue::ST_FLOATING))
+            return true;
+        else if(analogVal.getD() == AnalogValue::ST_GND)
+            return false;
+        else // could this happen?
+            return false;
+    }
+    if(outState==ANALOG) {
+        if(analogVal.analogValid())         // this part of condition isn't really correct, because it depends on Vcc level
                                             // and this isn't known here!
             return true;
         else
+            // could this happen?
             return false;
     }
 
@@ -259,61 +230,44 @@ Pin& Pin::operator= (char c) {
     switch(c) {
         case 'S':
             outState = SHORTED;
-            analogValue = 0;
             analogVal.setD(AnalogValue::ST_GND);
             break;
             
         case 'H':
             outState = HIGH;
-            analogValue = INT_MAX;
             analogVal.setD(AnalogValue::ST_VCC);
             break;
             
         case 'h':
             outState = PULLUP;
-            analogValue = INT_MAX;
             analogVal.setD(AnalogValue::ST_VCC);
             break;
             
         case 't':
             outState = TRISTATE;
-            analogValue = TRISTATE_ANALOG_VALUE;
             analogVal.setD(AnalogValue::ST_FLOATING);
             break;
             
         case 'l':
             outState = PULLDOWN;
-            analogValue = 0;
             analogVal.setD(AnalogValue::ST_GND);
             break;
             
         case 'L':
             outState = LOW;
-            analogValue = 0;
             analogVal.setD(AnalogValue::ST_GND);
             break;
             
         case 'a':
             outState = ANALOG;
-            analogValue = 0;
             analogVal.setD(AnalogValue::ST_FLOATING); // set to floating state, analog value, but not set
             break;
             
         case 'A':
             outState = ANALOG_SHORTED;
-            analogValue = 0;
             analogVal.setD(AnalogValue::ST_GND);
             break;
     }
-
-    CalcPin();
-
-    return *this;
-}
-
-Pin& Pin::SetAnalog(int value) {
-    // outState == ANALOG?
-    analogValue = value;
 
     CalcPin();
 

@@ -36,7 +36,7 @@ class ScopePin : public Pin {
 
     public:
         ScopePin(Scope *s, unsigned int c ):scope(s), channel(c){};
-        void SetInState(const Pin& p) {
+        void SetInState(Pin& p) {
             scope->SetInStateForChannel(channel, p);    //transmit the pin state to the scope
         }
 };
@@ -61,7 +61,7 @@ Pin *Scope::GetPin(unsigned int n) {
     return vecPin[n];
 }
 
-void Scope::SetInStateForChannel(unsigned int channel, const Pin& p) {
+void Scope::SetInStateForChannel(unsigned int channel, Pin& p) {
     if ( lastVal[channel]!= p.GetAnalog() ) {
         ostringstream os;
         os << name << " ChangeValue " << SystemClock::Instance().GetCurrentTime() << " " << channel << " " << p.GetAnalog()<<endl;

@@ -75,6 +75,7 @@ class AnalogValue {
 #endif
         //! set a digital state, see enum definition
         void setD(int dig) { dState = dig; aValue = 0.0; }
+        int getD(void) const { return dState; }
         //! set analog value, no check to value range between ground and vcc
         void setA(float val) { dState = ST_ANALOG; aValue = val; }
         //! calculate real voltage potential, needs value of Vcc potential
@@ -97,7 +98,6 @@ class Pin {
     protected:
         unsigned char *pinOfPort; //!< points to HWPort::pin or NULL
         unsigned char mask; //!< byte mask for HWPort::pin
-        int analogValue; //!< analog input value, from 0 to INT_MAX
         AnalogValue analogVal; //!< "real" analog voltage value
 
         Net *connectedTo; //!< the connection to other pins (NULL, if not connected)
@@ -142,10 +142,9 @@ class Pin {
         virtual void RegisterNet(Net *n); //!< registers Net instance on pin
         virtual void UnRegisterNet(Net *n); //!< deletes Net instance registration for pin
         virtual Pin GetPin(void) { return *this;} //!< "cast method" to get back a Pin instance
-        int GetAnalog(void) const; //!< Returns analog input value of pin
+        int GetAnalog(void); //!< Get analog value as integer from 0 to INT_MAX (for backward compatibility, will be deprecated later)
         float GetRawAnalog(void) const { return analogVal.getRaw(); } //!< get back raw analog value (just variable content!)
         float GetAnalogValue(float vcc); //!< Returns real analog input value of pin
-        Pin& SetAnalog(int value);  //!< Sets the pin to an analog value
         Pin& SetAnalogValue(float value);  //!< Sets the pin to an real analog value
         void RegisterCallback(HasPinNotifyFunction *); //!< register a listener for input value change
         //! Update input values from output values

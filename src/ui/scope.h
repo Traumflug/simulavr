@@ -54,7 +54,7 @@ class Scope : public SimulationMember {
         virtual ~Scope();
         Pin *GetPin(unsigned int no); 
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){return 0;} //what we should step here?
-        void SetInStateForChannel(unsigned int channel, const Pin& p);
+        void SetInStateForChannel(unsigned int channel, Pin& p);
 };
 
 #endif
