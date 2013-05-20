@@ -11,6 +11,9 @@ AC_PREREQ([2.61])
 AC_CONFIG_MACRO_DIR([m4])
 AM_MAINTAINER_MODE
 
+AC_CHECK_LIB(dl, dlopen, EXTRA_LIBS="$EXTRA_LIBS -ldl")
+AC_CHECK_LIB([z], [deflate], [ EXTRA_LIBS="$EXTRA_LIBS -lz"], [ AC_MSG_ERROR([required library not found]) ])
+
 ####
 # check for OS and build system: MSYS/MingW
 ####
