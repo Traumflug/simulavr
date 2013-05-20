@@ -31,7 +31,7 @@ template<typename T_Key, typename T_Value>
 class InitMap : public std::map<T_Key, T_Value> {
     public:
         InitMap& operator<< ( const std::pair<T_Key, T_Value>& v ) {
-            insert( v );
+            this->insert( v );
             return *this;
         }
 };

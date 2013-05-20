@@ -46,7 +46,7 @@ public:
     void RemoveMinimum();
     bool ContainsValue(Value v) const;
     void Insert(Key k, Value v) {
-        resize(this->size()+1);
+        this->resize(this->size()+1);
         InsertInternal(k, v, this->size());
     }
     void RemoveMinimumAndInsert(Key k, Value v) {
