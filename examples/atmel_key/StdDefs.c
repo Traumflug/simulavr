@@ -115,7 +115,7 @@ void putchar(CHARU c)
 void putstr(CHARU *s)
    {
    int j;
-   for (j = 0; j <= strlen(s); j++)
+   for (j = 0; j <= strlen((char*)s); j++)
        putchar(*(s + j));
    CRLF();
    }
