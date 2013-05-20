@@ -137,14 +137,12 @@ int avr_op_BRBC::Trace() {
     traceOut << branch_opcodes_clear[INDEX_FROM_BITMASK(bitmask)]
              << " ->" << HexShort(offset * 2) << " ";
     unsigned int oldPC = core->PC;
+    string sym(core->Flash->GetSymbolAtAddress(core->PC+1+offset));
     int ret = this->operator()();
     
-    string sym(core->Flash->GetSymbolAtAddress(core->PC * 2));
-    if(oldPC + 1 != core->PC) {
-        traceOut << sym << " ";
-        for(int len = sym.length(); len < 30; len++)
-            traceOut << " ";
-    }
+    traceOut << sym << " ";
+    for(int len = sym.length(); len < 30; len++)
+        traceOut << " ";
 
     return ret;
 }
@@ -164,14 +162,12 @@ int avr_op_BRBS::Trace() {
     traceOut << branch_opcodes_set[INDEX_FROM_BITMASK(bitmask)]
              << " ->" << HexShort(offset * 2) << " ";
     unsigned int oldPC = core->PC;
+    string sym(core->Flash->GetSymbolAtAddress(core->PC+1+offset));
     int ret=this->operator()();
 
-    string sym(core->Flash->GetSymbolAtAddress(core->PC * 2));
-    if(oldPC + 1 != core->PC) {
-        traceOut << sym << " ";
-        for(int len = sym.length(); len < 30; len++)
-            traceOut << " ";
-    }
+    traceOut << sym << " ";
+    for(int len = sym.length(); len < 30; len++)
+        traceOut << " ";
 
     return ret;
 }
