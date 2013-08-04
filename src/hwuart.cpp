@@ -319,6 +319,7 @@ unsigned int HWUart::CpuCycleRx() {
 
                         }
                     } else { //stopbit was low so set framing error
+                        udrRead=rxDataTmp&0xff;
                         usr|=FE;
                     }
                     if (ucsrc&USBS) {
