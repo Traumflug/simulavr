@@ -129,7 +129,7 @@ function runConfCmd() {
   fi
   TMP=`mktemp`
   LOG=$HOME_DIR/log/$1.log
-  echo "[configure]" >> $LOG_CONFIG
+  echo "[$1]" >> $LOG_CONFIG
   echo "log=$LOG" >> $LOG_CONFIG
   echo "cmd=$C $PARAM_PYTHON_LDFLAGS $PARAM_EXTRA_LIBS" >> $LOG_CONFIG
   date "+start=%Y/%m/%d/%H/%M/%S" >> $LOG_CONFIG
@@ -138,10 +138,10 @@ function runConfCmd() {
   RES=`cat $TMP`
   echo "result=$RES" >> $LOG_CONFIG
   echo "" >> $LOG_CONFIG
-  LOG_STEPS="$LOG_STEPS configure"
+  LOG_STEPS="$LOG_STEPS $1"
   rm -f $TMP
   if [ ! $RES = 0 ]; then
-    writehtml "configure"
+    writehtml "$1"
     error "run 'configure' failed" 4
   fi
 }
