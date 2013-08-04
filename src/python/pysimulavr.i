@@ -36,6 +36,7 @@
 %include "std_vector.i"
 %include "std_iostream.i"
 %include "std_sstream.i"
+%include "types.h"
 
 namespace std {
    %template(DWordVector) vector<dword>;
@@ -53,7 +54,6 @@ namespace std {
   }
 }
 
-%include "types.h"
 %include "systemclocktypes.h"
 %include "simulationmember.h"
 
