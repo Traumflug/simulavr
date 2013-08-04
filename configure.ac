@@ -30,6 +30,11 @@ fi
 LT_INIT
 LT_PREREQ([2.2])
 AC_PROG_CXX
+AC_CHECK_PROG(CXX_PROG,${CXX},yes,no)
+if test ${CXX_PROG} = no ; then
+  # AC_PROG_CXX sets g++, if nothing is found, but if not found make will fail
+  AC_MSG_ERROR([C++ compiler ${CXX} not found],1)
+fi
 AC_PROG_SWIG(2.0.0)
 if test "x$SWIG_LIB" = "x"; then
   # fall back to SWIG version 1.3.x in case of SWIG 2.0.x not found!
@@ -124,6 +129,11 @@ AM_CONDITIONAL([USE_VERILOG_TOOLS],[test "x$IVERILOG" != "x" -a "x$VVP" != "x"])
 ####
 AC_CHECK_PROGS(TEX, [tex], [no])
 AM_CONDITIONAL([HAVE_TEX], [test x"${TEX}" != x"no"])
+AC_CHECK_PROG(MAKEINFO_PROG,makeinfo,yes,no)
+if test ${MAKEINFO_PROG} = no ; then
+  # makeinfo is used by creating info document
+  AC_MSG_ERROR([makeinfo not found],1)
+fi
 DX_DOXYGEN_FEATURE(OFF)
 DX_PDF_FEATURE(OFF)
 DX_PS_FEATURE(OFF)
