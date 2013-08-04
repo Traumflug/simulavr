@@ -3,7 +3,7 @@
 
 volatile int timer2_ticks;
 
-ISR(SIG_OUTPUT_COMPARE2) {
+ISR(TIMER2_COMP_vect) {
    timer2_ticks++;
 }
 

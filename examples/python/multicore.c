@@ -11,7 +11,7 @@
 volatile char cnt_irq = 0;         // IRQ counter
 volatile char cnt_res = 0;         // measurement value for time distance between events
 
-ISR(SIG_INTERRUPT0) {
+ISR(INT0_vect) {
   cnt_irq++;                       // increment event counter
   cnt_res = TCNT0;                 // save timer value = time distance to last event
   TCNT0 = 0;                       // reset timer value

@@ -4,11 +4,11 @@
 volatile int timer_ticks;
 volatile int input_capture;
 
-ISR(SIG_OVERFLOW1) {
+ISR(TIMER1_OVF_vect) {
    timer_ticks++;
 }
 
-ISR(SIG_INPUT_CAPTURE1) {
+ISR(TIMER1_CAPT_vect) {
   input_capture = ICR1L + (ICR1H << 8);
 }
 

@@ -49,14 +49,14 @@ void init_timer1(void) {
 
 #ifdef TMODE_PWM
 /* timer 1 interrupt: overflow */
-ISR(SIG_OVERFLOW1) { timer_ticks_overflow++; }
+ISR(TIMER1_OVF_vect) { timer_ticks_overflow++; }
 #else
 /* timer 1 interrupt: overflow, does not occur in CTC mode! */
-ISR(SIG_OVERFLOW1) { timer_ticks_overflow++; GTCCR = 0x18; }
+ISR(TIMER1_OVF_vect) { timer_ticks_overflow++; GTCCR = 0x18; }
 #endif
 
 /* timer 1 interrupt: OCR channel B */
-ISR(SIG_OUTPUT_COMPARE1B) { timer_ticks_compare_b++; }
+ISR(TIMER1_COMPB_vect) { timer_ticks_compare_b++; }
 
 int main(void) {
     init_port();

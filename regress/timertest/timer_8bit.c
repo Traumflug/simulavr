@@ -3,7 +3,7 @@
 
 volatile int timer_ticks;
 
-ISR(SIG_OVERFLOW0) {
+ISR(TIMER0_OVF_vect) {
    timer_ticks++;
 }
 

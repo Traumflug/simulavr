@@ -31,7 +31,11 @@ void set_port(void) {
     }
 }
 
-ISR(SIG_COMPARATOR) {
+#if defined(PROC_attiny25) || defined(PROC_atmega8) || defined(PROC_at90s4433) || defined(PROC_at90s8515) || defined(PROC_attiny2313) || defined(PROC_atmega16)
+ISR(ANA_COMP_vect) {
+#else
+ISR(ANALOG_COMP_vect) {
+#endif
     // set port according to comparator output
     set_port();
     // count isr counter

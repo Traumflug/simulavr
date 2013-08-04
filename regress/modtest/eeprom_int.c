@@ -12,7 +12,13 @@ typedef struct {
 } eep_t;
 eep_t EEMEM eep = { 0, 0x33 };
 
-ISR(SIG_EEPROM_READY) {
+#if defined(PROC_attiny25) || defined(PROC_atmega8) || defined(PROC_at90s4433)
+ISR(EE_RDY_vect) {
+#elif defined(PROC_attiny2313)
+ISR(EEPROM_READY_vect) {
+#else
+ISR(EE_READY_vect) {
+#endif
     // EEPROM cell written, reset EERIE
     EECR &= ~_BV(EERIE);
     complete = 1;

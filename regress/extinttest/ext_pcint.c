@@ -23,10 +23,10 @@ volatile unsigned char hs_cmd = 0;
 volatile unsigned char hs_data = 0;
 
 #if defined(__AVR_ATtiny2313__)
-  ISR(SIG_PIN_CHANGE) {
+  ISR(PCINT_vect) {
 #endif
 #if defined(__AVR_ATmega48__)
-  ISR(SIG_PIN_CHANGE1) {
+  ISR(PCINT1_vect) {
 #endif
   cnt_irq++;
 }

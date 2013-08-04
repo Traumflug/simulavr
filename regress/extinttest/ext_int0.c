@@ -89,12 +89,12 @@ volatile unsigned char hs_data = 0;
 volatile unsigned char dis_mask = 0;
 
 #if defined(TEST_INT1)
-  ISR(SIG_INTERRUPT1) {
+  ISR(INT1_vect) {
 #else
 # if defined(TEST_INT2_16)
-  ISR(SIG_INTERRUPT2) {
+  ISR(INT2_vect) {
 # else
-  ISR(SIG_INTERRUPT0) {
+  ISR(INT0_vect) {
 # endif
 #endif
   cnt_irq++;

@@ -24,7 +24,7 @@ void init(void) {
     CTLREG = 0xad;
 }
 
-ISR(SIG_ADC) {
+ISR(ADC_vect) {
     // read ADC value
     adc_value = ADCL | (ADCH << 8);
     // increment counter    

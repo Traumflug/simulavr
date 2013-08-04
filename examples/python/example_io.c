@@ -5,7 +5,7 @@ volatile int timer2_ticks;
 volatile int port_val;
 volatile int port_cnt;
 
-ISR(SIG_OUTPUT_COMPARE2) {
+ISR(TIMER2_COMP_vect) {
    timer2_ticks++;
 }
 

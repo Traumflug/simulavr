@@ -4,11 +4,11 @@
 volatile int timer_ticks;
 
 #ifdef PROC_atmega48
-ISR(SIG_OUTPUT_COMPARE2A) {
+ISR(TIMER2_COMPA_vect) {
    timer_ticks++;
 }
 #else
-ISR(SIG_OUTPUT_COMPARE2) {
+ISR(TIMER2_COMP_vect) {
    timer_ticks++;
 }
 #endif

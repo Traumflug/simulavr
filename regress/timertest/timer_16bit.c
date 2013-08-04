@@ -4,14 +4,14 @@
 volatile int timer_ticks;
 
 #ifdef T3TEST
-ISR(SIG_OVERFLOW3) {
+ISR(TIMER3_OVF_vect) {
    timer_ticks++;
 }
-ISR(SIG_OUTPUT_COMPARE3B) {
+ISR(TIMER3_COMPB_vect) {
    timer_ticks++;
 }
 #else
-ISR(SIG_OVERFLOW1) {
+ISR(TIMER1_OVF_vect) {
    timer_ticks++;
 }
 #endif
