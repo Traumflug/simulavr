@@ -72,14 +72,14 @@ void HWUart::SetUdr(unsigned char val) {
 
 void HWUart::SetUsr(unsigned char val) { 
     unsigned char usrold=usr;
+    usr = val;
 
-    if ( val & TXC) {
+    unsigned char irqold= ucr & usrold;
+    unsigned char irqnew= ucr & usr;
+
+    if ( usr & TXC) {
         usr &=0xff-TXC; //clear TXC if 1 written to TXC
     }
-
-    unsigned char irqold= ucr&usrold;
-    unsigned char irqnew= ucr&usr;
-
 
     unsigned char changed=irqold^irqnew;
     unsigned char setnew= changed&irqnew;
