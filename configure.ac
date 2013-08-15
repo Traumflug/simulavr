@@ -11,8 +11,29 @@ AC_PREREQ([2.61])
 AC_CONFIG_MACRO_DIR([m4])
 AM_MAINTAINER_MODE
 
-AC_CHECK_LIB(dl, dlopen, EXTRA_LIBS="$EXTRA_LIBS -ldl")
-AC_CHECK_LIB([z], [deflate], [ EXTRA_LIBS="$EXTRA_LIBS -lz"], [ AC_MSG_ERROR([required library not found]) ])
+####
+# check for libdl and libz, if it is necessary to link simulavr successful
+####
+AC_ARG_ENABLE(
+  libdl,
+  AC_HELP_STRING([--enable-libdl],
+    [check an link libdl and libz, use only for distributions or OS, where it's necessary to link all together]),
+    [
+      link_libdl_enable="yes"
+    ],[
+      link_libdl_enable="no"
+    ])
+AC_CHECK_LIB(dl, dlopen, [EXTRA_LIBS_LDL="yes"])
+AC_CHECK_LIB(z, deflate, [EXTRA_LIBS_LZ="yes"])
+if test "$link_libdl_enable" = "yes"; then
+  if test x"$EXTRA_LIBS_LDL" = x""; then
+    AC_MSG_ERROR([required library libdl not found])
+  fi
+  if test x"$EXTRA_LIBS_LZ" = x""; then
+    AC_MSG_ERROR([required library libz not found])
+  fi
+  EXTRA_LIBS="$EXTRA_LIBS -ldl -lz"
+fi
 
 ####
 # check for OS and build system: MSYS/MingW
