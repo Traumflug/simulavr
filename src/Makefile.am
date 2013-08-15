@@ -44,8 +44,8 @@ pysimulavr_wrap.cpp: $(PYTHON_MODUL_INTERFACE)
 $(PYTHON_MODUL_LIB): lib_pysimulavr.la
 if SYS_MINGW
 	$(CXX) -shared -o $(PYTHON_MODUL_LIB) \
-		$(addprefix .libs/,$(lib_pysimulavr_la_OBJECTS:.lo=.o)) .libs/libsim.a \
-		-lstdc++ -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty \
+		$(addprefix .libs/,$(lib_pysimulavr_la_OBJECTS:.lo=.o)) $(SIMULAVR_PROC_SOURCES:.cpp=.o) \
+                .libs/libsim.a -lstdc++ -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty \
 		$(EXTRA_LIBS) $(PYTHON_LDFLAGS)
 else
 	cp .libs/lib_pysimulavr.so $(PYTHON_MODUL_LIB)
@@ -66,10 +66,13 @@ FAB_CPP=avr_ATtiny2313.cpp avr_ATtiny15.cpp avr_ATmega8.cpp
 FAB_HEADER=avr_ATtiny2313.h avr_ATtiny15.h avr_ATmega8.h
 endif
 
+SIMULAVR_PROC_SOURCES = \
+  at4433.cpp at8515.cpp atmega668base.cpp atmega128.cpp at90canbase.cpp \
+  atmega8.cpp atmega1284abase.cpp attiny25_45_85.cpp atmega16_32.cpp \
+  attiny2313.cpp
+
 libsim_la_SOURCES = \
-  adcpin.cpp application.cpp at4433.cpp at8515.cpp atmega668base.cpp atmega128.cpp \
-  at90canbase.cpp atmega8.cpp atmega1284abase.cpp attiny25_45_85.cpp \
-  atmega16_32.cpp attiny2313.cpp externalirq.cpp \
+  $(SIMULAVR_PROC_SOURCES) adcpin.cpp application.cpp externalirq.cpp \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp flashprog.cpp hardware.cpp helper.cpp cmd/gdbserver.cpp \
   hwacomp.cpp hwad.cpp hweeprom.cpp avrsignature.cpp avrreadelf.cpp \
