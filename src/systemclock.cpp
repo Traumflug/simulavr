@@ -148,6 +148,8 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
         currentTime = syncMembers.begin()->first;
         SystemClockOffset nextStepIn_ns = -1;
         
+        syncMembers.RemoveMinimum();
+
         // do a step on simulation member
         res = core->Step(untilCoreStepFinished, &nextStepIn_ns);
         
@@ -159,9 +161,7 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
         // be called anymore!
         
         if(nextStepIn_ns > 0)
-            syncMembers.RemoveMinimumAndInsert(nextStepIn_ns, core);
-        else
-            syncMembers.RemoveMinimum();
+            syncMembers.Insert(nextStepIn_ns, core);
 
         // handle async simulation members
         amiEnd = asyncMembers.end();
