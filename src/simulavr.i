@@ -3,6 +3,7 @@
 %include std_string.i
 
 %{
+#include "config.h"
 #include "systemclocktypes.h"
 #include "traceval.h"
 #include "avrdevice.h"
@@ -70,6 +71,7 @@ namespace std {
     }
 }
 
+%include "config.h"
 %include "ui/extpin.h"
 %include "net.h"
 %include "cmd/gdb.h"
