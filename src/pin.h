@@ -146,6 +146,7 @@ class Pin {
         float GetRawAnalog(void) const { return analogVal.getRaw(); } //!< get back raw analog value (just variable content!)
         float GetAnalogValue(float vcc); //!< Returns real analog input value of pin
         Pin& SetAnalogValue(float value);  //!< Sets the pin to an real analog value
+        void SetRawAnalog(float value) { analogVal.setA(value); }
         void RegisterCallback(HasPinNotifyFunction *); //!< register a listener for input value change
         //! Update input values from output values
         /*! If there is no connection to other pins, then it will reflect the own
