@@ -4,15 +4,11 @@
 
 Author: Knut Schwichtenberg <kschwi@web.de>
 
+Build the example (after configuring and building in the main directory):
 
-Joel Sherrill Notes
-===================
+  make
 
-3 March 2009
-Temporarily, the Makefile.am is a real Makefile. The rest of the
-contents of this directory appear to work with the autotools
-tree but the Makefile Knut provided has not yet been converted to
-a Makefile.am properly. Until this is complete
+Run the example:
 
-make -f Makefile.notauto 
-make -f Makefile.notauto clean
+  ../../src/simulavr -d atmega128 --file stdiodemo.elf
+
