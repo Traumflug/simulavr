@@ -31,10 +31,12 @@
 #include "elfio/elfio.hpp"
 
 #include <string>
+#include <cstring>
 #include <map>
 #include <limits>
 
 #include "avrdevice_impl.h"
+#include "simulavr_info.h"
 
 #include "avrreadelf.h"
 
@@ -204,11 +206,44 @@ void ELFLoad(const AvrDevice * core) {
                     /* lock bits starting from 0x830000, do nothing */;
                 } else if(value >= 0x840000 && value < 0x840400) {
                     /* signature space starting from 0x840000, do nothing */;
+                } else if(!strncmp("siminfo" , name.c_str(), 7)) {
+                    /* SIMINFO symbol, do nothing */
                 } else
                     avr_warning("Unknown symbol address range found! (symbol='%s', address=0x%lx)",
                                 name.c_str(),
                                 value);
 
+            }
+        }
+        if(psec->get_name() == ".siminfo") {
+            /*
+             * You wonder why SIMINFO is read here, ignoring symbols?
+             * Well, doing things this way is pretty independent from ELF
+             * internals, other than finding the .siminfo section start pointer.
+             * Accordingly, we can add pretty much anything, as long as the
+             * interpretation here matches what's given in simulavr_info.h.
+             */
+            ELFIO::Elf_Xword filesize = psec->get_size();
+            const char *data = psec->get_data();
+            const char *data_ptr = data, *data_end = data + filesize;
+
+            while(data_ptr < data_end) {
+                char tag = *data_ptr++;
+                switch(tag) {
+                  case SIMINFO_TAG_DEVICE:
+                    avr_warning("device is %s", data_ptr);
+                    while(*data_ptr != '\0')
+                      data_ptr++;
+                    data_ptr++; // the '\0' its self
+                    break;
+                  case SIMINFO_TAG_CPUFREQUENCY:
+                    avr_warning("frequency is %u", *(uint32_t *)data_ptr);
+                    data_ptr += sizeof(uint32_t);
+                    break;
+                  default:
+                    avr_warning("Unknown tag in ELF .siminfo section: %hu", tag);
+                    data_ptr++;
+                }
             }
         }
     }
