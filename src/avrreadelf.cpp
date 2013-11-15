@@ -30,9 +30,11 @@
 #endif
 
 #include <string>
+#include <cstring>
 #include <map>
 
 #include "avrdevice_impl.h"
+#include "simulavr_info.h"
 
 #include "avrreadelf.h"
 
@@ -193,7 +195,9 @@ void ELFLoad(const AvrDevice * core) {
             } else if(vma >= 0x840000 && vma < 0x840400) {
                 /* signature space starting from 0x840000, do nothing */;
             } else
-                avr_warning("Unknown symbol address range found! (symbol='%s', address=0x%x)", symbol_table[i]->name, vma);
+                if ( ! strcmp(symbol_table[i]->name, ".siminfo") &&
+                     ! strcmp(symbol_table[i]->name, "siminfo"))
+                    avr_warning("Unknown symbol address range found! (symbol='%s', address=0x%x)", symbol_table[i]->name, vma);
         }
         free(symbol_table);
     } else
@@ -203,7 +207,7 @@ void ELFLoad(const AvrDevice * core) {
     sec = abfd->sections;
     while(sec != 0) {
         // only loadable sections
-        if(sec->flags & SEC_LOAD) {
+        if(sec->flags & SEC_LOAD && strcmp(sec->name, ".siminfo")) {
             int size;
             size = sec->size;
 
@@ -247,6 +251,47 @@ void ELFLoad(const AvrDevice * core) {
             // free allocated space
             free(tmp);
         }
+        else if ( ! strcmp(sec->name, ".siminfo")) {
+          avr_warning(".siminfo section found!");
+          /*
+           * You wonder why the .siminfo section is read here, while this
+           * stuff also shows up as symbols, which are read above already?
+           * Well, doing things this way is pretty independent from ELF
+           * internals, other than finding the .siminfo section start pointer.
+           * Accordingly, we can add pretty much anything, as long as the
+           * interpretation here matches what's given in simulavr_info.h.
+           */
+          int size = sec->size;
+          unsigned char *data, *data_ptr, *data_end;
+
+          data = (unsigned char *)malloc(size);
+          if (data == NULL)
+            break;
+          bfd_get_section_contents(abfd, sec, data, 0, size);
+
+          data_ptr = data;
+          data_end = data + size;
+          while (data_ptr < data_end) {
+            char tag = *data_ptr++;
+            switch (tag) {
+              case SIMINFO_TAG_DEVICE:
+                avr_warning("device is %s", data_ptr);
+                while (*data_ptr != '\0')
+                  data_ptr++;
+                data_ptr++; // the '\0' its self
+                break;
+              case SIMINFO_TAG_CPUFREQUENCY:
+                avr_warning("frequency is %u", *(uint32_t *)data_ptr);
+                data_ptr += sizeof(uint32_t);
+                break;
+              default:
+                avr_warning("Unknown tag in ELF .siminfo section: %hu", tag);
+                data_ptr++;
+            }
+          }
+          free(data);
+        }
+
 
         sec = sec->next;
     }

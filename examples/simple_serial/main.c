@@ -36,6 +36,26 @@
 
 #include <avr/interrupt.h>
 
+/*
+ * Here we tell SimulAVR for which device and which frequency we build this
+ * code. The nice thing is, these macros add a section to the ELF file, so
+ * they can be read by SimulAVR, but they're also ignored when converted to
+ * an ihex file for hardware upload. Accordingly, the executed binary for
+ * SimulAVR and real hardware is the same, no need to recompile for one or
+ * another. The more important result of this is, behaviour is also exactly
+ * the same, no extra cycles for serving simulator matters.
+ *
+ * One small caveat: To stop the linker from stripping this section, avr-gcc
+ * needs an extra parameter when linking the binary (see Makefile.am):
+ *
+ *   -Wl,--section-start=.siminfo=0x900000
+ *
+ * For details on these macros, see the comments in simulavr_info.h.
+ */
+#include "../../src/simulavr_info.h"
+SIMINFO_DEVICE("atmega644");
+SIMINFO_CPUFREQUENCY(F_CPU);
+
 
 // This is all we need:
 int main (void) {
