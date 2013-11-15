@@ -10,6 +10,7 @@ AVR_GCC = @AVR_GCC@
 AVR_CPU = atmega644
 AVR_FREQUENCY = 20000000
 AVR_CFLAGS = -g -O2 -mmcu=$(AVR_CPU) -DF_CPU=$(AVR_FREQUENCY)
+AVR_CFLAGS += -Wl,--section-start=.siminfo=0x900000
 AVR_OBJS = main.o serial.o
 SIMULAVR_ARGS = -d $(AVR_CPU) -f $(EXAMPLE).elf
 
