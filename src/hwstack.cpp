@@ -322,8 +322,7 @@ void ThreadList::OnPop()
 	new_thread->m_ip = 0x0000;
 	new_thread->m_alive = true;
 
-    if(global_verbose_on)
-        fprintf(stderr, "Context switch at PC 0x%05x from thread %d to %d\n", addr, m_cur_thread, n);
+    avr_message("Context switch at PC 0x%05x from thread %d to %d\n", addr, m_cur_thread, n);
     m_cur_thread = n;
 }
 

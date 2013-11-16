@@ -128,6 +128,9 @@ void SystemConsoleHandler::TraceNextLine(void) {
 }
 
 void SystemConsoleHandler::vfmessage(const char *fmt, ...) {
+    if ( ! global_verbose_on)
+        return;
+
     va_list ap;
     snprintf(formatStringBuffer, sizeof(formatStringBuffer),
              "MESSAGE %s", fmt);
