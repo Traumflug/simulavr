@@ -36,6 +36,7 @@
 #include <limits>
 
 #include "avrdevice_impl.h"
+#include "avrsignature.h"
 #include "simulavr_info.h"
 
 #include "avrreadelf.h"
@@ -129,7 +130,7 @@ void ELFLoad(const AvrDevice * core) {
     fclose(f);
 }
 
-unsigned int ELFGetSignature(const char *filename) {
+unsigned int ELFGetDeviceNameAndSignature(const char *filename, char *devicename) {
     return std::numeric_limits<unsigned int>::max();
 }
 
@@ -231,7 +232,7 @@ void ELFLoad(const AvrDevice * core) {
                 char tag = *data_ptr++;
                 switch(tag) {
                   case SIMINFO_TAG_DEVICE:
-                    avr_warning("device is %s", data_ptr);
+                    // Device name. Handled in ELFGetDeviceNameAndSignature().
                     while(*data_ptr != '\0')
                       data_ptr++;
                     data_ptr++; // the '\0' its self
@@ -298,8 +299,9 @@ void ELFLoad(const AvrDevice * core) {
     }
 }
 
-unsigned int ELFGetSignature(const char *filename) {
+unsigned int ELFGetDeviceNameAndSignature(const char *filename, char *devicename) {
     unsigned int signature = std::numeric_limits<unsigned int>::max();
+    unsigned int new_sig = 0;
     ELFIO::elfio reader;
 
     if(!reader.load(filename))
@@ -310,33 +312,110 @@ unsigned int ELFGetSignature(const char *filename) {
                   filename,
                   reader.get_machine());
 
-    ELFIO::Elf_Half seg_num = reader.segments.size();
+    // Command line takes precedence.
+    if(!strcmp(devicename, "unknown")) {
+        ELFIO::Elf_Half seg_num = reader.segments.size();
 
-    for(ELFIO::Elf_Half i = 0; i < seg_num; i++) {
-        ELFIO::segment* pseg = reader.segments[i];
+        for(ELFIO::Elf_Half i = 0; i < seg_num; i++) {
+            ELFIO::segment* pseg = reader.segments[i];
 
-        if(pseg->get_type() == PT_LOAD) {
-            ELFIO::Elf_Xword  filesize = pseg->get_file_size();
-            ELFIO::Elf64_Addr vma = pseg->get_virtual_address();
+            if(pseg->get_type() == PT_LOAD) {
+                ELFIO::Elf_Xword  filesize = pseg->get_file_size();
+                ELFIO::Elf64_Addr vma = pseg->get_virtual_address();
 
-            if(filesize == 0)
-                continue;
+                if(filesize == 0)
+                    continue;
 
-            if(vma >= 0x840000 && vma < 0x840400) {
-                // read and check signature, if available, space from 0x840000 to 0x840400
-                if(filesize != 3)
-                    avr_error("wrong device signature size in elf file, expected=3, given=%lu",
-                              filesize);
-                else {
-                    const unsigned char* data = (const unsigned char*)pseg->get_data();
+                if(vma >= 0x840000 && vma < 0x840400) {
+                    // read and check signature, if available, space from 0x840000 to 0x840400
+                    if(filesize != 3)
+                        avr_error("wrong device signature size in elf file, "
+                                  "expected=3, given=%lu", filesize);
+                    else {
+                        const unsigned char* data = (const unsigned char*)pseg->get_data();
 
-                    signature = (((data[2] << 8) + data[1]) << 8) + data[0];
-                    break;
+                        signature = (((data[2] << 8) + data[1]) << 8) + data[0];
+                        break;
+                    }
                 }
             }
         }
+
+        ELFIO::Elf_Half sec_num = reader.sections.size();
+
+        for(ELFIO::Elf_Half i = 0; i < sec_num; i++) {
+            ELFIO::section* psec = reader.sections[i];
+
+            if(psec->get_name() == ".siminfo") {
+                ELFIO::Elf_Xword filesize = psec->get_size();
+                const char *data = psec->get_data();
+                const char *data_ptr = data, *data_end = data + filesize;
+
+                while(data_ptr < data_end) {
+                    char tag = *data_ptr++;
+                    switch(tag) {
+                      case SIMINFO_TAG_DEVICE:
+                        strncpy(devicename, data_ptr, 1024);
+                        devicename[1023] = '\0'; // safety
+                        while(*data_ptr != '\0')
+                            data_ptr++;
+                        data_ptr++; // the '\0' its self
+                        break;
+                      case SIMINFO_TAG_CPUFREQUENCY:
+                        // Handled in ELF_Load().
+                        data_ptr += sizeof(uint32_t);
+                        break;
+                      default:
+                        // Unknown tag, warning given in ELFLoad().
+                        data_ptr++;
+                    }
+                }
+            }
+        }
+
+        if(strcmp(devicename, "unknown")) {
+            // We found a device name, find the signature of _this_ one.
+            std::map<std::string, unsigned int>::iterator cur =
+                AvrNameToSignatureMap.find(devicename);
+            if(cur != AvrNameToSignatureMap.end()) {
+                new_sig = cur->second;
+            } else {
+                avr_warning("signature for device '%s' not found", devicename);
+            }
+        }
+        if(signature != 0) {
+            if(new_sig != 0 && signature != new_sig) {
+                avr_warning("ELF signature 0x%x taking precedence over "
+                            "ELF siminfo device name %s",
+                            signature, devicename);
+            }
+        } else
+            signature = new_sig;
+    }
+    else {
+        // We have a device name from the command line.
+        std::map<std::string, unsigned int>::iterator cur =
+            AvrNameToSignatureMap.find(devicename);
+        if(cur != AvrNameToSignatureMap.end()) {
+            signature = cur->second;
+        } else {
+            avr_warning("signature for device '%s' not found", devicename);
+        }
     }
 
+    // If we've found _anything_, we've a signature now.
+    if(signature != 0) {
+        std::map<unsigned int, std::string>::iterator cur =
+            AvrSignatureToNameMap.find(signature);
+        if(cur != AvrSignatureToNameMap.end()) {
+            strncpy(devicename, cur->second.c_str(), 1024);
+        } else {
+            // Assume signatures found by device name never get here.
+            avr_warning("unknown signature in ELF file: 0x%x", signature);
+        }
+    }
+
+    avr_message("Device name is %s", devicename);
     return signature;
 }
 

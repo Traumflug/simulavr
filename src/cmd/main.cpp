@@ -26,6 +26,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cstring>
 #include <map>
 #include <limits>
 using namespace std;
@@ -275,7 +276,6 @@ int main(int argc, char *argv[]) {
                 break;
             
             case 'd':
-                avr_message("Device to simulate: %s", optarg);
                 devicename = optarg;
                 break;
             
@@ -350,35 +350,17 @@ int main(int argc, char *argv[]) {
     
     /* check, if devicename is given or get it out from elf file, if given */
     unsigned int sig;
-    if(devicename == "unknown") {
-        // option -d | --device not given
-        if(filename != "unknown") {
-            // filename given, try to get signature
-            sig = ELFGetSignature(filename.c_str());
-            if(sig != numeric_limits<unsigned int>::max()) {
-                // signature in elf found, try to get devicename
-                std::map<unsigned int, std::string>::iterator cur  = AvrSignatureToNameMap.find(sig);
-                if(cur != AvrSignatureToNameMap.end()) {
-                    // devicename found
-                    devicename = cur->second;
-                } else {
-                    avr_warning("unknown signature in elf file '%s': 0x%x", filename.c_str(), sig);
-                }
-            }
-        }
+    char *new_devicename = (char *)malloc(1024); // can't be static
+
+    strncpy(new_devicename, devicename.c_str(), 1024);
+    if(filename != "unknown") {
+        sig = ELFGetDeviceNameAndSignature(filename.c_str(), new_devicename);
     }
 
     /* now we create the device and set device name and signature */
-    AvrDevice *dev1 = AvrFactory::instance().makeDevice(devicename.c_str());
-    std::map<std::string, unsigned int>::iterator cur  = AvrNameToSignatureMap.find(devicename);
-    if(cur != AvrNameToSignatureMap.end()) {
-        // signature found
-        sig = cur->second;
-    } else {
-        avr_warning("signature for device '%s' not found", devicename.c_str());
-        sig = -1;
-    }
-    dev1->SetDeviceNameAndSignature(devicename, sig);
+    AvrDevice *dev1 = AvrFactory::instance().makeDevice(new_devicename);
+    dev1->SetDeviceNameAndSignature(new_devicename, sig);
+    free(new_devicename);
     
     /* We had to wait with dumping the available tracing values
       until the device has been created! */
