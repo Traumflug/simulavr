@@ -45,7 +45,7 @@ Report bugs to <bug-automake@gnu.org>.
 EOF
     exit $?
     ;;
-  -v | --v*)
+  -V | --v*)
     echo "mdate-sh $scriptversion"
     exit $?
     ;;

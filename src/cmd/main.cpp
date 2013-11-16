@@ -120,7 +120,7 @@ const char Usage[] =
     "-e --writetoexit <offset>\n"
     "                      add a special register at IO-offset\n"
     "                      which exits simulator run\n"
-    "-V --verbose          output some hints to console\n"
+    "-v --verbose          output some hints to console\n"
     "-T --terminate <label> or <address>\n"
     "                      stops simulation if PC runs on <label> or <address>\n"
     "-B --breakpoint <label> or <address>\n"
@@ -130,7 +130,7 @@ const char Usage[] =
     "                      <tracer>[:further-options ...]\n"
     "-o <trace-value-file> Specifies a file into which all available trace value names\n"
     "                      will be written.\n"
-    "-v --version          print out version and exit immediately\n"
+    "-V --version          print out version and exit immediately\n"
     "-h --help             print this help\n"
     "\n";
 
@@ -175,13 +175,13 @@ int main(int argc, char *argv[]) {
             {"maxruntime", 1, 0, 'm'},
             {"nogdbwait", 0, 0, 'n'},
             {"trace", 1, 0, 't'},
-            {"version", 0, 0, 'v'},
+            {"version", 0, 0, 'V'},
             {"cpufrequency", 1, 0, 'F'},
             {"readfrompipe", 1, 0, 'R'},
             {"writetopipe", 1, 0, 'W'},
             {"writetoabort", 1, 0, 'a'},
             {"writetoexit", 1, 0, 'e'},
-            {"verbose", 0, 0, 'V'},
+            {"verbose", 0, 0, 'v'},
             {"terminate", 1, 0, 'T'},
             {"breakpoint", 1, 0, 'B'},
             {"irqstatistic", 0, 0, 's'},
@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
                 terminationArgs.push_back(optarg);
                 break;
             
-            case 'V':
+            case 'v':
                 global_verbose_on = 1;
                 break;
             
@@ -301,7 +301,7 @@ int main(int argc, char *argv[]) {
                 sysConHandler.SetTraceFile(optarg, linestotrace);
                 break;
             
-            case 'v':
+            case 'V':
                 cout << "SimulAVR " << VERSION << endl
                      << "See documentation for copyright and distribution terms" << endl
                      << endl;

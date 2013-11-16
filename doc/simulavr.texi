@@ -179,9 +179,9 @@ no matter if it is ever reached or not.
 run with user interface for external pin handling at port 7777. This
 does not open any graphics but activates the interface to communicate
 with the environment simulation.
-@item -v --version
+@item -V --version
 show the software version of simulavr
-@item -V --verbose
+@item -v --verbose
 output some hints to console
 @item -W --writetopipe <offset>,<file>
 add a special pipe register to device at IO-Offset and opens <file> for writing
