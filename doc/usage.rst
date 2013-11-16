@@ -8,10 +8,10 @@ Invoke simulavr::
 Common options
 --------------
 
-``-v, --version``
+``-V, --version``
   show the software version of simulavr
   
-``-V, --verbose``
+``-v, --verbose``
   output some hints to console
   
 ``-h, --help``
