@@ -34,6 +34,7 @@
 #include <map>
 
 #include "avrdevice_impl.h"
+#include "avrsignature.h"
 #include "simulavr_info.h"
 
 #include "avrreadelf.h"
@@ -127,7 +128,7 @@ void ELFLoad(const AvrDevice * core) {
     fclose(f);
 }
 
-unsigned int ELFGetSignature(const char *filename) {
+unsigned int ELFGetDeviceNameAndSignature(const char *filename, char * devicename) {
     return -1;
 }
 #endif
@@ -275,7 +276,7 @@ void ELFLoad(const AvrDevice * core) {
             char tag = *data_ptr++;
             switch (tag) {
               case SIMINFO_TAG_DEVICE:
-                avr_warning("device is %s", data_ptr);
+                // Device name. Handled in ELFGetDeviceNameAndSignature().
                 while (*data_ptr != '\0')
                   data_ptr++;
                 data_ptr++; // the '\0' its self
@@ -299,41 +300,111 @@ void ELFLoad(const AvrDevice * core) {
     bfd_close(abfd);
 }
 
-unsigned int ELFGetSignature(const char *filename) {
-    bfd *abfd;
-    asection *sec;
-    unsigned int signature = -1;
+unsigned int ELFGetDeviceNameAndSignature(const char *filename, char *devicename) {
+    unsigned int signature = 0, new_sig = 0;
 
-    bfd_init();
-    abfd = bfd_openr(filename, NULL);
+    // Command line takes precedence.
+    if ( ! strcmp(devicename, "unknown")) {
+        bfd *abfd;
+        asection *sec;
 
-    if((abfd != NULL) && (bfd_check_format(abfd, bfd_object) == TRUE)) {
-        sec = abfd->sections;
-        while(sec != 0) {
-            if(sec->flags & SEC_LOAD) {
+        bfd_init();
+        abfd = bfd_openr(filename, NULL);
+
+        if((abfd != NULL) && (bfd_check_format(abfd, bfd_object) == TRUE)) {
+            sec = abfd->sections;
+            while(sec != 0) {
                 int size = sec->size;
-                unsigned char *tmp = (unsigned char *)malloc(size);
+                char *tmp = (char *)malloc(size);
 
-                bfd_get_section_contents(abfd, sec, tmp, 0, size);
+                if(sec->flags & SEC_LOAD) {
 
-                if(sec->vma >= 0x840000 && sec->vma < 0x840400) {
-                    // read and check signature, if available, space from 0x840000 to 0x840400
-                    if(size != 3) {
-                        free(tmp); // free memory before abort program
-                        avr_error("wrong device signature size in elf file, expected=3, given=%d", size);
-                    } else
-                        signature = (((tmp[2] << 8) + tmp[1]) << 8) + tmp[0];
+                    bfd_get_section_contents(abfd, sec, tmp, 0, size);
+
+                    if(sec->vma >= 0x840000 && sec->vma < 0x840400) {
+                        // read and check signature, if available, space from 0x840000 to 0x840400
+                        if(size != 3) {
+                            free(tmp); // free memory before abort program
+                            avr_error("wrong device signature size in elf file, expected=3, given=%d", size);
+                        } else
+                            signature = (((tmp[2] << 8) + tmp[1]) << 8) + tmp[0];
+                    }
                 }
 
-                free(tmp);
-            }
+                if ( ! strcmp(sec->name, ".siminfo")) {
+                    char *data_ptr, *data_end;
 
-            sec = sec->next;
+                    data_ptr = tmp;
+                    data_end = tmp + size;
+                    while (data_ptr < data_end) {
+                        char tag = *data_ptr++;
+                        switch (tag) {
+                          case SIMINFO_TAG_DEVICE:
+                            strncpy(devicename, data_ptr, 1024);
+                            devicename[1023] = '\0'; // safety
+                            while (*data_ptr != '\0')
+                                data_ptr++;
+                            data_ptr++; // the '\0' its self
+                            break;
+                          case SIMINFO_TAG_CPUFREQUENCY:
+                            // Handled in ELF_Load().
+                            data_ptr += sizeof(uint32_t);
+                            break;
+                          default:
+                            // Unknown tag, warning given in ELFLoad().
+                            data_ptr++;
+                        }
+                    }
+                }
+                free(tmp);
+                sec = sec->next;
+            }
+            bfd_close(abfd);
         }
 
-        bfd_close(abfd);
+        if (strcmp(devicename, "unknown")) {
+            // We found a device name, find the signature of _this_ one.
+            std::map<std::string, unsigned int>::iterator cur =
+                AvrNameToSignatureMap.find(devicename);
+            if (cur != AvrNameToSignatureMap.end()) {
+                new_sig = cur->second;
+            } else {
+                avr_warning("signature for device '%s' not found", devicename);
+            }
+        }
+
+        if (signature != 0) {
+            if (new_sig != 0 && signature != new_sig) {
+                avr_warning("ELF signature 0x%x taking precedence over ELF siminfo device name %s",
+                            signature, devicename);
+            }
+        } else
+            signature = new_sig;
+    }
+    else {
+        // We have a device name from the command line.
+        std::map<std::string, unsigned int>::iterator cur =
+            AvrNameToSignatureMap.find(devicename);
+        if (cur != AvrNameToSignatureMap.end()) {
+            signature = cur->second;
+        } else {
+            avr_warning("signature for device '%s' not found", devicename);
+        }
     }
 
+    // If we've found _anything_, we've a signature now.
+    if (signature != 0) {
+        std::map<unsigned int, std::string>::iterator cur =
+            AvrSignatureToNameMap.find(signature);
+        if (cur != AvrSignatureToNameMap.end()) {
+            strncpy(devicename, cur->second.c_str(), 1024);
+        } else {
+            // Assume signatures found by device name never get here.
+            avr_warning("unknown signature in ELF file: 0x%x", signature);
+        }
+    }
+
+    avr_message("Device name is %s", devicename);
     return signature;
 }
 #endif

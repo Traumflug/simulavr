@@ -28,7 +28,7 @@
 
 #include "avrdevice.h"
 
-unsigned int ELFGetSignature(const char *filename);
+unsigned int ELFGetDeviceNameAndSignature(const char *filename, char *devicename);
 void ELFLoad(const AvrDevice * core);
 
 #endif
