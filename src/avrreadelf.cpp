@@ -89,18 +89,18 @@ typedef struct {
 } Elf32_Phdr;
 
 void ELFLoad(const AvrDevice * core) {
-    FILE * f = fopen(core->actualFilename.c_str(), "rb");
+    FILE * f = fopen(core->GetFname().c_str(), "rb");
     if(f == NULL)
-        avr_error("Could not open file: %s", core->actualFilename.c_str());
+        avr_error("Could not open file: %s", core->GetFname().c_str());
 
     Elf32_Ehdr header;
     fread(&header, sizeof(header), 1, f);
     if(header.e_ident[0] != 0x7F || header.e_ident[1] != 'E'
         || header.e_ident[2] != 'L' || header.e_ident[3] != 'F')
-        avr_error("File '%s' is not an ELF file", core->actualFilename.c_str());
+        avr_error("File '%s' is not an ELF file", core->GetFname().c_str());
     // TODO: fix endianity in header
     if(header.e_machine != 83)
-        avr_error("ELF file '%s' is not for Atmel AVR architecture (%d)", core->actualFilename.c_str(), header.e_machine);
+        avr_error("ELF file '%s' is not for Atmel AVR architecture (%d)", core->GetFname().c_str(), header.e_machine);
 
     for(int i = 0; i < header.e_phnum; i++) {
         fseek(f, header.e_phoff + i * header.e_phentsize, SEEK_SET);
@@ -115,7 +115,7 @@ void ELFLoad(const AvrDevice * core) {
             continue;  // not into a Flash
         if(progHeader.p_filesz != progHeader.p_memsz) {
             avr_error("Segment sizes 0x%x and 0x%x in ELF file '%s' must be the same",
-                progHeader.p_filesz, progHeader.p_memsz, core->actualFilename.c_str());
+                progHeader.p_filesz, progHeader.p_memsz, core->GetFname().c_str());
         }
         unsigned char * tmp = new unsigned char[progHeader.p_filesz];
         fseek(f, progHeader.p_offset, SEEK_SET);
@@ -134,20 +134,20 @@ unsigned int ELFGetDeviceNameAndSignature(const char *filename, char * devicenam
 #endif
 
 #ifndef _MSC_VER
-void ELFLoad(const AvrDevice * core) {
+void ELFLoad(AvrDevice * core) {
     bfd *abfd;
     asection *sec;
 
     // open file
     bfd_init();
-    abfd = bfd_openr(core->actualFilename.c_str(), NULL);
+    abfd = bfd_openr(core->GetFname().c_str(), NULL);
 
     if(abfd == NULL)
-        avr_error("Could not open file: %s", core->actualFilename.c_str());
+        avr_error("Could not open file: %s", core->GetFname().c_str());
 
     // check format
     if(bfd_check_format(abfd, bfd_object) == FALSE)
-        avr_error("File '%s' isn't a elf object", core->actualFilename.c_str());
+        avr_error("File '%s' isn't a elf object", core->GetFname().c_str());
 
     // reading out the symbols
     long storage_needed;
@@ -202,7 +202,7 @@ void ELFLoad(const AvrDevice * core) {
         }
         free(symbol_table);
     } else
-        avr_warning("Elf file '%s' has no symbol table!", core->actualFilename.c_str());
+        avr_warning("Elf file '%s' has no symbol table!", core->GetFname().c_str());
 
     // load program, data and - if available - eeprom, fuses and signature
     sec = abfd->sections;
@@ -242,9 +242,10 @@ void ELFLoad(const AvrDevice * core) {
                     avr_error("wrong device signature size in elf file, expected=3, given=%d", size);
                 } else {
                     unsigned int sig = (((tmp[2] << 8) + tmp[1]) << 8) + tmp[0];
-                    if(core->devSignature != (unsigned int)-1 && sig != core->devSignature) {
+                    if(core->GetDeviceSignature() != (unsigned int)-1 &&
+                       sig != core->GetDeviceSignature()) {
                         free(tmp); // free memory before abort program
-                        avr_error("wrong device signature, expected=0x%x, given=0x%x", core->devSignature, sig);
+                        avr_error("wrong device signature, expected=0x%x, given=0x%x", core->GetDeviceSignature(), sig);
                     }
                 }
             }
@@ -253,7 +254,6 @@ void ELFLoad(const AvrDevice * core) {
             free(tmp);
         }
         else if ( ! strcmp(sec->name, ".siminfo")) {
-          avr_warning(".siminfo section found!");
           /*
            * You wonder why the .siminfo section is read here, while this
            * stuff also shows up as symbols, which are read above already?
@@ -282,7 +282,7 @@ void ELFLoad(const AvrDevice * core) {
                 data_ptr++; // the '\0' its self
                 break;
               case SIMINFO_TAG_CPUFREQUENCY:
-                avr_warning("frequency is %u", *(uint32_t *)data_ptr);
+                core->SetClockFreq((SystemClockOffset)1000000000 / *(uint32_t *)data_ptr);
                 data_ptr += sizeof(uint32_t);
                 break;
               default:
