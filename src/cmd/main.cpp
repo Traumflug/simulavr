@@ -257,37 +257,31 @@ int main(int argc, char *argv[]) {
                     cerr << "maxRunTime is zero" << endl;
                     exit(1);
                 }
-                if(global_verbose_on)
-                    cout << "Maximum Run Time: " << maxRunTime << endl;
+                avr_message("Maximum Run Time: %lld", maxRunTime);
                 break;
             
             case 'u':
-                if(global_verbose_on)
-                    cout << "Run with User Interface at Port 7777" << endl;
+                avr_message("Run with User Interface at Port 7777");
                 userinterface_flag = 1;
                 break;
             
             case 'f':
-                if(global_verbose_on)
-                    cout << "File to load: " << optarg << endl;
+                avr_message("File to load: %s", optarg);
                 filename = optarg;
                 break;
             
             case 'd':
-                if(global_verbose_on)
-                    cout << "Device to simulate: " << optarg << endl;
+                avr_message("Device to simulate: %s", optarg);
                 devicename = optarg;
                 break;
             
             case 'g':
-                if(global_verbose_on)
-                    cout << "Running as gdb-server" << endl;
+                avr_message("Running as gdb-server");
                 gdbserver_flag = 1;
                 break;
             
             case 'G':
-                if(global_verbose_on)
-                    cout << "Running with debug information from gdbserver" << endl;
+                avr_message("Running with debug information from gdbserver");
                 global_gdb_debug = 1;
                 gdbserver_flag = 1;
                 break;
@@ -297,13 +291,12 @@ int main(int argc, char *argv[]) {
                     cerr << "GDB Server Port is not a number" << endl;
                     exit(1);
                 }
-                if(global_verbose_on)
-                    cout << "Running on port: " << optarg << endl;
+                avr_message("Running on port: %ld", global_gdbserver_port);
                 break;
             
             case 't':
-                if(global_verbose_on)
-                    cout << "Running in Trace Mode with maximum " << linestotrace << " lines per file" << endl;
+                avr_message("Running in Trace Mode with maximum %lld lines per file",
+                            linestotrace);
 
                 sysConHandler.SetTraceFile(optarg, linestotrace);
                 break;
@@ -395,33 +388,26 @@ int main(int argc, char *argv[]) {
     
     //if we want to insert some special "pipe" Registers we could do this here:
     if(readFromPipeFileName != "") {
-        if(global_verbose_on)
-            cout << "Add ReadFromPipe-Register at 0x"
-                 << hex << readFromPipeOffset
-                 << " and read from file: " << readFromPipeFileName << endl;
+        avr_message("Add ReadFromPipe-Register at 0x%lx and read from file: %s",
+                    readFromPipeOffset, readFromPipeFileName.c_str());
         dev1->ReplaceIoRegister(readFromPipeOffset,
             new RWReadFromFile(dev1, "FREAD", readFromPipeFileName.c_str()));
     }
     
     if(writeToPipeFileName != "") {
-        if(global_verbose_on)
-            cout << "Add WriteToPipe-Register at 0x"
-                 << hex << writeToPipeOffset
-                 << " and write to file: " << writeToPipeFileName << endl;
+        avr_message("Add WriteToPipe-Register at 0x%lx and write to file: %s",
+                    writeToPipeOffset, writeToPipeFileName.c_str());
         dev1->ReplaceIoRegister(writeToPipeOffset,
             new RWWriteToFile(dev1, "FWRITE", writeToPipeFileName.c_str()));
     }
     
     if(writeToAbort) {
-        if(global_verbose_on)
-            cout << "Add WriteToAbort-Register at 0x" << hex
-                 << writeToAbort << endl;
+        avr_message("Add WriteToAbort-Register at 0x%lx", writeToAbort);
         dev1->ReplaceIoRegister(writeToAbort, new RWAbort(dev1, "ABORT"));
     }
     
     if(writeToExit) {
-        if(global_verbose_on)
-            cout << "Add WriteToExit-Register at 0x" << hex << writeToExit << endl;
+        avr_message("Add WriteToExit-Register at 0x%lx", writeToExit);
         dev1->ReplaceIoRegister(writeToExit, new RWExit(dev1, "EXIT"));
     }
     
@@ -433,8 +419,7 @@ int main(int argc, char *argv[]) {
     //if we have a file we can check out for termination lines.
     vector<string>::iterator ii;
     for(ii = terminationArgs.begin(); ii != terminationArgs.end(); ii++) {
-        if(global_verbose_on)
-            cout << "Termination or Breakpoint Symbol: " << *ii << endl;
+        avr_message("Termination or Breakpoint Symbol: %s", (*ii).c_str());
         dev1->RegisterTerminationSymbol((*ii).c_str());
     }
     
@@ -456,8 +441,7 @@ int main(int argc, char *argv[]) {
             SystemClock::Instance().Run(maxRunTime);
         }
     } else { // gdb should be activated
-        if(global_verbose_on)
-            cout << "Going to gdb..." << endl;
+        avr_message("Going to gdb...");
         GdbServer gdb1(dev1, global_gdbserver_port, global_gdb_debug, globalWaitForGdbConnection);
         SystemClock::Instance().Add(&gdb1);
         SystemClock::Instance().Endless();
