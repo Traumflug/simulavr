@@ -77,11 +77,13 @@ enum {
 
 struct siminfo_long_t {
   uint8_t tag;
+  uint8_t length;
   uint32_t value;
 } __attribute__((__packed__));
 
 struct siminfo_string_t {
   uint8_t tag;
+  uint8_t length;
   char string[];
 } __attribute__((__packed__));
 
@@ -92,6 +94,9 @@ struct siminfo_string_t {
 #define SIMINFO_DEVICE(name) \
   const struct siminfo_string_t siminfo_device SIMINFO_SECTION = { \
     SIMINFO_TAG_DEVICE, \
+    /* We could use sizeof(siminfo_device) here, but avr-gcc has \
+       been seen to set length to 0 (zero), then. */ \
+    sizeof(name) + 2, \
     name \
   }
 
@@ -101,6 +106,7 @@ struct siminfo_string_t {
 #define SIMINFO_CPUFREQUENCY(value) \
   const struct siminfo_long_t siminfo_cpufrequency SIMINFO_SECTION = { \
     SIMINFO_TAG_CPUFREQUENCY, \
+    sizeof(uint32_t) + 2, \
     value \
   }
 
