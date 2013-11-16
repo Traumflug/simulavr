@@ -91,18 +91,18 @@ typedef struct {
 } Elf32_Phdr;
 
 void ELFLoad(const AvrDevice * core) {
-    FILE * f = fopen(core->actualFilename.c_str(), "rb");
+    FILE * f = fopen(core->GetFname().c_str(), "rb");
     if(f == NULL)
-        avr_error("Could not open file: %s", core->actualFilename.c_str());
+        avr_error("Could not open file: %s", core->GetFname().c_str());
 
     Elf32_Ehdr header;
     fread(&header, sizeof(header), 1, f);
     if(header.e_ident[0] != 0x7F || header.e_ident[1] != 'E'
         || header.e_ident[2] != 'L' || header.e_ident[3] != 'F')
-        avr_error("File '%s' is not an ELF file", core->actualFilename.c_str());
+        avr_error("File '%s' is not an ELF file", core->GetFname().c_str());
     // TODO: fix endianity in header
     if(header.e_machine != 83)
-        avr_error("ELF file '%s' is not for Atmel AVR architecture (%d)", core->actualFilename.c_str(), header.e_machine);
+        avr_error("ELF file '%s' is not for Atmel AVR architecture (%d)", core->GetFname().c_str(), header.e_machine);
 
     for(int i = 0; i < header.e_phnum; i++) {
         fseek(f, header.e_phoff + i * header.e_phentsize, SEEK_SET);
@@ -117,7 +117,7 @@ void ELFLoad(const AvrDevice * core) {
             continue;  // not into a Flash
         if(progHeader.p_filesz != progHeader.p_memsz) {
             avr_error("Segment sizes 0x%x and 0x%x in ELF file '%s' must be the same",
-                progHeader.p_filesz, progHeader.p_memsz, core->actualFilename.c_str());
+                progHeader.p_filesz, progHeader.p_memsz, core->GetFname().c_str());
         }
         unsigned char * tmp = new unsigned char[progHeader.p_filesz];
         fseek(f, progHeader.p_offset, SEEK_SET);
@@ -137,17 +137,16 @@ unsigned int ELFGetDeviceNameAndSignature(const char *filename, char *devicename
 #endif
 
 #ifndef _MSC_VER
-
-void ELFLoad(const AvrDevice * core) {
+void ELFLoad(AvrDevice * core) {
     ELFIO::elfio reader;
 
-    if(!reader.load(core->actualFilename))
+    if(!reader.load(core->GetFname()))
         avr_error("File '%s' not found or isn't a elf object",
-                  core->actualFilename.c_str());
+                  core->GetFname().c_str());
 
     if(reader.get_machine() != EM_AVR)
         avr_error("ELF file '%s' is not for Atmel AVR architecture (%d)",
-                  core->actualFilename.c_str(),
+                  core->GetFname().c_str(),
                   reader.get_machine());
 
     // over all symbols ...
@@ -238,7 +237,7 @@ void ELFLoad(const AvrDevice * core) {
                     data_ptr++; // the '\0' its self
                     break;
                   case SIMINFO_TAG_CPUFREQUENCY:
-                    avr_warning("frequency is %u", *(uint32_t *)data_ptr);
+                    core->SetClockFreq((SystemClockOffset)1000000000 / *(uint32_t *)data_ptr);
                     data_ptr += sizeof(uint32_t);
                     break;
                   default:
@@ -289,9 +288,10 @@ void ELFLoad(const AvrDevice * core) {
                 else {
                     unsigned int sig = (((data[2] << 8) + data[1]) << 8) + data[0];
 
-                    if(core->devSignature != std::numeric_limits<unsigned int>::max() && sig != core->devSignature)
+                    if(core->GetDeviceSignature() != std::numeric_limits<unsigned int>::max() &&
+                       sig != core->GetDeviceSignature())
                         avr_error("wrong device signature, expected=0x%x, given=0x%x",
-                                  core->devSignature,
+                                  core->GetDeviceSignature(),
                                   sig);
                 }
             }

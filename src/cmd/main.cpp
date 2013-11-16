@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
     int global_gdb_debug = 0;
     bool globalWaitForGdbConnection = true; //please wait for gdb connection
     int userinterface_flag = 0;
-    unsigned long long fcpu = 4000000;
+    unsigned long long fcpu = 0;
     unsigned long long maxRunTime = 0;
     unsigned long long linestotrace = 1000000;
     UserInterface *ui;
@@ -241,9 +241,6 @@ int main(int argc, char *argv[]) {
                     cerr << "frequency is zero" << endl;
                     exit(1);
                 }
-                if(global_verbose_on)
-                    printf("Running with CPU frequency: %1.4f MHz (%lld Hz)\n",
-                           fcpu/1000000.0, fcpu);
                 break;
 
             case 'l':
@@ -417,8 +414,20 @@ int main(int argc, char *argv[]) {
     //if not gdb, the ui will be master controller :-)
     ui = (userinterface_flag == 1) ? new UserInterface(7777) : NULL;
     
-    dev1->SetClockFreq(1000000000 / fcpu); // time base is 1ns!
-    
+    if(fcpu != 0)
+        dev1->SetClockFreq((SystemClockOffset)1000000000 / fcpu); // time base is 1ns!
+
+    if(dev1->GetClockFreq() == 0) {
+        avr_warning("Clock frequency not given, defaulting to 4000000. "
+                    "Use -F | --cpufrequency FREQ or insert a "
+                    "SIMINFO_CPUFREQUENCY(freq) macro into your source %s",
+                    "to specify it.");
+        dev1->SetClockFreq((SystemClockOffset)1000000000 / 4000000);
+    }
+    avr_message("Running with CPU frequency: %1.3lf MHz (%lld Hz)\n",
+                (double)1000 / dev1->GetClockFreq(),
+                (unsigned long long)1000000000 / dev1->GetClockFreq());
+
     if(sysConHandler.GetTraceState())
         dev1->trace_on = 1;
     
