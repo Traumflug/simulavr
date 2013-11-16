@@ -272,22 +272,20 @@ void ELFLoad(AvrDevice * core) {
           data_ptr = data;
           data_end = data + size;
           while (data_ptr < data_end) {
-            char tag = *data_ptr++;
+            char tag = *data_ptr;
+            char length = *(data_ptr + 1);
             switch (tag) {
               case SIMINFO_TAG_DEVICE:
                 // Device name. Handled in ELFGetDeviceNameAndSignature().
-                while (*data_ptr != '\0')
-                  data_ptr++;
-                data_ptr++; // the '\0' its self
                 break;
               case SIMINFO_TAG_CPUFREQUENCY:
-                core->SetClockFreq((SystemClockOffset)1000000000 / *(uint32_t *)data_ptr);
-                data_ptr += sizeof(uint32_t);
+                core->SetClockFreq((SystemClockOffset)1000000000 /
+                                   ((siminfo_long_t *)data_ptr)->value);
                 break;
               default:
                 avr_warning("Unknown tag in ELF .siminfo section: %hu", tag);
-                data_ptr++;
             }
+            data_ptr += length;
           }
           free(data);
         }
@@ -336,23 +334,16 @@ unsigned int ELFGetDeviceNameAndSignature(const char *filename, char *devicename
                     data_ptr = tmp;
                     data_end = tmp + size;
                     while (data_ptr < data_end) {
-                        char tag = *data_ptr++;
-                        switch (tag) {
-                          case SIMINFO_TAG_DEVICE:
-                            strncpy(devicename, data_ptr, 1024);
+                        char tag = *data_ptr;
+                        char length = *(data_ptr + 1);
+                        if (tag == SIMINFO_TAG_DEVICE) {
+                            strncpy(devicename,
+                                    ((siminfo_string_t *)data_ptr)->string, 1024);
                             devicename[1023] = '\0'; // safety
-                            while (*data_ptr != '\0')
-                                data_ptr++;
-                            data_ptr++; // the '\0' its self
                             break;
-                          case SIMINFO_TAG_CPUFREQUENCY:
-                            // Handled in ELF_Load().
-                            data_ptr += sizeof(uint32_t);
-                            break;
-                          default:
-                            // Unknown tag, warning given in ELFLoad().
-                            data_ptr++;
                         }
+                        // Everything else handled in ELFLoad().
+                        data_ptr += length;
                     }
                 }
                 free(tmp);
