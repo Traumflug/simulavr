@@ -5,8 +5,8 @@
 examplesdir = $(docdir)/examples/feedback
 
 EXAMPLE=feedback
+
 AVR_GCC=@AVR_GCC@
-PYTHON=@PYTHON@
 AVR_CPU=atmega128
 AVR_FREQUENCY=4000000
 AVR_CFLAGS= -g -O2 -mmcu=$(AVR_CPU) -DF_CPU=$(AVR_FREQUENCY)

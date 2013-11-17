@@ -15,11 +15,23 @@ hello world #2
 hello world #3
 hello world #1
 
-The initial input value of ADC0 is 0.  When the feedback modules seens
+The initial input value of ADC0 is 0.  When the feedback modules sees
 1, 2 or 3, it changes the "voltage" on ADC0.  The debug output expected is:
 
 ADC0=10 expect 10
 ADC0=20 expect 20
 ADC0=30 expect 30
 ADC0=10 expect 10
+
+Building and running the example:
+
+- configure simulavr with TCL, this needs TCL/TK installed. For the most
+  distributions it's also necessary to install TCL dev package (tclConfig.sh
+  is needed), iTCL is also needed!
+- build simulavr (make), the files here are also built in this step
+- then start the example: go to examples/feedback directory and type "make do"
+- other possibility is::
+
+    ../simulavr.tcl -d atmega128 -f feedback.elf -s ./feedback.tcl \
+      -W 0x20,/dev/stderr -R 0x22,- -F 4000000 -T exit -S ./simfeedback.tcl
 
