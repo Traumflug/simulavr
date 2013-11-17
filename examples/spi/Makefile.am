@@ -11,6 +11,8 @@ AVR_CFLAGS  = -g -Os -mmcu=$(AVR_CPU)
 
 EXTRA_DIST = main.cpp spidata anadata $(EXAMPLE).tcl
 
+SUFFIXES = .cpp
+
 examples_DATA = $(EXAMPLE).elf $(EXTRA_DIST) README
 
 CLEANFILES = $(EXAMPLE).elf main.o trace
@@ -36,7 +38,7 @@ dogdb: $(EXAMPLE).elf
 do_old:
 	$(TCL_WISH) check.tcl
 
-%.o: $(srcdir)/%.cpp
+.cpp.o:
 	$(AVR_GCC) $(AVR_CFLAGS) -c -o $@ $<
 
 main.o : $(srcdir)/main.cpp

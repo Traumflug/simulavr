@@ -44,8 +44,8 @@ by the Free Software Foundation.
 
 @c The following two commands start the copyright page.
 @page
-@hfill Send bugs and comments on SimulAVR to@*
-@hfill @w{@email{simulavr-devel@@nongnu.org}}
+Send bugs and comments on SimulAVR to@*
+@w{@email{simulavr-devel@@nongnu.org}}
 @vskip 0pt plus 1filll
 @insertcopying
 @end titlepage

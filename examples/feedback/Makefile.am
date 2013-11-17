@@ -18,6 +18,8 @@ SIMULAVR_ARGS=-d $(AVR_CPU) -f $(EXAMPLE).elf -s $(srcdir)/$(EXAMPLE).tcl \
 EXTRA_DIST = main.c $(EXAMPLE).tcl debugio.c debugio.h adc.c uart.c uart.h \
     defines.h simfeedback.tcl
 
+SUFFIXES = .c
+
 examples_DATA = $(EXAMPLE).elf $(EXTRA_DIST) README
 
 CLEANFILES = $(EXAMPLE).elf $(AVR_OBJS) trace $(EXAMPLE).lst
@@ -31,7 +33,7 @@ dogdb: $(EXAMPLE).elf
 $(EXAMPLE).elf: $(AVR_OBJS)
 	$(AVR_GCC) $(AVR_CFLAGS) -o $@ $^
 
-%.o: %.c
+.c.o:
 	$(AVR_GCC) $(AVR_CFLAGS) -c -o $@ $<
 
 main.o: main.c

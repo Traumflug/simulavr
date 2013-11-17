@@ -5,7 +5,7 @@
 SUBDIRS = web
 
 # produce simulavr.pdf and simulavr.info
-info_TEXINFOS = simulavr.texinfo
+info_TEXINFOS = simulavr.texi
 
 EXTRA_DIST = $(DX_CONFIG)
 

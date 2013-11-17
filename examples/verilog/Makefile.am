@@ -25,11 +25,13 @@ EXTRA_DIST = README baretest.sav baretest.v right-unit.s singlepincomm.h \
     loop.c loop.sav loop.v toggle.c spi.c spi.sav spi.v spi-waveforms.c \
     spi-waveforms.sav spi-waveforms.v
 
+SUFFIXES = .c .s .o .v .vvp .vcd
+
 examples_DATA = $(EXTRA_DIST) $(AVR_PROGS) Makefile
 
 example: $(EXAMPLE_TARGETS)
 
-%.o: %.c
+.c.o:
 	$(AVR_GCC) -mmcu=attiny2313 -c -Os $^ -o $@
 
 spi.o: spi.c
@@ -44,7 +46,7 @@ spi-waveforms.o: spi-waveforms.c
 spi-waveforms.elf: spi-waveforms.o
 	$(AVR_GCC) -mmcu=atmega8 $^ -o $@
 
-%.o: %.s
+.s.o:
 	$(AVR_GCC) -c -Wa,-gstabs -x assembler-with-cpp -o $@ $<
 
 left-unit.elf: left-unit.o csinglepincomm.o
@@ -53,16 +55,18 @@ right-unit.elf: right-unit.o singlepincomm.o
 	$(AVR_LD) -e _start $^ -o $@
 
 
-%.elf: %.o
+.o.elf:
 	$(AVR_GCC) -mmcu=attiny2313 $^ -o $@
 
-%.vvp: %.v
+.v.vvp:
 	$(IVERILOG) $^ -s test -v -I. $(AVRS)/avr.v $(AVRS)/avr_ATtiny15.v $(AVRS)/avr_ATtiny2313.v $(AVRS)/avr_ATmega8.v -o $@ 
 
-%.run: %.vvp $(AVR_PROGS)
+.vvp.run: $(AVR_PROGS)
 	$(VVP) -M../../src -mavr $^
 
-%.view: %.vcd %.sav
+# this is suspicious, because dependency to .sav isn't given! Was before:
+#%.view: %.vcd %.sav
+.vcd.view:
 if USE_GTKWAVE
 	$(GTKWAVE) -a $*.sav $*.vcd &
 else

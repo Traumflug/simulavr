@@ -15,6 +15,8 @@ AVR_CFLAGS = $(AVR_CPU_CFLAGS) -I. -DF_CPU=4000000UL \
 EXTRA_DIST = kb.c kb.h main.c pindefs.h scancodes.h serial.c serial.h \
   StdDefs.c StdDefs.h README Notes.txt atmel_key.tcl
 
+SUFFIXES = .c
+
 examples_DATA = $(EXAMPLE).elf $(EXTRA_DIST)
 
 CLEANFILES = $(EXAMPLE).elf kb.o main.o serial.o StdDefs.o
@@ -39,7 +41,7 @@ endif
 $(EXAMPLE).elf: kb.o main.o serial.o StdDefs.o
 	$(AVR_GCC) $(AVR_CPU_CFLAGS) -o $@ $^ -lm
 
-%.o: $(srcdir)/%.c
+.c.o:
 	$(AVR_GCC) $(AVR_CFLAGS) -c -o $@ $<
 
 kb.o: kb.c

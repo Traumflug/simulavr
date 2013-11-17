@@ -12,6 +12,8 @@ AVR_CFLAGS  = -g -O2 -mmcu=$(AVR_CPU)
 
 EXTRA_DIST = main.c $(EXAMPLE).tcl
 
+SUFFIXES = .c
+
 examples_DATA = $(EXAMPLE).elf README Makefile $(EXTRA_DIST)
 
 CLEANFILES = $(EXAMPLE).elf trace anacomp.o $(EXAMPLE).lst
@@ -35,7 +37,7 @@ endif
 $(EXAMPLE).elf: main.o
 	$(AVR_GCC) $(AVR_CFLAGS) -o $@ $<
 
-%.o: $(srcdir)/%.c
+.c.o:
 	$(AVR_GCC) $(AVR_CFLAGS) -c -o $@ $<
 
 main.o: $(srcdir)/main.c

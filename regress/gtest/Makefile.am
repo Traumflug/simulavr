@@ -42,9 +42,11 @@ OBJS_TARGET = session_001/avr_code.atmega32.o \
               session_irq_check/tc3.atmega32.o \
               session_io_pin/tc1.atmega128.o
 
-CXXFLAGS += $(GTEST_CXXFLAGS) $(GTEST_INCLUDE) $(SIMULAVR_INCLUDE) -g
+AM_CXXFLAGS = $(GTEST_CXXFLAGS) $(GTEST_INCLUDE) $(SIMULAVR_INCLUDE) -g
 
 EXTRA_DIST = $(OBJS_SRC)
+
+SUFFIXES = .c .s
 
 CLEANFILES = */*.o
 
@@ -57,14 +59,35 @@ dut_LDADD = -lpthread $(SIMULAVR_LIB) $(AVR_LIBIBERTY_LIB) $(AVR_LIBBFD_LIB) -lz
 dut_DEPENDENCIES = $(SIMULAVR_LIB)
 endif
 
-%.atmega32.o: %.s
-	avr-gcc -Wa,--gstabs,-D -xassembler-with-cpp -mmcu=atmega32 $< -o $@
+define build-asm-m32
+avr-gcc -Wa,--gstabs,-D -xassembler-with-cpp -mmcu=atmega32 $< -o $@
+endef
 
-%.atmega32.o: %.c
-	avr-gcc -mmcu=atmega32 -O2 $< -o $@
+define build-c-m32
+avr-gcc -mmcu=atmega32 -O2 $< -o $@
+endef
 
-%.atmega128.o: %.s
-	avr-gcc -Wa,--gstabs,-D -xassembler-with-cpp -mmcu=atmega128 $< -o $@
+define build-asm-m128
+avr-gcc -Wa,--gstabs,-D -xassembler-with-cpp -mmcu=atmega128 $< -o $@
+endef
+
+session_001/avr_code.atmega32.o: session_001/avr_code.s
+	$(build-asm-m32)
+
+session_irq_check/check.atmega32.o: session_irq_check/check.s
+	$(build-asm-m32)
+
+session_irq_check/tc1.atmega32.o: session_irq_check/tc1.s
+	$(build-asm-m32)
+
+session_irq_check/tc2.atmega32.o: session_irq_check/tc2.s
+	$(build-asm-m32)
+
+session_irq_check/tc3.atmega32.o: session_irq_check/tc3.s
+	$(build-asm-m32)
+
+session_io_pin/tc1.atmega128.o: session_io_pin/tc1.s
+	$(build-asm-m128)
 
 check-local: run-gtest
 

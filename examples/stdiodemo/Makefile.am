@@ -14,6 +14,8 @@ EXTRA_DIST = defines.h hd44780.c hd44780.h lcd.c lcd.h stdiodemo.tcl \
   README stdiodemo.c stdiodemo.dox stdiodemo-setup.jpg uart.c uart.h \
   checkdebug.gdb
 
+SUFFIXES = .c
+
 examples_DATA = $(EXAMPLE).elf $(EXTRA_DIST)
 
 CLEANFILES = $(EXAMPLE).elf hd44780.o lcd.o stdiodemo.o uart.o
@@ -38,7 +40,7 @@ endif
 $(EXAMPLE).elf: hd44780.o lcd.o stdiodemo.o uart.o
 	$(AVR_GCC) $(AVR_CFLAGS) -o $@ $^ -lm
 
-%.o: $(srcdir)/%.c
+.c.o:
 	$(AVR_GCC) $(AVR_CFLAGS) -c -o $@ $<
 
 hd44780.o: hd44780.c

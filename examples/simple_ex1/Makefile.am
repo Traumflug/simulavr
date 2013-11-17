@@ -15,6 +15,8 @@ CLEANFILES = $(EXAMPLE) fred.o
 
 EXTRA_DIST = fred.c
 
+SUFFIXES = .c
+
 run_sim: $(EXAMPLE)
 	../../src/simulavr --device $(AVR_CPU) -f $(EXAMPLE) \
 	    -W 0x20,- -R 0x22,- -T exit
@@ -35,7 +37,7 @@ else
 	@echo "Tcl not installed. Example will not run. Sorry!"
 endif
 
-%.o: $(srcdir)/%.c
+.c.o:
 	$(AVR_GCC) $(AVR_CFLAGS) -c -o $@ $<
 
 fred.o: $(srcdir)/fred.c

@@ -12,6 +12,8 @@ AVR_CFLAGS= -g -Os -mmcu=$(AVR_CPU) -DF_CPU=$(AVR_FREQUENCY)
 
 EXTRA_DIST = debugio.c debugio.h main.c
 
+SUFFIXES = .c
+
 examples_DATA = $(EXAMPLE) $(EXTRA_DIST) README
 
 CLEANFILES = $(EXAMPLE) main.o debugio.o trace
@@ -24,7 +26,7 @@ dogdb:
 	../simulavr.tcl -d $(AVR_CPU) -f $(EXAMPLE) \
 	    -W 0x20,- -R 0x22,- -T exit -g
 
-%.o: $(srcdir)/%.c
+.c.o:
 	$(AVR_GCC) $(AVR_CFLAGS) -c -o $@ $<
 
 main.o: $(srcdir)/main.c

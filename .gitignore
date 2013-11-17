@@ -17,6 +17,7 @@ config.sub
 depcomp
 install-sh
 libtool
+ar-lib
 ltmain.sh
 missing
 py-compile

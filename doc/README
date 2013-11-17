@@ -14,7 +14,7 @@ Prerequisites for this is, that you have installed tex and makeinfo. This will
 be detected at configure time. (e.g. when you run './configure'!)
 
 Documentation will be generated from texinfo file. You'll find source at
-'doc/simulavr.texinfo'. From this a info file ('simulavr.info') will be generated
+'doc/simulavr.texi'. From this a info file ('simulavr.info') will be generated
 automatically with the default make target::
 
   > make

@@ -9,8 +9,7 @@ AVR_LIBBFD_INC=@AVR_LIBBFD_INC@
 SWIG=@SWIG@
 PYTHON_CPPFLAGS=@PYTHON_CPPFLAGS@
 
-AM_CXXFLAGS=-I$(AVR_LIBBFD_INC)
-CXXFLAGS=-g -O2 -Icmd -Iui -Ihwtimer
+AM_CXXFLAGS=-I$(AVR_LIBBFD_INC) -g -O2 -Icmd -Iui -Ihwtimer
 
 bin_PROGRAMS    = simulavr
 @MAINT@ noinst_PROGRAMS = kbdgentables
