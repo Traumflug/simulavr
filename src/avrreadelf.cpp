@@ -275,6 +275,8 @@ void ELFLoad(AvrDevice * core) {
           while (data_ptr < data_end) {
             char tag = *data_ptr;
             char length = *(data_ptr + 1);
+            // Length check already done in ELFGetDeviceNameAndSignature().
+
             switch (tag) {
               case SIMINFO_TAG_DEVICE:
                 // Device name. Handled in ELFGetDeviceNameAndSignature().
@@ -290,7 +292,6 @@ void ELFLoad(AvrDevice * core) {
           }
           free(data);
         }
-
 
         sec = sec->next;
     }
@@ -337,6 +338,9 @@ unsigned int ELFGetDeviceNameAndSignature(const char *filename, char *devicename
                     while (data_ptr < data_end) {
                         char tag = *data_ptr;
                         char length = *(data_ptr + 1);
+                        if (length == 0)
+                            avr_error("Field of zero length in .siminfo"
+                                      "section in ELF file found.");
                         if (tag == SIMINFO_TAG_DEVICE) {
                             strncpy(devicename,
                                     ((siminfo_string_t *)data_ptr)->string, 1024);
