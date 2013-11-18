@@ -144,7 +144,7 @@ class Pin {
         virtual Pin GetPin(void) { return *this;} //!< "cast method" to get back a Pin instance
         int GetAnalog(void); //!< Get analog value as integer from 0 to INT_MAX (for backward compatibility, will be deprecated later)
         float GetRawAnalog(void) const { return analogVal.getRaw(); } //!< get back raw analog value (just variable content!)
-        float GetAnalogValue(float vcc); //!< Returns real analog input value of pin
+        float GetAnalogValue(float vcc) { return analogVal.getA(vcc); } //!< Returns real analog input value of pin
         Pin& SetAnalogValue(float value);  //!< Sets the pin to an real analog value
         void SetRawAnalog(float value) { analogVal.setA(value); }
         void RegisterCallback(HasPinNotifyFunction *); //!< register a listener for input value change

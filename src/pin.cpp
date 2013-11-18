@@ -52,28 +52,6 @@ int Pin::GetAnalog(void) {
     return (int)(((double)GetAnalogValue(vcc) * INT_MAX) / (double)vcc);
 }
 
-float Pin::GetAnalogValue(float vcc) {
-    switch (outState) {
-        case ANALOG:
-            return analogVal.getA(vcc); // reflect that this instance deliver an analog value as output
-
-        case HIGH:
-        case PULLUP:
-            return vcc;
-
-        case TRISTATE:
-            // if we are input, we read the analog value
-            return analogVal.getA(vcc);
-
-        case LOW:
-        case PULLDOWN:
-            return 0.0;
-
-        default:
-            return 0.0;
-    }
-}
-
 void Pin::RegisterCallback(HasPinNotifyFunction *h) {
     notifyList.push_back(h);
 }
@@ -201,11 +179,11 @@ Pin::operator char() const {
 }
 
 Pin::operator bool() const {
-    if((outState==HIGH) || (outState==PULLUP))
+    if(outState==HIGH)
         return true;
 
     // maybe for TRISTATE not handled complete in simulavr... TODO
-    if(outState==TRISTATE) {
+    if((outState==TRISTATE) || (outState==PULLUP)) {
         // fix, because in SetInState the output state of connected pin is only transfered to analogVal!
         if((analogVal.getD() == AnalogValue::ST_VCC) || (analogVal.getD() == AnalogValue::ST_FLOATING))
             return true;
@@ -277,10 +255,10 @@ Pin& Pin::operator= (char c) {
 Pin& Pin::SetAnalogValue(float value) {
     analogVal.setA(value);
 
-     CalcPin();
+    CalcPin();
 
-     return *this;
- }
+    return *this;
+}
 
 Pin Pin::operator+= (const Pin& p) {
     *this = *this + p;
