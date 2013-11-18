@@ -48,6 +48,7 @@ fi
 ####
 # support of libtool, g++, swig (for tcl module and python module used)
 ####
+AC_SUBST([DOLLAR_SIGN],[$])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
 LT_PREREQ([2.2])

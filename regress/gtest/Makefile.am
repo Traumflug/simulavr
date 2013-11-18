@@ -72,22 +72,22 @@ avr-gcc -Wa,--gstabs,-D -xassembler-with-cpp -mmcu=atmega128 $< -o $@
 endef
 
 session_001/avr_code.atmega32.o: session_001/avr_code.s
-	$(build-asm-m32)
+	@DOLLAR_SIGN@(build-asm-m32)
 
 session_irq_check/check.atmega32.o: session_irq_check/check.s
-	$(build-asm-m32)
+	@DOLLAR_SIGN@(build-asm-m32)
 
 session_irq_check/tc1.atmega32.o: session_irq_check/tc1.s
-	$(build-asm-m32)
+	@DOLLAR_SIGN@(build-asm-m32)
 
 session_irq_check/tc2.atmega32.o: session_irq_check/tc2.s
-	$(build-asm-m32)
+	@DOLLAR_SIGN@(build-asm-m32)
 
 session_irq_check/tc3.atmega32.o: session_irq_check/tc3.s
-	$(build-asm-m32)
+	@DOLLAR_SIGN@(build-asm-m32)
 
 session_io_pin/tc1.atmega128.o: session_io_pin/tc1.s
-	$(build-asm-m128)
+	@DOLLAR_SIGN@(build-asm-m128)
 
 check-local: run-gtest
 
