@@ -37,6 +37,7 @@
 
 #include "avrdevice_impl.h"
 #include "avrsignature.h"
+#include "serialrx.h"
 #include "simulavr_info.h"
 
 #include "avrreadelf.h"
@@ -241,10 +242,18 @@ void ELFLoad(AvrDevice * core) {
                                        ((siminfo_long_t *)data_ptr)->value);
                     break;
                   case SIMINFO_TAG_SERIAL_OUT:
-                    avr_warning("Want to connect pin %s to file %s at %d baud.",
+                    avr_message("Connecting pin %s as serial out to file %s at %d baud.",
                                 ((siminfo_serial_t *)data_ptr)->pin,
                                 ((siminfo_serial_t *)data_ptr)->filename,
                                 ((siminfo_serial_t *)data_ptr)->baudrate);
+                    {
+                        Net *net = new Net();
+                        SerialRxFile *serial =
+                          new SerialRxFile(((siminfo_serial_t *)data_ptr)->filename);
+                        serial->SetBaudRate(((siminfo_serial_t *)data_ptr)->baudrate);
+                        net->Add(core->GetPin(((siminfo_serial_t *)data_ptr)->pin));
+                        net->Add(serial->GetPin("rx"));
+                    }
                     break;
                   default:
                     avr_warning("Unknown tag in ELF .siminfo section: %hu", tag);
