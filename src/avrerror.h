@@ -32,8 +32,12 @@
 #define ATTRIBUTE_NORETURN __declspec(noreturn)
 #define ATTRIBUTE_PRINTF(string_arg, first_arg)
 #elif defined(__GNUC__)
+#ifndef ATTRIBUTE_NORETURN
 #define ATTRIBUTE_NORETURN __attribute__((noreturn))
+#endif
+#ifndef ATTRIBUTE_PRINTF
 #define ATTRIBUTE_PRINTF(string_arg, first_arg) __attribute__ ((format (printf, string_arg, first_arg)))
+#endif
 #else
 #define ATTRIBUTE_NORETURN
 #define ATTRIBUTE_PRINTF(string_arg, first_arg)
