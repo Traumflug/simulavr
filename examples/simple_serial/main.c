@@ -55,6 +55,7 @@
 #include "../../src/simulavr_info.h"
 SIMINFO_DEVICE("atmega644");
 SIMINFO_CPUFREQUENCY(F_CPU);
+SIMINFO_SERIAL_IN("D0", "-", 19200);
 SIMINFO_SERIAL_OUT("D1", "-", 19200);
 
 
