@@ -38,6 +38,7 @@
 #include "avrdevice_impl.h"
 #include "avrsignature.h"
 #include "serialrx.h"
+#include "serialtx.h"
 #include "simulavr_info.h"
 
 #include "avrreadelf.h"
@@ -242,10 +243,18 @@ void ELFLoad(AvrDevice * core) {
                                        ((siminfo_long_t *)data_ptr)->value);
                     break;
                   case SIMINFO_TAG_SERIAL_IN:
-                    avr_warning("Want to connect pin %s to file %s at %d baud.",
-                                ((siminfo_serial_t *)data_ptr)->pin,
+                    avr_message("Connecting file %s as serial in to pin %s at %d baud.",
                                 ((siminfo_serial_t *)data_ptr)->filename,
+                                ((siminfo_serial_t *)data_ptr)->pin,
                                 ((siminfo_serial_t *)data_ptr)->baudrate);
+                    {
+                        Net *net = new Net();
+                        SerialTxFile *serial =
+                          new SerialTxFile(((siminfo_serial_t *)data_ptr)->filename);
+                        serial->SetBaudRate(((siminfo_serial_t *)data_ptr)->baudrate);
+                        net->Add(core->GetPin(((siminfo_serial_t *)data_ptr)->pin));
+                        net->Add(serial->GetPin("tx"));
+                    }
                     break;
                   case SIMINFO_TAG_SERIAL_OUT:
                     avr_message("Connecting pin %s as serial out to file %s at %d baud.",
