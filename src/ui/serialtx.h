@@ -61,8 +61,25 @@ class SerialTxBuffered: public SimulationMember {
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
         /// Add byte from UI to be sent to device's UART.
         virtual void Send(unsigned char data);
+        bool Sending(void);
         virtual void SetBaudRate(SystemClockOffset baud);
         virtual Pin* GetPin(const char *name); 
+};
+
+#include <stdio.h>
+#include <unistd.h>
+
+/** Reads  bytes from a file, a special file/com port or the console
+ *  and sends them to the device's UART. */
+class SerialTxFile: public SerialTxBuffered {
+    private:
+        // Use a classic file descriptor to have better
+        // control over buffers (and their avoidance).
+        int fd;
+    public:
+        SerialTxFile(const char *filename);
+        ~SerialTxFile();
+        virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
 };
 
 
