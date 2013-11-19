@@ -74,6 +74,7 @@ enum {
   SIMINFO_TAG_DEVICE,
   SIMINFO_TAG_CPUFREQUENCY,
   SIMINFO_TAG_SERIAL_OUT,
+  SIMINFO_TAG_SERIAL_IN,
 };
 
 struct siminfo_long_t {
@@ -120,23 +121,37 @@ struct siminfo_serial_t {
   }
 
 /*
- * Create a serial out (Tx, from AVR) component. The given file will receive
- * the characters/bytes. This can be connected to the same file as a serial in,
- * if it's a special file like a real serial device or a pipe. Connecting both
- * to the same regular file will mess things up.
+ * Create a serial in (Rx, to AVR) component. The the sent characters/bytes
+ * will be taken from the given file. This component can be connected to the
+ * same file as a serial out, if it's a special file like a real serial device
+ * or a pipe. Connecting both to the same regular file will mess things up.
  *
  * Using "-" as file name means connecting to the console (stdin/stdout).
  *
  * The pin to connect is named by a 2-character string, where "E2" means
  * pin 2 on port E.
  *
- * Why a baud rate? Well, the component doesn't just fetch what's written
- * to the UART send register, but interprets the signal on the pin. If your
- * code sets a baud rate not matching the one given here, serial communications
- * won't work. Just like a real serial device configured to work at 19200 baud
- * won't work on a real serial port set to something else.
+ * Why a baud rate? Well, the component doesn't just write to the UART receive
+ * register, but synthesizes actual serial signals on the pin, which in turn
+ * should be interpreted by your AVR code. If your code sets a baud rate not
+ * matching the one given here, serial communications won't work. Just like a
+ * real serial device configured to work at 19200 baud won't work on a real
+ * serial port set to something else.
  *
  * Other parameters are fixed to 8N1, which means 8 bits, no parity, 1 stop bit.
+ */
+#define SIMINFO_SERIAL_IN(pin, filename, baudrate) \
+  const struct siminfo_serial_t siminfo_serial_in SIMINFO_SECTION = { \
+    SIMINFO_TAG_SERIAL_IN, \
+    sizeof(char[3]) + sizeof(uint32_t) + sizeof(filename) + 2, \
+    pin, \
+    baudrate, \
+    filename \
+  }
+
+/*
+ * Create a serial out (Tx, from AVR) component. Same as above, but the
+ * other direction. The serial port pin is continuously read and interpreted.
  */
 #define SIMINFO_SERIAL_OUT(pin, filename, baudrate) \
   const struct siminfo_serial_t siminfo_serial_out SIMINFO_SECTION = { \
