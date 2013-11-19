@@ -107,12 +107,16 @@ void SerialTxBuffered::Send(unsigned char data)
 {
     inputBuffer.push_back(data); //write new char to input buffer
 
-    cerr << "TX: " << hex << data << " ";
+    // cerr << "TX: " << hex << data << endl;
     //if we not active, activate tx machine now
     if (txState==TX_DISABLED) {
         txState=TX_SEND_STARTBIT;
         SystemClock::Instance().Add(this);
     }
+}
+
+bool SerialTxBuffered::Sending(void) {
+    return (txState != TX_DISABLED);
 }
 
 void SerialTxBuffered::SetBaudRate(SystemClockOffset baud){
@@ -124,6 +128,60 @@ void SerialTxBuffered::SetHexInput(bool newValue){
 }
 
 
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <poll.h>
+
+SerialTxFile::SerialTxFile(const char *filename) {
+    if (std::string(filename) == "-")
+        fd = fileno(stdin);
+    else
+        fd = open(filename, O_RDONLY, O_CREAT);
+    if (fd < 0)
+        avr_error("open input file failed");
+    Reset();
+
+    SystemClock::Instance().Add(this);
+}
+
+SerialTxFile::~SerialTxFile() {
+    if (fd != fileno(stdin))
+        close(fd);
+}
+
+int SerialTxFile::Step(bool &trueHwStep,
+                       SystemClockOffset *timeToNextStepIn_ns) {
+
+    if (Sending()) {
+        SerialTxBuffered::Step(trueHwStep, timeToNextStepIn_ns);
+    }
+    
+#ifndef WIN32
+    pollfd cinfd[1];
+    cinfd[0].fd = fd;
+    cinfd[0].events = POLLIN;
+    if (poll(cinfd, 1, 0) > 0) {
+#else
+    HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
+    if (WaitForSingleObject(h, 0) == WAIT_OBJECT_0) {
+#endif
+        unsigned char c;
+        if (read(fd, &c, 1)) {
+            Send((unsigned char)c);
+        }
+    }
+
+    if ( ! Sending()) // may have changed with Step() or Send()
+        // Polling for new data every millisecond should be enough. If there's
+        // more than one byte waiting, they're accepted at every serial clock
+        // tick, which means, ten times faster than they can be sent.
+        *timeToNextStepIn_ns = (SystemClockOffset)1000000;
+}
 
 // ===========================================================================
 // ===========================================================================
