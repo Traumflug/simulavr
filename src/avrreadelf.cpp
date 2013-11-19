@@ -241,6 +241,12 @@ void ELFLoad(AvrDevice * core) {
                     core->SetClockFreq((SystemClockOffset)1000000000 /
                                        ((siminfo_long_t *)data_ptr)->value);
                     break;
+                  case SIMINFO_TAG_SERIAL_IN:
+                    avr_warning("Want to connect pin %s to file %s at %d baud.",
+                                ((siminfo_serial_t *)data_ptr)->pin,
+                                ((siminfo_serial_t *)data_ptr)->filename,
+                                ((siminfo_serial_t *)data_ptr)->baudrate);
+                    break;
                   case SIMINFO_TAG_SERIAL_OUT:
                     avr_message("Connecting pin %s as serial out to file %s at %d baud.",
                                 ((siminfo_serial_t *)data_ptr)->pin,
