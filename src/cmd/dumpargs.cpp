@@ -98,4 +98,11 @@ void ShowRegisteredTraceValues(const string &outname) {
         delete outf;
 }
 
+void WriteCoreDump(const string &outname, AvrDevice *dev) {
+    ostream *outf;
+    outf = new ofstream(outname.c_str());
+    outf << "just a test" << endl;
+    delete outf;
+}
+
 // EOF

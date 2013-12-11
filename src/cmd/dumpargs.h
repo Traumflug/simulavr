@@ -38,5 +38,8 @@ extern void SetDumpTraceArgs(const std::vector<std::string> &traceopts, AvrDevic
 //! Write out registered trace values for device to file or stdout
 extern void ShowRegisteredTraceValues(const std::string &outname);
 
+//! Write out core dump file (for analysis)
+extern void WriteCoreDump(const std::string &outname, AvrDevice *dev);
+
 #endif
 // EOF

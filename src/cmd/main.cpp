@@ -120,6 +120,7 @@ const char Usage[] =
     "-e --writetoexit <offset>\n"
     "                      add a special register at IO-offset\n"
     "                      which exits simulator run\n"
+    "-C --core-dump <name> dump a core memory image <name> to file on exit\n"
     "-v --verbose          output some hints to console\n"
     "-T --terminate <label> or <address>\n"
     "                      stops simulation if PC runs on <label> or <address>\n"
@@ -137,6 +138,7 @@ const char Usage[] =
 int main(int argc, char *argv[]) {
     int c;
     bool gdbserver_flag = 0;
+    string coredumpfile("unknown");
     string filename("unknown");
     string devicename("unknown");
     string tracefilename("unknown");
@@ -184,12 +186,13 @@ int main(int argc, char *argv[]) {
             {"verbose", 0, 0, 'v'},
             {"terminate", 1, 0, 'T'},
             {"breakpoint", 1, 0, 'B'},
+            {"core-dump", 1, 0, 'C'},
             {"irqstatistic", 0, 0, 's'},
             {"help", 0, 0, 'h'},
             {0, 0, 0, 0}
         };
         
-        c = getopt_long(argc, argv, "a:e:f:d:gGm:p:t:uxyzhvnisF:R:W:VT:B:c:o:l:", long_options, &option_index);
+        c = getopt_long(argc, argv, "a:e:f:d:gGm:p:t:uxyzhvnisF:R:W:VT:B:c:C:o:l:", long_options, &option_index);
         if(c == -1)
             break;
         
@@ -327,6 +330,11 @@ int main(int argc, char *argv[]) {
                 enableIRQStatistic = true;
                 break;
             
+            case 'C':
+                avr_message("Write core dump file on exit: %s", optarg);
+                coredumpfile = optarg;
+                break;
+            
             default:
                 cout << Usage
                      << "Supported devices:" << endl
@@ -449,6 +457,11 @@ int main(int argc, char *argv[]) {
     
     dman->stopApplication(); // stop dump session. Close dump files, if necessary
     
+    if(coredumpfile != "unknown") {
+        avr_message("write core dump file ...");
+        WriteCoreDump(coredumpfile, dev1)
+    }
+
     // delete ui and device
     delete ui;
     delete dev1;
