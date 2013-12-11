@@ -3,6 +3,7 @@
 # files created by configure
 config.texi
 conf.py
+mdate-sh
 
 # files created by make
 doc_build
