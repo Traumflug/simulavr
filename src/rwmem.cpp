@@ -40,14 +40,16 @@
 using namespace std;
 
 RWMemoryMember::RWMemoryMember(TraceValueRegister *_reg,
-                               const std::string &tracename,
+                               const std::string &_tracename,
                                const int index):
-    registry(_reg)
+    registry(_reg),
+    tracename(_tracename),
+    isInvalid(false)
 {
-    if (tracename.size()) {
-        tv = new TraceValue(8, registry->GetTraceValuePrefix() + tracename, index);
+    if (_tracename.size()) {
+        tv = new TraceValue(8, registry->GetTraceValuePrefix() + _tracename, index);
         if (!registry) {
-            avr_error("registry not initialized for RWMemoryMember '%s'.", tracename.c_str());
+            avr_error("registry not initialized for RWMemoryMember '%s'.", _tracename.c_str());
         }
         registry->RegisterTraceValue(tv);
     } else {
@@ -57,6 +59,8 @@ RWMemoryMember::RWMemoryMember(TraceValueRegister *_reg,
 
 RWMemoryMember::RWMemoryMember(void):
     registry(NULL),
+    tracename(""),
+    isInvalid(true),
     tv(NULL) {}
 
 RWMemoryMember::operator unsigned char() const {

@@ -24,6 +24,7 @@
  */
 
 #include <fstream>
+#include <iomanip>
 
 #include <stdlib.h>
 
@@ -100,8 +101,80 @@ void ShowRegisteredTraceValues(const string &outname) {
 
 void WriteCoreDump(const string &outname, AvrDevice *dev) {
     ostream *outf;
+
+    // open dump file
     outf = new ofstream(outname.c_str());
-    outf << "just a test" << endl;
+
+    // write out PC
+    *outf << "PC = 0x" << hex << setw(6) << setfill('0') << dev->PC
+          << " (PC*2 = 0x" << hex << setw(6) << setfill('0') << (dev->PC * 2)
+          << ")" << endl << endl;
+
+    // write out general purpose register
+    //*outf << dec << (int)dev->GetMemRegisterSize() << " " << (int)dev->GetMemIOSize() << " " << (int)dev->GetMemIRamSize() << " " << (int)dev->GetMemERamSize() << endl;
+    *outf << "General Purpose Register Dump:" << endl;
+    for(int i = 0, j = 0; i < dev->GetMemRegisterSize(); i++) {
+        *outf << dec << "r" << setw(2) << setfill('0') << i << "="
+              << hex << setw(2) << setfill('0') << (int)((unsigned char)*(dev->rw[i])) << "  ";
+        j++;
+        if(j == 8) {
+            *outf << endl;
+            j = 0;
+        }
+    }
+    *outf << endl;
+
+    // write out IO register
+    //*outf << dec << (int)dev->GetMemRegisterSize() << " " << (int)dev->GetMemIOSize() << " " << (int)dev->GetMemIRamSize() << " " << (int)dev->GetMemERamSize() << endl;
+    *outf << "IO Register Dump:" << endl;
+    int offs = dev->GetMemRegisterSize(), size = dev->GetMemIOSize();
+    int hsize = (size + 1) / 2;
+    const int sp_name = 10, sp_col = 15; // place for IO register name an gap size between columns
+    for(int i = 0; i < hsize; i++) {
+        // left column
+        string regname = dev->rw[i + offs]->GetTraceName();
+        unsigned char val = 0;
+        if(dev->rw[i + offs]->IsInvalid())
+            regname = "Reserved";
+        else
+            val = (unsigned char)*(dev->rw[i + offs]);
+        *outf << hex << setw(2) << setfill('0') << (i + offs) << " : "
+              << setw(sp_name) << setfill(' ') << left << regname << " : "
+              << "0x" << hex << setw(2) << setfill('0') << (int)val;
+        if((i + hsize) >= size)
+            *outf << endl; // odd count of IO registers?
+        else {
+            // right column
+            regname = dev->rw[i + hsize + offs]->GetTraceName();
+            val = 0;
+            if(dev->rw[i + hsize + offs]->IsInvalid())
+                regname = "Reserved";
+            else
+                val = (unsigned char)*(dev->rw[i + hsize + offs]);
+            *outf << setw(sp_col) <<  setfill(' ') << " "
+                  << hex << setw(2) << setfill('0') << (i + hsize + offs) << " : "
+                  << setw(sp_name) << setfill(' ') << left << regname << " : "
+                  << "0x" << hex << setw(2) << setfill('0') << (int)val
+                  << endl;
+        }
+    }
+    *outf << endl;
+
+    // write out internal RAM
+    *outf << "Internal SRAM Memory Dump:" << endl;
+    *outf << endl;
+
+    // write out external RAM
+    if(dev->GetMemERamSize() > 0) {
+        *outf << "External SRAM Memory Dump:" << endl;
+        *outf << endl;
+    }
+
+    // write out flash content
+    *outf << "Program Flash Memory Dump:" << endl;
+    *outf << endl;
+
+    // close file
     delete outf;
 }
 

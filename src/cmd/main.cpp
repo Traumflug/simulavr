@@ -331,7 +331,7 @@ int main(int argc, char *argv[]) {
                 break;
             
             case 'C':
-                avr_message("Write core dump file on exit: %s", optarg);
+                avr_message("Write core dump on exit to file: %s", optarg);
                 coredumpfile = optarg;
                 break;
             
@@ -459,7 +459,7 @@ int main(int argc, char *argv[]) {
     
     if(coredumpfile != "unknown") {
         avr_message("write core dump file ...");
-        WriteCoreDump(coredumpfile, dev1)
+        WriteCoreDump(coredumpfile, dev1);
     }
 
     // delete ui and device
