@@ -84,8 +84,12 @@ class XMLPage(object):
     r = self.add(root, "tr")
     self.add(r, "td", { "class": "tbl-header" }, "repo status after build check")
     d = self.add(r, "td", { "class": "tbl-data" })
-    for t in open(self.cfg.get("global", "status-repo"), "r").read().strip().split("\n"):
-      self.add(d, "div", text = t.strip())
+    txt = open(self.cfg.get("global", "status-repo"), "r").read().strip()
+    if len(txt) > 0:
+      for t in txt.split("\n"):
+        self.add(d, "div", text = t.strip())
+    else:
+      self.add(d, "div", text = "<empty>")
 
   def addLogRow(self, root, section):
     r = self.add(root, "tr")
