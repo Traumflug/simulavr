@@ -99,7 +99,7 @@ class XMLPage(object):
 
   def addVersions(self, root, title):
     if not self.cfg.has_section("versions"): return
-    if not self.cfg.has_option("versions", "tools"); return
+    if not self.cfg.has_option("versions", "tools"): return
     t = self.addTable(root, title)
     for item in self.cfg.get("versions", "tools").split():
       if not self.cfg.has_option("versions", item) or not self.cfg.has_option("versions", item + "-text"):
