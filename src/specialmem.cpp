@@ -46,7 +46,7 @@ void RWWriteToFile::set(unsigned char val) {
 }
 
 unsigned char RWWriteToFile::get() const {
-    cerr << "Invalid read access to RWWriteToFile register." << endl;
+    avr_warning("Invalid read access to RWWriteToFile register.");
     return 0;
 } 
 
@@ -61,7 +61,7 @@ RWReadFromFile::RWReadFromFile(TraceValueRegister *registry,
 }
 
 void RWReadFromFile::set(unsigned char val) {
-    cerr << "Invalid write access to RWWriteToFile register with value " << val << "." << endl;
+    avr_warning("Invalid write access to RWWriteToFile register with value %d.", (int)val);
 }
 
 unsigned char RWReadFromFile::get() const { 
@@ -72,35 +72,35 @@ unsigned char RWReadFromFile::get() const {
 
 
 RWExit::RWExit(TraceValueRegister *registry,
-               const std::string &tracename) :
+               const string &tracename) :
     RWMemoryMember(registry, tracename) {}
 
 
 void RWExit::set(unsigned char c) {
-    cerr << "Exiting at simulated program request" << endl;
+    avr_message("Exiting at simulated program request (write)");
     DumpManager::Instance()->stopApplication();
     sysConHandler.ExitApplication(c); 
 }
 
 unsigned char RWExit::get() const {
-    cerr << "Exiting at simulated program request" << endl;
+    avr_message("Exiting at simulated program request (read)");
     DumpManager::Instance()->stopApplication();
     sysConHandler.ExitApplication(0); 
     return 0;
 }
 
 RWAbort::RWAbort(TraceValueRegister *registry,
-                 const std::string &tracename) :
+                 const string &tracename) :
     RWMemoryMember(registry, tracename) {}
 
 void RWAbort::set(unsigned char c) {
-    cerr << "Aborting at simulated program request" << endl;
+    avr_warning("Aborting at simulated program request (write)");
     DumpManager::Instance()->stopApplication();
     sysConHandler.AbortApplication(c);
 }
 
 unsigned char RWAbort::get() const {
-    cerr << "Aborting at simulated program request" << endl;
+    avr_warning("Aborting at simulated program request (read)");
     DumpManager::Instance()->stopApplication();
     sysConHandler.AbortApplication(0);
     return 0;

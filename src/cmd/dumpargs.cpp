@@ -24,6 +24,7 @@
  */
 
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 
 #include <stdlib.h>
@@ -31,6 +32,7 @@
 #include "dumpargs.h"
 #include "../helper.h"
 #include "../avrerror.h"
+#include "../flash.h"
 
 using namespace std;
  
@@ -99,6 +101,103 @@ void ShowRegisteredTraceValues(const string &outname) {
         delete outf;
 }
 
+static void WriteCoreDumpIO(ostream &outf, AvrDevice *dev, int offs, int size) {
+    int hsize = (size + 1) / 2;
+    const int sp_name = 10, sp_col = 15; // place for IO register name an gap size between columns
+    for(int i = 0; i < hsize; i++) {
+        // left column
+        string regname = dev->rw[i + offs]->GetTraceName();
+        unsigned char val = 0;
+        if(dev->rw[i + offs]->IsInvalid())
+            regname = "Reserved";
+        else
+            val = (unsigned char)*(dev->rw[i + offs]);
+        outf << hex << setw(2) << setfill('0') << right << (i + offs) << " : "
+             << setw(sp_name) << setfill(' ') << left << regname << " : "
+             << "0x" << hex << setw(2) << setfill('0') << right << (int)val;
+        if((i + hsize) >= size)
+            outf << endl; // odd count of IO registers?
+        else {
+            // right column
+            regname = dev->rw[i + hsize + offs]->GetTraceName();
+            val = 0;
+            if(dev->rw[i + hsize + offs]->IsInvalid())
+                regname = "Reserved";
+            else
+                val = (unsigned char)*(dev->rw[i + hsize + offs]);
+            outf << setw(sp_col) <<  setfill(' ') << " "
+                 << hex << setw(2) << setfill('0') << right << (i + hsize + offs) << " : "
+                 << setw(sp_name) << setfill(' ') << left << regname << " : "
+                 << "0x" << hex << setw(2) << setfill('0') << right << (int)val
+                 << endl;
+        }
+    }
+}
+
+static void WriteCoreDumpRAM(ostream &outf, AvrDevice *dev, int offs, int size) {
+    const int maxLineByte = 16;
+    ostringstream buf;
+    int start = offs, lastStart = 0, dup = 0, j = 0;
+    string lastLine("");
+
+    for(int i = 0; i < size; i++) {
+        buf << hex << setw(2) << setfill('0') << (int)((unsigned char)*(dev->rw[i + offs])) << " ";
+        if(++j == maxLineByte) {
+            if(buf.str() == lastLine) // check for duplicate line
+              dup++;
+            else {
+              if(dup > 0) outf << "  -- last line repeats --" << endl;
+              outf << hex << setw(4) << setfill('0') << right << start << " : " << buf.str() << endl;
+              dup = 0;
+              lastLine = buf.str();
+            }
+            j = 0;
+            lastStart = start;
+            start += maxLineByte;
+            buf.str("");
+        }
+    }
+    if((j > 0) || (dup > 0)) {
+        if(dup > 0) outf << "  -- last line repeats --" << endl;
+        if(j == 0)
+          outf << hex << setw(4) << setfill('0') << right << lastStart << " : " << lastLine << endl;
+        else
+          outf << hex << setw(4) << setfill('0') << right << start << " : " << buf.str() << endl;
+    }
+}
+
+static void WriteCoreDumpFlash(ostream &outf, AvrDevice *dev, int size) {
+    const int maxLineWord = 8;
+    ostringstream buf;
+    int start = 0, lastStart = 0, dup = 0, j = 0;
+    string lastLine("");
+
+    for(int i = 0; i < size; i += 2) {
+        buf << hex << setw(4) << setfill('0') << dev->Flash->ReadMemRawWord(i) << " ";
+        if(++j == maxLineWord) {
+            if(buf.str() == lastLine) // check for duplicate line
+              dup++;
+            else {
+              if(dup > 0) outf << "  -- last line repeats --" << endl;
+              outf << hex << setw(4) << setfill('0') << right << start << " : " << buf.str() << endl;
+              dup = 0;
+              lastLine = buf.str();
+            }
+            j = 0;
+            lastStart = start;
+            start += maxLineWord;
+            buf.str("");
+        }
+    }
+    if((j > 0) || (dup > 0)) {
+        if(dup > 0) outf << "  -- last line repeats --" << endl;
+        if(j == 0)
+          outf << hex << setw(4) << setfill('0') << right << lastStart << " : " << lastLine << endl;
+        else
+          outf << hex << setw(4) << setfill('0') << right << start << " : " << buf.str() << endl;
+    }
+}
+
 void WriteCoreDump(const string &outname, AvrDevice *dev) {
     ostream *outf;
 
@@ -111,7 +210,6 @@ void WriteCoreDump(const string &outname, AvrDevice *dev) {
           << ")" << endl << endl;
 
     // write out general purpose register
-    //*outf << dec << (int)dev->GetMemRegisterSize() << " " << (int)dev->GetMemIOSize() << " " << (int)dev->GetMemIRamSize() << " " << (int)dev->GetMemERamSize() << endl;
     *outf << "General Purpose Register Dump:" << endl;
     for(int i = 0, j = 0; i < dev->GetMemRegisterSize(); i++) {
         *outf << dec << "r" << setw(2) << setfill('0') << i << "="
@@ -125,53 +223,25 @@ void WriteCoreDump(const string &outname, AvrDevice *dev) {
     *outf << endl;
 
     // write out IO register
-    //*outf << dec << (int)dev->GetMemRegisterSize() << " " << (int)dev->GetMemIOSize() << " " << (int)dev->GetMemIRamSize() << " " << (int)dev->GetMemERamSize() << endl;
     *outf << "IO Register Dump:" << endl;
-    int offs = dev->GetMemRegisterSize(), size = dev->GetMemIOSize();
-    int hsize = (size + 1) / 2;
-    const int sp_name = 10, sp_col = 15; // place for IO register name an gap size between columns
-    for(int i = 0; i < hsize; i++) {
-        // left column
-        string regname = dev->rw[i + offs]->GetTraceName();
-        unsigned char val = 0;
-        if(dev->rw[i + offs]->IsInvalid())
-            regname = "Reserved";
-        else
-            val = (unsigned char)*(dev->rw[i + offs]);
-        *outf << hex << setw(2) << setfill('0') << (i + offs) << " : "
-              << setw(sp_name) << setfill(' ') << left << regname << " : "
-              << "0x" << hex << setw(2) << setfill('0') << (int)val;
-        if((i + hsize) >= size)
-            *outf << endl; // odd count of IO registers?
-        else {
-            // right column
-            regname = dev->rw[i + hsize + offs]->GetTraceName();
-            val = 0;
-            if(dev->rw[i + hsize + offs]->IsInvalid())
-                regname = "Reserved";
-            else
-                val = (unsigned char)*(dev->rw[i + hsize + offs]);
-            *outf << setw(sp_col) <<  setfill(' ') << " "
-                  << hex << setw(2) << setfill('0') << (i + hsize + offs) << " : "
-                  << setw(sp_name) << setfill(' ') << left << regname << " : "
-                  << "0x" << hex << setw(2) << setfill('0') << (int)val
-                  << endl;
-        }
-    }
+    WriteCoreDumpIO(*outf, dev, dev->GetMemRegisterSize(), dev->GetMemIOSize());
     *outf << endl;
 
     // write out internal RAM
     *outf << "Internal SRAM Memory Dump:" << endl;
+    WriteCoreDumpRAM(*outf, dev, dev->GetMemRegisterSize() + dev->GetMemIOSize(), dev->GetMemIRamSize());
     *outf << endl;
 
     // write out external RAM
     if(dev->GetMemERamSize() > 0) {
         *outf << "External SRAM Memory Dump:" << endl;
+        WriteCoreDumpRAM(*outf, dev, dev->GetMemRegisterSize() + dev->GetMemIOSize() + dev->GetMemIRamSize(), dev->GetMemERamSize());
         *outf << endl;
     }
 
     // write out flash content
     *outf << "Program Flash Memory Dump:" << endl;
+    WriteCoreDumpFlash(*outf, dev, dev->Flash->GetSize());
     *outf << endl;
 
     // close file
