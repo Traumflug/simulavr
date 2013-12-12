@@ -192,6 +192,8 @@ Writes all available VCD trace sources for a device to <filename> or to stdout,
 if <-> is given.
 @item -c <trace-params>
 Enable a trace dump, for valid <trace-params> see below.
+@item -C --core-dump <name>
+Write a core dump to file <name>.
 @item -h --help
 show commandline help for simulavr and what devices are supported
 @item -a --writetoabort <offset>
