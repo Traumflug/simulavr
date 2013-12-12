@@ -71,6 +71,9 @@ Simulation options
   
 ``-s, --irqstatistic``
   Writes IRQ statistic to stdout at the end of simulation.
+
+``-C <name>, --core-dump <name>``
+  write a core dump to file <name> at simulation exit.
   
 GDB options
 -----------

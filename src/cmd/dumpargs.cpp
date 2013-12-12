@@ -33,6 +33,7 @@
 #include "../helper.h"
 #include "../avrerror.h"
 #include "../flash.h"
+#include "../hweeprom.h"
 
 using namespace std;
  
@@ -166,6 +167,38 @@ static void WriteCoreDumpRAM(ostream &outf, AvrDevice *dev, int offs, int size) 
     }
 }
 
+static void WriteCoreDumpEEPROM(ostream &outf, AvrDevice *dev, int size) {
+    const int maxLineByte = 16;
+    ostringstream buf;
+    int start = 0, lastStart = 0, dup = 0, j = 0;
+    string lastLine("");
+
+    for(int i = 0; i < size; i++) {
+        buf << hex << setw(2) << setfill('0') << (int)(dev->eeprom->ReadFromAddress(i)) << " ";
+        if(++j == maxLineByte) {
+            if(buf.str() == lastLine) // check for duplicate line
+              dup++;
+            else {
+              if(dup > 0) outf << "  -- last line repeats --" << endl;
+              outf << hex << setw(4) << setfill('0') << right << start << " : " << buf.str() << endl;
+              dup = 0;
+              lastLine = buf.str();
+            }
+            j = 0;
+            lastStart = start;
+            start += maxLineByte;
+            buf.str("");
+        }
+    }
+    if((j > 0) || (dup > 0)) {
+        if(dup > 0) outf << "  -- last line repeats --" << endl;
+        if(j == 0)
+          outf << hex << setw(4) << setfill('0') << right << lastStart << " : " << lastLine << endl;
+        else
+          outf << hex << setw(4) << setfill('0') << right << start << " : " << buf.str() << endl;
+    }
+}
+
 static void WriteCoreDumpFlash(ostream &outf, AvrDevice *dev, int size) {
     const int maxLineWord = 8;
     ostringstream buf;
@@ -238,6 +271,11 @@ void WriteCoreDump(const string &outname, AvrDevice *dev) {
         WriteCoreDumpRAM(*outf, dev, dev->GetMemRegisterSize() + dev->GetMemIOSize() + dev->GetMemIRamSize(), dev->GetMemERamSize());
         *outf << endl;
     }
+
+    // write out EEPROM content
+    *outf << "EEPROM Memory Dump:" << endl;
+    WriteCoreDumpEEPROM(*outf, dev, dev->eeprom->GetSize());
+    *outf << endl;
 
     // write out flash content
     *outf << "Program Flash Memory Dump:" << endl;
