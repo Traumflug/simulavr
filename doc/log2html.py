@@ -89,7 +89,7 @@ class XMLPage(object):
       for t in txt.split("\n"):
         self.add(d, "div", text = t.strip())
     else:
-      self.add(d, "div", text = "<empty>")
+      self.add(d, "div", text = "<clean>")
 
   def addLogRow(self, root, section):
     r = self.add(root, "tr")
