@@ -97,6 +97,17 @@ class XMLPage(object):
     if self.cfg.has_option(section, "result"): res = self.cfg.get(section, "result")
     self.add(r, "td", { "class": "tbl-data right-align" }, res)
 
+  def addVersions(self, root, title):
+    if not self.cfg.has_section("versions"): return
+    if not self.cfg.has_option("versions", "tools"); return
+    t = self.addTable(root, title)
+    for item in self.cfg.get("versions", "tools").split():
+      if not self.cfg.has_option("versions", item) or not self.cfg.has_option("versions", item + "-text"):
+        continue
+      ver = self.cfg.get("versions", item)
+      txt = self.cfg.get("versions", item + "-text")
+      self.addOverviewRow(t, txt, ver)
+
 def createIndex(cfg):
   p = XMLPage(cfg, "index.html", "Simulavr build check report")
   p.add(p.body, "h1", text = "Simulavr build check report")
@@ -123,6 +134,8 @@ def createIndex(cfg):
   p.addCommitRow(t)
   p.addRepoStatusRow(t)
 
+  p.addVersions(p.body, "Used tool versions")
+  
   p.add(p.body, "a", { "name": "logs" })
   t = p.addTable(p.body, "Log files")
   r = p.add(t, "tr")
