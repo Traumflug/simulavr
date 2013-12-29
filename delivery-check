@@ -348,9 +348,9 @@ if __name__ == "__main__":
   s = TXT(opts)
   s.writeText(_text_func_wh)
   if sys.platform in ("win32", "cygwin"):
-    s.writeText(_text_func_wh_linux)
-  else:
     s.writeText(_text_func_wh_msys)
+  else:
+    s.writeText(_text_func_wh_linux)
   if opts.delworkarea:
     s.writeText(_text_del_wa_1)
   else:
