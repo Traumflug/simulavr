@@ -133,9 +133,9 @@ _text_func_wh = """function writehtml() {
   echo "gcc-text=GCC" >> %(wa)s/log/log.cfg
   echo "avrgcc=`avr-gcc --version | head -1`" >> %(wa)s/log/log.cfg
   echo "avrgcc-text=AVR-GCC" >> %(wa)s/log/log.cfg
-  echo "swig=`swig -version | awk '/.+/{print $0}' | head -3 | tr '\n' ' '`" >> %(wa)s/log/log.cfg
+  echo "swig=`swig -version | awk '/.+/{print $0}' | head -3 | tr '\\n' ' '`" >> %(wa)s/log/log.cfg
   echo "swig-text=SWIG" >> %(wa)s/log/log.cfg
-  echo "python=`python -c 'import sys; print(sys.version)' | tr '\n' ' '`" >> %(wa)s/log/log.cfg
+  echo "python=`python -c 'import sys; print(sys.version)' | tr '\\n' ' '`" >> %(wa)s/log/log.cfg
   echo "python-text=Python" >> %(wa)s/log/log.cfg
   echo "tclsh=`echo 'puts $tcl_patchLevel; exit' | tclsh`" >> %(wa)s/log/log.cfg
   echo "tclsh-text=Tclsh" >> %(wa)s/log/log.cfg
@@ -169,11 +169,21 @@ _text_func_wh = """function writehtml() {
   # if python exists, create html files
   python %(wa)s/repo/doc/log2html.py %(wa)s/log/log.cfg
   R=$?
-  # if xdg-open exists, open browser
+"""
+
+_text_func_wh_linux = """  # if xdg-open exists, open browser
   C=`which xdg-open`
   if [ ! -z "$C" -a $R == 0 ]; then
     $C %(wa)s/log/index.html
   fi
+}
+
+"""
+_text_func_wh_msys = """  # open default browser
+  cmd << EOT
+start file:///%(wa)s/log/index.html
+exit
+EOT
 }
 
 """
@@ -248,12 +258,12 @@ echo "run bootstrap and configure ..."
 _text_run_and_test = """echo "[%(name)s]" >> %(wa)s/log/log.cfg
 echo "log=%(wa)s/log/%(name)s.log" >> %(wa)s/log/log.cfg
 echo "cmd=%(cmd)s" >> %(wa)s/log/log.cfg
-TMP=`mktemp`
+TMPNAME=`mktemp`
 date "+start=%%Y/%%m/%%d/%%H/%%M/%%S" >> %(wa)s/log/log.cfg
-(%(cmd)s 2>&1; echo $? >> $TMP) | tee %(wa)s/log/%(name)s.log
+(%(cmd)s 2>&1; echo $? >> $TMPNAME) | tee %(wa)s/log/%(name)s.log
 date "+end=%%Y/%%m/%%d/%%H/%%M/%%S" >> %(wa)s/log/log.cfg
-RES=`cat $TMP`
-rm -f $TMP
+RES=`cat $TMPNAME`
+rm -f $TMPNAME
 echo "result=$RES" >> %(wa)s/log/log.cfg
 echo "" >> %(wa)s/log/log.cfg
 LOG_STEPS="$LOG_STEPS %(name)s"
@@ -273,12 +283,12 @@ def runAndTest(hdl, cmd, name):
 _text_configure_test = """echo "[%(name)s]" >> %(wa)s/log/log.cfg
 echo "log=%(wa)s/log/%(name)s.log" >> %(wa)s/log/log.cfg
 echo "cmd=%(cmd)s" >> %(wa)s/log/log.cfg
-TMP=`mktemp`
+TMPNAME=`mktemp`
 date "+start=%%Y/%%m/%%d/%%H/%%M/%%S" >> %(wa)s/log/log.cfg
-(%(cmd)s 2>&1; echo $? >> $TMP) | tee %(wa)s/log/%(name)s.log
+(%(cmd)s 2>&1; echo $? >> $TMPNAME) | tee %(wa)s/log/%(name)s.log
 date "+end=%%Y/%%m/%%d/%%H/%%M/%%S" >> %(wa)s/log/log.cfg
-RES=`cat $TMP`
-rm -f $TMP
+RES=`cat $TMPNAME`
+rm -f $TMPNAME
 echo "result=$RES" >> %(wa)s/log/log.cfg
 echo "" >> %(wa)s/log/log.cfg
 LOG_STEPS="$LOG_STEPS %(name)s"
@@ -337,6 +347,10 @@ if __name__ == "__main__":
   # create script
   s = TXT(opts)
   s.writeText(_text_func_wh)
+  if sys.platform in ("win32", "cygwin"):
+    s.writeText(_text_func_wh_linux)
+  else:
+    s.writeText(_text_func_wh_msys)
   if opts.delworkarea:
     s.writeText(_text_del_wa_1)
   else:
