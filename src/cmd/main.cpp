@@ -60,6 +60,9 @@ using namespace std;
 
 #include "dumpargs.h"
 
+#include "serialrx.h"
+#include "serialtx.h"
+
 const char *SplitOffsetFile(const char *arg,
                             const char *name,
                             int base,
@@ -132,6 +135,8 @@ const char Usage[] =
     "-o <trace-value-file> Specifies a file into which all available trace value names\n"
     "                      will be written.\n"
     "-V --version          print out version and exit immediately\n"
+    "-z --uart             activate uart in/out on stdin/stdout\n"
+    "-b --baudrate         baudrate for UART (require -z)\n"
     "-h --help             print this help\n"
     "\n";
 
@@ -146,6 +151,7 @@ int main(int argc, char *argv[]) {
     bool globalWaitForGdbConnection = true; //please wait for gdb connection
     int userinterface_flag = 0;
     unsigned long long fcpu = 0;
+    unsigned long long baudrate = 9600;
     unsigned long long maxRunTime = 0;
     unsigned long long linestotrace = 1000000;
     UserInterface *ui;
@@ -161,6 +167,7 @@ int main(int argc, char *argv[]) {
     
     vector<string> tracer_opts;
     bool tracer_dump_avail = false;
+    bool enableUARTstd = false;
     string tracer_avail_out;
     
     while (1) {
@@ -186,11 +193,13 @@ int main(int argc, char *argv[]) {
             {"terminate", 1, 0, 'T'},
             {"breakpoint", 1, 0, 'B'},
             {"irqstatistic", 0, 0, 's'},
+            {"uart", 0, 0, 'z'},
+            {"baudrate", 1, 0, 'b'},
             {"help", 0, 0, 'h'},
             {0, 0, 0, 0}
         };
         
-        c = getopt_long(argc, argv, "a:e:f:d:gGm:p:t:uxyzhvnisF:R:W:VT:B:c:o:l:", long_options, &option_index);
+        c = getopt_long(argc, argv, "a:e:f:d:gGm:p:t:uxyzhvnisF:R:W:VT:B:c:o:l:b:", long_options, &option_index);
         if(c == -1)
             break;
         
@@ -324,6 +333,21 @@ int main(int argc, char *argv[]) {
                 enableIRQStatistic = true;
                 break;
             
+            case 'z':
+                enableUARTstd = true;
+                break;
+
+            case 'b':
+                if(!StringToUnsignedLongLong(optarg, &baudrate, NULL, 10)) {
+                    cerr << "baudrate is not a number" << endl;
+                    exit(1);
+                }
+                if(baudrate == 0) {
+                    cerr << "baudrate is zero" << endl;
+                    exit(1);
+                }
+                break;
+            
             default:
                 cout << Usage
                      << "Supported devices:" << endl
@@ -421,7 +445,46 @@ int main(int argc, char *argv[]) {
 
     if(sysConHandler.GetTraceState())
         dev1->trace_on = 1;
-    
+  
+    if (enableUARTstd){
+
+      struct inoserial_t {
+	char pin[3];
+	uint32_t baudrate;
+	char filename[2];
+      };
+
+
+      const struct inoserial_t inoserial_in = {"D0",baudrate,"-"};
+      const struct inoserial_t inoserial_out = {"D1",baudrate,"-"};
+
+      avr_message("Connecting file %s as serial in to pin %s at %d baud.",
+		  inoserial_in.filename,
+		  inoserial_in.pin,
+		  inoserial_in.baudrate);
+      
+      Net *netin = new Net();
+      SerialTxFile *serialin =
+	new SerialTxFile(inoserial_in.filename);
+      serialin->SetBaudRate(inoserial_in.baudrate);
+      netin->Add(dev1->GetPin(inoserial_in.pin));
+      netin->Add(serialin->GetPin("tx"));
+      
+
+      avr_message("Connecting pin %s as serial out to file %s at %d baud.",
+		  inoserial_out.pin,
+		  inoserial_out.filename,
+		  inoserial_out.baudrate);
+      
+      Net *netout = new Net();
+      SerialRxFile *serialout =
+	new SerialRxFile(inoserial_out.filename);
+      serialout->SetBaudRate(inoserial_out.baudrate);
+      netout->Add(dev1->GetPin(inoserial_out.pin));
+      netout->Add(serialout->GetPin("rx"));
+      
+    }
+  
     dman->start(); // start dump session
     
     if(gdbserver_flag == 0) { // no gdb
