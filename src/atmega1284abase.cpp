@@ -30,15 +30,15 @@
 #include "avrerror.h"
 #include "avrfactory.h"
 
-AVR_REGISTER(atmega164A, AvrDevice_atmega164A);
-AVR_REGISTER(atmega324A, AvrDevice_atmega324A);
-AVR_REGISTER(atmega644A, AvrDevice_atmega644A);
-AVR_REGISTER(atmega1284A, AvrDevice_atmega1284A);
+AVR_REGISTER(atmega164A, AvrDevice_atmega164A)
+AVR_REGISTER(atmega324A, AvrDevice_atmega324A)
+AVR_REGISTER(atmega644A, AvrDevice_atmega644A)
+AVR_REGISTER(atmega1284A, AvrDevice_atmega1284A)
 
-AVR_REGISTER(atmega164, AvrDevice_atmega164A);
-AVR_REGISTER(atmega324, AvrDevice_atmega324A);
-AVR_REGISTER(atmega644, AvrDevice_atmega644A);
-AVR_REGISTER(atmega1284, AvrDevice_atmega1284A);
+AVR_REGISTER(atmega164, AvrDevice_atmega164A)
+AVR_REGISTER(atmega324, AvrDevice_atmega324A)
+AVR_REGISTER(atmega644, AvrDevice_atmega644A)
+AVR_REGISTER(atmega1284, AvrDevice_atmega1284A)
 
 AvrDevice_atmega1284Abase::~AvrDevice_atmega1284Abase() {
     delete usart1;

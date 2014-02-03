@@ -118,7 +118,7 @@ void TimerIRQRegister::Reset(void) {
 unsigned char TimerIRQRegister::set_from_reg(const IOSpecialReg* reg, unsigned char nv) {
     if(reg == &timsk_reg) {
         // mask register: trigger interrupt, if mask bit is new set and flag is true
-        int idx = 0;
+        unsigned int idx = 0;
         unsigned char m = 1;
         nv &= bitmask;
         for(; idx < lines.size(); idx++, m <<= 1) {

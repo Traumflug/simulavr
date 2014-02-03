@@ -33,7 +33,7 @@
 
 #include "avrfactory.h"
 
-AVR_REGISTER(atmega8, AvrDevice_atmega8);
+AVR_REGISTER(atmega8, AvrDevice_atmega8)
 
 AvrDevice_atmega8::AvrDevice_atmega8() :
     AvrDevice(64, // I/O space above General Purpose Registers

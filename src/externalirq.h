@@ -139,7 +139,7 @@ class ExternalIRQPort: public ExternalIRQ, public HasPinNotifyFunction {
     protected:
         bool state[8]; //!< saved states from all pins
         Pin* pins[8]; //!< pins of port for identifying, which bit is changed
-        int portSize; //!< how much pins the port controls
+        unsigned int portSize; //!< how much pins the port controls
         
     public:
         ExternalIRQPort(IOSpecialReg *ctrl, HWPort *port);

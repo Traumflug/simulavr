@@ -18,13 +18,3 @@
 /* UART baud rate */
 #define UART_BAUD  9600
 
-/* HD44780 LCD port connections */
-#define HD44780_PORT C
-#define HD44780_RS PORT6
-#define HD44780_RW PORT4
-#define HD44780_E  PORT5
-/* The data bits have to be in ascending order. */
-#define HD44780_D4 PORT0
-#define HD44780_D5 PORT1
-#define HD44780_D6 PORT2
-#define HD44780_D7 PORT3

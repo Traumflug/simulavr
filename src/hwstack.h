@@ -82,7 +82,7 @@ public:
     int GetCurrentThreadForGDB() const;  ///< Get GDB-style thread ID (the first is 1)
     const Thread * GetThreadFromGDB(int thread_id) const;
     bool IsGDBThreadAlive(int thread_id) const;  ///< GDB-style thread ID (the first is 1)
-    int GetCount() const;
+    unsigned int GetCount() const;
 };
 
 //! Implements a stack register with stack logic

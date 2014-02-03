@@ -34,7 +34,7 @@
 #include "avrfactory.h"
 #include "hwsreg.h"
 
-AVR_REGISTER(at90s4433, AvrDevice_at90s4433);
+AVR_REGISTER(at90s4433, AvrDevice_at90s4433)
 
 AvrDevice_at90s4433::AvrDevice_at90s4433():
     AvrDevice(64, 128, 0, 4*1024)

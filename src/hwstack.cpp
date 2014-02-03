@@ -359,7 +359,7 @@ bool ThreadList::IsGDBThreadAlive(int thread_id) const
 	Thread * p = m_threads[index];
 	return p->m_alive;
 }
-int ThreadList::GetCount() const
+unsigned int ThreadList::GetCount() const
 {
 	return m_threads.size();
 }

@@ -48,7 +48,7 @@ HWPort::HWPort(AvrDevice *core, const string &name, bool portToggle, int size):
     portSize = size;
     portMask = (unsigned char)((1 << size) - 1);
 
-    for(int tt = 0; tt < portSize; tt++) {
+    for(unsigned int tt = 0; tt < portSize; tt++) {
         // register pin to give access to pin by name
         string dummy = name + (char)('0' + tt);
         core->RegisterPin(dummy, &p[tt]);
@@ -95,13 +95,13 @@ Pin& HWPort::GetPin(unsigned char pinNo) {
 void HWPort::CalcPin(void) {
     // calculating the value for register "pin" from the Pin p[] array
     pin = 0;
-    for(int tt = 0; tt < portSize; tt++) {
+    for(unsigned int tt = 0; tt < portSize; tt++) {
         if(p[tt].CalcPin()) pin |= (1 << tt);
     }
 }
 
 void HWPort::CalcOutputs(void) { // Calculate the new output value to be transmitted to the environment
-    for(int actualBitNo = 0; actualBitNo < portSize; actualBitNo++) {
+    for(unsigned int actualBitNo = 0; actualBitNo < portSize; actualBitNo++) {
         unsigned char actualBit = 1 << actualBitNo;
         unsigned char workingPort = 0;
         unsigned char workingDdr = 0;
@@ -150,7 +150,7 @@ string HWPort::GetPortString(void) {
     string dummy;
     dummy.resize(portSize);
     assert(portSize < sizeof(p)/sizeof(p[0]));
-    for(int tt = 0; tt < portSize; tt++)
+    for(unsigned int tt = 0; tt < portSize; tt++)
         dummy[portSize - 1 - tt] = p[tt];  // calls Pin::operator char()
 
     return dummy;

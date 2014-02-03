@@ -353,8 +353,8 @@ void GdbServer::avr_core_insert_breakpoint(dword pc) {
 }
 
 int GdbServer::signal_has_occurred(int signo) {return 0;}
-void GdbServer::signal_watch_start(int signo){};
-void GdbServer::signal_watch_stop(int signo){};
+void GdbServer::signal_watch_start(int signo){}
+void GdbServer::signal_watch_stop(int signo){}
 
 static char HEX_DIGIT[] = "0123456789abcdef";
 

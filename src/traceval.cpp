@@ -202,12 +202,12 @@ void TraceValueRegister::_tvr_insertTraceValuesToSet(TraceSet &t) {
 void TraceValueRegister::RegisterTraceValue(TraceValue *t) {
     // check for duplicate names and the right prefix
     string p = t->name();
-    int idx = _tvr_scopeprefix.length();
+    unsigned int idx = _tvr_scopeprefix.length();
     if((p.length() <= idx) || (p.substr(0, idx) != _tvr_scopeprefix))
         avr_error("add TraceValue denied: wrong prefix: '%s', scope is '%s'",
                   p.c_str(), _tvr_scopeprefix.c_str());
     string n = p.substr(idx);
-    if(n.find('.') != -1)
+    if(n.find('.') != (unsigned int)-1)
         avr_error("add TraceValue denied: wrong name: '%s', scope is '%s'",
                   n.c_str(), _tvr_scopeprefix.c_str());
     // register this TraceValue
@@ -319,7 +319,7 @@ TraceValue* TraceValueCoreRegister::GetTraceValueByName(const std::string &name)
             for(setmap_t::iterator i = _tvr_valset.begin(); i != _tvr_valset.end(); i++) {
                 if(n == *(i->first)) {
                     TraceSet *set = i->second;
-                    if(v < set->size())
+                    if(v < (int)set->size())
                         res = (*set)[v];
                     break;
                 }

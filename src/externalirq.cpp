@@ -46,7 +46,7 @@ ExternalIRQHandler::ExternalIRQHandler(AvrDevice* c,
 }
 
 ExternalIRQHandler::~ExternalIRQHandler(void) {
-    for(int idx = 0; idx < extirqs.size(); idx++)
+    for(unsigned int idx = 0; idx < extirqs.size(); idx++)
         delete extirqs[idx];
 }
 
@@ -103,14 +103,14 @@ bool ExternalIRQHandler::LevelInterruptPending(unsigned int vector) {
 void ExternalIRQHandler::Reset(void) {
     irq_mask = 0;
     irq_flag = 0;
-    for(int idx = 0; idx < extirqs.size(); idx++)
+    for(unsigned int idx = 0; idx < extirqs.size(); idx++)
         extirqs[idx]->ResetMode();
 }
 
 unsigned char ExternalIRQHandler::set_from_reg(const IOSpecialReg* reg, unsigned char nv) {
     if(reg == mask_reg) {
         // mask register: trigger interrupt, if mask bit is new set and flag is true or fireAgain()
-        for(int idx = 0; idx < irqbits.size(); idx++) {
+        for(unsigned int idx = 0; idx < irqbits.size(); idx++) {
             unsigned char m = 1 << irqbits[idx];
             if(((nv & m) != 0) &&
                ((irq_mask & m) == 0) &&
@@ -221,7 +221,7 @@ ExternalIRQPort::ExternalIRQPort(IOSpecialReg *ctrl, HWPort *port):
     ExternalIRQ(ctrl, 0, port->GetPortSize())
 {
     portSize = port->GetPortSize();
-    for(int idx = 0; idx < 8; idx++) {
+    for(unsigned int idx = 0; idx < 8; idx++) {
         if(idx < portSize) {
             Pin *p = &port->GetPin((unsigned char)idx);
             pins[idx] = p;
@@ -240,7 +240,7 @@ void ExternalIRQPort::PinStateHasChanged(Pin *pin) {
     bool s = (bool)*pin;
     
     // get bit of port
-    int idx = 0;
+    unsigned int idx = 0;
     unsigned char m = 1;
     for(; idx < portSize; idx++, m <<= 1) {
         if(pin == pins[idx]) {

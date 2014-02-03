@@ -32,8 +32,12 @@
 #define ATTRIBUTE_NORETURN __declspec(noreturn)
 #define ATTRIBUTE_PRINTF(string_arg, first_arg)
 #elif defined(__GNUC__)
+#ifndef ATTRIBUTE_NORETURN
 #define ATTRIBUTE_NORETURN __attribute__((noreturn))
+#endif
+#ifndef ATTRIBUTE_PRINTF
 #define ATTRIBUTE_PRINTF(string_arg, first_arg) __attribute__ ((format (printf, string_arg, first_arg)))
+#endif
 #else
 #define ATTRIBUTE_NORETURN
 #define ATTRIBUTE_PRINTF(string_arg, first_arg)
@@ -123,9 +127,9 @@ extern int global_verbose_on;
 //! Helper function for writing trace (trace IO access)
 void trioaccess(const char *t, unsigned char val);
 
-#define avr_message(fmt, ...) sysConHandler.vfmessage(__FILE__, __LINE__, fmt, ## __VA_ARGS__)
-#define avr_warning(fmt, ...) sysConHandler.vfwarning(__FILE__, __LINE__, fmt, ## __VA_ARGS__)
-#define avr_failure(fmt, ...) sysConHandler.vferror(__FILE__, __LINE__, fmt, ## __VA_ARGS__)
-#define avr_error(fmt, ...)   sysConHandler.vffatal(__FILE__, __LINE__, fmt, ## __VA_ARGS__)
+#define avr_message(...) sysConHandler.vfmessage(__FILE__, __LINE__, ## __VA_ARGS__)
+#define avr_warning(...) sysConHandler.vfwarning(__FILE__, __LINE__, ## __VA_ARGS__)
+#define avr_failure(...) sysConHandler.vferror(__FILE__, __LINE__, ## __VA_ARGS__)
+#define avr_error(...)   sysConHandler.vffatal(__FILE__, __LINE__, ## __VA_ARGS__)
 
 #endif /* SIM_AVRERROR_H */

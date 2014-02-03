@@ -192,7 +192,7 @@ HWIrqSystem::HWIrqSystem(AvrDevice* _core, int bytes, int tblsize):
     irqTrace(tblsize),
     irqStatistic(_core)
 {
-    for(int i = 0; i < vectorTableSize; i++) {
+    for(unsigned int i = 0; i < vectorTableSize; i++) {
         TraceValue* tv = new TraceValue(1, GetTraceValuePrefix() + "VECTOR" + int2str(i));
         tv->set_written(0);
         RegisterTraceValue(tv);

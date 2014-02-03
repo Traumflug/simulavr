@@ -107,7 +107,7 @@ void AvrFlash::Decode(unsigned int offset, int secSize) {
 }
 
 void AvrFlash::Decode(unsigned int addr) {
-    assert(0 <= addr && (unsigned)addr < size);
+    assert((unsigned)addr < size);
     assert((addr % 2) == 0);
     word opcode = (myMemory[addr] << 8) + myMemory[addr + 1];
     unsigned int index = addr / 2;

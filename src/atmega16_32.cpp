@@ -37,8 +37,8 @@
 
 #include "avrfactory.h"
 
-AVR_REGISTER(atmega16, AvrDevice_atmega16);
-AVR_REGISTER(atmega32, AvrDevice_atmega32);
+AVR_REGISTER(atmega16, AvrDevice_atmega16)
+AVR_REGISTER(atmega32, AvrDevice_atmega32)
 
 AvrDevice_atmega16_32::~AvrDevice_atmega16_32() {
     delete acomp;

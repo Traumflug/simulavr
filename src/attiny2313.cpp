@@ -36,7 +36,7 @@
 
 #include "avrfactory.h"
 
-AVR_REGISTER(attiny2313, AvrDevice_attiny2313);
+AVR_REGISTER(attiny2313, AvrDevice_attiny2313)
 
 AvrDevice_attiny2313::~AvrDevice_attiny2313() {
     delete acomp;

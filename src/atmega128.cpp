@@ -36,7 +36,7 @@
 
 #include "avrfactory.h"
 
-AVR_REGISTER(atmega128, AvrDevice_atmega128);
+AVR_REGISTER(atmega128, AvrDevice_atmega128)
 
 AvrDevice_atmega128::~AvrDevice_atmega128() {
     delete acomp;

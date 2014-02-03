@@ -237,7 +237,7 @@ void ELFLoad(const AvrDevice * core) {
                     avr_error("wrong device signature size in elf file, expected=3, given=%d", size);
                 } else {
                     unsigned int sig = (((tmp[2] << 8) + tmp[1]) << 8) + tmp[0];
-                    if(core->devSignature != -1 && sig != core->devSignature) {
+                    if(core->devSignature != (unsigned int)-1 && sig != core->devSignature) {
                         free(tmp); // free memory before abort program
                         avr_error("wrong device signature, expected=0x%x, given=0x%x", core->devSignature, sig);
                     }

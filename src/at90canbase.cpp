@@ -30,9 +30,9 @@
 #include "avrerror.h"
 #include "avrfactory.h"
 
-AVR_REGISTER(at90can32, AvrDevice_at90can32);
-AVR_REGISTER(at90can64, AvrDevice_at90can64);
-AVR_REGISTER(at90can128, AvrDevice_at90can128);
+AVR_REGISTER(at90can32, AvrDevice_at90can32)
+AVR_REGISTER(at90can64, AvrDevice_at90can64)
+AVR_REGISTER(at90can128, AvrDevice_at90can128)
 
 AvrDevice_at90canbase::~AvrDevice_at90canbase() {
     delete usart1;

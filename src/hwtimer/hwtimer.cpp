@@ -223,7 +223,7 @@ void BasicTimerUnit::SetCompareOutputMode(int idx, COMtype mode) {
 
 void BasicTimerUnit::SetCompareOutput(int idx) {
     COMtype mode = com[idx];
-    bool new_state, old_state = compare_output_state[idx];
+    bool new_state=false, old_state = compare_output_state[idx];
     switch(mode) {
         case COM_NOOP:
             return;
@@ -247,7 +247,7 @@ void BasicTimerUnit::SetCompareOutput(int idx) {
 
 void BasicTimerUnit::SetPWMCompareOutput(int idx, bool topOrDown) {
     COMtype mode = com[idx];
-    bool new_state, old_state = compare_output_state[idx];
+    bool new_state=false, old_state = compare_output_state[idx];
     switch(mode) {
         case COM_NOOP:
             return;

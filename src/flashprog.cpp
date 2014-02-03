@@ -62,7 +62,7 @@ FlashProgramming::FlashProgramming(AvrDevice *c,
 {
     // initialize hidden buffer
     tempBuffer = avr_new(unsigned char, pgsz * 2);
-    for(int i = 0; i < (pageSize * 2); i++)
+    for(unsigned int i = 0; i < (pageSize * 2); i++)
         tempBuffer[i] = 0xff;
     
     // set masks and modes
@@ -165,7 +165,7 @@ int FlashProgramming::SPM_action(unsigned int data, unsigned int xaddr, unsigned
             // calculate page address
             addr &= ~((pageSize * 2) - 1);
             // erase temp. buffer and store to flash
-            for(int i = 0; i < (pageSize * 2); i++)
+            for(unsigned int i = 0; i < (pageSize * 2); i++)
                 tempBuffer[i] = 0xff;
             core->Flash->WriteMem(tempBuffer, addr, pageSize * 2);
             // calculate system time, where operation is finished

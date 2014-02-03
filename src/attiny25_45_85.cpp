@@ -36,9 +36,9 @@
 
 #include "avrfactory.h"
 
-AVR_REGISTER(attiny25, AvrDevice_attiny25);
-AVR_REGISTER(attiny45, AvrDevice_attiny45);
-AVR_REGISTER(attiny85, AvrDevice_attiny85);
+AVR_REGISTER(attiny25, AvrDevice_attiny25)
+AVR_REGISTER(attiny45, AvrDevice_attiny45)
+AVR_REGISTER(attiny85, AvrDevice_attiny85)
 
 AvrDevice_attinyX5::~AvrDevice_attinyX5() {
     // destroy subsystems in reverse order, you've created it in constructor

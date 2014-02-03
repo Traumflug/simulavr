@@ -155,7 +155,7 @@ void SerialTx::SetNewValueFromUi(const string &s) {
         if (s == "__SPACE__")  { Send(' '); }
         else 
         {
-            for(int i=0; i < s.length(); i++)
+            for(unsigned int i=0; i < s.length(); i++)
             {
                 Send(s[i]);
             }
