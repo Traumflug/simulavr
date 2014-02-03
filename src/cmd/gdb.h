@@ -65,6 +65,7 @@ class GdbServerSocket {
         virtual void SetBlockingMode(int mode)=0;
         virtual bool Connect(void)=0;
         virtual void CloseConnection(void)=0;
+        virtual ~GdbServerSocket(){}
 };
 
 #if defined(HAVE_SYS_MINGW) || defined(_MSC_VER)

@@ -28,9 +28,9 @@
 
 HWPrescaler::HWPrescaler(AvrDevice *core, const std::string &tracename):
     Hardware(core),
-    countEnable(true),
     _resetBit(-1),
-    _resetSyncBit(-1)
+    _resetSyncBit(-1),
+    countEnable(true)
 {
     core->AddToCycleList(this);
     trace_direct(&(core->coreTraceGroup), "PRESCALER" + tracename, &preScaleValue);
@@ -42,9 +42,9 @@ HWPrescaler::HWPrescaler(AvrDevice *core,
                          IOSpecialReg *ioreg,
                          int resetBit):
     Hardware(core),
-    countEnable(true),
     _resetBit(resetBit),
-    _resetSyncBit(-1)
+    _resetSyncBit(-1),
+    countEnable(true)
 {
     core->AddToCycleList(this);
     trace_direct(&(core->coreTraceGroup), "PRESCALER" + tracename, &preScaleValue);
@@ -58,9 +58,9 @@ HWPrescaler::HWPrescaler(AvrDevice *core,
                          int resetBit,
                          int resetSyncBit):
     Hardware(core),
-    countEnable(true),
     _resetBit(resetBit),
-    _resetSyncBit(resetSyncBit)
+    _resetSyncBit(resetSyncBit),
+    countEnable(true)
 {
     core->AddToCycleList(this);
     trace_direct(&(core->coreTraceGroup), "PRESCALER" + tracename, &preScaleValue);

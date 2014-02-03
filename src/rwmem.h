@@ -91,8 +91,9 @@ class GPIORegister: public RWMemoryMember, public Hardware {
         GPIORegister(AvrDevice *core,
                      TraceValueRegister *registry,
                      const std::string &tracename):
-            Hardware(core),
-            RWMemoryMember(registry, tracename) { value = 0; }
+            RWMemoryMember(registry, tracename),
+            Hardware(core)
+    { value = 0; }
         
         // from Hardware
         void Reset(void) { value = 0; }

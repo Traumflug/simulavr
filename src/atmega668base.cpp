@@ -82,8 +82,8 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     portb(this, "B", true),
     portc(this, "C", true, 7),
     portd(this, "D", true),
-    assr_reg(&coreTraceGroup, "ASSR"),
     gtccr_reg(&coreTraceGroup, "GTCCR"),
+    assr_reg(&coreTraceGroup, "ASSR"),
     prescaler01(this, "01", &gtccr_reg, 0, 7),
     prescaler2(this, "2", PinAtPort(&portb, 6), &assr_reg, 5, &gtccr_reg, 1, 7)
 { 

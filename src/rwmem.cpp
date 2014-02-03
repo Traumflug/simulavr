@@ -56,8 +56,9 @@ RWMemoryMember::RWMemoryMember(TraceValueRegister *_reg,
 }
 
 RWMemoryMember::RWMemoryMember(void):
-    registry(NULL),
-    tv(NULL) {}
+    tv(NULL),
+    registry(NULL)
+{}
 
 RWMemoryMember::operator unsigned char() const {
     if (tv)
@@ -89,9 +90,9 @@ RWMemoryMember::~RWMemoryMember() {
 
 CLKPRRegister::CLKPRRegister(AvrDevice *core,
                              TraceValueRegister *registry):
+        RWMemoryMember(registry, "CLKPR"),
         Hardware(core),
-        _core(core),
-        RWMemoryMember(registry, "CLKPR") {
+        _core(core) {
     if(_core->fuses->GetFuseBit(AvrFuses::FB_CKDIV8))
         value = 3;
     else
@@ -138,8 +139,9 @@ void CLKPRRegister::set(unsigned char v) {
 
 XDIVRegister::XDIVRegister(AvrDevice *core,
                              TraceValueRegister *registry):
-        Hardware(core),
-        RWMemoryMember(registry, "XDIV") {
+        RWMemoryMember(registry, "XDIV"), 
+        Hardware(core)
+{
     Reset();
 }
 
@@ -163,9 +165,10 @@ void XDIVRegister::set(unsigned char v) {
 OSCCALRegister::OSCCALRegister(AvrDevice *core,
                              TraceValueRegister *registry,
                              int cal):
-        Hardware(core),
         RWMemoryMember(registry, "OSCCAL"),
-        cal_type(cal){
+        Hardware(core),
+        cal_type(cal)
+{
     Reset();
 }
 

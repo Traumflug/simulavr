@@ -621,6 +621,21 @@ void HWTimer8::Reset(void) {
 void HWTimer8::ChangeWGM(WGMtype mode) {
     wgm = mode;
     switch(wgm) {
+        case WGM_PCPWM_9BIT:
+        case WGM_PCPWM_10BIT:
+        case WGM_FASTPWM_9BIT:
+        case WGM_FASTPWM_10BIT:
+        case WGM_PFCPWM_ICR:
+        case WGM_PFCPWM_OCRA:
+        case WGM_PCPWM_ICR:
+        case WGM_PCPWM_OCRA:
+        case WGM_CTC_ICR:
+        case WGM_RESERVED:
+        case WGM_FASTPWM_ICR:
+        case WGM_FASTPWM_OCRA:
+        case WGM_tablesize: 
+            break;
+
         case WGM_NORMAL:
             limit_top = limit_max;
             updown_counting = false;
@@ -818,6 +833,10 @@ unsigned char HWTimer16::GetComplexRegister(bool is_icr, bool high) {
 void HWTimer16::ChangeWGM(WGMtype mode) {
     wgm = mode;
     switch(wgm) {
+        case WGM_RESERVED:
+        case WGM_tablesize:
+            break;
+
         case WGM_NORMAL:
             limit_top = limit_max;
             updown_counting = false;
@@ -1093,11 +1112,12 @@ HWTimer16_2C2::HWTimer16_2C2(AvrDevice *core,
                              ICaptureSource* icapsrc,
                              bool is_at8515):
     HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, NULL, NULL, ticap, icapsrc),
+    at8515_mode(is_at8515),
     tccra_reg(this, "TCCRA",
               this, &HWTimer16_2C2::Get_TCCRA, &HWTimer16_2C2::Set_TCCRA),
     tccrb_reg(this, "TCCRB",
-              this, &HWTimer16_2C2::Get_TCCRB, &HWTimer16_2C2::Set_TCCRB),
-    at8515_mode(is_at8515) {}
+              this, &HWTimer16_2C2::Get_TCCRB, &HWTimer16_2C2::Set_TCCRB)
+{}
 
 void HWTimer16_2C2::Set_WGM(int val) {
     if(wgm_raw != val) {
@@ -1307,7 +1327,12 @@ HWTimerTinyX5::HWTimerTinyX5(AvrDevice *core,
         PinAtPort* ocrb_outinv):
     Hardware(core),
     TraceValueRegister(core, "TIMER1"),
+    ocra_unit(ocra_out, ocra_outinv),
+    ocrb_unit(ocrb_out, ocrb_outinv),
     core(core),
+    timerOverflowInt(tov),
+    timerOCRAInt(tocra),
+    timerOCRBInt(tocrb),
     tccr_reg(this, "TCCR1",
              this, &HWTimerTinyX5::Get_TCCR, &HWTimerTinyX5::Set_TCCR),
     tcnt_reg(this, "TCNT1",
@@ -1323,12 +1348,7 @@ HWTimerTinyX5::HWTimerTinyX5(AvrDevice *core,
     dt1a_reg(this, "DT1A",
              this, &HWTimerTinyX5::Get_DT1A, &HWTimerTinyX5::Set_DT1A),
     dt1b_reg(this, "DT1B",
-             this, &HWTimerTinyX5::Get_DT1B, &HWTimerTinyX5::Set_DT1B),
-    timerOverflowInt(tov),
-    timerOCRAInt(tocra),
-    timerOCRBInt(tocrb),
-    ocra_unit(ocra_out, ocra_outinv),
-    ocrb_unit(ocrb_out, ocrb_outinv)
+             this, &HWTimerTinyX5::Get_DT1B, &HWTimerTinyX5::Set_DT1B)
 {
     // gtccr and pllcsr register
     gtccrRegister = gtccr;
@@ -1538,6 +1558,9 @@ bool HWTimerTinyX5::PrescalerMux(void) {
     case 15: // CKx16384
         return (bool)((prescaler % 16384) == 0);
     }
+
+    // should not happen
+    return 0;
 }
 
 bool HWTimerTinyX5::DeadTimePrescalerMux(void) {
@@ -1559,6 +1582,9 @@ bool HWTimerTinyX5::DeadTimePrescalerMux(void) {
     case 3: // CKx8
         return (bool)((dtprescaler % 8) == 0);
     }
+
+    // should not happen
+    return 0;
 }
 
 unsigned char HWTimerTinyX5::set_from_reg(const IOSpecialReg *reg, unsigned char nv) {

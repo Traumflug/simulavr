@@ -54,9 +54,9 @@ FlashProgramming::FlashProgramming(AvrDevice *c,
                                    unsigned int nrww,
                                    int mode):
     Hardware(c),
-    core(c),
     pageSize(pgsz),
     nrww_addr(nrww),
+    core(c),
     spmcr_reg(c, "SPMCR",
               this, &FlashProgramming::GetSpmcr, &FlashProgramming::SetSpmcr)
 {
@@ -235,8 +235,8 @@ AvrFuses::AvrFuses(void):
     fuseBits(0xfffffffd),
     nrwwAddr(0),
     nrwwSize(0),
-    bitPosBOOTRST(-1),
     bitPosBOOTSZ(-1),
+    bitPosBOOTRST(-1),
     flagBOOTRST(true),
     valueBOOTSZ(0)
 {

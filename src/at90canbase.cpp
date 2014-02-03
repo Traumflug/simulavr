@@ -83,8 +83,8 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
     porte(this, "E", true),
     portf(this, "F", true),
     portg(this, "G", true),
-    assr_reg(&coreTraceGroup, "ASSR"),
     gtccr_reg(&coreTraceGroup, "GTCCR"),
+    assr_reg(&coreTraceGroup, "ASSR"),
     prescaler013(this, "01", &gtccr_reg, 0, 7),
     prescaler2(this, "2", PinAtPort(&portc, 7), &assr_reg, 5, &gtccr_reg, 1, 7) {
     flagELPMInstructions = true;

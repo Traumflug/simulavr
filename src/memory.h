@@ -53,7 +53,7 @@ class Memory {
         Memory(int size);
         
         /*! Destructor, frees myMemory */
-        ~Memory() { avr_free(myMemory); }
+        virtual ~Memory() { avr_free(myMemory); }
         
         /*! Return string with symbols found at address
         

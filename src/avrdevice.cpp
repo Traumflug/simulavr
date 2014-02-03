@@ -126,12 +126,16 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
                      unsigned int ERamSize,
                      unsigned int flashSize):
     TraceValueRegister(),
-    coreTraceGroup(this),
-    abortOnInvalidAccess(false),
+    ioSpaceSize(_ioSpaceSize),
     iRamSize(IRamSize),
     eRamSize(ERamSize),
-    ioSpaceSize(_ioSpaceSize),
     devSignature(-1),
+    abortOnInvalidAccess(false),
+    coreTraceGroup(this),
+    deferIrq(false),
+    newIrqPc(0xffffffff),
+    v_supply(5.0),  // assume 5V supply voltage
+    v_bandgap(1.1), // assume a bandgap ref unit with 1.1V
     flagIWInstructions(true),
     flagJMPInstructions(true),
     flagIJMPInstructions(true),
@@ -142,11 +146,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     flagMOVWInstruction(true),
     flagTiny10(false),
     flagTiny1x(false),
-    flagXMega(false),
-    deferIrq(false),
-    newIrqPc(0xffffffff),
-    v_supply(5.0),  // assume 5V supply voltage
-    v_bandgap(1.1)  // assume a bandgap ref unit with 1.1V
+    flagXMega(false)
 {
     dump_manager = DumpManager::Instance();
     dump_manager->registerAvrDevice(this);

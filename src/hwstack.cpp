@@ -33,8 +33,9 @@
 using namespace std;
 
 HWStack::HWStack(AvrDevice *c):
-    m_ThreadList(*c),
-    core(c) {
+    core(c),
+    m_ThreadList(*c)
+{
     Reset();
 }
 
@@ -62,11 +63,12 @@ void HWStack::SetReturnPoint(unsigned long stackPointer, Funktor *f) {
 HWStackSram::HWStackSram(AvrDevice *c, int bs, bool initRE):
     HWStack(c),
     TraceValueRegister(c, "STACK"),
+    initRAMEND(initRE),
     sph_reg(this, "SPH",
             this, &HWStackSram::GetSph, &HWStackSram::SetSph),
     spl_reg(this, "SPL",
-            this, &HWStackSram::GetSpl, &HWStackSram::SetSpl),
-    initRAMEND(initRE) {
+            this, &HWStackSram::GetSpl, &HWStackSram::SetSpl)
+{
     stackCeil = 1 << bs;  // TODO: The number of bits is unable to acurately represent 0x460 ceiling of ATmega8: has 1024 B RAM (0x400) and 32+64 (0x60) registers.
     Reset();
 }

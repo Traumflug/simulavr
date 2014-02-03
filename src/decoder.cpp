@@ -206,8 +206,8 @@ int avr_op_AND::operator()() {
 avr_op_ANDI::avr_op_ANDI(word opcode, AvrDevice *c):
     DecodedInstruction(c),
     R1(get_rd_4(opcode)),
-    status(c->status),
-    K(get_K_8(opcode)) {}
+    K(get_K_8(opcode)),
+    status(c->status) {}
 
 int avr_op_ANDI::operator()() {
     unsigned char rd = core->GetCoreReg(R1);
@@ -330,8 +330,8 @@ int avr_op_BSET::operator()() {
 avr_op_BST::avr_op_BST(word opcode, AvrDevice *c):
     DecodedInstruction(c),
     R1(get_rd_5(opcode)),
-    status(c->status),
-    Kbit(get_reg_bit(opcode)) {}
+    Kbit(get_reg_bit(opcode)),
+    status(c->status) {}
 
 int avr_op_BST::operator()() {
     status->T = ((core->GetCoreReg(R1) & (1 << Kbit)) != 0); 
@@ -440,8 +440,8 @@ int avr_op_CPC::operator()() {
 avr_op_CPI::avr_op_CPI(word opcode, AvrDevice *c):
     DecodedInstruction(c),
     R1(get_rd_4(opcode)),
-    status(c->status),
-    K(get_K_8(opcode)) {}
+    K(get_K_8(opcode)), 
+    status(c->status) {}
 
 int avr_op_CPI::operator()() {
     byte rd  = core->GetCoreReg(R1);
@@ -1153,8 +1153,8 @@ int avr_op_OR::operator()() {
 avr_op_ORI::avr_op_ORI(word opcode, AvrDevice *c):
     DecodedInstruction(c),
     R1(get_rd_4(opcode)),
-    status(c->status),
-    K(get_K_8(opcode)) {}
+    K(get_K_8(opcode)),
+    status(c->status) {}
 
 int avr_op_ORI::operator()() {
     byte res = core->GetCoreReg(R1) | K;
@@ -1303,8 +1303,8 @@ int avr_op_SBC::operator()() {
 avr_op_SBCI::avr_op_SBCI(word opcode, AvrDevice *c):
     DecodedInstruction(c),
     R1(get_rd_4(opcode)),
-    status(c->status),
-    K(get_K_8(opcode)) {}
+    K(get_K_8(opcode)),
+    status(c->status) {}
 
 unsigned char avr_op_SBCI::GetModifiedR() const {
     return R1;
@@ -1397,8 +1397,8 @@ int avr_op_SBIS::operator()() {
 avr_op_SBIW::avr_op_SBIW(word opcode, AvrDevice *c):
     DecodedInstruction(c),
     R1(get_rd_2(opcode)),
-    status(c->status),
-    K(get_K_6(opcode)) {}
+    K(get_K_6(opcode)),
+    status(c->status) {}
 
 unsigned char avr_op_SBIW::GetModifiedR() const {
     return R1;

@@ -44,6 +44,9 @@ float AnalogValue::getA(float vcc) {
                 return vcc;
             return aValue;
     }
+
+    //remove warning only:
+    return 0;
 }
 
 int Pin::GetAnalog(void) {

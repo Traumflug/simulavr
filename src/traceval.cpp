@@ -38,9 +38,9 @@ TraceValue::TraceValue(size_t bits,
                        const std::string &__name,
                        const int __index,
                        const void *_shadow) :
-    b(bits),
     _name(__name),
     _index(__index),
+    b(bits),
     shadow(_shadow),
     v(0xaffeaffe),
     f(0),
@@ -399,21 +399,23 @@ DumpVCD::DumpVCD(ostream *_os,
                  const std::string &_tscale,
                  const bool rstrobes,
                  const bool wstrobes) :
-    os(_os),
     tscale(_tscale),
     rs(rstrobes),
     ws(wstrobes),
-    changesWritten(false) {}
+    changesWritten(false),
+    os(_os)
+{}
 
 DumpVCD::DumpVCD(const std::string &_name,
                  const std::string &_tscale,
                  const bool rstrobes,
                  const bool wstrobes) :
-    os(new ofstream(_name.c_str())),
     tscale(_tscale),
     rs(rstrobes),
     ws(wstrobes),
-    changesWritten(false) {}
+    changesWritten(false),
+    os(new ofstream(_name.c_str()))
+{}
 
 void DumpVCD::setActiveSignals(const TraceSet &act) {
     tv=act;

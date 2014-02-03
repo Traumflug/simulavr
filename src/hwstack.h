@@ -103,7 +103,7 @@ class HWStack {
         ThreadList m_ThreadList;  ///< List of known threads created within target.
         //! Creates a stack instance
         HWStack(AvrDevice *core);
-        ~HWStack() {}
+        virtual ~HWStack() {}
 
         virtual void Push(unsigned char val)=0; //!< Pushs one byte to stack
         virtual unsigned char Pop()=0; //!< Pops one byte from stack

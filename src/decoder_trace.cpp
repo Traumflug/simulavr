@@ -136,7 +136,6 @@ const char *branch_opcodes_clear[8] = {
 int avr_op_BRBC::Trace() {
     traceOut << branch_opcodes_clear[INDEX_FROM_BITMASK(bitmask)]
              << " ->" << HexShort(offset * 2) << " ";
-    unsigned int oldPC = core->PC;
     string sym(core->Flash->GetSymbolAtAddress(core->PC+1+offset));
     int ret = this->operator()();
     
@@ -161,7 +160,6 @@ const char *branch_opcodes_set[8] = {
 int avr_op_BRBS::Trace() {
     traceOut << branch_opcodes_set[INDEX_FROM_BITMASK(bitmask)]
              << " ->" << HexShort(offset * 2) << " ";
-    unsigned int oldPC = core->PC;
     string sym(core->Flash->GetSymbolAtAddress(core->PC+1+offset));
     int ret=this->operator()();
 

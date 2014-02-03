@@ -69,7 +69,6 @@ PrescalerMultiplexerExt::PrescalerMultiplexerExt(HWPrescaler *ps, PinAtPort pi):
 }
 
 bool PrescalerMultiplexerExt::isClock(unsigned int cs) {
-    unsigned short pv = prescaler->GetValue();
     bool current = (bool)(clkpin == 1);
   
     switch(cs) {

@@ -97,10 +97,12 @@ class HWAdmux: public HasPinNotifyFunction {
         AvrDevice *core;
 
     public:
-        HWAdmux(AvrDevice* _core, int _pins): core(_core),
-                                              numPins(_pins),
+        HWAdmux(AvrDevice* _core, int _pins):
+                                              notifyClient(0), 
                                               muxSelect(0),
-                                              notifyClient(0) { }
+                                              numPins(_pins),
+            core(_core)
+    { }
         virtual ~HWAdmux() { }
 
         virtual float GetValue(int select, float vcc) = 0;

@@ -30,9 +30,10 @@ AddressExtensionRegister::AddressExtensionRegister(AvrDevice *core,
                                                    unsigned bitsize):
     Hardware(core),
     TraceValueRegister(core, regname),
+    reg_mask((1 << bitsize) - 1),
     ext_reg(this, regname,
-            this, &AddressExtensionRegister::GetRegVal, &AddressExtensionRegister::SetRegVal),
-    reg_mask((1 << bitsize) - 1) {
+            this, &AddressExtensionRegister::GetRegVal, &AddressExtensionRegister::SetRegVal)
+{
     Reset();
 }
 
