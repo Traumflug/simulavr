@@ -14,7 +14,8 @@ done
 if [ -f $CONF ]; then
   . $CONF
   export CONF_REPO_URL CONF_REPO_BRANCH CONF_CHECK_PATH CONF_BFD_PATH CONF_WITH_DOXYGEN CONF_WITH_TCL
-  export CONF_TCL_CONFIG CONF_GTEST_PATH CONF_WITH_VERILOG CONF_SHOW_COMMIT_MAX CONF_PYTHON_LDFLAGS CONF_EXTRA_LIBS
+  export CONF_TCL_CONFIG CONF_GTEST_PATH CONF_WITH_VERILOG CONF_SHOW_COMMIT_MAX CONF_PYTHON_LDFLAGS
+  export CONF_EXTRA_LIBS CONF_CXXCOMPILER CONF_CXXFLAGS
 else
   echo "error: config file not found: $CONF"
   echo "       try $0 -h to get help"
@@ -101,6 +102,8 @@ file."""
   opts.gtestpath = os.environ.get("CONF_GTEST_PATH", None)
   opts.pythonldflags = os.environ.get("CONF_PYTHON_LDFLAGS", None)
   opts.extralibs = os.environ.get("CONF_EXTRA_LIBS", None)
+  opts.cxxflags = os.environ.get("CONF_CXXFLAGS", None)
+  opts.cxxcompiler = os.environ.get("CONF_CXXCOMPILER", None)
   opts.fmtdict = dict(
     wa = opts.checkpath,
     maxc = opts.commitmax,
@@ -315,6 +318,8 @@ def runConfigure(hdl, name):
   if hdl.opts.buildverilog: cmd += " --enable-verilog"
   if not hdl.opts.pythonldflags is None: cmd += ' PYTHON_LDFLAGS="%s"' % hdl.opts.pythonldflags
   if not hdl.opts.extralibs is None: cmd += ' EXTRA_LIBS="%s"' % hdl.opts.extralibs
+  if not hdl.opts.cxxflags is None: cmd += ' CXXFLAGS="%s"' % hdl.opts.cxxflags
+  if not hdl.opts.cxxcompiler is None: cmd += ' CXX="%s"' % hdl.opts.cxxcompiler
   d = dict(cmd = cmd, name = name)
   d.update(hdl.opts.fmtdict)
   hdl.write(_text_configure_test % d)

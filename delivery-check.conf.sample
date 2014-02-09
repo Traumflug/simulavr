@@ -41,4 +41,10 @@ CONF_SHOW_COMMIT_MAX=20
 # CONF_EXTRA_LIBS: only used for building on msys, if libintl or such is needed for linking
 #CONF_EXTRA_LIBS='-L/mingw/lib -lintl'
 
+# CONF_CXXFLAGS: additional CXX flags, if necessary
+#CONF_CXXFLAGS='-pedantic -Wall -Wextra -Wno-unused-parameter -std=c++11 -g -O2'
+
+# CONF_CXXCOMPILER: experimental option, used, if other compiler as system default have to be used
+#CONF_CXXCOMPILER=/path/to/different/g++
+
 # EOF
