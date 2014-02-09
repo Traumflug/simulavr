@@ -1,0 +1,48 @@
+#
+#  $Id$
+#
+#
+# Copyright (C) 2013 Markus Hitter <mah@jump-ing.de>
+
+
+This example illustrates how one can communicate with the simulated AVR
+using its USART. The other end of the communications line is stdin/stdout,
+so you can simply interact with the simulated AVR by typing into the
+terminal you used to start it with.
+
+The firmware provided can be uploaded to real hardware as-is and should do
+just the same when accessed through a serial terminal. This is an important
+point, because in main.c you can see how few tweaks to the original code
+are required to allow interacting with a simulated run. All of these tweaks
+don't alter the binary actually executed at all.
+
+Building and running the example:
+
+ - Have SimulAVR built, default configuration options are fine.
+
+ - Go to examples/simple_serial (here).
+
+ - Build the example:
+
+      make
+
+ - Run the example:
+
+      make do
+
+ - Upload the example to and run it on real hardware (this isn't exactly
+   flexible, yet, it might require some tweaks to the Makefile to match
+   /your/ hardware):
+
+      export SERIAL_AVR=/dev/<your device here>
+      make program
+      gtkterm -p $SERIAL_AVR -s 19200
+
+Interaction:
+
+Well, extremely simple. It's a code example, after all. Type characters and
+the characters will be sent back with some extra text. That's all, I hope
+this fuels your imagination.
+
+
+

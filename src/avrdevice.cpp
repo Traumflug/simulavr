@@ -275,8 +275,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
             }
 
             if(EP.end() != find(EP.begin(), EP.end(), PC)) {
-                if(global_verbose_on)
-                    cout << "Simulation finished!" << endl;
+                avr_message("Simulation finished!");
                 SystemClock::Instance().stop();
                 dump_manager->cycle();
                 return 0;

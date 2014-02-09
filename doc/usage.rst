@@ -8,10 +8,10 @@ Invoke simulavr::
 Common options
 --------------
 
-``-v, --version``
+``-V, --version``
   show the software version of simulavr
   
-``-V, --verbose``
+``-v, --verbose``
   output some hints to console
   
 ``-h, --help``
@@ -71,6 +71,9 @@ Simulation options
   
 ``-s, --irqstatistic``
   Writes IRQ statistic to stdout at the end of simulation.
+
+``-C <name>, --core-dump <name>``
+  write a core dump to file <name> at simulation exit.
   
 GDB options
 -----------

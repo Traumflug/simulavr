@@ -84,8 +84,12 @@ class XMLPage(object):
     r = self.add(root, "tr")
     self.add(r, "td", { "class": "tbl-header" }, "repo status after build check")
     d = self.add(r, "td", { "class": "tbl-data" })
-    for t in open(self.cfg.get("global", "status-repo"), "r").read().strip().split("\n"):
-      self.add(d, "div", text = t.strip())
+    txt = open(self.cfg.get("global", "status-repo"), "r").read().strip()
+    if len(txt) > 0:
+      for t in txt.split("\n"):
+        self.add(d, "div", text = t.strip())
+    else:
+      self.add(d, "div", text = "<clean>")
 
   def addLogRow(self, root, section):
     r = self.add(root, "tr")
@@ -96,6 +100,17 @@ class XMLPage(object):
     res = "-"
     if self.cfg.has_option(section, "result"): res = self.cfg.get(section, "result")
     self.add(r, "td", { "class": "tbl-data right-align" }, res)
+
+  def addVersions(self, root, title):
+    if not self.cfg.has_section("versions"): return
+    if not self.cfg.has_option("versions", "tools"): return
+    t = self.addTable(root, title)
+    for item in self.cfg.get("versions", "tools").split():
+      if not self.cfg.has_option("versions", item) or not self.cfg.has_option("versions", item + "-text"):
+        continue
+      ver = self.cfg.get("versions", item)
+      txt = self.cfg.get("versions", item + "-text")
+      self.addOverviewRow(t, txt, ver)
 
 def createIndex(cfg):
   p = XMLPage(cfg, "index.html", "Simulavr build check report")
@@ -123,6 +138,8 @@ def createIndex(cfg):
   p.addCommitRow(t)
   p.addRepoStatusRow(t)
 
+  p.addVersions(p.body, "Used tool versions")
+  
   p.add(p.body, "a", { "name": "logs" })
   t = p.addTable(p.body, "Log files")
   r = p.add(t, "tr")

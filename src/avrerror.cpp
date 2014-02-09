@@ -127,15 +127,21 @@ void SystemConsoleHandler::TraceNextLine(void) {
     }
 }
 
-void SystemConsoleHandler::vfmessage(const char *file, int line, const char *fmt, ...) {
+void SystemConsoleHandler::vfmessage(const char *fmt, ...) {
+    if ( ! global_verbose_on)
+        return;
+
     va_list ap;
-    char *mfmt = getFormatString("MESSAGE", file, line, fmt);
+    snprintf(formatStringBuffer, sizeof(formatStringBuffer),
+             "MESSAGE %s", fmt);
     va_start(ap, fmt);
-    vsnprintf(messageStringBuffer, sizeof(messageStringBuffer), mfmt, ap);
+    vsnprintf(messageStringBuffer, sizeof(messageStringBuffer),
+              formatStringBuffer, ap);
     va_end(ap);
-    if(fmt[strlen(fmt) - 1] != '\n')
-        *wrnStream << std::endl;
     *msgStream << messageStringBuffer;
+    if(fmt[strlen(fmt) - 1] != '\n')
+        *msgStream << std::endl;
+    msgStream->flush();
 }
 
 void SystemConsoleHandler::vfwarning(const char *file, int line, const char *fmt, ...) {

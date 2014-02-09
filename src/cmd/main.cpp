@@ -120,7 +120,8 @@ const char Usage[] =
     "-e --writetoexit <offset>\n"
     "                      add a special register at IO-offset\n"
     "                      which exits simulator run\n"
-    "-V --verbose          output some hints to console\n"
+    "-C --core-dump <name> dump a core memory image <name> to file on exit\n"
+    "-v --verbose          output some hints to console\n"
     "-T --terminate <label> or <address>\n"
     "                      stops simulation if PC runs on <label> or <address>\n"
     "-B --breakpoint <label> or <address>\n"
@@ -130,13 +131,14 @@ const char Usage[] =
     "                      <tracer>[:further-options ...]\n"
     "-o <trace-value-file> Specifies a file into which all available trace value names\n"
     "                      will be written.\n"
-    "-v --version          print out version and exit immediately\n"
+    "-V --version          print out version and exit immediately\n"
     "-h --help             print this help\n"
     "\n";
 
 int main(int argc, char *argv[]) {
     int c;
     bool gdbserver_flag = 0;
+    string coredumpfile("unknown");
     string filename("unknown");
     string devicename("unknown");
     string tracefilename("unknown");
@@ -175,21 +177,22 @@ int main(int argc, char *argv[]) {
             {"maxruntime", 1, 0, 'm'},
             {"nogdbwait", 0, 0, 'n'},
             {"trace", 1, 0, 't'},
-            {"version", 0, 0, 'v'},
+            {"version", 0, 0, 'V'},
             {"cpufrequency", 1, 0, 'F'},
             {"readfrompipe", 1, 0, 'R'},
             {"writetopipe", 1, 0, 'W'},
             {"writetoabort", 1, 0, 'a'},
             {"writetoexit", 1, 0, 'e'},
-            {"verbose", 0, 0, 'V'},
+            {"verbose", 0, 0, 'v'},
             {"terminate", 1, 0, 'T'},
             {"breakpoint", 1, 0, 'B'},
+            {"core-dump", 1, 0, 'C'},
             {"irqstatistic", 0, 0, 's'},
             {"help", 0, 0, 'h'},
             {0, 0, 0, 0}
         };
         
-        c = getopt_long(argc, argv, "a:e:f:d:gGm:p:t:uxyzhvnisF:R:W:VT:B:c:o:l:", long_options, &option_index);
+        c = getopt_long(argc, argv, "a:e:f:d:gGm:p:t:uxyzhvnisF:R:W:VT:B:c:C:o:l:", long_options, &option_index);
         if(c == -1)
             break;
         
@@ -199,7 +202,7 @@ int main(int argc, char *argv[]) {
                 terminationArgs.push_back(optarg);
                 break;
             
-            case 'V':
+            case 'v':
                 global_verbose_on = 1;
                 break;
             
@@ -257,37 +260,31 @@ int main(int argc, char *argv[]) {
                     cerr << "maxRunTime is zero" << endl;
                     exit(1);
                 }
-                if(global_verbose_on)
-                    cout << "Maximum Run Time: " << maxRunTime << endl;
+                avr_message("Maximum Run Time: %lld", maxRunTime);
                 break;
             
             case 'u':
-                if(global_verbose_on)
-                    cout << "Run with User Interface at Port 7777" << endl;
+                avr_message("Run with User Interface at Port 7777");
                 userinterface_flag = 1;
                 break;
             
             case 'f':
-                if(global_verbose_on)
-                    cout << "File to load: " << optarg << endl;
+                avr_message("File to load: %s", optarg);
                 filename = optarg;
                 break;
             
             case 'd':
-                if(global_verbose_on)
-                    cout << "Device to simulate: " << optarg << endl;
+                avr_message("Device to simulate: %s", optarg);
                 devicename = optarg;
                 break;
             
             case 'g':
-                if(global_verbose_on)
-                    cout << "Running as gdb-server" << endl;
+                avr_message("Running as gdb-server");
                 gdbserver_flag = 1;
                 break;
             
             case 'G':
-                if(global_verbose_on)
-                    cout << "Running with debug information from gdbserver" << endl;
+                avr_message("Running with debug information from gdbserver");
                 global_gdb_debug = 1;
                 gdbserver_flag = 1;
                 break;
@@ -297,18 +294,17 @@ int main(int argc, char *argv[]) {
                     cerr << "GDB Server Port is not a number" << endl;
                     exit(1);
                 }
-                if(global_verbose_on)
-                    cout << "Running on port: " << optarg << endl;
+                avr_message("Running on port: %ld", global_gdbserver_port);
                 break;
             
             case 't':
-                if(global_verbose_on)
-                    cout << "Running in Trace Mode with maximum " << linestotrace << " lines per file" << endl;
+                avr_message("Running in Trace Mode with maximum %lld lines per file",
+                            linestotrace);
 
                 sysConHandler.SetTraceFile(optarg, linestotrace);
                 break;
             
-            case 'v':
+            case 'V':
                 cout << "SimulAVR " << VERSION << endl
                      << "See documentation for copyright and distribution terms" << endl
                      << endl;
@@ -332,6 +328,11 @@ int main(int argc, char *argv[]) {
              
             case 's':
                 enableIRQStatistic = true;
+                break;
+            
+            case 'C':
+                avr_message("Write core dump on exit to file: %s", optarg);
+                coredumpfile = optarg;
                 break;
             
             default:
@@ -395,33 +396,26 @@ int main(int argc, char *argv[]) {
     
     //if we want to insert some special "pipe" Registers we could do this here:
     if(readFromPipeFileName != "") {
-        if(global_verbose_on)
-            cout << "Add ReadFromPipe-Register at 0x"
-                 << hex << readFromPipeOffset
-                 << " and read from file: " << readFromPipeFileName << endl;
+        avr_message("Add ReadFromPipe-Register at 0x%lx and read from file: %s",
+                    readFromPipeOffset, readFromPipeFileName.c_str());
         dev1->ReplaceIoRegister(readFromPipeOffset,
             new RWReadFromFile(dev1, "FREAD", readFromPipeFileName.c_str()));
     }
     
     if(writeToPipeFileName != "") {
-        if(global_verbose_on)
-            cout << "Add WriteToPipe-Register at 0x"
-                 << hex << writeToPipeOffset
-                 << " and write to file: " << writeToPipeFileName << endl;
+        avr_message("Add WriteToPipe-Register at 0x%lx and write to file: %s",
+                    writeToPipeOffset, writeToPipeFileName.c_str());
         dev1->ReplaceIoRegister(writeToPipeOffset,
             new RWWriteToFile(dev1, "FWRITE", writeToPipeFileName.c_str()));
     }
     
     if(writeToAbort) {
-        if(global_verbose_on)
-            cout << "Add WriteToAbort-Register at 0x" << hex
-                 << writeToAbort << endl;
+        avr_message("Add WriteToAbort-Register at 0x%lx", writeToAbort);
         dev1->ReplaceIoRegister(writeToAbort, new RWAbort(dev1, "ABORT"));
     }
     
     if(writeToExit) {
-        if(global_verbose_on)
-            cout << "Add WriteToExit-Register at 0x" << hex << writeToExit << endl;
+        avr_message("Add WriteToExit-Register at 0x%lx", writeToExit);
         dev1->ReplaceIoRegister(writeToExit, new RWExit(dev1, "EXIT"));
     }
     
@@ -433,8 +427,7 @@ int main(int argc, char *argv[]) {
     //if we have a file we can check out for termination lines.
     vector<string>::iterator ii;
     for(ii = terminationArgs.begin(); ii != terminationArgs.end(); ii++) {
-        if(global_verbose_on)
-            cout << "Termination or Breakpoint Symbol: " << *ii << endl;
+        avr_message("Termination or Breakpoint Symbol: %s", (*ii).c_str());
         dev1->RegisterTerminationSymbol((*ii).c_str());
     }
     
@@ -456,8 +449,7 @@ int main(int argc, char *argv[]) {
             SystemClock::Instance().Run(maxRunTime);
         }
     } else { // gdb should be activated
-        if(global_verbose_on)
-            cout << "Going to gdb..." << endl;
+        avr_message("Going to gdb...");
         GdbServer gdb1(dev1, global_gdbserver_port, global_gdb_debug, globalWaitForGdbConnection);
         SystemClock::Instance().Add(&gdb1);
         SystemClock::Instance().Endless();
@@ -465,6 +457,11 @@ int main(int argc, char *argv[]) {
     
     dman->stopApplication(); // stop dump session. Close dump files, if necessary
     
+    if(coredumpfile != "unknown") {
+        avr_message("write core dump file ...");
+        WriteCoreDump(coredumpfile, dev1);
+    }
+
     // delete ui and device
     delete ui;
     delete dev1;

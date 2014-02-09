@@ -64,7 +64,9 @@ class RWMemoryMember {
         unsigned char operator=(const RWMemoryMember &mm);
 #endif
         virtual ~RWMemoryMember();
-        
+        const std::string &GetTraceName(void) { return tracename; }
+        const bool IsInvalid(void) { return isInvalid; }
+
     protected:
         /*! This function is the function which will
           be called by the above access operators and
@@ -81,6 +83,8 @@ class RWMemoryMember {
           accesses, if applicable. */
         mutable TraceValue *tv;
         TraceValueRegister *registry;
+        const std::string tracename;
+        const bool isInvalid;
 };
 
 //! A register in IO register space unrelated to any peripheral. "GPIORx" in datasheets.

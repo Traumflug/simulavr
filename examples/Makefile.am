@@ -5,7 +5,7 @@
 
 examplesdir = $(docdir)/examples
 
-SUBDIRS = simple_ex1
+SUBDIRS = simple_ex1 simple_serial
 if USE_TCL
 SUBDIRS += anacomp atmega48 spi stdiodemo feedback atmega128_timer atmel_key
 endif

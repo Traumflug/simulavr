@@ -74,8 +74,8 @@ class SystemConsoleHandler {
         void TraceNextLine(void);
         
         //! Format and send a message to message stream (default stdout)
-        void vfmessage(const char *file, int line, const char *fmt, ...)
-            ATTRIBUTE_PRINTF(4, 5);
+        void vfmessage(const char *fmt, ...)
+            ATTRIBUTE_PRINTF(2, 3);
         //! Format and send a warning message to warning stream (default stderr)
         void vfwarning(const char *file, int line, const char *fmt, ...)
             ATTRIBUTE_PRINTF(4, 5);
@@ -127,7 +127,7 @@ extern int global_verbose_on;
 //! Helper function for writing trace (trace IO access)
 void trioaccess(const char *t, unsigned char val);
 
-#define avr_message(...) sysConHandler.vfmessage(__FILE__, __LINE__, ## __VA_ARGS__)
+#define avr_message(...) sysConHandler.vfmessage(__VA_ARGS__)
 #define avr_warning(...) sysConHandler.vfwarning(__FILE__, __LINE__, ## __VA_ARGS__)
 #define avr_failure(...) sysConHandler.vferror(__FILE__, __LINE__, ## __VA_ARGS__)
 #define avr_error(...)   sysConHandler.vffatal(__FILE__, __LINE__, ## __VA_ARGS__)
