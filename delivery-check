@@ -267,7 +267,9 @@ rm -f $TMPNAME
 echo "result=$RES" >> %(wa)s/log/log.cfg
 echo "" >> %(wa)s/log/log.cfg
 LOG_STEPS="$LOG_STEPS %(name)s"
-if [ ! $RES = 0 ]; then
+"""
+
+_text_run_and_test_2 = """if [ ! $RES = 0 ]; then
   writehtml %(name)s
   echo "'%(name)s' finished with exit code not equal 0 ($RES)"
   exit 3
@@ -275,10 +277,14 @@ fi
 
 """
 
-def runAndTest(hdl, cmd, name):
+def runAndTest(hdl, cmd, name, nocheckres = False):
   d = dict(cmd = cmd, name = name)
   d.update(hdl.opts.fmtdict)
   hdl.write(_text_run_and_test % d)
+  if nocheckres:
+    hdl.write("\n")
+  else:
+    hdl.write(_text_run_and_test_2 % d)
 
 _text_configure_test = """echo "[%(name)s]" >> %(wa)s/log/log.cfg
 echo "log=%(wa)s/log/%(name)s.log" >> %(wa)s/log/log.cfg
@@ -374,9 +380,14 @@ if __name__ == "__main__":
     runAndTest(s, "make dist", "dist")
     s.write('echo "run make install ..."\n')
     runAndTest(s, "make DESTDIR=%s/inst install" % opts.checkpath, "install")
-    runAndTest(s, "make DESTDIR=%s/inst install-info" % opts.checkpath, "install-info")
-    runAndTest(s, "make DESTDIR=%s/inst install-pdf" % opts.checkpath, "install-pdf")
-    runAndTest(s, "make DESTDIR=%s/inst install-html" % opts.checkpath, "install-html")
+    if sys.platform in ("win32", "cygwin"):
+      runAndTest(s, "make DESTDIR=%s/inst install-info" % opts.checkpath, "install-info", True)
+      runAndTest(s, "make DESTDIR=%s/inst install-pdf" % opts.checkpath, "install-pdf", True)
+      runAndTest(s, "make DESTDIR=%s/inst install-html" % opts.checkpath, "install-html", True)
+    else:
+      runAndTest(s, "make DESTDIR=%s/inst install-info" % opts.checkpath, "install-info")
+      runAndTest(s, "make DESTDIR=%s/inst install-pdf" % opts.checkpath, "install-pdf")
+      runAndTest(s, "make DESTDIR=%s/inst install-html" % opts.checkpath, "install-html")
     if opts.builddoxygen:
       runAndTest(s, "make DESTDIR=%s/inst install-doxygen" % opts.checkpath, "install-doxy")
     if opts.buildverilog:
