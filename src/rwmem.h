@@ -65,7 +65,7 @@ class RWMemoryMember {
 #endif
         virtual ~RWMemoryMember();
         const std::string &GetTraceName(void) { return tracename; }
-        const bool IsInvalid(void) { return isInvalid; }
+        bool IsInvalid(void) const { return isInvalid; } 
 
     protected:
         /*! This function is the function which will

@@ -244,7 +244,7 @@ void WriteCoreDump(const string &outname, AvrDevice *dev) {
 
     // write out general purpose register
     *outf << "General Purpose Register Dump:" << endl;
-    for(int i = 0, j = 0; i < dev->GetMemRegisterSize(); i++) {
+    for(unsigned int i = 0, j = 0; i < dev->GetMemRegisterSize(); i++) {
         *outf << dec << "r" << setw(2) << setfill('0') << i << "="
               << hex << setw(2) << setfill('0') << (int)((unsigned char)*(dev->rw[i])) << "  ";
         j++;
