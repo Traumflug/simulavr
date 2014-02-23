@@ -22,9 +22,6 @@ CONF_WITH_TCL=n
 #    CONF_WITH_TCL is set!
 CONF_TCL_CONFIG=/usr/lib/tcl8.5
 
-# CONF_GTEST_PATH: path to google test lib installation, comment it, if not available
-#CONF_GTEST_PATH=/some/where/gtest-1.6.0
-
 # CONF_WITH_VERILOG: configure simulavr build with verilog to create verilog lib too, set to "y" to enable
 CONF_WITH_VERILOG=n
 

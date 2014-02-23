@@ -170,27 +170,6 @@ DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN([Simulavr], [simulavr.doxy], )
 
 ####
-# support for google test
-####
-AC_MSG_CHECKING([google test library])
-AC_ARG_WITH([gtest],
-  [AS_HELP_STRING([--with-gtest=path  directory with google test library files])],
-  [if test ! -d ${with_gtest} -o ! -f ${with_gtest}/include/gtest/gtest.h -o ! -f ${with_gtest}/src/gtest.cc ; then
-     AC_MSG_ERROR([(${with_gtest}) is not a directory with google test library files])
-     with_gtest=
-     AC_MSG_RESULT([NOT available])
-   else
-     AC_MSG_RESULT([available])
-   fi
-  ],
-  [with_gtest=
-   AC_MSG_RESULT([NOT configured])
-  ]
-)
-AM_CONDITIONAL([GTEST_USE], [test x"${with_gtest}" != x])
-AC_SUBST([GTEST_LIB_PATH],[${with_gtest}])
-
-####
 # definitions for distcheck
 ####
 ## We have to propagate all the configure flags we want to use when

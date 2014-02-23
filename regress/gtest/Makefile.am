@@ -3,22 +3,50 @@
 #
 
 # google test library
-GTEST_OBJS = $(GTEST_LIB_PATH)/src/gtest-port.cc \
-             $(GTEST_LIB_PATH)/src/gtest-test-part.cc \
-             $(GTEST_LIB_PATH)/src/gtest-filepath.cc \
-             $(GTEST_LIB_PATH)/src/gtest-typed-test.cc \
-             $(GTEST_LIB_PATH)/src/gtest-death-test.cc \
-             $(GTEST_LIB_PATH)/src/gtest-printers.cc \
-             $(GTEST_LIB_PATH)/src/gtest.cc 
+GTEST_OBJS = gtest-1.6.0/src/gtest-all.cc
 
-GTEST_INCLUDE = -I$(GTEST_LIB_PATH)/include/gtest -I$(GTEST_LIB_PATH)/include -I$(GTEST_LIB_PATH)
+GTEST_INCLUDE = -Igtest-1.6.0/include/gtest -Igtest-1.6.0/include -Igtest-1.6.0
 
 GTEST_CXXFLAGS = -Dprivate=public -Dprotected=public 
+
+GTEST_EXTRA_FILES = gtest-1.6.0/src/gtest-internal-inl.h \
+                    gtest-1.6.0/src/gtest-filepath.cc \
+                    gtest-1.6.0/src/gtest.cc \
+                    gtest-1.6.0/src/gtest-port.cc \
+                    gtest-1.6.0/src/gtest-printers.cc \
+                    gtest-1.6.0/src/gtest-test-part.cc \
+                    gtest-1.6.0/src/gtest-death-test.cc \
+                    gtest-1.6.0/src/gtest_main.cc \
+                    gtest-1.6.0/src/gtest-typed-test.cc \
+                    gtest-1.6.0/CONTRIBUTORS \
+                    gtest-1.6.0/CHANGES \
+                    gtest-1.6.0/README \
+                    gtest-1.6.0/COPYING \
+                    gtest-1.6.0/include/gtest/gtest-printers.h \
+                    gtest-1.6.0/include/gtest/gtest-param-test.h \
+                    gtest-1.6.0/include/gtest/gtest_pred_impl.h \
+                    gtest-1.6.0/include/gtest/gtest-death-test.h \
+                    gtest-1.6.0/include/gtest/gtest_prod.h \
+                    gtest-1.6.0/include/gtest/gtest.h \
+                    gtest-1.6.0/include/gtest/gtest-spi.h \
+                    gtest-1.6.0/include/gtest/gtest-typed-test.h \
+                    gtest-1.6.0/include/gtest/gtest-test-part.h \
+                    gtest-1.6.0/include/gtest/gtest-message.h \
+                    gtest-1.6.0/include/gtest/internal/gtest-filepath.h \
+                    gtest-1.6.0/include/gtest/internal/gtest-string.h \
+                    gtest-1.6.0/include/gtest/internal/gtest-linked_ptr.h \
+                    gtest-1.6.0/include/gtest/internal/gtest-port.h \
+                    gtest-1.6.0/include/gtest/internal/gtest-type-util.h \
+                    gtest-1.6.0/include/gtest/internal/gtest-death-test-internal.h \
+                    gtest-1.6.0/include/gtest/internal/gtest-param-util-generated.h \
+                    gtest-1.6.0/include/gtest/internal/gtest-tuple.h \
+                    gtest-1.6.0/include/gtest/internal/gtest-internal.h \
+                    gtest-1.6.0/include/gtest/internal/gtest-param-util.h
 
 # simulavr bindings
 SIMULAVR_PATH = ../..
 SIMULAVR_INCLUDE = -I$(SIMULAVR_PATH)/src
-SIMULAVR_LIB = $(SIMULAVR_PATH)/src/.libs/libsimulavr.a
+SIMULAVR_LIB = $(SIMULAVR_PATH)/src/.libs/libsim.a
 
 # design under test settings
 OBJS_UNITTEST = session_001/unittest001.cpp \
@@ -44,20 +72,17 @@ OBJS_TARGET = session_001/avr_code.atmega32.o \
 
 AM_CXXFLAGS = $(GTEST_CXXFLAGS) $(GTEST_INCLUDE) $(SIMULAVR_INCLUDE) -g
 
-EXTRA_DIST = $(OBJS_SRC)
+EXTRA_DIST = $(OBJS_SRC) $(GTEST_EXTRA_FILES)
 
 SUFFIXES = .c .s
 
 CLEANFILES = */*.o
 
 # design under test rules
-if GTEST_USE
 noinst_PROGRAMS = dut
-dut_SOURCES = $(OBJS_UNITTEST)
-nodist_dut_SOURCES = $(GTEST_OBJS)
-dut_LDADD = -lpthread $(SIMULAVR_LIB) $(AVR_LIBIBERTY_LIB) $(AVR_LIBBFD_LIB) -lz
+dut_SOURCES = $(OBJS_UNITTEST) $(GTEST_OBJS)
+dut_LDADD = -lpthread $(SIMULAVR_LIB) $(LIBZ_FLAGS) $(EXTRA_LIBS)
 dut_DEPENDENCIES = $(SIMULAVR_LIB)
-endif
 
 define build-asm-m32
 avr-gcc -Wa,--gstabs,-D -xassembler-with-cpp -mmcu=atmega32 $< -o $@
@@ -89,15 +114,12 @@ session_irq_check/tc3.atmega32.o: session_irq_check/tc3.s
 session_io_pin/tc1.atmega128.o: session_io_pin/tc1.s
 	@DOLLAR_SIGN@(build-asm-m128)
 
-check-local: run-gtest
-
-if GTEST_USE
-run-gtest: dut $(OBJS_TARGET)
+if USE_AVR_CROSS
+check-local: dut $(OBJS_TARGET)
 	./dut
 else
-run-gtest:
-	@echo "  Google test library not configured. Test dosn't run!."
+check-local:
+	@echo "  Configure could not find AVR cross compiling environment so gtest"
+	@echo "  can not be run."
 endif
-
-.PHONY: run-gtest
 

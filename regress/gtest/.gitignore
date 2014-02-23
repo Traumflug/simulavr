@@ -1,4 +1,5 @@
 # files created by make
 .deps
+.dirstamp
 dut
 dut.exe
