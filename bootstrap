@@ -16,6 +16,14 @@ top_srcdir=`dirname $0`
 
 PROJECT=simulavr
 
+# Fix to support glibtool/glibtoolize instead of libtool/libtoolize on Mac OS X
+LIBTOOL=libtool
+LIBTOOLIZE=libtoolize
+if [ "`uname -s`" = "Darwin" -a -n "`which glibtool 2> /dev/null`" ]; then
+  LIBTOOL=glibtool
+  LIBTOOLIZE=glibtoolize
+fi
+
 test -d src || {
     echo "You must run this script in the top-level $PROJECT directory"
     exit 1
@@ -23,13 +31,13 @@ test -d src || {
 
 (autoconf --version) < /dev/null > /dev/null 2>&1 || {
     echo
-    echo "You must have autoconf 2.63 installed to compile $PROJECT."
+    echo "You must have autoconf (>=2.63) installed to compile $PROJECT."
     exit 1
 }
 
-(libtool --version) < /dev/null > /dev/null 2>&1 || {
+($LIBTOOL --version) < /dev/null > /dev/null 2>&1 || {
     echo
-    echo "You must have libtool installed to compile $PROJECT."
+    echo "You must have $LIBTOOL installed to compile $PROJECT."
     exit 1
 }
 		  
@@ -81,7 +89,7 @@ case ${mode} in
   generate)
     aclocal ${verbose} -I m4
     autoheader ${verbose}
-    libtoolize ${verbose} --copy --force
+    $LIBTOOLIZE ${verbose} --copy --force
     automake ${verbose} --add-missing --copy
     autoconf ${verbose}
     echo
