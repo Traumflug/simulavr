@@ -14,7 +14,7 @@ done
 if [ -f $CONF ]; then
   . $CONF
   export CONF_REPO_URL CONF_REPO_BRANCH CONF_CHECK_PATH CONF_WITH_DOXYGEN CONF_WITH_TCL
-  export CONF_TCL_CONFIG CONF_GTEST_PATH CONF_WITH_VERILOG CONF_SHOW_COMMIT_MAX CONF_PYTHON_LDFLAGS
+  export CONF_TCL_CONFIG CONF_WITH_VERILOG CONF_SHOW_COMMIT_MAX CONF_PYTHON_LDFLAGS
   export CONF_EXTRA_LIBS CONF_CXXFLAGS
 else
   echo "error: config file not found: $CONF"
@@ -100,7 +100,6 @@ file."""
   opts.tclpath = os.environ.get("CONF_TCL_CONFIG", None)
   v = os.environ.get("CONF_WITH_TCL", None)
   if v is None or v is not "y" or not opts.tclpath: opts.buildtcl = False
-  opts.gtestpath = os.environ.get("CONF_GTEST_PATH", None)
   opts.pythonldflags = os.environ.get("CONF_PYTHON_LDFLAGS", None)
   opts.extralibs = os.environ.get("CONF_EXTRA_LIBS", None)
   opts.cxxflags = os.environ.get("CONF_CXXFLAGS", None)
@@ -329,7 +328,6 @@ def runConfigure(hdl, name):
   cmd = "./configure --prefix=/usr"
   if hdl.opts.buildpython: cmd += " --enable-python"
   if hdl.opts.buildtcl: cmd += " --with-tclconfig=%s" % hdl.opts.tclpath
-  if not hdl.opts.gtestpath is None: cmd += " --with-gtest=%s" % hdl.opts.gtestpath
   if hdl.opts.builddoxygen: cmd += " --enable-doxygen-doc"
   if hdl.opts.buildverilog: cmd += " --enable-verilog"
   if not hdl.opts.pythonldflags is None: cmd += ' PYTHON_LDFLAGS="%s"' % hdl.opts.pythonldflags
