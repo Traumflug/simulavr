@@ -169,7 +169,7 @@ else
 	@echo "  Can't build web site with Sphinx, python not configured!"
 endif
 
-CLEANFILES = simulavr.info stamp-vti $(DX_CLEANFILES) $(SPHINX_CLEANFILES) $(WEBSITE_CLEANFILES)
+CLEANFILES = stamp-vti $(DX_CLEANFILES) $(SPHINX_CLEANFILES) $(WEBSITE_CLEANFILES)
 
 all-am: $(TEX_FORMATS) info
 
