@@ -128,7 +128,7 @@ void ELFLoad(const AvrDevice * core) {
 }
 
 unsigned int ELFGetSignature(const char *filename) {
-    return numeric_limits<unsigned int>::max();
+    return std::numeric_limits<unsigned int>::max();
 }
 
 #endif
@@ -147,7 +147,7 @@ void ELFLoad(const AvrDevice * core) {
                   core->actualFilename.c_str(),
                   reader.get_machine());
 
-        // over all symbols ...
+    // over all symbols ...
     ELFIO::Elf_Half sec_num = reader.sections.size();
 
     for(ELFIO::Elf_Half i = 0; i < sec_num; i++) {
@@ -253,7 +253,7 @@ void ELFLoad(const AvrDevice * core) {
                 else {
                     unsigned int sig = (((data[2] << 8) + data[1]) << 8) + data[0];
 
-                    if(core->devSignature != numeric_limits<unsigned int>::max() && sig != core->devSignature)
+                    if(core->devSignature != std::numeric_limits<unsigned int>::max() && sig != core->devSignature)
                         avr_error("wrong device signature, expected=0x%x, given=0x%x",
                                   core->devSignature,
                                   sig);
@@ -264,7 +264,7 @@ void ELFLoad(const AvrDevice * core) {
 }
 
 unsigned int ELFGetSignature(const char *filename) {
-    unsigned int signature = numeric_limits<unsigned int>::max();
+    unsigned int signature = std::numeric_limits<unsigned int>::max();
     ELFIO::elfio reader;
 
     if(!reader.load(filename))
