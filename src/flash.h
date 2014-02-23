@@ -67,7 +67,7 @@ class AvrFlash: public Memory {
         /*! Write `secSize' bytes from `src' data to byte address `addr'.
           @param src binary c-string with data to write in
           @param secSize count of available data (bytes) in src */
-        void WriteMem(unsigned char* src, unsigned int addr, unsigned int secSize);
+        void WriteMem(const unsigned char* src, unsigned int addr, unsigned int secSize);
         
         /*! Write byte `val' at `address' (in bytes). Caller must call Decode() later. */
         void WriteMemByte(unsigned char val, unsigned int address);

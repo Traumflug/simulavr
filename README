@@ -28,7 +28,7 @@ others: ??? (if you run a system with this plattform please let us know)
 Building From CVS
 =================
 ./bootstrap
-./configure --enable-bfd=DIRECTORY_TO_BINUTILS/BFD
+./configure
 make
 make check
 

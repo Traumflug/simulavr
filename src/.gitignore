@@ -15,6 +15,7 @@ simulavr.exe
 stamp-h1
 .deps
 .libs
+.dirstamp
 *.la
 simulavr_wrap.cxx
 pysimulavr_wrap.*

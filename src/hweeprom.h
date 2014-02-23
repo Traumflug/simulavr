@@ -83,7 +83,7 @@ class HWEeprom: public Hardware, public Memory, public TraceValueRegister {
         void Reset();
         void ClearIrqFlag(unsigned int vector);
 
-        void WriteMem(unsigned char *, unsigned int offset, unsigned int size);
+        void WriteMem(const unsigned char *, unsigned int offset, unsigned int size);
         void WriteAtAddress(unsigned int, unsigned char);
         unsigned char ReadFromAddress(unsigned int);
 

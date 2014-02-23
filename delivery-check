@@ -13,7 +13,7 @@ while true; do
 done
 if [ -f $CONF ]; then
   . $CONF
-  export CONF_REPO_URL CONF_REPO_BRANCH CONF_CHECK_PATH CONF_BFD_PATH CONF_WITH_DOXYGEN CONF_WITH_TCL
+  export CONF_REPO_URL CONF_REPO_BRANCH CONF_CHECK_PATH CONF_WITH_DOXYGEN CONF_WITH_TCL
   export CONF_TCL_CONFIG CONF_GTEST_PATH CONF_WITH_VERILOG CONF_SHOW_COMMIT_MAX CONF_PYTHON_LDFLAGS
   export CONF_EXTRA_LIBS CONF_CXXFLAGS
 else
@@ -95,7 +95,6 @@ file."""
   v = os.environ.get("CONF_CHECK_PATH", None)
   if v is None or len(v) == 0: p.error("setting CONF_CHECK_PATH in delivery-check.conf expected")
   opts.checkpath = v
-  opts.bfdpath = os.environ.get("CONF_BFD_PATH", None)
   v = os.environ.get("CONF_WITH_VERILOG", None)
   if v is None or v is not "y": opts.buildverilog = False
   opts.tclpath = os.environ.get("CONF_TCL_CONFIG", None)
@@ -288,12 +287,21 @@ fi
 
 """
 
-def runAndTest(hdl, cmd, name, nocheckres = False):
+_text_run_and_test_3 = """if [ ! $RES = 0 -a ! $RES = %(extrares)s ]; then
+  writehtml %(name)s
+  echo "'%(name)s' finished with exit code not equal 0 or %(extrares)s ($RES)"
+  exit 3
+fi
+
+"""
+
+def runAndTest(hdl, cmd, name, allowedResult = None):
   d = dict(cmd = cmd, name = name)
   d.update(hdl.opts.fmtdict)
   hdl.write(_text_run_and_test % d)
-  if nocheckres:
-    hdl.write("\n")
+  if allowedResult is not None:
+    d["extrares"] = str(allowedResult)
+    hdl.write(_text_run_and_test_3 % d)
   else:
     hdl.write(_text_run_and_test_2 % d)
 
@@ -320,7 +328,6 @@ fi
 def runConfigure(hdl, name):
   cmd = "./configure --prefix=/usr"
   if hdl.opts.buildpython: cmd += " --enable-python"
-  if not hdl.opts.bfdpath is None: cmd += " --with-bfd=%s" % hdl.opts.bfdpath
   if hdl.opts.buildtcl: cmd += " --with-tclconfig=%s" % hdl.opts.tclpath
   if not hdl.opts.gtestpath is None: cmd += " --with-gtest=%s" % hdl.opts.gtestpath
   if hdl.opts.builddoxygen: cmd += " --enable-doxygen-doc"
@@ -393,14 +400,9 @@ if __name__ == "__main__":
     runAndTest(s, "make dist", "dist")
     s.write('echo "run make install ..."\n')
     runAndTest(s, "make DESTDIR=%s/inst install" % opts.checkpath, "install")
-    if sys.platform in ("win32", "cygwin"):
-      runAndTest(s, "make DESTDIR=%s/inst install-info" % opts.checkpath, "install-info", True)
-      runAndTest(s, "make DESTDIR=%s/inst install-pdf" % opts.checkpath, "install-pdf", True)
-      runAndTest(s, "make DESTDIR=%s/inst install-html" % opts.checkpath, "install-html", True)
-    else:
-      runAndTest(s, "make DESTDIR=%s/inst install-info" % opts.checkpath, "install-info")
-      runAndTest(s, "make DESTDIR=%s/inst install-pdf" % opts.checkpath, "install-pdf")
-      runAndTest(s, "make DESTDIR=%s/inst install-html" % opts.checkpath, "install-html")
+    runAndTest(s, "make DESTDIR=%s/inst install-info" % opts.checkpath, "install-info")
+    runAndTest(s, "make DESTDIR=%s/inst install-pdf" % opts.checkpath, "install-pdf", 2)
+    runAndTest(s, "make DESTDIR=%s/inst install-html" % opts.checkpath, "install-html")
     if opts.builddoxygen:
       runAndTest(s, "make DESTDIR=%s/inst install-doxygen" % opts.checkpath, "install-doxy")
     if opts.buildverilog:

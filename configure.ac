@@ -92,9 +92,16 @@ AC_CHECK_PROG(GNUTIME,time,yes,no)
   
 ####
 # Check about the AVR cross compilation environment, check for libz (only on msys,
-# used automaticaly by libtool!), libbfd and libiberty
+# used automaticaly by libtool!)
 ####
-AX_AVR_ENVIRONMENT
+AC_CHECK_PROG(AVR_AS, avr-as, avr-as)
+AC_CHECK_PROG(AVR_LD,  avr-ld, avr-ld)
+AC_CHECK_PROG(AVR_GCC, avr-gcc, avr-gcc)
+AC_CHECK_PROG(AVR_GXX, avr-g++, avr-g++)
+AC_SUBST([AVR_AS])
+AC_SUBST([AVR_LD])
+AC_SUBST([AVR_GCC])
+AC_SUBST([AVR_GXX])
 if test "$ac_sys_check_uname_o" = "Msys"; then
   # need libwsock32 too
   AVR_CHECK_WINSOCK
@@ -188,9 +195,6 @@ AC_SUBST([GTEST_LIB_PATH],[${with_gtest}])
 ####
 ## We have to propagate all the configure flags we want to use when
 ## configuring for make distcheck
-DISTCHECK_CONFIGURE_FLAGS="${DISTCHECK_CONFIGURE_FLAGS} \
-  --with-bfd=${libbfd_root_location} \
-  --with-libiberty=${libiberty_root_location}"
 if test X"${tclconfig_root_path}" != X ; then
   DISTCHECK_CONFIGURE_FLAGS="${DISTCHECK_CONFIGURE_FLAGS} \
     --with-tclconfig=${tclconfig_root_path}"
@@ -257,9 +261,6 @@ echo
 echo "Summary:"
 echo "build system = $ac_sys_check_uname_o"
 echo "AVR_GCC=${AVR_GCC}"
-echo "AVR_LIBBFD_INC=${AVR_LIBBFD_INC}"
-echo "AVR_LIBBFD_LIB=${AVR_LIBBFD_LIB}"
-echo "AVR_LIBIBERTY_LIB=${AVR_LIBIBERTY_LIB}"
 echo "PYTHON=${PYTHON}"
 if test x"${build_tcl_libs}" = x"yes" -a x"${HAVE_TCL}" != x"no" ; then
   echo "TCL_WISH=${TCL_WISH}"

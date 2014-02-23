@@ -199,11 +199,6 @@ Now you have an autoconfigured project. Follow the usual step:
 
 --prefix=/wherever you want to install simulavr to.
 
---with-bfd=/path/to/avr-compiled/tools
-
-        Notice that you may want to use --enable-install-libbfd when
-        configuring binutils for AVR to get the libraries.
-
 documentation:
    It seems auto-tools behavior changed... Now the project is
    configured so that "make doc" should make all the documentation.

@@ -137,7 +137,7 @@ namespace std {
     return 0;
   }
   void PyWriteMem(char *src, unsigned int offset, unsigned int secSize) {
-    $self->WriteMem((unsigned char *)src, offset, secSize);
+    $self->WriteMem((const unsigned char *)src, offset, secSize);
   }
 }
 

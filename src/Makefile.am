@@ -4,12 +4,10 @@
 
 SUBDIRS = hwtimer cmd ui python
 
-AVR_LIBBFD_LIB=@AVR_LIBBFD_LIB@
-AVR_LIBBFD_INC=@AVR_LIBBFD_INC@
 SWIG=@SWIG@
 PYTHON_CPPFLAGS=@PYTHON_CPPFLAGS@
 
-AM_CXXFLAGS=-I$(AVR_LIBBFD_INC) -g -O2 -Icmd -Iui -Ihwtimer
+AM_CXXFLAGS=-Ielfio -g -O2 -Icmd -Iui -Ihwtimer
 
 bin_PROGRAMS    = simulavr
 @MAINT@ noinst_PROGRAMS = kbdgentables
@@ -34,8 +32,7 @@ noinst_LTLIBRARIES += lib_pysimulavr.la
 nodist_lib_pysimulavr_la_SOURCES=pysimulavr_wrap.cpp
 lib_pysimulavr_la_CPPFLAGS=$(PYTHON_CPPFLAGS) $(PYTHON_XTRA_INC)
 lib_pysimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-lib_pysimulavr_la_LIBADD= libsim.la \
-  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty $(EXTRA_LIBS)
+lib_pysimulavr_la_LIBADD= libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
 
 pysimulavr_wrap.cpp: $(PYTHON_MODUL_INTERFACE)
 	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_XTRA_INC) -o $@ $?
@@ -44,8 +41,7 @@ $(PYTHON_MODUL_LIB): lib_pysimulavr.la
 if SYS_MINGW
 	$(CXX) -shared -o $(PYTHON_MODUL_LIB) \
 		$(addprefix .libs/,$(lib_pysimulavr_la_OBJECTS:.lo=.o)) $(SIMULAVR_PROC_SOURCES:.cpp=.o) \
-                .libs/libsim.a -lstdc++ -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty \
-		$(EXTRA_LIBS) $(PYTHON_LDFLAGS)
+                .libs/libsim.a -lstdc++ $(EXTRA_LIBS) $(PYTHON_LDFLAGS)
 else
 	cp .libs/lib_pysimulavr.so $(PYTHON_MODUL_LIB)
 endif
@@ -89,8 +85,7 @@ libsim_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 
 nodist_libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
 libsimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz \
-  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty $(EXTRA_LIBS)
+libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) $(EXTRA_LIBS)
 
 pkginclude_HEADERS = \
   adcpin.h application.h at4433.h at8515.h atmega128.h atmega16_32.h attiny2313.h \
@@ -101,22 +96,24 @@ pkginclude_HEADERS = \
   hwport.h hwspi.h hwsreg.h hwstack.h hwuart.h hwwado.h ioregs.h irqsystem.h \
   memory.h net.h pin.h pinatport.h pinnotify.h pinmon.h printable.h rwmem.h \
   simulationmember.h spisrc.h spisink.h specialmem.h systemclock.h \
-  systemclocktypes.h traceval.h types.h avrsignature.h avrreadelf.h
+  systemclocktypes.h traceval.h types.h avrsignature.h avrreadelf.h \
+  elfio/elfio/elf_types.hpp elfio/elfio/elfio.hpp elfio/elfio/elfio_dump.hpp \
+  elfio/elfio/elfio_dynamic.hpp elfio/elfio/elfio_header.hpp elfio/elfio/elfio_note.hpp \
+  elfio/elfio/elfio_relocation.hpp elfio/elfio/elfio_section.hpp \
+  elfio/elfio/elfio_segment.hpp elfio/elfio/elfio_strings.hpp \
+  elfio/elfio/elfio_symbols.hpp elfio/elfio/elfio_utils.hpp
 
 nodist_pkginclude_HEADERS =  $(FAB_HEADER)
 
 simulavr_SOURCES = cmd/main.cpp cmd/dumpargs.cpp
-simulavr_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) \
-  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty \
-  $(EXTRA_LIBS) $(LIBWSOCK_FLAGS)
+simulavr_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) $(EXTRA_LIBS) $(LIBWSOCK_FLAGS)
 
 if USE_VERILOG
 VPI_LIB=avr.vpi
 libavrvpi_la_SOURCES = vpi.cpp cmd/dumpargs.cpp
 libavrvpi_la_DEPENDENCIES = $(libsim_la_OBJECTS)
 libavrvpi_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-libavrvpi_la_LIBADD= $(libsim_la_OBJECTS) $(LIBZ_FLAGS) \
-  -L$(AVR_LIBBFD_LIBPATH) -lbfd -L$(AVR_LIBIBERTY_LIBPATH) -liberty $(EXTRA_LIBS)
+libavrvpi_la_LIBADD= $(libsim_la_OBJECTS) $(LIBZ_FLAGS) $(EXTRA_LIBS)
 libavrvpi_la_CXXFLAGS = $(AM_CXXFLAGS)
 
 $(VPI_LIB): libavrvpi.la
@@ -148,7 +145,8 @@ $(srcdir)/ui/keyboard.cpp: $(srcdir)/ui/keytrans.h
 @MAINT@     $(srcdir)/ui/xcode_to_keynumber.dat
 @MAINT@	$(builddir)/kbdgentables $(srcdir)/ui
 
-EXTRA_DIST = simulavr.i python/pysimulavr.i python/README
+EXTRA_DIST = simulavr.i python/pysimulavr.i python/README elfio/AUTHORS \
+             elfio/COPYING elfio/README elfio/VERSION
 
 MAINTAINERCLEANFILES = ui/keytrans.h
 

@@ -85,7 +85,7 @@ class Memory {
         unsigned int GetSize() { return size; }
         
         /*! Write memory data to memory */
-        virtual void WriteMem(unsigned char*, unsigned int offset, unsigned int size) = 0;
+        virtual void WriteMem(const unsigned char*, unsigned int offset, unsigned int size) = 0;
 };
 
 //! Hold data memory block and symbol informations.
@@ -96,7 +96,7 @@ class Data : public Memory {
     public:
         /*! Creates the data memory block */
         Data(): Memory(0) {}
-        void WriteMem(unsigned char*, unsigned int offset, unsigned int size) {}
+        void WriteMem(const unsigned char*, unsigned int offset, unsigned int size) {}
 };
 
 #endif

@@ -59,7 +59,7 @@ AvrFlash::~AvrFlash() {
     }
 }
 
-void AvrFlash::WriteMem(unsigned char *src, unsigned int offset, unsigned int secSize) {
+void AvrFlash::WriteMem(const unsigned char *src, unsigned int offset, unsigned int secSize) {
     for(unsigned tt = 0; tt < secSize; tt += 2) { 
         if(tt + offset < size) {
             assert(tt+offset+1<size);
@@ -147,7 +147,7 @@ bool AvrFlash::LooksLikeContextSwitch(unsigned int addr) const
 		instr = DecodedMem[index - i];
 		byte Rlo = instr->GetModifiedR();  // "sbiw r28:r29, 42" returns 28
 		byte Rhi = instr->GetModifiedRHi();  // "sbiw r28:r29, 42" returns 29
-		if(out_R == Rlo || is_SPH && out_R == Rhi) {
+        if(out_R == Rlo || (is_SPH && out_R == Rhi)) {
 			// TODO: LD, LDD, LDS indicate switch (not LDI)
 			return false;  // The "OUT" insn is in prologue/epilogue.
 		}

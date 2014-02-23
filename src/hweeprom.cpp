@@ -285,7 +285,7 @@ unsigned char HWEeprom::ReadFromAddress( unsigned int addr) {
     return myMemory[addr];
 }
 
-void HWEeprom::WriteMem( unsigned char *src, unsigned int offset, unsigned int secSize) {
+void HWEeprom::WriteMem(const unsigned char *src, unsigned int offset, unsigned int secSize) {
     for(unsigned int tt = 0; tt < secSize; tt++) { 
         if(tt + offset < size) {
             *(myMemory + tt + offset) = src[tt];

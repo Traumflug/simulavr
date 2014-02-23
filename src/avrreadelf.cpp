@@ -26,11 +26,13 @@
 #ifndef _MSC_VER
     // only, if BFD lib is used
 #   include "config.h"
-#   include "bfd.h"
 #endif
+
+#include "elfio/elfio.hpp"
 
 #include <string>
 #include <map>
+#include <limits>
 
 #include "avrdevice_impl.h"
 
@@ -126,171 +128,183 @@ void ELFLoad(const AvrDevice * core) {
 }
 
 unsigned int ELFGetSignature(const char *filename) {
-    return -1;
+    return numeric_limits<unsigned int>::max();
 }
+
 #endif
 
 #ifndef _MSC_VER
+
 void ELFLoad(const AvrDevice * core) {
-    bfd *abfd;
-    asection *sec;
+    ELFIO::elfio reader;
 
-    // open file
-    bfd_init();
-    abfd = bfd_openr(core->actualFilename.c_str(), NULL);
+    if(!reader.load(core->actualFilename))
+        avr_error("File '%s' not found or isn't a elf object",
+                  core->actualFilename.c_str());
 
-    if(abfd == NULL)
-        avr_error("Could not open file: %s", core->actualFilename.c_str());
-
-    // check format
-    if(bfd_check_format(abfd, bfd_object) == FALSE)
-        avr_error("File '%s' isn't a elf object", core->actualFilename.c_str());
-
-    // reading out the symbols
-    long storage_needed;
-    static asymbol **symbol_table;
-    long number_of_symbols;
-    long i;
-
-    storage_needed = bfd_get_symtab_upper_bound(abfd);
-    if(storage_needed < 0)
-        avr_error("internal error: storage_needed < 0");
-    if(storage_needed > 0) {
-
-        symbol_table = (asymbol **)malloc(storage_needed);
-
-        number_of_symbols = bfd_canonicalize_symtab(abfd, symbol_table);
-        if(number_of_symbols < 0)
-            avr_error("internal error: number_of_symbols < 0");
+    if(reader.get_machine() != EM_AVR)
+        avr_error("ELF file '%s' is not for Atmel AVR architecture (%d)",
+                  core->actualFilename.c_str(),
+                  reader.get_machine());
 
         // over all symbols ...
-        for(i = 0; i < number_of_symbols; i++) {
-            // if no section data, skip
-            if(!symbol_table[i]->section)
-                continue;
+    ELFIO::Elf_Half sec_num = reader.sections.size();
 
-            unsigned int lma = symbol_table[i]->section->lma;
-            unsigned int vma = symbol_table[i]->section->vma;
+    for(ELFIO::Elf_Half i = 0; i < sec_num; i++) {
+        ELFIO::section* psec = reader.sections[i];
 
-            if(vma < 0x800000) { //range of flash space
-                std::pair<unsigned int, std::string> p((symbol_table[i]->value+lma) >> 1, symbol_table[i]->name);
-                core->Flash->AddSymbol(p);
-            } else if(vma < 0x810000) { //range of ram
-                unsigned int offset = vma - 0x800000;
-                std::pair<unsigned int, std::string> p(symbol_table[i]->value + offset, symbol_table[i]->name);
-                core->data->AddSymbol(p);  // not a real data container, only holding symbols!
+        if(psec->get_type() == SHT_SYMTAB) {
+            const ELFIO::symbol_section_accessor symbols(reader, psec);
 
-                std::pair<unsigned int, std::string> pp(symbol_table[i]->value + lma, symbol_table[i]->name);
-                core->Flash->AddSymbol(pp);
-            } else if(vma < 0x820000) { // range of eeprom
-                unsigned int offset = vma - 0x810000;
-                std::pair<unsigned int, std::string> p(symbol_table[i]->value + offset, symbol_table[i]->name);
-                core->eeprom->AddSymbol(p);
-            } else if(vma < 0x820400) {
-                /* fuses space starting from 0x820000, do nothing */;
-            } else if(vma >= 0x830000 && vma < 0x830400) {
-                /* lock bits starting from 0x830000, do nothing */;
-            } else if(vma >= 0x840000 && vma < 0x840400) {
-                /* signature space starting from 0x840000, do nothing */;
-            } else
-                avr_warning("Unknown symbol address range found! (symbol='%s', address=0x%x)", symbol_table[i]->name, vma);
-        }
-        free(symbol_table);
-    } else
-        avr_warning("Elf file '%s' has no symbol table!", core->actualFilename.c_str());
+            for(ELFIO::Elf_Xword j = 0; j < symbols.get_symbols_num(); j++) {
+                std::string       name;
+                ELFIO::Elf64_Addr value = 0;
+                ELFIO::Elf_Xword  size = 0;
+                unsigned char     bind = 0;
+                unsigned char     type = 0;
+                ELFIO::Elf_Half   section_index = 0;
+                unsigned char     other = 0;
+                
+                // read symbol properties
+                symbols.get_symbol(j, name, value, size, bind,
+                                      type, section_index, other);
 
-    // load program, data and - if available - eeprom, fuses and signature
-    sec = abfd->sections;
-    while(sec != 0) {
-        // only loadable sections
-        if(sec->flags & SEC_LOAD) {
-            int size;
-            size = sec->size;
+                // check zero length names
+                if(name.length() == 0)
+                    continue;
 
-            unsigned char *tmp = (unsigned char *)malloc(size);
+                // don't list section absolute symbols
+                if(section_index == SHN_ABS)
+                    continue;
 
-            bfd_get_section_contents(abfd, sec, tmp, 0, size);
+                // don't list local symbols
+                if((bind == STB_LOCAL) && (type != STT_NOTYPE))
+                    continue;
 
-            if(sec->vma < 0x810000) {
-                // read program, space below 0x810000
-                core->Flash->WriteMem(tmp, sec->lma, size);
-            } else if(sec->vma >= 0x810000 && sec->vma < 0x820000) {
-                // read eeprom content, if available, space from 0x810000 to 0x820000
-                unsigned int offset = sec->vma - 0x810000;
-                core->eeprom->WriteMem(tmp, offset, size);
-            } else if(sec->vma >= 0x820000 && sec->vma < 0x820400) {
-                // read fuses, if available, space from 0x820000 to 0x820400
-                if(!core->fuses->LoadFuses(tmp, size)) {
-                    free(tmp); // free memory before abort program
-                    avr_error("wrong byte size of fuses");
-                }
-            } else if(sec->vma >= 0x830000 && sec->vma < 0x830400) {
-                // read lock bits, if available, space from 0x830000 to 0x830400
-                if(!core->lockbits->LoadLockBits(tmp, size)) {
-                    free(tmp); // free memory before abort program
-                    avr_error("wrong byte size of lock bits");
-                }
-            } else if(sec->vma >= 0x840000 && sec->vma < 0x840400) {
-                // read and check signature, if available, space from 0x840000 to 0x840400
-                if(size != 3) {
-                    free(tmp); // free memory before abort program
-                    avr_error("wrong device signature size in elf file, expected=3, given=%d", size);
-                } else {
-                    unsigned int sig = (((tmp[2] << 8) + tmp[1]) << 8) + tmp[0];
-                    if(core->devSignature != (unsigned int)-1 && sig != core->devSignature) {
-                        free(tmp); // free memory before abort program
-                        avr_error("wrong device signature, expected=0x%x, given=0x%x", core->devSignature, sig);
-                    }
-                }
+                if(value < 0x800000) {
+                    // range of flash space (.text)
+                    std::pair<unsigned int, std::string> p(value >> 1, name);
+
+                    core->Flash->AddSymbol(p);
+                } else if(value < 0x810000) {
+                    // range of ram (.data)
+                    ELFIO::Elf64_Addr offset = value - 0x800000;
+                    std::pair<unsigned int, std::string> p(offset, name);
+
+                    core->data->AddSymbol(p);
+                } else if(value < 0x820000) {
+                    // range of eeprom (.eeprom)
+                    ELFIO::Elf64_Addr offset = value - 0x810000;
+                    std::pair<unsigned int, std::string> p(offset, name);
+
+                    core->eeprom->AddSymbol(p);
+                } else if(value < 0x820400) {
+                    /* fuses space starting from 0x820000, do nothing */;
+                } else if(value >= 0x830000 && value < 0x830400) {
+                    /* lock bits starting from 0x830000, do nothing */;
+                } else if(value >= 0x840000 && value < 0x840400) {
+                    /* signature space starting from 0x840000, do nothing */;
+                } else
+                    avr_warning("Unknown symbol address range found! (symbol='%s', address=0x%llx)",
+                                name.c_str(),
+                                value);
+
             }
-
-            // free allocated space
-            free(tmp);
         }
-
-        sec = sec->next;
     }
 
-    bfd_close(abfd);
+    // load program, data and - if available - eeprom, fuses and signature
+    ELFIO::Elf_Half seg_num = reader.segments.size();
+
+    for(ELFIO::Elf_Half i = 0; i < seg_num; i++) {
+        ELFIO::segment* pseg = reader.segments[i];
+
+        if(pseg->get_type() == PT_LOAD) {
+            ELFIO::Elf_Xword  filesize = pseg->get_file_size();
+            ELFIO::Elf64_Addr vma = pseg->get_virtual_address();
+            ELFIO::Elf64_Addr pma = pseg->get_physical_address();
+
+            if(filesize == 0)
+                continue;
+
+            const unsigned char* data = (const unsigned char*)pseg->get_data();
+
+            if(vma < 0x810000) {
+                // read program, space below 0x810000 (.text)
+                core->Flash->WriteMem(data, pma, filesize);
+            } else if(vma >= 0x810000 && vma < 0x820000) {
+                // read eeprom content, if available, space from 0x810000 to 0x820000 (.eeprom)
+                unsigned int offset = vma - 0x810000;
+
+                core->eeprom->WriteMem(data, offset, filesize);
+            } else if(vma >= 0x820000 && vma < 0x820400) {
+                // read fuses, if available, space from 0x820000 to 0x820400
+                if(!core->fuses->LoadFuses(data, filesize))
+                    avr_error("wrong byte size of fuses");
+            } else if(vma >= 0x830000 && vma < 0x830400) {
+                // read lock bits, if available, space from 0x830000 to 0x830400
+                if(!core->lockbits->LoadLockBits(data, filesize))
+                    avr_error("wrong byte size of lock bits");
+            } else if(vma >= 0x840000 && vma < 0x840400) {
+                // read and check signature, if available, space from 0x840000 to 0x840400
+                if(filesize != 3)
+                    avr_error("wrong device signature size in elf file, expected=3, given=%llu",
+                              filesize);
+                else {
+                    unsigned int sig = (((data[2] << 8) + data[1]) << 8) + data[0];
+
+                    if(core->devSignature != numeric_limits<unsigned int>::max() && sig != core->devSignature)
+                        avr_error("wrong device signature, expected=0x%x, given=0x%x",
+                                  core->devSignature,
+                                  sig);
+                }
+            }
+        }
+    }
 }
 
 unsigned int ELFGetSignature(const char *filename) {
-    bfd *abfd;
-    asection *sec;
-    unsigned int signature = -1;
+    unsigned int signature = numeric_limits<unsigned int>::max();
+    ELFIO::elfio reader;
 
-    bfd_init();
-    abfd = bfd_openr(filename, NULL);
+    if(!reader.load(filename))
+        avr_error("File '%s' not found or isn't a elf object", filename);
 
-    if((abfd != NULL) && (bfd_check_format(abfd, bfd_object) == TRUE)) {
-        sec = abfd->sections;
-        while(sec != 0) {
-            if(sec->flags & SEC_LOAD) {
-                int size = sec->size;
-                unsigned char *tmp = (unsigned char *)malloc(size);
+    if(reader.get_machine() != EM_AVR)
+        avr_error("ELF file '%s' is not for Atmel AVR architecture (%d)",
+                  filename,
+                  reader.get_machine());
 
-                bfd_get_section_contents(abfd, sec, tmp, 0, size);
+    ELFIO::Elf_Half seg_num = reader.segments.size();
 
-                if(sec->vma >= 0x840000 && sec->vma < 0x840400) {
-                    // read and check signature, if available, space from 0x840000 to 0x840400
-                    if(size != 3) {
-                        free(tmp); // free memory before abort program
-                        avr_error("wrong device signature size in elf file, expected=3, given=%d", size);
-                    } else
-                        signature = (((tmp[2] << 8) + tmp[1]) << 8) + tmp[0];
+    for(ELFIO::Elf_Half i = 0; i < seg_num; i++) {
+        ELFIO::segment* pseg = reader.segments[i];
+
+        if(pseg->get_type() == PT_LOAD) {
+            ELFIO::Elf_Xword  filesize = pseg->get_file_size();
+            ELFIO::Elf64_Addr vma = pseg->get_virtual_address();
+
+            if(filesize == 0)
+                continue;
+
+            if(vma >= 0x840000 && vma < 0x840400) {
+                // read and check signature, if available, space from 0x840000 to 0x840400
+                if(filesize != 3)
+                    avr_error("wrong device signature size in elf file, expected=3, given=%llu",
+                              filesize);
+                else {
+                    const unsigned char* data = (const unsigned char*)pseg->get_data();
+
+                    signature = (((data[2] << 8) + data[1]) << 8) + data[0];
+                    break;
                 }
-
-                free(tmp);
             }
-
-            sec = sec->next;
         }
-
-        bfd_close(abfd);
     }
 
     return signature;
 }
+
 #endif
 
 // EOF

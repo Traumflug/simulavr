@@ -11,10 +11,6 @@ CONF_REPO_BRANCH=master
 #    You have to set absolute paths! 
 CONF_CHECK_PATH=$HOME/delivery-check
 
-# CONF_BFD_PATH: path, where avr bfd libs are located, if this isn't set, default bfd libs are used. It's reported,
-#    that with default (i386) libs simulavr crashes while loading elf file!
-CONF_BFD_PATH=/usr/i486-linux-gnu/avr
-
 # CONF_WITH_DOXYGEN: configure simulavr build with doxygen to create doxygen documentation too, set to "y" to
 #    enable
 CONF_WITH_DOXYGEN=n
