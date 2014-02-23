@@ -82,6 +82,7 @@ AZ_PYTHON_ENABLE
 AZ_PYTHON_VERSION_ENSURE([2.4.0])
 SWIG_PYTHON
 AM_PATH_PYTHON
+AM_CONDITIONAL([PYTHON_CMD_USE], [test ! -z "$PYTHON"])
 
 ###
 # Regression test suite support programs

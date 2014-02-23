@@ -14,7 +14,7 @@ clean-local:
 	rm -f $(srcdir)/*.elf $(srcdir)/*.report $(srcdir)/*.output
 
 avrtest:
-if PYTHON_USE
+if PYTHON_CMD_USE
 if USE_AVR_CROSS
 	@PYTHON@ -m create_makefile -o $(srcdir)/avrtest.makefile \
 	                            -c $(srcdir)/avrtest.cfg \
