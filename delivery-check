@@ -3,7 +3,7 @@
 # idea from: http://www.linuxjournal.com/content/add-binary-payload-your-shell-scripts
 CONF=`dirname $0`/delivery-check.conf
 while true; do
-  getopts "f:htdvyxcs" OPT
+  getopts "f:htdvyxcsp" OPT
   if [ $OPT = "f" ]; then
     CONF=$OPTARG
     break
@@ -15,7 +15,7 @@ if [ -f $CONF ]; then
   . $CONF
   export CONF_REPO_URL CONF_REPO_BRANCH CONF_CHECK_PATH CONF_BFD_PATH CONF_WITH_DOXYGEN CONF_WITH_TCL
   export CONF_TCL_CONFIG CONF_GTEST_PATH CONF_WITH_VERILOG CONF_SHOW_COMMIT_MAX CONF_PYTHON_LDFLAGS
-  export CONF_EXTRA_LIBS CONF_CXXCOMPILER CONF_CXXFLAGS
+  export CONF_EXTRA_LIBS CONF_CXXFLAGS
 else
   echo "error: config file not found: $CONF"
   echo "       try $0 -h to get help"
@@ -23,8 +23,8 @@ else
 fi
 match=$(grep --text --line-number '^PAYLOAD:$' $0 | cut -d ':' -f 1)
 payload_start=$((match + 1))
-scriptname=`mktemp`
-if [ ! $? = 0 ]; then echo "error: mktemp not found"; exit 1; fi
+scriptname=`mktemp -t delivery-check.XXXXXXXXXXXX`
+if [ ! $? = 0 ]; then echo "error: mktemp not found or can't create temp file"; exit 1; fi
 tail -n +$payload_start $0 | python - $scriptname $*
 if [ $? = 0 -a -f $scriptname ]; then
   chmod 755 $scriptname
@@ -61,6 +61,8 @@ file."""
                      help = "disable dist check")
   p.add_option("-t", action = "store_false", dest = "buildtcl", default = True,
                      help = "disable build/install tcl module (if configured!)")
+  p.add_option("-p", action = "store_false", dest = "buildpython", default = True,
+                     help = "disable build/install python module")
   p.add_option("-v", action = "store_false", dest = "buildverilog", default = True,
                      help = "disable build/install verilog module (if configured!)")
   p.add_option("-y", action = "store_false", dest = "builddoxygen", default = True,
@@ -103,7 +105,6 @@ file."""
   opts.pythonldflags = os.environ.get("CONF_PYTHON_LDFLAGS", None)
   opts.extralibs = os.environ.get("CONF_EXTRA_LIBS", None)
   opts.cxxflags = os.environ.get("CONF_CXXFLAGS", None)
-  opts.cxxcompiler = os.environ.get("CONF_CXXCOMPILER", None)
   opts.fmtdict = dict(
     wa = opts.checkpath,
     maxc = opts.commitmax,
@@ -112,6 +113,7 @@ file."""
     sel = opts.selcommit,
     o_dist = _f(opts.distcheck),
     o_tcl = _f(opts.buildtcl),
+    o_python = _f(opts.buildpython),
     o_verilog = _f(opts.buildverilog),
     o_sphinx = _f(opts.buildsphinx),
     o_doxy = _f(opts.builddoxygen),
@@ -130,8 +132,13 @@ _text_func_wh = """function writehtml() {
   echo "automake-text=Automake" >> %(wa)s/log/log.cfg
   echo "autoconf=`autoconf --version | head -1`" >> %(wa)s/log/log.cfg
   echo "autoconf-text=Autoconf" >> %(wa)s/log/log.cfg
-  echo "libtool=`libtool --version | head -1`" >> %(wa)s/log/log.cfg
-  echo "libtool-text=Libtool" >> %(wa)s/log/log.cfg
+  if [ "`uname -s`" = "Darwin" -a -n "`which glibtool 2> /dev/null`" ]; then
+    echo "libtool=`glibtool --version | head -1`" >> %(wa)s/log/log.cfg
+    echo "libtool-text=Glibtool (Darwin)" >> %(wa)s/log/log.cfg
+  else
+    echo "libtool=`libtool --version | head -1`" >> %(wa)s/log/log.cfg
+    echo "libtool-text=Libtool" >> %(wa)s/log/log.cfg
+  fi
   echo "gcc=`gcc --version | head -1`" >> %(wa)s/log/log.cfg
   echo "gcc-text=GCC" >> %(wa)s/log/log.cfg
   echo "avrgcc=`avr-gcc --version | head -1`" >> %(wa)s/log/log.cfg
@@ -154,6 +161,7 @@ _text_func_wh = """function writehtml() {
   date "+end=%%Y/%%m/%%d/%%H/%%M/%%S" >> %(wa)s/log/log.cfg
   echo "steps=$LOG_STEPS" >> %(wa)s/log/log.cfg  
   echo "opt-tcl=%(o_tcl)s" >> %(wa)s/log/log.cfg  
+  echo "opt-python=%(o_python)s" >> %(wa)s/log/log.cfg  
   echo "opt-dist=%(o_dist)s" >> %(wa)s/log/log.cfg  
   echo "opt-verilog=%(o_verilog)s" >> %(wa)s/log/log.cfg  
   echo "opt-sphinx=%(o_sphinx)s" >> %(wa)s/log/log.cfg  
@@ -261,7 +269,7 @@ echo "run bootstrap and configure ..."
 _text_run_and_test = """echo "[%(name)s]" >> %(wa)s/log/log.cfg
 echo "log=%(wa)s/log/%(name)s.log" >> %(wa)s/log/log.cfg
 echo "cmd=%(cmd)s" >> %(wa)s/log/log.cfg
-TMPNAME=`mktemp`
+TMPNAME=`mktemp -t delivery-check.XXXXXXXXXXXX`
 date "+start=%%Y/%%m/%%d/%%H/%%M/%%S" >> %(wa)s/log/log.cfg
 (%(cmd)s 2>&1; echo $? >> $TMPNAME) | tee %(wa)s/log/%(name)s.log
 date "+end=%%Y/%%m/%%d/%%H/%%M/%%S" >> %(wa)s/log/log.cfg
@@ -292,7 +300,7 @@ def runAndTest(hdl, cmd, name, nocheckres = False):
 _text_configure_test = """echo "[%(name)s]" >> %(wa)s/log/log.cfg
 echo "log=%(wa)s/log/%(name)s.log" >> %(wa)s/log/log.cfg
 echo "cmd=%(cmd)s" >> %(wa)s/log/log.cfg
-TMPNAME=`mktemp`
+TMPNAME=`mktemp -t delivery-check.XXXXXXXXXXXX`
 date "+start=%%Y/%%m/%%d/%%H/%%M/%%S" >> %(wa)s/log/log.cfg
 (%(cmd)s 2>&1; echo $? >> $TMPNAME) | tee %(wa)s/log/%(name)s.log
 date "+end=%%Y/%%m/%%d/%%H/%%M/%%S" >> %(wa)s/log/log.cfg
@@ -310,7 +318,8 @@ fi
 """
 
 def runConfigure(hdl, name):
-  cmd = "./configure --prefix=/usr --enable-python"
+  cmd = "./configure --prefix=/usr"
+  if hdl.opts.buildpython: cmd += " --enable-python"
   if not hdl.opts.bfdpath is None: cmd += " --with-bfd=%s" % hdl.opts.bfdpath
   if hdl.opts.buildtcl: cmd += " --with-tclconfig=%s" % hdl.opts.tclpath
   if not hdl.opts.gtestpath is None: cmd += " --with-gtest=%s" % hdl.opts.gtestpath
@@ -319,7 +328,6 @@ def runConfigure(hdl, name):
   if not hdl.opts.pythonldflags is None: cmd += ' PYTHON_LDFLAGS="%s"' % hdl.opts.pythonldflags
   if not hdl.opts.extralibs is None: cmd += ' EXTRA_LIBS="%s"' % hdl.opts.extralibs
   if not hdl.opts.cxxflags is None: cmd += ' CXXFLAGS="%s"' % hdl.opts.cxxflags
-  if not hdl.opts.cxxcompiler is None: cmd += ' CXX="%s"' % hdl.opts.cxxcompiler
   d = dict(cmd = cmd, name = name)
   d.update(hdl.opts.fmtdict)
   hdl.write(_text_configure_test % d)

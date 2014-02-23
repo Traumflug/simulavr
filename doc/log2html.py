@@ -127,6 +127,7 @@ def createIndex(cfg):
 
   t = p.addTable(p.body, "Build options")
   p.addOverviewRow(t, "with dist check", p.getFlag("opt-dist"))
+  p.addOverviewRow(t, "with python / python module", p.getFlag("opt-python"))
   p.addOverviewRow(t, "with tcl / tcl module", p.getFlag("opt-tcl", "conf-tcl"))
   p.addOverviewRow(t, "with api documentation", p.getFlag("opt-doxy", "conf-doxy"))
   p.addOverviewRow(t, "with manual / web pages", p.getFlag("opt-sphinx"))
