@@ -27,6 +27,7 @@
 #include <sstream>
 #include <string>
 #include <map>
+#include <limits>
 using namespace std;
 
 #include <stdio.h>
@@ -354,7 +355,7 @@ int main(int argc, char *argv[]) {
         if(filename != "unknown") {
             // filename given, try to get signature
             sig = ELFGetSignature(filename.c_str());
-            if(sig != (unsigned int)-1) {
+            if(sig != numeric_limits<unsigned int>::max()) {
                 // signature in elf found, try to get devicename
                 std::map<unsigned int, std::string>::iterator cur  = AvrSignatureToNameMap.find(sig);
                 if(cur != AvrSignatureToNameMap.end()) {

@@ -207,7 +207,7 @@ void TraceValueRegister::RegisterTraceValue(TraceValue *t) {
         avr_error("add TraceValue denied: wrong prefix: '%s', scope is '%s'",
                   p.c_str(), _tvr_scopeprefix.c_str());
     string n = p.substr(idx);
-    if(n.find('.') != (unsigned int)-1)
+    if(n.find('.') != string::npos)
         avr_error("add TraceValue denied: wrong name: '%s', scope is '%s'",
                   n.c_str(), _tvr_scopeprefix.c_str());
     // register this TraceValue

@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2001, 2002, 2003   Klaus Rudolph
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,10 +131,10 @@ unsigned char ExternalIRQHandler::set_from_reg(const IOSpecialReg* reg, unsigned
 unsigned char ExternalIRQHandler::get_from_client(const IOSpecialReg* reg, unsigned char v) {
     if(reg == mask_reg)
         // mask register
-        v = v & ~reg_mask | irq_mask;
+        v = (v & ~reg_mask) | irq_mask;
     else
         // flag register
-        v = v & ~reg_mask | irq_flag;
+        v = (v & ~reg_mask) | irq_flag;
     return v;
 }
 

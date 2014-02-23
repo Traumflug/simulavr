@@ -1416,7 +1416,8 @@ void GdbServer::TryConnectGdb() {
     if(oldTime != newTime) {
         oldTime = newTime;
 
-        if(connState = server->Connect())
+        connState = server->Connect();
+        if(connState)
             allGdbServers.push_back(this);  //remark that we now must called everytime
     }
 }

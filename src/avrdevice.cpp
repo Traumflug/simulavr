@@ -23,6 +23,8 @@
  *  $Id$
  */
 
+#include <limits>
+
 #include "avrdevice.h"
 #include "traceval.h"
 #include "helper.h"
@@ -129,7 +131,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     ioSpaceSize(_ioSpaceSize),
     iRamSize(IRamSize),
     eRamSize(ERamSize),
-    devSignature(-1),
+    devSignature(numeric_limits<unsigned int>::max()),
     abortOnInvalidAccess(false),
     coreTraceGroup(this),
     deferIrq(false),

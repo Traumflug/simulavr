@@ -130,28 +130,28 @@ void AvrFlash::Decode(unsigned int addr) {
 */
 bool AvrFlash::LooksLikeContextSwitch(unsigned int addr) const
 {
-	assert(addr < size);
-	word index = addr/2;
-	DecodedInstruction * instr = DecodedMem[index];
-	avr_op_OUT * out_instr = dynamic_cast<avr_op_OUT*>(instr);
-	if(out_instr == NULL)
-		return false;
-	bool is_SPL = (out_instr->ioreg == 0x3d);  // SPL register (0x5d)
-	bool is_SPH = (out_instr->ioreg == 0x3e);  // SPH register (0x5e)
-	if(! is_SPH && ! is_SPL)
-		return false;
+    assert(addr < size);
+    word index = addr/2;
+    DecodedInstruction * instr = DecodedMem[index];
+    avr_op_OUT * out_instr = dynamic_cast<avr_op_OUT*>(instr);
+    if(out_instr == NULL)
+        return false;
+    bool is_SPL = (out_instr->ioreg == 0x3d);  // SPL register (0x5d)
+    bool is_SPH = (out_instr->ioreg == 0x3e);  // SPH register (0x5e)
+    if(! is_SPH && ! is_SPL)
+    return false;
 
-	unsigned char out_R = out_instr->R1;  // We have "OUT SP, R"
+    unsigned char out_R = out_instr->R1;  // We have "OUT SP, R"
 
-	for(int i = 1; i < 8 && i <= index; i++) {
-		instr = DecodedMem[index - i];
-		byte Rlo = instr->GetModifiedR();  // "sbiw r28:r29, 42" returns 28
-		byte Rhi = instr->GetModifiedRHi();  // "sbiw r28:r29, 42" returns 29
+    for(int i = 1; i < 8 && i <= index; i++) {
+        instr = DecodedMem[index - i];
+        byte Rlo = instr->GetModifiedR();  // "sbiw r28:r29, 42" returns 28
+        byte Rhi = instr->GetModifiedRHi();  // "sbiw r28:r29, 42" returns 29
         if(out_R == Rlo || (is_SPH && out_R == Rhi)) {
-			// TODO: LD, LDD, LDS indicate switch (not LDI)
-			return false;  // The "OUT" insn is in prologue/epilogue.
-		}
-	}
+            // TODO: LD, LDD, LDS indicate switch (not LDI)
+            return false;  // The "OUT" insn is in prologue/epilogue.
+        }
+    }
 
-	return true;
+    return true;
 }
