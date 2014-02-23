@@ -8,8 +8,7 @@ Authors:
 * 2005 Klaus Rudolph
 * 2008 Knut Schwichtenberg
 * 2009 Joel Sherrill, Onno Kortmann, Thomas Klepp
-* 2010 Thomas Klepp
-* 2010, 2011, 2012 Petr Hluzin and others
+* 2010 - 2014 Petr Hluzin and others
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice

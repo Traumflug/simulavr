@@ -116,6 +116,9 @@ Control options
   is omitted, simulavr has to be terminated manually.
   For <label> you can use any label listed in the map-file of the linker -
   no matter if it is ever reached or not.
+
+``-B <label> or <address>, --breakpoint <label> or <address>``
+  same as -T for backward compatibility
   
 ``-W <offset>,<file>, --writetopipe <offset>,<file>``
   add a special pipe register to device at IO-Offset and opens <file> for writing
@@ -128,6 +131,16 @@ Control options
   write to this IO-Offset, then the written value will be given back as exit value
   of the simulator!)
 
+``-M``
+  disable messages for bad I/O and memory references
+  
+``-l <number> --linestotrace <number>``
+  maximum number of lines in each trace file. 0 means endless. **Attention:** if
+  you use gdb & trace, please use always 0!
+  
+``-M``
+  disable messages for bad I/O and memory references
+  
 The commands -R / -W / -a / -e are not AVR-hardware related. Here you can link
 an address within the address space of the AVR to an input or output
 pipe. This is a simple way to create a "printf"- debugger, e.g. after

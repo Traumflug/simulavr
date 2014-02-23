@@ -28,8 +28,6 @@ Host specific issues
 --------------------
 
 - Cygwin: Basic Simulator Functionality Works.  Need to check Tcl/X.
-- Mingw: Uses BSD sockets.  Need to have WinSock as alternative
-- check for makeinfo/texi2html program, else a full build will fail!
 
 Feature parity with avrtest
 ---------------------------
@@ -53,8 +51,6 @@ Known issues:
   - ATmega103 - can be ignored as obsolete
   - range of AT43USBxxx controllers - can be ignored as replaced (sorta)
     by the AT90USB* / ATmega???U? devices.
-    
-- old simulavr has a core dump feature
   
 Configure issues
 ----------------

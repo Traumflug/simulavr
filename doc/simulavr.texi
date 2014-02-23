@@ -148,9 +148,9 @@ The following options are only valid for the command-line version of simulavr:
 @table @samp
 @item -d --device <device name>
 tell simulavr, what type of device it has to simulate. The following devices
-are supported: at90s8515, at90s4433, atmega128, atmega48, atmega88, atmega168,
-atmega328. To find out, which devices are supported with your current
-installation, use the help option!
+are supported: at90s8515, at90s4433, atmega128, atmega168, atmega16,
+attiny25 and other. To find out, which devices are supported with your
+current installation, use the help option!
 @item -f --file <name>
 load ELF-file <name> for simulation in simulated target.
 @item -F --cpufrequency <value>
@@ -303,7 +303,7 @@ flash bytes.
 known labels from the loaded ELF-file.  If multiple labels are located
 to one address all labels are printed. In future releases it is maybe
 possible to give some flags for the labels which would be printed. This
-is dependent on the ELF-file and BFD-library.
+is dependent on the ELF-file.
 @item after the label a potential offset to that label is printed. For
 example @command{main+0x6} which means 6 instructions after the
 @command{main} label is defined.
@@ -663,10 +663,6 @@ For more possibilities on installing python interface, please see python
 documentation (distutils package) and documentation for setuptools python
 package.@*
 
-Simulavr does rely on a few other GNU tools. In particular, it relies
-on libbfd from binutils, and by libbfd's dependency, it also relies on
-libiberty.
-
 I have found it useful to install my hand-configured-installed
 files in one area. That way I can put the AVR-tools in my path only when
 I'm working on AVR related work.  For reference, here is how I could
@@ -698,17 +694,6 @@ of the configure options.
 @item --prefix
 Use this option to specify the root directory to install simulavr
 to. @file{/usr/local} is the default.
-
-@item --with-bfd
-If configure tells you it can't find libbfd, try
-@code{--with-bfd=/your/path/}. Notice that you are expected to point to
-the libbfd from binutils configured for AVR.
-
-@item --with-libiberty
-In the unlikely event that your properly installed AVR binutils results
-in simulavr finding libbfd but not libiberty, use this option. Use of
-this option usually means the libiberty you are looking at did not come
-from the same binutils install that gave you the libbfd you have.
 
 @item --disable-tcl
 By default, the Tcl interface is enabled.  However, it is possible to
@@ -759,12 +744,6 @@ verilog interface. (not enabled by default) See next chapter!
 There are more options for running @command{./configure}. To find out, what's
 possible, see autotools documentation or try @command{./configure --help}.
 
-@b{A few words about libbfd and libiberty:} simulavr dosn't use any AVR specific
-things from libbfd, so it should be possible to use the system libbfd (and
-libiberty). But I have seen cases, where building simulavr against this system
-libbfd was successfull and running simulavr with a AVR elf file end in a
-segmentation fault. Then it's necessary to use a special AVR binutils build.
-
 @b{How to build simulavr on MingW/Windows:}
 
 (Your should have experience with shell scripts, MingW on Windows, how to
@@ -786,12 +765,12 @@ recommended to run @command{make clean && make distclean && ./bootstrap -c}
 in package root.
 @item Run @command{./bootstrap} in package root. This will (re)build configure
 script and also all necessary files to run configure.
-@item Then run configure: @command{./configure --with-bfd=/mingw}
+@item Then run configure: @command{./configure}
 @item If configure was successfull, then you cann proceed with @command{make} and
 so one ...
 @item If you want to use python interface and you have installed Python and SWIG,
 then you should use the following options for configure:
-@command{./configure --with-bfd=/mingw --enable-python PYTHON_LDFLAGS="-LX:/PYPATH/libs -lpython25"}
+@command{./configure --enable-python PYTHON_LDFLAGS="-LX:/PYPATH/libs -lpython25"}
 where @file{X:/PYPATH} is @b{your} path to your python installations. (e.g. where the
 python.exe can be found) Replace also the name of the library (here @file{python25})
 to the right name from @b{your} installation, for python 2.6.x it is for example
@@ -1027,7 +1006,10 @@ SerialRx mysrx $ui "serialRx0" ".x"
 SerialRxBasic_SetBaudRate mysrx 19200
 @end example
 
-These two commands create a SerialRx instance @code{mysrx} with the name @code{"serialRx0"}. For this instance the baud rate is set to 19200. This SerialRx is wired to the controller pin, a display pin by the following commands:
+These two commands create a SerialRx instance @code{mysrx} with the
+name @code{"serialRx0"}. For this instance the baud rate is set to
+19200. This SerialRx is wired to the controller pin, a display pin
+by the following commands:
 
 @example
 ExtPin exttxD0 $Pin_PULLUP $ui "txD0" ".x"
@@ -1055,8 +1037,7 @@ To install the AVR cross compiler toolchain, try: @code{crossdev -t AVR}
 Of course you may need to "@code{emerge crossdev}" first ;-)
 
 There have been some problems reported with crossdev. Have a look to
-build scripts for Linux provided by the AVR-Freaks.  This script has
-problems with the bfd-libs but the rest builds easily.
+build scripts for Linux provided by the AVR-Freaks.
 
 No ebuild for simulavr exists yet, but for me, the standard ./configure
 && make works. Let me know if this is not the case for you.
@@ -1077,10 +1058,10 @@ simulavr. Specific limitations see below.
 @itemize @bullet
 @item The documentation of the simulator provides a wide field of
 activities to be carried out.
-@item Currently only some AVR-CPUs are simulated. While several of the
-Mega-CPUs can be simulated by the available Mega128 no Tiny is around.
-If your Mega-CPU is not available recompile your project and use a
-Mega128 CPU for simulation. This works only if your destination CPU and
+@item Currently not all AVR-CPUs are simulated. There are many ATMega
+and some ATTiny CPU's implemented. If your CPU is not available
+recompile your project and use (for example) a Mega128 CPU for
+simulation. But this works only if your destination CPU and
 the Mega128 share @strong{identical} components. Comparing of the names
 e.g. "Timer0" is not sufficient - you need to compare each component
 for identical function!

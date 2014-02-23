@@ -12,10 +12,10 @@ simulavr. Specific limitations see below.
 
 * The documentation of the simulator provides a wide field of
   activities to be carried out.
-* Currently only some AVR-CPUs are simulated. While several of the
-  Mega-CPUs can be simulated by the available Mega128 no Tiny is around.
-  If your Mega-CPU is not available recompile your project and use a
-  Mega128 CPU for simulation. This works only if your destination CPU and
+* Currently not all AVR-CPUs are simulated. There are many ATMega
+  and some ATTiny CPU's implemented. If your CPU is not available
+  recompile your project and use (for example) a Mega128 CPU for
+  simulation. This works only if your destination CPU and
   the Mega128 share **identical** components. Comparing of the names
   e.g. "Timer0" is not sufficient - you need to compare each component
   for identical function!

@@ -27,6 +27,7 @@ build and install simulavr: (for more see manual)
 - make (all not to old versions should work, known to work with 3.81, ubuntu 10.04)
 - libtool (version >= 2.2, known to work with 2.2.6b, ubuntu 10.04)
 - gcc (version known to work with 4.4.3, ubuntu 10.04)
+- makeinfo (version known to work with 4.13, ubuntu 10.04)
 
 Do the build
 ------------

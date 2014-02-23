@@ -65,10 +65,6 @@ package.
 Prerequsites
 ------------
 
-simulavr does rely on a few other GNU tools. In particular, it relies
-on libbfd from binutils, and by libbfd's dependency, it also relies on
-libiberty.
-
 Here is a list of tools, which are needed by building configure script, run
 configure and run make:
 
@@ -76,6 +72,7 @@ configure and run make:
 - autoconf (version >= 2.63, known to work with 2.65, ubuntu 10.04)
 - automake (version >= 1.10, known to work with 1.11.1, ubuntu 10.04)
 - libtool (version >= 2.2, known to work with 2.2.6b, ubuntu 10.04)
+- makeinfo (version known to work with 4.13, ubuntu 10.04)
 - SWIG (version >= 1.3.18, known to work with 1.3.40, ubuntu 10.04), needed if you want to
   create tcl or python extensions or to run examples, **attention:** SWIG 1.3.x, not SWIG 2.0.x,
   see below!
@@ -89,16 +86,13 @@ configure and run make:
 - python (version >= 2.4.0, known to work with 2.6.5, ubuntu 10.04), needed if you want to
   create python interface, run examples and/or ``make check``, **attention:** not python 3.x,
   see below!
-- if you want to configure and run google test cases in regression test, then you need
-  google test library as source / header files, installed in a available directory. You
-  need at least version 1.6.0.
 
 **Attention:**
 
 - On simulavr 1.0 build does run only with SWIG 1.3.x (last version is 1.3.40), SWIG 2.0.x
-  is supported with upcoming version 1.1. If you want to use SWIG 2.0.x with simulavr 1.0, then
+  is supported with upcoming version 1.1. **If you want to use SWIG 2.0.x with simulavr 1.0, then
   you have to replace the line 30 "AC_PROG_SWIG(1.3.18)" in file configure.ac with
-  "AC_PROG_SWIG(2.0.0)". Then run ``./bootstrap``, ``./configure ...`` and ``make`` again.
+  "AC_PROG_SWIG(2.0.0)".** Then run ``./bootstrap``, ``./configure ...`` and ``make`` again.
 - Python 3 isn't supported yet. Use python 2.x, last 2.x version is 2.7.2. Will be changed
   in next versions!
 
@@ -112,17 +106,6 @@ of the configure options.
   Use this option to specify the root directory to install simulavr
   to. ``/usr/local`` is the default.
 
-``--with-bfd``
-  If configure tells you it can't find libbfd, try
-  ``--with-bfd=/your/path/``. Notice that you are expected to point to
-  the libbfd from binutils configured for AVR.
-
-``--with-libiberty``
-  In the unlikely event that your properly installed AVR binutils results
-  in simulavr finding libbfd but not libiberty, use this option. Use of
-  this option usually means the libiberty you are looking at did not come
-  from the same binutils install that gave you the libbfd you have.
-
 ``--disable-tcl``
   By default, the Tcl interface is enabled.  However, it is possible to
   build a standalone simulavr executable without Tcl.  When ``--disable-tcl``
@@ -134,11 +117,6 @@ of the configure options.
 ``--with-tclconfig``
   If configure tells you it can't find ``tclConfig.sh``, try
   ``--with-tclconfig=/your/path/``.
-
-``--with-gtest``
-  If you want to run google test cases in regression tests, then you have to configure
-  the path, where google test library files are to find, for example:
-  ``--with-gtest=/some/where/gtest-1.6.0``.
 
 ``--enable-maintainer-mode``
   If specified on the configure command, the generated Makefiles will
@@ -174,12 +152,6 @@ of the configure options.
 
 There are more options for running ``./configure``. To find out, what's
 possible, see autotools documentation or try ``./configure --help``.
-
-**A few words about libbfd and libiberty:** simulavr dosn't use any AVR specific
-things from libbfd, so it should be possible to use the system libbfd (and
-libiberty). But I have seen cases, where building simulavr against this system
-libbfd was successfull and running simulavr with a AVR elf file end in a
-segmentation fault. Then it's necessary to use a special AVR binutils build.
 
 Hint: where to install
 ----------------------
@@ -227,12 +199,12 @@ How to build simulavr on MingW/Windows
   ``make clean && make distclean && ./bootstrap -c`` in package root.
 * Run ``./bootstrap`` in package root. This will (re)build configure
   script and also all necessary files to run configure.
-* Then run configure: ``./configure --with-bfd=/mingw``
+* Then run configure: ``./configure``
 * If configure was successfull, then you cann proceed with ``make`` and
   so one ...
 * If you want to use python interface and you have installed Python and SWIG,
   then you should use the following options for configure:
-  ``./configure --with-bfd=/mingw --enable-python PYTHON_LDFLAGS="-LX:/PYPATH/libs -lpython25"``
+  ``./configure --enable-python PYTHON_LDFLAGS="-LX:/PYPATH/libs -lpython25"``
   where ``X:/PYPATH`` is **your** path to your python installations. (e.g. where the
   python.exe can be found) Replace also the name of the library (here ``python25``)
   to the right name from **your** installation, for python 2.6.x it is for example
