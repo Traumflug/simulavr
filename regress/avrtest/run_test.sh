@@ -3,7 +3,7 @@
 # get filename for report
 REPORT_FILE=$1
 OUTPUT_FILE=`basename $1 .report`.output
-if [ `uname -o` = "Msys" ]; then
+if [ `uname -s | cut -b-7` = "MINGW32" ]; then
   EXPECTED_RESULT=`echo "$2" | cut -d, -f 2`
 else
   EXPECTED_RESULT=`echo "$2" | cut -d, -f 1`

@@ -39,7 +39,7 @@ fi
 # check for OS and build system: MSYS/MingW
 ####
 AC_SYS_CHECK_MINGW
-if test "$ac_sys_check_uname_o" = "Msys"; then
+if test "$ac_sys_check_uname_o" = "MINGW32"; then
   AC_SUBST([PYTHON_MODULE_EXTENSION],[.pyd])
 else
   AC_SUBST([PYTHON_MODULE_EXTENSION],[.so])
@@ -103,7 +103,7 @@ AC_SUBST([AVR_AS])
 AC_SUBST([AVR_LD])
 AC_SUBST([AVR_GCC])
 AC_SUBST([AVR_GXX])
-if test "$ac_sys_check_uname_o" = "Msys"; then
+if test "$ac_sys_check_uname_o" = "MINGW32"; then
   # need libwsock32 too
   AVR_CHECK_WINSOCK
   # libtool links to libz by default, but on MSYS/MingW this is on other place

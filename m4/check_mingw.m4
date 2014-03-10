@@ -6,8 +6,8 @@
 
 AC_DEFUN([AC_SYS_CHECK_MINGW], [
   AC_MSG_CHECKING(whether build system is MSYS/MingW)
-  ac_sys_check_uname_o=`uname -o`
-  if test "$ac_sys_check_uname_o" = "Msys"; then
+  ac_sys_check_uname_o=`uname -s | cut -b-7`
+  if test "$ac_sys_check_uname_o" = "MINGW32"; then
     AM_CONDITIONAL([SYS_MINGW], [true])
     AC_DEFINE([HAVE_SYS_MINGW], [1], [Define to 1 if you build simulavr on windows with MSYS/MingW])
     AC_MSG_RESULT(yes)
