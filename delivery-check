@@ -15,7 +15,7 @@ if [ -f $CONF ]; then
   . $CONF
   export CONF_REPO_URL CONF_REPO_BRANCH CONF_CHECK_PATH CONF_WITH_DOXYGEN CONF_WITH_TCL
   export CONF_TCL_CONFIG CONF_WITH_VERILOG CONF_SHOW_COMMIT_MAX CONF_PYTHON_LDFLAGS
-  export CONF_EXTRA_LIBS CONF_CXXFLAGS
+  export CONF_EXTRA_LIBS CONF_CXXFLAGS CONF_WITH_PYTHON
 else
   echo "error: config file not found: $CONF"
   echo "       try $0 -h to get help"
@@ -97,6 +97,8 @@ file."""
   opts.checkpath = v
   v = os.environ.get("CONF_WITH_VERILOG", None)
   if v is None or v is not "y": opts.buildverilog = False
+  v = os.environ.get("CONF_WITH_PYTHON", None)
+  if v is "n": opts.buildpython = False
   opts.tclpath = os.environ.get("CONF_TCL_CONFIG", None)
   v = os.environ.get("CONF_WITH_TCL", None)
   if v is None or v is not "y" or not opts.tclpath: opts.buildtcl = False
@@ -124,7 +126,7 @@ _text_func_wh = """function writehtml() {
   echo "tools=os bash automake autoconf libtool gcc avrgcc swig python tclsh" >> %(wa)s/log/log.cfg
   echo "bash=`bash --version | head -1`" >> %(wa)s/log/log.cfg
   echo "bash-text=Shell (bash)" >> %(wa)s/log/log.cfg
-  echo "os=`uname -srvmo`" >> %(wa)s/log/log.cfg
+  echo "os=`uname -srvm`" >> %(wa)s/log/log.cfg
   echo "os-text=OS" >> %(wa)s/log/log.cfg
   echo "automake=`automake --version | head -1`" >> %(wa)s/log/log.cfg
   echo "automake-text=Automake" >> %(wa)s/log/log.cfg

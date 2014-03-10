@@ -11,6 +11,9 @@ CONF_REPO_BRANCH=master
 #    You have to set absolute paths! 
 CONF_CHECK_PATH=$HOME/delivery-check
 
+# CONF_WITH_PYTHON: configure simulavr build with python to create python module too, set to "n" to disable
+CONF_WITH_PYTHON=y
+
 # CONF_WITH_DOXYGEN: configure simulavr build with doxygen to create doxygen documentation too, set to "y" to
 #    enable
 CONF_WITH_DOXYGEN=n
