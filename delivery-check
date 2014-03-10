@@ -198,6 +198,14 @@ EOT
 }
 
 """
+_text_func_wh_darwin = """  # open default browser
+  cmd << EOT
+open file:///%(wa)s/log/index.html
+exit
+EOT
+}
+
+"""
 
 _text_del_wa_1 = """# delete workarea, if exists
 echo "Workarea path: '%(wa)s'"
@@ -375,6 +383,8 @@ if __name__ == "__main__":
   s.writeText(_text_func_wh)
   if sys.platform in ("win32", "cygwin"):
     s.writeText(_text_func_wh_msys)
+  elif sys.platform == "darwin":
+    s.writeText(_text_func_wh_darwin)
   else:
     s.writeText(_text_func_wh_linux)
   if opts.delworkarea:
