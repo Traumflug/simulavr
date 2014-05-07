@@ -202,7 +202,7 @@ void TraceValueRegister::_tvr_insertTraceValuesToSet(TraceSet &t) {
 void TraceValueRegister::RegisterTraceValue(TraceValue *t) {
     // check for duplicate names and the right prefix
     string p = t->name();
-    unsigned int idx = _tvr_scopeprefix.length();
+    size_t idx = _tvr_scopeprefix.length();
     if((p.length() <= idx) || (p.substr(0, idx) != _tvr_scopeprefix))
         avr_error("add TraceValue denied: wrong prefix: '%s', scope is '%s'",
                   p.c_str(), _tvr_scopeprefix.c_str());
@@ -220,7 +220,7 @@ void TraceValueRegister::RegisterTraceValue(TraceValue *t) {
 }
 
 void TraceValueRegister::UnregisterTraceValue(TraceValue *t) {
-    int idx = _tvr_scopeprefix.length();
+    size_t idx = _tvr_scopeprefix.length();
     string n = t->name().substr(idx);
     for (valmap_t::iterator i = _tvr_values.begin(); i != _tvr_values.end(); i++) {
         if(n == *(i->first)) {
@@ -247,8 +247,8 @@ TraceValue* TraceValueRegister::GetTraceValueByName(const std::string &name) {
 }
 
 TraceValueRegister* TraceValueRegister::FindScopeGroupByName(const std::string &name) {
-    int idx = name.find('.');
-    if(idx > 0) {
+    size_t idx = name.find('.');
+    if(idx != 0 && idx != string::npos) {
         TraceValueRegister *r = GetScopeGroupByName(name.substr(0, idx));
         if(r == NULL)
             return NULL;
@@ -259,8 +259,8 @@ TraceValueRegister* TraceValueRegister::FindScopeGroupByName(const std::string &
 }
 
 TraceValue* TraceValueRegister::FindTraceValueByName(const std::string &name) {
-    int idx = name.find('.');
-    if(idx > 0) {
+    size_t idx = name.find('.');
+    if(idx != 0 && idx != string::npos) {
         TraceValueRegister *r = GetScopeGroupByName(name.substr(0, idx));
         if(r == NULL)
             return NULL;
@@ -311,8 +311,8 @@ void TraceValueCoreRegister::RegisterTraceSetValue(TraceValue *t, const std::str
 TraceValue* TraceValueCoreRegister::GetTraceValueByName(const std::string &name) {
     TraceValue *res = TraceValueRegister::GetTraceValueByName(name);
     if(res == NULL) {
-        int idx = _tvr_numberindex(name);
-        if(idx != -1) {
+        size_t idx = _tvr_numberindex(name);
+        if(idx != string::npos) {
             // name + number found, check name and index value
             string n = name.substr(0, idx);
             int v = atoi(name.substr(idx).c_str());
@@ -352,11 +352,10 @@ void TraceValueCoreRegister::_tvr_insertTraceValuesToSet(TraceSet &t) {
     }
 }
 
-int TraceValueCoreRegister::_tvr_numberindex(const std::string &str) {
-    int l = str.size();
-    int i = l - 1;
+size_t TraceValueCoreRegister::_tvr_numberindex(const std::string &str) {
+    size_t l = str.size(), i;
     // start from end of string to the beginning ...
-    for(; i >= 0; i--) {
+    for(i = l - 1; i >= 0; i--) {
         char c = str[i];
         // check, if number sign
         if(c < '0' || c > '9') {
@@ -365,7 +364,7 @@ int TraceValueCoreRegister::_tvr_numberindex(const std::string &str) {
         }
     }
     if(i == l)
-        i = -1;
+        i = string::npos;
     return i;
 }
 
@@ -598,8 +597,8 @@ TraceValue* DumpManager::seekValueByName(const std::string &name) {
             return NULL;
         return devices[0]->FindTraceValueByName(name);
     } else {
-        int idx = name.find('.');
-        if(idx <= 0)
+        size_t idx = name.find('.');
+        if(idx == 0 || idx == string::npos)
             return NULL;
         for(vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
             if((*i)->GetScopeName() == name.substr(0, idx)) {
