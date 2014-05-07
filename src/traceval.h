@@ -510,7 +510,7 @@ class TraceValueCoreRegister: public TraceValueRegister {
         setmap_t _tvr_valset; //!< the registered TraceValue's
 
         //! helper function to split up into name an number tail
-        int _tvr_numberindex(const std::string &str);
+        size_t _tvr_numberindex(const std::string &str);
         
     protected:
         //! Get the count of all TraceValues, that are registered here and descending
