@@ -222,7 +222,7 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         //! When a call/jump/cond-jump instruction was executed. For debugging.
         void DebugOnJump();
 
-        friend void ELFLoad(const AvrDevice * core);
+        friend void ELFLoad(AvrDevice * core);
 
 };
 
