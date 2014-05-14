@@ -92,7 +92,7 @@ typedef struct {
     Elf32_Word p_align;  /* memory/file alignment */
 } Elf32_Phdr;
 
-void ELFLoad(const AvrDevice * core) {
+void ELFLoad(AvrDevice * core) {
     FILE * f = fopen(core->GetFname().c_str(), "rb");
     if(f == NULL)
         avr_error("Could not open file: %s", core->GetFname().c_str());
