@@ -235,7 +235,10 @@ void WriteCoreDump(const string &outname, AvrDevice *dev) {
     ostream *outf;
 
     // open dump file
-    outf = new ofstream(outname.c_str());
+    if(outname != "-")
+        outf = new ofstream(outname.c_str());
+    else
+        outf = &cout;
 
     // write out PC
     *outf << "PC = 0x" << hex << setw(6) << setfill('0') << dev->PC
@@ -283,7 +286,8 @@ void WriteCoreDump(const string &outname, AvrDevice *dev) {
     *outf << endl;
 
     // close file
-    delete outf;
+    if(outf != &cout)
+        delete outf;
 }
 
 // EOF

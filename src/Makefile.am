@@ -70,7 +70,7 @@ libsim_la_SOURCES = \
   $(SIMULAVR_PROC_SOURCES) adcpin.cpp application.cpp externalirq.cpp \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp flashprog.cpp hardware.cpp helper.cpp cmd/gdbserver.cpp \
-  hwacomp.cpp hwad.cpp hweeprom.cpp avrsignature.cpp avrreadelf.cpp \
+  hwacomp.cpp hwad.cpp hweeprom.cpp avrsignature.cpp avrreadelf.cpp cmd/dumpargs.cpp \
   hwtimer/timerprescaler.cpp hwtimer/prescalermux.cpp \
   hwtimer/timerirq.cpp hwpinchange.cpp hwport.cpp hwspi.cpp hwsreg.cpp \
   hwtimer/icapturesrc.cpp hwstack.cpp hwtimer/hwtimer.cpp hwuart.cpp hwwado.cpp \
@@ -105,12 +105,12 @@ pkginclude_HEADERS = \
 
 nodist_pkginclude_HEADERS =  $(FAB_HEADER)
 
-simulavr_SOURCES = cmd/main.cpp cmd/dumpargs.cpp
+simulavr_SOURCES = cmd/main.cpp
 simulavr_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) $(EXTRA_LIBS) $(LIBWSOCK_FLAGS)
 
 if USE_VERILOG
 VPI_LIB=avr.vpi
-libavrvpi_la_SOURCES = vpi.cpp cmd/dumpargs.cpp
+libavrvpi_la_SOURCES = vpi.cpp
 libavrvpi_la_DEPENDENCIES = $(libsim_la_OBJECTS)
 libavrvpi_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 libavrvpi_la_LIBADD= $(libsim_la_OBJECTS) $(LIBZ_FLAGS) $(EXTRA_LIBS)
