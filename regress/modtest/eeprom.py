@@ -6,7 +6,7 @@ class TestCase(SimTestCase):
   data_load  = ( 0x00, 0x33, 0xAA, 0x55, 0xEF, 0xBE, 0xAD, 0xDE)
   data_write = ( 0x00, 0x66, 0x34, 0x12, 0x55, 0xAA, 0xAA, 0x55)
 
-  DELAY = 16000 # run 16 microseconds
+  DELAY = 17500 # run 16 microseconds
   WDELAY_L = 9000000 # run 9 milliseconds
   WDELAY_M = 4500000 # run 4.5 milliseconds
   WDELAY_S = 3900000 # run 3.9 milliseconds
