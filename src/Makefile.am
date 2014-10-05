@@ -41,7 +41,7 @@ $(PYTHON_MODUL_LIB): lib_pysimulavr.la
 if SYS_MINGW
 	$(CXX) -shared -o $(PYTHON_MODUL_LIB) \
 		$(addprefix .libs/,$(lib_pysimulavr_la_OBJECTS:.lo=.o)) $(SIMULAVR_PROC_SOURCES:.cpp=.o) \
-                .libs/libsim.a -lstdc++ $(EXTRA_LIBS) $(PYTHON_LDFLAGS)
+                .libs/libsim.a -lstdc++ $(EXTRA_LIBS) $(LIBWSOCK_FLAGS) $(PYTHON_LDFLAGS)
 else
 	cp .libs/lib_pysimulavr.so $(PYTHON_MODUL_LIB)
 endif

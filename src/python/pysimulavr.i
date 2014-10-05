@@ -73,6 +73,8 @@ namespace std {
   }
 }
 
+%include "config.h"
+
 %include "systemclocktypes.h"
 %include "simulationmember.h"
 
