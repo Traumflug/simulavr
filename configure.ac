@@ -46,7 +46,7 @@ else
 fi
 
 ####
-# support of libtool, g++, swig (for tcl module and python module used)
+# support of libtool, g++
 ####
 AC_SUBST([DOLLAR_SIGN],[$])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
@@ -58,11 +58,20 @@ if test ${CXX_PROG} = no ; then
   # AC_PROG_CXX sets g++, if nothing is found, but if not found make will fail
   AC_MSG_ERROR([C++ compiler ${CXX} not found],1)
 fi
-AC_PROG_SWIG(2.0.0)
+
+####
+# support of swig (for tcl module and python module used)
+####
+AC_PROG_SWIG(3.0.0)
 if test "x$SWIG_LIB" = "x"; then
-  # fall back to SWIG version 1.3.x in case of SWIG 2.0.x not found!
-  AC_MSG_NOTICE([Don't worry, we can try to find SWIG 1.3.x!])
-  AC_PROG_SWIG(1.3.18)
+  # fall back to SWIG version 2.x.y in case of SWIG 3.x.y not found!
+  AC_MSG_NOTICE([SWIG 3.x.y not available, try to find SWIG 2.x.y!])
+  AC_PROG_SWIG(2.0.0)
+  if test "x$SWIG_LIB" = "x"; then
+    # fall back to SWIG version 1.3.x in case of SWIG 2.x.y not found!
+    AC_MSG_NOTICE([SWIG 2.x.y or 3.x.y not available, try to find SWIG 1.3.x!])
+    AC_PROG_SWIG(1.3.18)
+  fi
 fi
 SWIG_ENABLE_CXX
 SWIG_MULTI_MODULE_SUPPORT
