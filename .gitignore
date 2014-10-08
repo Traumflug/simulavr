@@ -17,6 +17,7 @@ config.sub
 depcomp
 install-sh
 libtool
+compile
 ar-lib
 ltmain.sh
 missing
