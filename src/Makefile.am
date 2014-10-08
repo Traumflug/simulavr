@@ -34,8 +34,8 @@ lib_pysimulavr_la_CPPFLAGS=$(PYTHON_CPPFLAGS) $(PYTHON_XTRA_INC)
 lib_pysimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 lib_pysimulavr_la_LIBADD= libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
 
-pysimulavr_wrap.cpp: $(PYTHON_MODUL_INTERFACE)
-	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_XTRA_INC) -o $@ $?
+pysimulavr_wrap.cpp: $(PYTHON_MODUL_INTERFACE) $(pkginclude_HEADERS)
+	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_XTRA_INC) -o $@ $(PYTHON_MODUL_INTERFACE)
 
 $(PYTHON_MODUL_LIB): lib_pysimulavr.la
 if SYS_MINGW
