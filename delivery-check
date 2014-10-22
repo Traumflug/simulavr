@@ -247,7 +247,7 @@ LOG_DATE_CLONE=`date "+%%Y/%%m/%%d/%%H/%%M/%%S"`
 _text_show_cmt = """pushd %(wa)s/repo > /dev/null
 echo ""
 echo "Last %(maxc)d commits in repo:"
-git log --format=oneline | head -%(maxc)d | nl
+git log --format=oneline | head -%(maxc)d | awk '{print NR,$0}'
 popd > /dev/null
 rm -rf %(wa)s
 exit 0
