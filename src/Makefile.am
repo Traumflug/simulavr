@@ -17,6 +17,8 @@ noinst_LTLIBRARIES =
 
 tcldir = $(libdir)/tcl
 tcl_LTLIBRARIES =
+ivldir = $(libdir)/ivl
+ivl_LTLIBRARIES =
 
 if USE_SWIG
 
@@ -54,7 +56,7 @@ endif
 endif
 
 if USE_VERILOG
-noinst_LTLIBRARIES += libavrvpi.la
+ivl_LTLIBRARIES += avr.vpi.la
 endif
 
 lib_LTLIBRARIES += libsim.la
@@ -114,18 +116,17 @@ endif
 
 if USE_VERILOG
 VPI_LIB=avr.vpi
-libavrvpi_la_SOURCES = vpi.cpp
-libavrvpi_la_DEPENDENCIES = $(libsim_la_OBJECTS)
-libavrvpi_la_LDFLAGS = -module -avoid-version -shared
-libavrvpi_la_LIBADD= libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
-libavrvpi_la_CXXFLAGS = $(AM_CXXFLAGS)
+avr_vpi_la_SOURCES = vpi.cpp
+avr_vpi_la_LDFLAGS = -avoid-version -module -shared
+avr_vpi_la_LIBADD= libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
+avr_vpi_la_CXXFLAGS = $(AM_CXXFLAGS)
 
-$(VPI_LIB): libavrvpi.la
-	cp .libs/libavrvpi.so $(VPI_LIB)
+$(VPI_LIB): avr.vpi.la
+	cp .libs/avr.vpi.so $(VPI_LIB)
 
 install-vpi:
-	$(INSTALL) -d $(DESTDIR)$(libdir)/ivl
-	$(INSTALL_PROGRAM) $(VPI_LIB) $(DESTDIR)$(libdir)/ivl
+	$(INSTALL) -d $(DESTDIR)$(ivldir)
+	$(INSTALL_PROGRAM) $(VPI_LIB) $(DESTDIR)$(ivldir)
 
 endif
 
