@@ -13,10 +13,8 @@ AVR_PROGS = toggle.elf loop.elf \
 AVRS = ../../src/verilog/
 
 if USE_AVR_CROSS
-if USE_FAB
 if USE_VERILOG_TOOLS
 EXAMPLE_TARGETS=$(AVR_PROGS) baretest.run loop.run spc.run spi.run
-endif
 endif
 endif
 
