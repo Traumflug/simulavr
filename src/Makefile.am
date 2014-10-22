@@ -61,13 +61,10 @@ FAB_CPP=avr_ATtiny2313.cpp avr_ATtiny15.cpp avr_ATmega8.cpp
 FAB_HEADER=avr_ATtiny2313.h avr_ATtiny15.h avr_ATmega8.h
 endif
 
-SIMULAVR_PROC_SOURCES = \
+libsim_la_SOURCES = \
   at4433.cpp at8515.cpp atmega668base.cpp atmega128.cpp at90canbase.cpp \
   atmega8.cpp atmega1284abase.cpp attiny25_45_85.cpp atmega16_32.cpp \
-  attiny2313.cpp
-
-libsim_la_SOURCES = \
-  $(SIMULAVR_PROC_SOURCES) adcpin.cpp application.cpp externalirq.cpp \
+  attiny2313.cpp adcpin.cpp application.cpp externalirq.cpp \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp flashprog.cpp hardware.cpp helper.cpp cmd/gdbserver.cpp \
   hwacomp.cpp hwad.cpp hweeprom.cpp avrsignature.cpp avrreadelf.cpp cmd/dumpargs.cpp \
@@ -85,7 +82,7 @@ libsim_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
 
 nodist_libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
 libsimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) $(EXTRA_LIBS)
+libsimulavr_la_LIBADD = libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
 
 pkginclude_HEADERS = \
   adcpin.h application.h at4433.h at8515.h atmega128.h atmega16_32.h attiny2313.h \
@@ -106,14 +103,18 @@ pkginclude_HEADERS = \
 nodist_pkginclude_HEADERS =  $(FAB_HEADER)
 
 simulavr_SOURCES = cmd/main.cpp
+if SYS_MINGW
 simulavr_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) $(EXTRA_LIBS) $(LIBWSOCK_FLAGS)
+else
+simulavr_LDADD = libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS) $(LIBWSOCK_FLAGS)
+endif
 
 if USE_VERILOG
 VPI_LIB=avr.vpi
 libavrvpi_la_SOURCES = vpi.cpp
 libavrvpi_la_DEPENDENCIES = $(libsim_la_OBJECTS)
 libavrvpi_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-libavrvpi_la_LIBADD= $(libsim_la_OBJECTS) $(LIBZ_FLAGS) $(EXTRA_LIBS)
+libavrvpi_la_LIBADD= libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
 libavrvpi_la_CXXFLAGS = $(AM_CXXFLAGS)
 
 $(VPI_LIB): libavrvpi.la
