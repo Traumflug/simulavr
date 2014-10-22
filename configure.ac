@@ -121,17 +121,6 @@ if test "$ac_sys_check_uname_o" = "MINGW32"; then
   AC_SUBST([EXTRA_LIBS])
 fi
 
-## Check for the XML files in src/fab/atmel-xml. This just checks for the
-## existence of the file ATmega8.xml and assumes that all files have been placed into
-## this directory.
-AC_MSG_CHECKING([XML part description files in src/fab/atmel-xml/])
-AM_CONDITIONAL([USE_FAB], [test -f "${srcdir}/src/fab/atmel-xml/ATmega8.xml"])
-if test X"${USE_FAB_FALSE}" == X"" ; then
-   AC_MSG_RESULT([NOT available])
-else
-   AC_MSG_RESULT([available])
-fi
-
 ## Examples compile to avr code.  Do not build them if avr tools not installed
 ## NOTE: Cheap check -- only seeing if avr-gcc was found
 if test X"${AVR_GCC}" = X"" ; then

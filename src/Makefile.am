@@ -61,11 +61,6 @@ endif
 
 lib_LTLIBRARIES += libsim.la
 
-if USE_FAB
-FAB_CPP=avr_ATtiny2313.cpp avr_ATtiny15.cpp avr_ATmega8.cpp
-FAB_HEADER=avr_ATtiny2313.h avr_ATtiny15.h avr_ATmega8.h
-endif
-
 libsim_la_SOURCES = \
   at4433.cpp at8515.cpp atmega668base.cpp atmega128.cpp at90canbase.cpp \
   atmega8.cpp atmega1284abase.cpp attiny25_45_85.cpp atmega16_32.cpp \
@@ -80,8 +75,6 @@ libsim_la_SOURCES = \
   ui/mysocket.cpp net.cpp pin.cpp ui/extpin.cpp pinatport.cpp pinmon.cpp \
   rwmem.cpp ui/scope.cpp ui/serialrx.cpp ui/serialtx.cpp spisrc.cpp spisink.cpp \
   specialmem.cpp string2.cpp systemclock.cpp traceval.cpp ui/ui.cpp 
-
-nodist_libsim_la_SOURCES =  $(FAB_CPP)
 
 libsim_la_LDFLAGS = -version-info 0:0:0 -rpath $(libdir)
 
@@ -104,8 +97,6 @@ pkginclude_HEADERS = \
   elfio/elfio/elfio_relocation.hpp elfio/elfio/elfio_section.hpp \
   elfio/elfio/elfio_segment.hpp elfio/elfio/elfio_strings.hpp \
   elfio/elfio/elfio_symbols.hpp elfio/elfio/elfio_utils.hpp
-
-nodist_pkginclude_HEADERS =  $(FAB_HEADER)
 
 simulavr_SOURCES = cmd/main.cpp
 if SYS_MINGW
@@ -157,9 +148,6 @@ MAINTAINERCLEANFILES = ui/keytrans.h
 
 CLEANFILES = simulavr_wrap.cxx $(PYTHON_MODUL_LIB) avr.vpi \
              pysimulavr_wrap.cpp pysimulavr_wrap.h pysimulavr.py pysimulavr.pyc
-
-$(FAB_CPP) $(FAB_HEADER): fab/* fab/atmel-xml/*
-	cd fab; ./avr-fab.py
 
 all-local: $(VPI_LIB) $(PYTHON_MODUL_LIB)
 
