@@ -46,7 +46,7 @@ GTEST_EXTRA_FILES = gtest-1.6.0/src/gtest-internal-inl.h \
 # simulavr bindings
 SIMULAVR_PATH = ../..
 SIMULAVR_INCLUDE = -I$(SIMULAVR_PATH)/src
-SIMULAVR_LIB = $(SIMULAVR_PATH)/src/.libs/libsim.a
+SIMULAVR_LIB = $(SIMULAVR_PATH)/src/.libs/libsim.la
 
 # design under test settings
 OBJS_UNITTEST = session_001/unittest001.cpp \
