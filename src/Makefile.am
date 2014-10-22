@@ -12,8 +12,11 @@ AM_CXXFLAGS=-Ielfio -g -O2 -Icmd -Iui -Ihwtimer
 bin_PROGRAMS    = simulavr
 @MAINT@ noinst_PROGRAMS = kbdgentables
 
-lib_LTLIBRARIES = 
+lib_LTLIBRARIES =
 noinst_LTLIBRARIES =
+
+tcldir = $(libdir)/tcl
+tcl_LTLIBRARIES =
 
 if USE_SWIG
 
@@ -21,7 +24,7 @@ if USE_TCL
 TCL_WRAP_SRC = simulavr_wrap.cxx
 TCL_LIB      = @AVR_TCL_LIB@
 TCL_INCLUDE  = @AVR_TCL_INCLUDE@
-lib_LTLIBRARIES += libsimulavr.la
+tcl_LTLIBRARIES += libsimulavr.la
 endif
 
 if PYTHON_USE
@@ -78,10 +81,10 @@ libsim_la_SOURCES = \
 
 nodist_libsim_la_SOURCES =  $(FAB_CPP)
 
-libsim_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
+libsim_la_LDFLAGS = -version-info 0:0:0 -rpath $(libdir)
 
 nodist_libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
-libsimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
+libsimulavr_la_LDFLAGS = -module -avoid-version -shared
 libsimulavr_la_LIBADD = libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
 
 pkginclude_HEADERS = \
@@ -113,7 +116,7 @@ if USE_VERILOG
 VPI_LIB=avr.vpi
 libavrvpi_la_SOURCES = vpi.cpp
 libavrvpi_la_DEPENDENCIES = $(libsim_la_OBJECTS)
-libavrvpi_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
+libavrvpi_la_LDFLAGS = -module -avoid-version -shared
 libavrvpi_la_LIBADD= libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
 libavrvpi_la_CXXFLAGS = $(AM_CXXFLAGS)
 
