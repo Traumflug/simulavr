@@ -1,7 +1,7 @@
 This directory contains some examples of how one can use
 the VERILOG simulavrxx interface. Just call
 
-> make
+> make example
 
 and after that, use 
 

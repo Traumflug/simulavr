@@ -36,7 +36,7 @@ module test;
    ATtiny2313 lavr(lclk, leftpba, leftpb, leftpd);
    
    defparam   ravr.progfile="right-unit.elf";
-   ATtiny15   ravr(rclk, rightpb);
+   ATtiny25   ravr(rclk, rightpb);
 
    defparam  lclock.FREQ=12_000_000;
    defparam  rclock.FREQ=1_600_000;
