@@ -23,8 +23,8 @@
 // warranty!
 //
 //-----------------------------------------------------------------------------
-.arch ATTiny15
-#define	__AVR_ATtiny15__	1
+.arch ATTiny25
+#define	__AVR_ATtiny25__	1
 #define __SFR_OFFSET 0
 #include <avr/io.h>
 #include "singlepincomm.h"

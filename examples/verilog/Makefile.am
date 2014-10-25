@@ -57,7 +57,7 @@ right-unit.elf: right-unit.o singlepincomm.o
 	$(AVR_GCC) -mmcu=attiny2313 $^ -o $@
 
 .v.vvp:
-	$(IVERILOG) $^ -s test -v -I. $(AVRS)/avr.v $(AVRS)/avr_ATtiny15.v $(AVRS)/avr_ATtiny2313.v $(AVRS)/avr_ATmega8.v -o $@ 
+	$(IVERILOG) $^ -s test -v -I. $(AVRS)/avr.v $(AVRS)/avr_ATtiny25.v $(AVRS)/avr_ATtiny2313.v $(AVRS)/avr_ATmega8.v -o $@ 
 
 .vvp.run: $(AVR_PROGS)
 	$(VVP) -M../../src -mavr $^
