@@ -18,13 +18,4 @@ stamp-h1
 .dirstamp
 *.la
 simulavr_wrap.cxx
-pysimulavr_wrap.*
-_pysimulavr.so
-_pysimulavr.pyd
-pysimulavr.py
-pysimulavr.pyc
-setup.py
-# files created by running setup.py
-pysimulavr.egg-info
-build
-dist
+

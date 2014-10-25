@@ -2,18 +2,30 @@
 #  $Id$
 #
 
-SUBDIRS = hwtimer cmd ui python
+SUBDIRS = hwtimer cmd ui .
 
-SWIG=@SWIG@
-PYTHON_CPPFLAGS=@PYTHON_CPPFLAGS@
+if USE_SWIG
+
+if PYTHON_USE
+
+SUBDIRS += python
+
+endif
+
+endif
 
 AM_CXXFLAGS=-Ielfio -g -O2 -Icmd -Iui -Ihwtimer
 
 bin_PROGRAMS    = simulavr
 @MAINT@ noinst_PROGRAMS = kbdgentables
 
-lib_LTLIBRARIES = 
+lib_LTLIBRARIES =
 noinst_LTLIBRARIES =
+
+tcldir = $(libdir)/tcl
+tcl_LTLIBRARIES =
+ivldir = $(libdir)/ivl
+ivl_LTLIBRARIES =
 
 if USE_SWIG
 
@@ -21,53 +33,21 @@ if USE_TCL
 TCL_WRAP_SRC = simulavr_wrap.cxx
 TCL_LIB      = @AVR_TCL_LIB@
 TCL_INCLUDE  = @AVR_TCL_INCLUDE@
-lib_LTLIBRARIES += libsimulavr.la
-endif
-
-if PYTHON_USE
-PYTHON_MODUL_LIB=_pysimulavr@PYTHON_MODULE_EXTENSION@
-PYTHON_XTRA_INC=-Ipython
-PYTHON_MODUL_INTERFACE=$(srcdir)/python/pysimulavr.i
-noinst_LTLIBRARIES += lib_pysimulavr.la
-nodist_lib_pysimulavr_la_SOURCES=pysimulavr_wrap.cpp
-lib_pysimulavr_la_CPPFLAGS=$(PYTHON_CPPFLAGS) $(PYTHON_XTRA_INC)
-lib_pysimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-lib_pysimulavr_la_LIBADD= libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
-
-pysimulavr_wrap.cpp: $(PYTHON_MODUL_INTERFACE) $(pkginclude_HEADERS)
-	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_XTRA_INC) -o $@ $(PYTHON_MODUL_INTERFACE)
-
-$(PYTHON_MODUL_LIB): lib_pysimulavr.la
-if SYS_MINGW
-	$(CXX) -shared -o $(PYTHON_MODUL_LIB) \
-		$(addprefix .libs/,$(lib_pysimulavr_la_OBJECTS:.lo=.o)) $(SIMULAVR_PROC_SOURCES:.cpp=.o) \
-                .libs/libsim.a -lstdc++ $(EXTRA_LIBS) $(LIBWSOCK_FLAGS) $(PYTHON_LDFLAGS)
-else
-	cp .libs/lib_pysimulavr.so $(PYTHON_MODUL_LIB)
-endif
-
+tcl_LTLIBRARIES += libsimulavr.la
 endif
 
 endif
 
 if USE_VERILOG
-noinst_LTLIBRARIES += libavrvpi.la
+ivl_LTLIBRARIES += avr.vpi.la
 endif
 
 lib_LTLIBRARIES += libsim.la
 
-if USE_FAB
-FAB_CPP=avr_ATtiny2313.cpp avr_ATtiny15.cpp avr_ATmega8.cpp
-FAB_HEADER=avr_ATtiny2313.h avr_ATtiny15.h avr_ATmega8.h
-endif
-
-SIMULAVR_PROC_SOURCES = \
+libsim_la_SOURCES = \
   at4433.cpp at8515.cpp atmega668base.cpp atmega128.cpp at90canbase.cpp \
   atmega8.cpp atmega1284abase.cpp attiny25_45_85.cpp atmega16_32.cpp \
-  attiny2313.cpp
-
-libsim_la_SOURCES = \
-  $(SIMULAVR_PROC_SOURCES) adcpin.cpp application.cpp externalirq.cpp \
+  attiny2313.cpp adcpin.cpp application.cpp externalirq.cpp \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp flashprog.cpp hardware.cpp helper.cpp cmd/gdbserver.cpp \
   hwacomp.cpp hwad.cpp hweeprom.cpp avrsignature.cpp avrreadelf.cpp cmd/dumpargs.cpp \
@@ -79,13 +59,11 @@ libsim_la_SOURCES = \
   rwmem.cpp ui/scope.cpp ui/serialrx.cpp ui/serialtx.cpp spisrc.cpp spisink.cpp \
   specialmem.cpp string2.cpp systemclock.cpp traceval.cpp ui/ui.cpp 
 
-nodist_libsim_la_SOURCES =  $(FAB_CPP)
-
-libsim_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
+libsim_la_LDFLAGS = -version-info 0:0:0 -rpath $(libdir)
 
 nodist_libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
-libsimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) $(EXTRA_LIBS)
+libsimulavr_la_LDFLAGS = -module -avoid-version -shared
+libsimulavr_la_LIBADD = libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
 
 pkginclude_HEADERS = \
   adcpin.h application.h at4433.h at8515.h atmega128.h atmega16_32.h attiny2313.h \
@@ -103,25 +81,29 @@ pkginclude_HEADERS = \
   elfio/elfio/elfio_segment.hpp elfio/elfio/elfio_strings.hpp \
   elfio/elfio/elfio_symbols.hpp elfio/elfio/elfio_utils.hpp
 
-nodist_pkginclude_HEADERS =  $(FAB_HEADER)
+export LIBSIM_SRCS=$(libsim_la_SOURCES)
+export LIBSIM_HDRS=$(pkginclude_HEADERS)
 
 simulavr_SOURCES = cmd/main.cpp
+if SYS_MINGW
 simulavr_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) $(EXTRA_LIBS) $(LIBWSOCK_FLAGS)
+else
+simulavr_LDADD = libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS) $(LIBWSOCK_FLAGS)
+endif
 
 if USE_VERILOG
 VPI_LIB=avr.vpi
-libavrvpi_la_SOURCES = vpi.cpp
-libavrvpi_la_DEPENDENCIES = $(libsim_la_OBJECTS)
-libavrvpi_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-libavrvpi_la_LIBADD= $(libsim_la_OBJECTS) $(LIBZ_FLAGS) $(EXTRA_LIBS)
-libavrvpi_la_CXXFLAGS = $(AM_CXXFLAGS)
+avr_vpi_la_SOURCES = vpi.cpp
+avr_vpi_la_LDFLAGS = -avoid-version -module -shared
+avr_vpi_la_LIBADD= libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
+avr_vpi_la_CXXFLAGS = $(AM_CXXFLAGS)
 
-$(VPI_LIB): libavrvpi.la
-	cp .libs/libavrvpi.so $(VPI_LIB)
+$(VPI_LIB): avr.vpi.la
+	cp .libs/avr.vpi.so $(VPI_LIB)
 
 install-vpi:
-	$(INSTALL) -d $(DESTDIR)$(libdir)/ivl
-	$(INSTALL_PROGRAM) $(VPI_LIB) $(DESTDIR)$(libdir)/ivl
+	$(INSTALL) -d $(DESTDIR)$(ivldir)
+	$(INSTALL_PROGRAM) $(VPI_LIB) $(DESTDIR)$(ivldir)
 
 endif
 
@@ -145,16 +127,11 @@ $(srcdir)/ui/keyboard.cpp: $(srcdir)/ui/keytrans.h
 @MAINT@     $(srcdir)/ui/xcode_to_keynumber.dat
 @MAINT@	$(builddir)/kbdgentables $(srcdir)/ui
 
-EXTRA_DIST = simulavr.i python/pysimulavr.i python/README elfio/AUTHORS \
-             elfio/COPYING elfio/README elfio/VERSION
+EXTRA_DIST = simulavr.i elfio/AUTHORS elfio/COPYING elfio/README elfio/VERSION
 
 MAINTAINERCLEANFILES = ui/keytrans.h
 
-CLEANFILES = simulavr_wrap.cxx $(PYTHON_MODUL_LIB) avr.vpi \
-             pysimulavr_wrap.cpp pysimulavr_wrap.h pysimulavr.py pysimulavr.pyc
+CLEANFILES = simulavr_wrap.cxx $(VPI_LIB)
 
-$(FAB_CPP) $(FAB_HEADER): fab/* fab/atmel-xml/*
-	cd fab; ./avr-fab.py
-
-all-local: $(VPI_LIB) $(PYTHON_MODUL_LIB)
+all-local: $(VPI_LIB)
 

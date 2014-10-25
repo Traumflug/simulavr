@@ -13,10 +13,8 @@ AVR_PROGS = toggle.elf loop.elf \
 AVRS = ../../src/verilog/
 
 if USE_AVR_CROSS
-if USE_FAB
 if USE_VERILOG_TOOLS
 EXAMPLE_TARGETS=$(AVR_PROGS) baretest.run loop.run spc.run spi.run
-endif
 endif
 endif
 
@@ -59,7 +57,7 @@ right-unit.elf: right-unit.o singlepincomm.o
 	$(AVR_GCC) -mmcu=attiny2313 $^ -o $@
 
 .v.vvp:
-	$(IVERILOG) $^ -s test -v -I. $(AVRS)/avr.v $(AVRS)/avr_ATtiny15.v $(AVRS)/avr_ATtiny2313.v $(AVRS)/avr_ATmega8.v -o $@ 
+	$(IVERILOG) $^ -s test -v -I. $(AVRS)/avr.v $(AVRS)/avr_ATtiny25.v $(AVRS)/avr_ATtiny2313.v $(AVRS)/avr_ATmega8.v -o $@ 
 
 .vvp.run: $(AVR_PROGS)
 	$(VVP) -M../../src -mavr $^

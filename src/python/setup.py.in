@@ -1,0 +1,60 @@
+# -*- coding: UTF-8 -*-
+import os
+import sys
+try:
+  from setuptools import setup
+except:
+  from distutils.core import setup
+from distutils.core import Extension
+
+# generate objects list for extension module
+objs_str = os.environ.get("EXT_SRCS")
+ext_objs = list()
+if objs_str is None:
+  # no objects for build extension module: build or build_ext command?
+  wrong = False
+  for arg in sys.argv:
+    if arg.lower() in ("build", "build_ext"): wrong = True
+  if wrong:
+    # abort
+    sys.stderr.write("error: environment variable EXT_SRCS not set" + os.linesep)
+    sys.exit(1)
+else:
+  for name in objs_str.strip().split():
+    name = os.path.splitext(name)[0]
+    ext_objs.append("../" + name + ".o")
+
+extension = Extension("_pysimulavr",
+                      ["pysimulavr.i"],
+                      swig_opts = ["-c++", "-I.."],
+                      include_dirs = [".", "..", "../elfio", "../cmd", "../ui", "../hwtimer"],
+                      define_macros = [("HAVE_CONFIG_H", None)],
+                      extra_objects = ext_objs,
+                      language = "c++")
+
+setup(name = "pysimulavr",
+      version = "@PACKAGE_VERSION@",
+      author = "Klaus Rudolph & others",
+      author_email = "<simulavr-devel@nongnu.org>",
+      url = "http://www.nongnu.org/simulavr/",
+      license = "GPL",
+      description = "Python modul for simulavr",
+      long_description = "Python modul for simulavr",
+      classifiers = [
+          # see https://pypi.python.org/pypi?%3Aaction=list_classifiers
+          "Development Status :: 4 - Beta",
+          "Development Status :: 5 - Production/Stable",
+          "Environment :: Console",
+          "Intended Audience :: Science/Research",
+          "Intended Audience :: Developers",
+          "License :: OSI Approved :: GNU General Public License (GPL)",
+          "Operating System :: Microsoft :: Windows",
+          "Operating System :: POSIX",
+          "Programming Language :: Python",
+          "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+          "Topic :: Software Development :: Embedded Systems",
+          "Topic :: Software Development :: Testing"],
+      py_modules = ["pysimulavr"],
+      ext_modules = [extension])
+
+# EOF

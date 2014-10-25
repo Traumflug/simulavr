@@ -62,6 +62,8 @@ fi
 ####
 # support of swig (for tcl module and python module used)
 ####
+echo "INFO: following warnings about SWIG not found can be ignored, if at least a valid"
+echo "      installation with version > 1.3.18 is found!"
 AC_PROG_SWIG(3.0.0)
 if test "x$SWIG_LIB" = "x"; then
   # fall back to SWIG version 2.x.y in case of SWIG 3.x.y not found!
@@ -88,7 +90,7 @@ AX_TCL_ENVIRONMENT
 ####
 AZ_PYTHON_DEFAULT
 AZ_PYTHON_ENABLE
-AZ_PYTHON_VERSION_ENSURE([2.4.0])
+AZ_PYTHON_VERSION_ENSURE([2.6.0])
 SWIG_PYTHON
 AM_PATH_PYTHON
 AM_CONDITIONAL([PYTHON_CMD_USE], [test ! -z "$PYTHON"])
@@ -119,17 +121,6 @@ if test "$ac_sys_check_uname_o" = "MINGW32"; then
   AVR_CHECK_ZLIB_MSYS
   # add extra libs setting, if set on commandline, but only on msys
   AC_SUBST([EXTRA_LIBS])
-fi
-
-## Check for the XML files in src/fab/atmel-xml. This just checks for the
-## existence of the file ATmega8.xml and assumes that all files have been placed into
-## this directory.
-AC_MSG_CHECKING([XML part description files in src/fab/atmel-xml/])
-AM_CONDITIONAL([USE_FAB], [test -f "${srcdir}/src/fab/atmel-xml/ATmega8.xml"])
-if test X"${USE_FAB_FALSE}" == X"" ; then
-   AC_MSG_RESULT([NOT available])
-else
-   AC_MSG_RESULT([available])
 fi
 
 ## Examples compile to avr code.  Do not build them if avr tools not installed
@@ -165,7 +156,7 @@ AC_PATH_PROG([VVP], [vvp])
 AM_CONDITIONAL([USE_VERILOG_TOOLS],[test "x$IVERILOG" != "x" -a "x$VVP" != "x"])
 
 ####
-# support for some documenatation tools, texinfo and doxygen
+# support for some documentation tools, texinfo and doxygen
 ####
 AC_CHECK_PROGS(TEX, [tex], [no])
 AM_CONDITIONAL([HAVE_TEX], [test x"${TEX}" != x"no"])
@@ -200,7 +191,7 @@ AC_CONFIG_FILES(
   [chmod +x regress/regress.py])
 AC_CONFIG_FILES([
   Makefile src/Makefile src/hwtimer/Makefile src/cmd/Makefile src/ui/Makefile
-  src/python/Makefile src/setup.py doc/Makefile doc/conf.py doc/web/Makefile
+  src/python/Makefile src/python/setup.py doc/Makefile doc/conf.py doc/web/Makefile
   doc/web/conf.py doc/config.texi regress/Makefile regress/modules/Makefile
   regress/test_opcodes/Makefile regress/avrtest/Makefile regress/gtest/Makefile
   regress/timertest/Makefile regress/extinttest/Makefile regress/modtest/Makefile
