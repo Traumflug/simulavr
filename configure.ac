@@ -62,6 +62,8 @@ fi
 ####
 # support of swig (for tcl module and python module used)
 ####
+echo "INFO: following warnings about SWIG not found can be ignored, if at least a valid"
+echo "      installation with version > 1.3.18 is found!"
 AC_PROG_SWIG(3.0.0)
 if test "x$SWIG_LIB" = "x"; then
   # fall back to SWIG version 2.x.y in case of SWIG 3.x.y not found!
@@ -154,7 +156,7 @@ AC_PATH_PROG([VVP], [vvp])
 AM_CONDITIONAL([USE_VERILOG_TOOLS],[test "x$IVERILOG" != "x" -a "x$VVP" != "x"])
 
 ####
-# support for some documenatation tools, texinfo and doxygen
+# support for some documentation tools, texinfo and doxygen
 ####
 AC_CHECK_PROGS(TEX, [tex], [no])
 AM_CONDITIONAL([HAVE_TEX], [test x"${TEX}" != x"no"])
@@ -189,7 +191,7 @@ AC_CONFIG_FILES(
   [chmod +x regress/regress.py])
 AC_CONFIG_FILES([
   Makefile src/Makefile src/hwtimer/Makefile src/cmd/Makefile src/ui/Makefile
-  src/python/Makefile src/setup.py doc/Makefile doc/conf.py doc/web/Makefile
+  src/python/Makefile src/python/setup.py doc/Makefile doc/conf.py doc/web/Makefile
   doc/web/conf.py doc/config.texi regress/Makefile regress/modules/Makefile
   regress/test_opcodes/Makefile regress/avrtest/Makefile regress/gtest/Makefile
   regress/timertest/Makefile regress/extinttest/Makefile regress/modtest/Makefile

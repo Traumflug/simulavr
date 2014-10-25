@@ -2,10 +2,17 @@
 #  $Id$
 #
 
-SUBDIRS = hwtimer cmd ui python
+SUBDIRS = hwtimer cmd ui .
 
-SWIG=@SWIG@
-PYTHON_CPPFLAGS=@PYTHON_CPPFLAGS@
+if USE_SWIG
+
+if PYTHON_USE
+
+SUBDIRS += python
+
+endif
+
+endif
 
 AM_CXXFLAGS=-Ielfio -g -O2 -Icmd -Iui -Ihwtimer
 
@@ -27,30 +34,6 @@ TCL_WRAP_SRC = simulavr_wrap.cxx
 TCL_LIB      = @AVR_TCL_LIB@
 TCL_INCLUDE  = @AVR_TCL_INCLUDE@
 tcl_LTLIBRARIES += libsimulavr.la
-endif
-
-if PYTHON_USE
-PYTHON_MODUL_LIB=_pysimulavr@PYTHON_MODULE_EXTENSION@
-PYTHON_XTRA_INC=-Ipython
-PYTHON_MODUL_INTERFACE=$(srcdir)/python/pysimulavr.i
-noinst_LTLIBRARIES += lib_pysimulavr.la
-nodist_lib_pysimulavr_la_SOURCES=pysimulavr_wrap.cpp
-lib_pysimulavr_la_CPPFLAGS=$(PYTHON_CPPFLAGS) $(PYTHON_XTRA_INC)
-lib_pysimulavr_la_LDFLAGS = -version-info 0:0:0 -rpath ${prefix}/lib
-lib_pysimulavr_la_LIBADD= libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
-
-pysimulavr_wrap.cpp: $(PYTHON_MODUL_INTERFACE) $(pkginclude_HEADERS)
-	$(SWIG) $(SWIG_PYTHON_OPT) $(PYTHON_XTRA_INC) -o $@ $(PYTHON_MODUL_INTERFACE)
-
-$(PYTHON_MODUL_LIB): lib_pysimulavr.la
-if SYS_MINGW
-	$(CXX) -shared -o $(PYTHON_MODUL_LIB) \
-		$(addprefix .libs/,$(lib_pysimulavr_la_OBJECTS:.lo=.o)) $(SIMULAVR_PROC_SOURCES:.cpp=.o) \
-                .libs/libsim.a -lstdc++ $(EXTRA_LIBS) $(LIBWSOCK_FLAGS) $(PYTHON_LDFLAGS)
-else
-	cp .libs/lib_pysimulavr.so $(PYTHON_MODUL_LIB)
-endif
-
 endif
 
 endif
@@ -98,6 +81,9 @@ pkginclude_HEADERS = \
   elfio/elfio/elfio_segment.hpp elfio/elfio/elfio_strings.hpp \
   elfio/elfio/elfio_symbols.hpp elfio/elfio/elfio_utils.hpp
 
+export LIBSIM_SRCS=$(libsim_la_SOURCES)
+export LIBSIM_HDRS=$(pkginclude_HEADERS)
+
 simulavr_SOURCES = cmd/main.cpp
 if SYS_MINGW
 simulavr_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) $(EXTRA_LIBS) $(LIBWSOCK_FLAGS)
@@ -141,13 +127,11 @@ $(srcdir)/ui/keyboard.cpp: $(srcdir)/ui/keytrans.h
 @MAINT@     $(srcdir)/ui/xcode_to_keynumber.dat
 @MAINT@	$(builddir)/kbdgentables $(srcdir)/ui
 
-EXTRA_DIST = simulavr.i python/pysimulavr.i python/README elfio/AUTHORS \
-             elfio/COPYING elfio/README elfio/VERSION
+EXTRA_DIST = simulavr.i elfio/AUTHORS elfio/COPYING elfio/README elfio/VERSION
 
 MAINTAINERCLEANFILES = ui/keytrans.h
 
-CLEANFILES = simulavr_wrap.cxx $(PYTHON_MODUL_LIB) avr.vpi \
-             pysimulavr_wrap.cpp pysimulavr_wrap.h pysimulavr.py pysimulavr.pyc
+CLEANFILES = simulavr_wrap.cxx $(VPI_LIB)
 
-all-local: $(VPI_LIB) $(PYTHON_MODUL_LIB)
+all-local: $(VPI_LIB)
 
