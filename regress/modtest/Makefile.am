@@ -9,7 +9,7 @@ EXTRA_DIST = modtest.cfg modtest.template pin.py anacomp.c anacomp.py adc.c adc.
              anacomp_mux.py adc_gain.py adc_diff_t25.c adc_diff_t25.py port.c port.py eeprom.c eeprom.py \
              eeprom_int.c eeprom_int.py
 
-export PYTHONPATH=$(srcdir)/../modules:$(srcdir)/../../src
+export PYTHONPATH=$(srcdir)/../modules:$(srcdir)/../../src/python
 
 check-local: modtest
 
