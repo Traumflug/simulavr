@@ -203,6 +203,22 @@ AC_DEFUN([AZ_PYTHON_ENABLE],
                 AM_CONDITIONAL(PYTHON_USE, test x"$az_python_use" = x"true")
             ]
         )
+    # tk: add handling, if PYTHON is set
+    else
+        # set PYTHON_USE unconditionally, if there is a python executable
+        AC_MSG_CHECKING(if "$PYTHON" is a executable)
+        if test -x "$PYTHON"
+        then
+            AC_MSG_RESULT(yes)
+            az_python_use=true
+            AM_CONDITIONAL(PYTHON_USE, test x"$az_python_use" = x"true")
+            AZ_PYTHON_PREFIX( )
+        else
+            AC_MSG_RESULT(no)
+            az_python_use=false
+            AM_CONDITIONAL(PYTHON_USE, test x"$az_python_use" = x"true")
+        fi
+    # tk: end
     fi
 
 ])
@@ -246,7 +262,7 @@ AC_DEFUN([AZ_PYTHON_CSPEC],
 # Look for Python and set the output variable 'PYTHON'
 # to 'python' if found, empty otherwise.
 
-AC_DEFUN([AZ_PYTHON_PATH],
+AC_DEFUN([AZ_PYTHON_INSIST],
 [
     AC_ARG_VAR( [PYTHON], [Python Executable Path] )
     if test -z "$PYTHON"

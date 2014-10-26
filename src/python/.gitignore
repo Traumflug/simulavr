@@ -1,7 +1,7 @@
 # files to ignore because of build python module
 pysimulavr_wrap.*
-_pysimulavr.so
-_pysimulavr.pyd
+*.so
+*.pyd
 pysimulavr.py
 pysimulavr.pyc
 setup.py
@@ -9,3 +9,4 @@ setup.cfg
 pysimulavr.egg-info
 build
 dist
+__pycache__
