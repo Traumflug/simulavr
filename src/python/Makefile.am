@@ -12,10 +12,18 @@ clean-local:
 pkginclude_HEADERS = \
     pysimulationmember.h
 
+if HAVE_PYMOD_wheel
+PYTHON_BDIST=bdist_wheel
+else
+if HAVE_PYMOD_setuptools
+PYTHON_BDIST=bdist_egg
+else
 if SYS_MINGW
 PYTHON_BDIST=bdist_wininst
 else
 PYTHON_BDIST=bdist
+endif
+endif
 endif
 
 python-build: _pysimulavr*@PYTHON_MODULE_EXTENSION@
