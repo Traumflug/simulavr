@@ -84,7 +84,7 @@ class test_SRBS_r%02d_b%d_v%02x_ni%d(base_SRBS):
 	v = %d
 	ni = %d
 	def fail(self,s):
-		raise SRBS_r%03d_b%d_v%02x_ni%d_TestFail, s
+		raise SRBS_r%02d_b%d_v%02x_ni%d_TestFail, s
 """
 
 #

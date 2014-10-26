@@ -58,7 +58,7 @@ class base_NEG(base_test.opcode_test):
 		got = self.anal_regs[self.Rd]
 		
 		if expect != got:
-			self.fail('NEG r%02d: 0x%02x & 0x%02x = (expect=%02x, got=%02x)' % (
+			self.fail('NEG r%02d: 0x%02x = (expect=%02x, got=%02x)' % (
 				self.Rd, self.Vd, expect, got))
 
 		expect_sreg = 0

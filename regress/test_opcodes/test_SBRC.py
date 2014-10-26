@@ -84,7 +84,7 @@ class test_SBRC_r%02d_b%d_v%02x_ni%d(base_SBRC):
 	v = %d
 	ni = %d
 	def fail(self,s):
-		raise SBRC_r%03d_b%d_v%02x_ni%d_TestFail, s
+		raise SBRC_r%02d_b%d_v%02x_ni%d_TestFail, s
 """
 
 #
