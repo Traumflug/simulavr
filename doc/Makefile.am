@@ -142,17 +142,29 @@ SPHINXBUILD = @PYTHON@ -c "import sys;from pkg_resources import load_entry_point
 SPHINX_CLEANFILES = -r $(srcdir)/doc_build
 
 sphinx-html:
-if PYTHON_USE
+if PYTHON_CMD_USE
+if HAVE_PYMOD_sphinx
 	$(SPHINXBUILD) -b html $(SPHINXOPTS) . $(SPHINX_BUILDDIR)/html
 else
-	@echo "  Can't build documentation with Sphinx, python not configured!"
+	@echo "  Can't build html documentation with Sphinx, python has no module sphinx!"
+endif
+else
+	@echo "  Can't build html documentation with Sphinx, python command not found!"
 endif
 
 sphinx-pdf:
-if PYTHON_USE
+if PYTHON_CMD_USE
+if HAVE_PYMOD_sphinx
+if HAVE_PYMOD_rst2pdf
 	$(SPHINXBUILD) -b pdf $(SPHINXOPTS) . $(SPHINX_BUILDDIR)/pdf
 else
-	@echo "  Can't build documentation with Sphinx, python not configured!"
+	@echo "  Can't build pdf documentation with Sphinx, python has no module rst2pdf!"
+endif
+else
+	@echo "  Can't build pdf documentation with Sphinx, python has no module sphinx!"
+endif
+else
+	@echo "  Can't build pdf documentation with Sphinx, python command not found!"
 endif
 
 sphinx-doc: sphinx-html sphinx-pdf
@@ -163,10 +175,14 @@ WEBSITEOPTS = -E -c web -d $(WEBSITE_BUILDDIR)/doctrees
 WEBSITE_CLEANFILES = -r $(srcdir)/web_build
 
 web-html:
-if PYTHON_USE
+if PYTHON_CMD_USE
+if HAVE_PYMOD_sphinx
 	$(SPHINXBUILD) -b html $(WEBSITEOPTS) . $(WEBSITE_BUILDDIR)/html
 else
-	@echo "  Can't build web site with Sphinx, python not configured!"
+	@echo "  Can't build web documentation with Sphinx, python has no module sphinx!"
+endif
+else
+	@echo "  Can't build web documentation with Sphinx, python command not found!"
 endif
 
 CLEANFILES = stamp-vti $(DX_CLEANFILES) $(SPHINX_CLEANFILES) $(WEBSITE_CLEANFILES)

@@ -25,17 +25,25 @@ else
 endif
 
 sphinx-doc:
-if PYTHON_USE
+if PYTHON_CMD_USE
+if HAVE_PYMOD_sphinx
 	$(MAKE) -C doc sphinx-doc
 else
-	@echo "  Can't build documentation with Sphinx, python not configured!"
+	@echo "  Can't build documentation with Sphinx, python has no module sphinx!"
+endif
+else
+	@echo "  Can't build documentation with Sphinx, python command not found!"
 endif
 
 web-html:
-if PYTHON_USE
+if PYTHON_CMD_USE
+if HAVE_PYMOD_sphinx
 	$(MAKE) -C doc web-html
 else
-	@echo "  Can't build web site with Sphinx, python not configured!"
+	@echo "  Can't build web site with Sphinx, python has no module sphinx!"
+endif
+else
+	@echo "  Can't build web site with Sphinx, python command not found!"
 endif
 
 install-doxygen:
@@ -52,5 +60,5 @@ else
 	@echo "install vpi module not available! Sorry."
 endif
 
-.PHONY: doxygen-doc sphinx-doc install-doxygen install-vpi
+.PHONY: doxygen-doc sphinx-doc web-html install-doxygen install-vpi
 

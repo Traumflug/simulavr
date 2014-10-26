@@ -76,7 +76,6 @@ if test "x$SWIG_LIB" = "x"; then
   fi
 fi
 SWIG_ENABLE_CXX
-SWIG_MULTI_MODULE_SUPPORT
 AM_CONDITIONAL([USE_SWIG],[test "x$SWIG" != 'x'])
 
 ####
@@ -91,9 +90,14 @@ AX_TCL_ENVIRONMENT
 AZ_PYTHON_DEFAULT
 AZ_PYTHON_ENABLE
 AZ_PYTHON_VERSION_ENSURE([2.6.0])
-SWIG_PYTHON
 AM_PATH_PYTHON
 AM_CONDITIONAL([PYTHON_CMD_USE], [test ! -z "$PYTHON"])
+# for building python packages as wheel or egg
+AX_PYTHON_MODULE(setuptools)
+AX_PYTHON_MODULE(wheel)
+# for building sphinx docu as pdf
+AX_PYTHON_MODULE(sphinx)
+AX_PYTHON_MODULE(rst2pdf)
 
 ###
 # Regression test suite support programs
@@ -242,10 +246,14 @@ echo "Summary:"
 echo "build system = $ac_sys_check_uname_o"
 echo "AVR_GCC=${AVR_GCC}"
 echo "PYTHON=${PYTHON}"
+if test x"$az_python_use" = x"true"; then
+  echo "have sphinx python module? ${ax_have_pymod_sphinx}"
+  echo "have rst2pdf python module? ${ax_have_pymod_rst2pdf}"
+fi
 if test x"${build_tcl_libs}" = x"yes" -a x"${HAVE_TCL}" != x"no" ; then
   echo "TCL_WISH=${TCL_WISH}"
   echo "tcl has package Itcl? ${check_itcl_available}"
 fi
-echo "build verilog modul avr.vpi = ${AVR_BUILD_VERILOG}"
+echo "build verilog modul avr.vpi? ${AVR_BUILD_VERILOG}"
 # EOF
 
