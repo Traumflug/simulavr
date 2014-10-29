@@ -134,8 +134,11 @@ void SystemClock::AddAsyncMember(SimulationMember *dev) {
     asyncMembers.push_back(dev);
 }
 
+volatile bool breakMessage = false;
+
 int SystemClock::Step(bool &untilCoreStepFinished) {
-    //0-> return also if cpu in waitstate 1-> return if cpu is really finished
+    // 0-> return also if cpu in waitstate 
+    // 1-> return if cpu is really finished
     int res = 0; // returns the state from a core step. Needed by gdb-server to
                  // watch for breakpoints
 
@@ -151,8 +154,10 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
         syncMembers.RemoveMinimum();
 
         // do a step on simulation member
-        res = core->Step(untilCoreStepFinished, &nextStepIn_ns);
-        
+        int rc = core->Step(untilCoreStepFinished, &nextStepIn_ns);
+        if (rc)
+            res = rc;
+
         if(nextStepIn_ns == 0) { // insert the next step behind the following!
             nextStepIn_ns = 1 + (syncMembers.IsEmpty() ? currentTime : syncMembers.front().first);
         } else if(nextStepIn_ns > 0)
@@ -171,6 +176,10 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
         }
     }
 
+    // honour the stop command
+    if (breakMessage)
+        return 1;
+
     return res;
 }
 
@@ -186,15 +195,13 @@ void SystemClock::Rescedule(SimulationMember *sm, SystemClockOffset newTime) {
     syncMembers.Insert(newTime+currentTime+1, sm);
 }
 
-volatile int breakMessage = false;
-
 void OnBreak(int s) {
     signal(SIGINT, SIG_DFL);
     signal(SIGTERM, SIG_DFL);
     breakMessage = true;
 }
 
-void SystemClock::stop() {
+void SystemClock::Stop() {
     breakMessage = true;
 }
 
@@ -204,9 +211,10 @@ void SystemClock::ResetClock(void) {
     currentTime = 0;
 }
 
-void SystemClock::Endless() {
+long SystemClock::Endless() {
+    long steps = 0;
+
     breakMessage = false;        // if we run a second loop, clear break before entering loop
-    int steps = 0;
     
     signal(SIGINT, OnBreak);
     signal(SIGTERM, OnBreak);
@@ -217,13 +225,11 @@ void SystemClock::Endless() {
         Step(untilCoreStepFinished);
     }
 
-    cout << "SystemClock::Endless stopped" << endl;
-    cout << "number of cpu cycles simulated: " << dec << steps << endl;
-    Application::GetInstance()->PrintResults();
+    return steps;
 }
 
-void SystemClock::Run(SystemClockOffset maxRunTime) {
-    int steps = 0;
+long SystemClock::Run(SystemClockOffset maxRunTime) {
+    long steps = 0;
     
     signal(SIGINT, OnBreak);
     signal(SIGTERM, OnBreak);
@@ -231,18 +237,16 @@ void SystemClock::Run(SystemClockOffset maxRunTime) {
     while((breakMessage== false) &&
           (SystemClock::Instance().GetCurrentTime() < maxRunTime)) {
         steps++;
-        bool untilCoreStepFinished =false;
-        Step(untilCoreStepFinished);
+        bool untilCoreStepFinished = false;
+        if (Step(untilCoreStepFinished))
+            break;
     }
 
-    cout << endl << "Ran too long.  Terminated after " << maxRunTime;
-    cout << " simulated nanoseconds." << endl;
-
-    Application::GetInstance()->PrintResults();
+    return steps;
 }
 
-int SystemClock::RunTimeRange(SystemClockOffset timeRange) {
-    int res = 0;
+long SystemClock::RunTimeRange(SystemClockOffset timeRange) {
+    long steps = 0;
     bool untilCoreStepFinished;
     
     signal(SIGINT, OnBreak);
@@ -251,12 +255,12 @@ int SystemClock::RunTimeRange(SystemClockOffset timeRange) {
     timeRange += SystemClock::Instance().GetCurrentTime();
     while((breakMessage == false) && (SystemClock::Instance().GetCurrentTime() < timeRange)) {
         untilCoreStepFinished = false;
-        res = Step(untilCoreStepFinished);
-        if(res != 0)
+        if (Step(untilCoreStepFinished))
             break;
+        steps++;
     }
     
-    return res;
+    return steps;
 }
 
 SystemClock& SystemClock::Instance() {

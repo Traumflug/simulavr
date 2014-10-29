@@ -1512,7 +1512,7 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
                 leave = false;
             }
 
-            if(!leave) { //we can�t leave the loop so we have to request the other gdb instances now!
+            if(!leave) { //we can't leave the loop so we have to request the other gdb instances now!
                 // step through all gdblist members WITHOUT my self!
                 //cout << "we do not leave and check for gdb events" << endl;
                 vector<GdbServer*>::iterator ii;

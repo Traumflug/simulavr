@@ -442,18 +442,30 @@ int main(int argc, char *argv[]) {
     
     dman->start(); // start dump session
     
+    long steps = 0;
     if(gdbserver_flag == 0) { // no gdb
         SystemClock::Instance().Add(dev1);
         if(maxRunTime == 0) {
-            SystemClock::Instance().Endless();
+            steps = SystemClock::Instance().Endless();
+            cout << "SystemClock::Endless stopped" << endl
+                 << "number of cpu cycles simulated: " << dec << steps << endl;
         } else {                                           // limited
-            SystemClock::Instance().Run(maxRunTime);
+            steps = SystemClock::Instance().Run(maxRunTime);
+            cout << "Ran too long.  Terminated after " << dec << maxRunTime
+                 << " ns (simulated) and " << endl 
+                 << dec << steps << " cpu cycles" << endl;
         }
+        Application::GetInstance()->PrintResults();
     } else { // gdb should be activated
-        avr_message("Going to gdb...");
+        avr_message("Waiting for gdb connection ...");
         GdbServer gdb1(dev1, global_gdbserver_port, global_gdb_debug, globalWaitForGdbConnection);
         SystemClock::Instance().Add(&gdb1);
         SystemClock::Instance().Endless();
+        if(global_verbose_on) {
+            cout << "SystemClock::Endless stopped" << endl
+                 << "number of cpu cycles simulated: " << dec << steps << endl;
+            Application::GetInstance()->PrintResults();
+        }
     }
     
     dman->stopApplication(); // stop dump session. Close dump files, if necessary
