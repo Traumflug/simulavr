@@ -119,7 +119,7 @@ class SystemClock
             given offset to current simulation time + 1.
             
             \todo This method is possibly obsolete! */
-        void Rescedule(SimulationMember *sm, SystemClockOffset newTime);
+        void Reschedule(SimulationMember *sm, SystemClockOffset newTime);
         //! Switches trace mode for all current found simulation members
         void SetTraceModeForAllMembers(int trace_on);
         //! Stop Run/Endless or Step asynchronously

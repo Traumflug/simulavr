@@ -183,7 +183,7 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
     return res;
 }
 
-void SystemClock::Rescedule(SimulationMember *sm, SystemClockOffset newTime) {
+void SystemClock::Reschedule(SimulationMember *sm, SystemClockOffset newTime) {
 
     for(unsigned i = 0; i < syncMembers.size(); i++) {
         if(syncMembers[i].second == sm) {
@@ -206,6 +206,7 @@ void SystemClock::Stop() {
 }
 
 void SystemClock::ResetClock(void) {
+    breakMessage = false;
     asyncMembers.clear();
     syncMembers.clear();
     currentTime = 0;
@@ -231,6 +232,8 @@ long SystemClock::Endless() {
 long SystemClock::Run(SystemClockOffset maxRunTime) {
     long steps = 0;
     
+    breakMessage = false;        // if we run a second loop, clear break before entering loop
+    
     signal(SIGINT, OnBreak);
     signal(SIGTERM, OnBreak);
 
@@ -248,6 +251,8 @@ long SystemClock::Run(SystemClockOffset maxRunTime) {
 long SystemClock::RunTimeRange(SystemClockOffset timeRange) {
     long steps = 0;
     bool untilCoreStepFinished;
+    
+    breakMessage = false;        // if we run a second loop, clear break before entering loop
     
     signal(SIGINT, OnBreak);
     signal(SIGTERM, OnBreak);

@@ -37,6 +37,9 @@
   this value will be used in call of method Step. Method Step here returns allways 0.*/
 class PySimulationMember: public SimulationMember {
     public:
+
+        virtual ~PySimulationMember() {}
+
         //! Process a time step, timeToNextStepIn_ns represents time to next call in ns.
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
             SystemClockOffset t = DoStep(trueHwStep);

@@ -80,8 +80,10 @@ Pin *AvrDevice::GetPin(const char *name) {
 }
 
 AvrDevice::~AvrDevice() {
-    // unregister device on DumpManager
-    dump_manager->unregisterAvrDevice(this);
+    if (dumpManager) {
+        // unregister device on DumpManager
+        dumpManager->unregisterAvrDevice(this);
+    }
     
     // delete invalid RW memory cells on shadow store + shadow store self
     unsigned size = totalIoSpace - registerSpaceSize - iRamSize - eRamSize;
@@ -150,8 +152,8 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     flagTiny1x(false),
     flagXMega(false)
 {
-    dump_manager = DumpManager::Instance();
-    dump_manager->registerAvrDevice(this);
+    dumpManager = DumpManager::Instance();
+    dumpManager->registerAvrDevice(this);
     DebugRecentJumpsIndex = 0;
     
     TraceValue* pc_tracer=trace_direct(&coreTraceGroup, "PC", &cPC);
@@ -272,14 +274,14 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                 if(nextStepIn_ns != 0)
                     *nextStepIn_ns=clockFreq;
                 untilCoreStepFinished = !(cpuCycles > 0);
-                dump_manager->cycle();
+                dumpManager->cycle();
                 return BREAK_POINT;
             }
 
             if(EP.end() != find(EP.begin(), EP.end(), PC)) {
                 avr_message("Simulation finished!");
                 SystemClock::Instance().Stop();
-                dump_manager->cycle();
+                dumpManager->cycle();
                 return 0;
             }
 
@@ -352,7 +354,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
     }
 
     untilCoreStepFinished = !((cpuCycles > 0) || hwWait);
-    dump_manager->cycle();
+    dumpManager->cycle();
     return (cpuCycles < 0) ? cpuCycles : 0;
 }
 

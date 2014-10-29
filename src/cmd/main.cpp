@@ -344,7 +344,7 @@ int main(int argc, char *argv[]) {
         }
     }
     
-    /* get dump manager an inform it, that we have a single device application */
+    /* get dump manager and inform it, that we have a single device application */
     DumpManager *dman = DumpManager::Instance();
     dman->SetSingleDeviceApp();
     
