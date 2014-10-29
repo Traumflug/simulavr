@@ -9,4 +9,5 @@ setup.cfg
 pysimulavr.egg-info
 build
 dist
+.module-built
 __pycache__

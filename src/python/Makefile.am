@@ -4,10 +4,10 @@
 
 EXTRA_DIST = pysimulavr.i setcfg.py README
 
-CLEANFILES = pysimulavr_wrap.cpp pysimulavr_wrap.h pysimulavr.py pysimulavr.pyc _pysimulavr.so _pysimulavr.pyd
+CLEANFILES = pysimulavr_wrap.cpp pysimulavr_wrap.h pysimulavr.py pysimulavr.pyc
 
 clean-local:
-	-rm -rf build dist
+	-rm -rf build dist .module-built _pysimulavr*.so _pysimulavr*.pyd
 
 pkginclude_HEADERS = \
     pysimulationmember.h
@@ -26,8 +26,8 @@ endif
 endif
 endif
 
-python-build: _pysimulavr*@PYTHON_MODULE_EXTENSION@
-_pysimulavr*@PYTHON_MODULE_EXTENSION@: pysimulavr.i $(pkginclude_HEADERS) @DOLLAR_SIGN@(addprefix ../,$(LIBSIM_HDRS))
+python-build: .module-built
+.module-built: pysimulavr.i $(pkginclude_HEADERS) @DOLLAR_SIGN@(addprefix ../,$(LIBSIM_HDRS))
 if SYS_MINGW
 	$(PYTHON) setcfg.py -c build_ext -o "library_dirs" -s "/mingw/lib"
 	$(PYTHON) setcfg.py -c build_ext -o "libraries" -s "stdc++ ws2_32"
@@ -35,7 +35,10 @@ if SYS_MINGW
 endif
 	EXT_SRCS="$(LIBSIM_SRCS)" $(PYTHON) setup.py build_ext $(PYTHON_BDIST)
 	cp build/lib*/_pysimulavr*@PYTHON_MODULE_EXTENSION@ .
+	touch .module-built
 
 all-local: python-build
+
+.PHONY: python-build
 
 # EOF
