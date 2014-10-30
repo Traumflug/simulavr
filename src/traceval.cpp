@@ -539,11 +539,22 @@ bool DumpVCD::enabled(const TraceValue *t) const {
 
 DumpVCD::~DumpVCD() { delete os; }
 
+int DumpManager::_devidx = 0;
+DumpManager *::DumpManager::_instance = NULL;
+
 DumpManager* DumpManager::Instance(void) {
-    static DumpManager *f;
-    if(f == NULL)
-        f = new DumpManager();
-    return f;
+    if(_instance == NULL)
+        _instance = new DumpManager();
+    return _instance;
+}
+
+void DumpManager::Reset(void) {
+    if(_instance) {
+        _instance->detachAvrDevices();
+        delete _instance;
+    }
+    _instance = NULL;
+    _devidx = 0;
 }
 
 DumpManager::DumpManager() {
@@ -551,12 +562,11 @@ DumpManager::DumpManager() {
 }
 
 void DumpManager::appendDeviceName(std::string &s) {
-    static int devidx = 0;
-    devidx++;
-    if(singleDeviceApp && devidx > 1)
+    _devidx++;
+    if(singleDeviceApp && _devidx > 1)
         avr_error("Can't create device name twice, because it's a single device application");
     if(!singleDeviceApp)
-        s += "Dev" + int2str(devidx);
+        s += "Dev" + int2str(_devidx);
 }
 
 void DumpManager::registerAvrDevice(AvrDevice* dev) {
@@ -571,6 +581,15 @@ void DumpManager::unregisterAvrDevice(AvrDevice* dev) {
             dl.push_back(d);
     }
     devices.swap(dl);
+}
+
+void DumpManager::detachAvrDevices() {
+    vector<AvrDevice*> dl;
+
+    for(vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
+        AvrDevice* d = *i;
+        d->detachDumpManager();
+    }
 }
 
 TraceValue* DumpManager::seekValueByName(const std::string &name) {
@@ -593,7 +612,7 @@ TraceValue* DumpManager::seekValueByName(const std::string &name) {
 
 void DumpManager::SetSingleDeviceApp(void) {
     if(devices.size() > 0)
-        avr_error("method SetSingleDeviceApp have to be used before creating and adding devices to DumpManager");
+        avr_error("method SetSingleDeviceApp must be called before devices are added to DumpManager");
     singleDeviceApp = true;
 }
 

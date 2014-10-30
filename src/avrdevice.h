@@ -75,6 +75,9 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         unsigned int devSignature; //!< hold the device signature for this core
         std::string devName; //!< hold the device name, which this core simulate
 
+        friend class DumpManager;
+        void detachDumpManager() { dumpManager = NULL; }
+
     protected:
         SystemClockOffset clockFreq;  ///< Period of a tick (1/F_OSC) in [ns]
         std::map < std::string, Pin *> allPins;
@@ -132,7 +135,7 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         std::vector<Hardware *> hwResetList; 
         std::vector<Hardware *> hwCycleList; 
 
-        DumpManager *dump_manager;
+        DumpManager *dumpManager;
     
         AvrDevice(unsigned int ioSpaceSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int flashSize);
         virtual ~AvrDevice();

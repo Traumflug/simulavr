@@ -240,7 +240,7 @@ unsigned char NotSimulatedRegister::get() const {
 }
 
 void NotSimulatedRegister::set(unsigned char c) {
-    avr_warning("%s (write to register)", message_on_access);
+    avr_warning("%s (write 0x%02x to register)", message_on_access, (unsigned)c);
 }
 
 IOSpecialReg::IOSpecialReg(TraceValueRegister *registry, const std::string &name):

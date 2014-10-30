@@ -105,12 +105,12 @@ class SystemClock
         void AddAsyncMember(SimulationMember *dev);
         //! Process one simulation step
         int Step(bool &untilCoreStepFinished);
-        //! Run simulation endless till SIGINT or SIGTERM signal
-        void Endless();
+        //! Run simulation endless till SIGINT or SIGTERM signal, return the number of CPU cycles
+        long Endless();
         //! Run simulation till given time is arrived or signal is cached
-        void Run(SystemClockOffset maxRunTime);
+        long Run(SystemClockOffset maxRunTime);
         //! Like Run method, but stops on breakpoint or after given time offset
-        int RunTimeRange(SystemClockOffset timeRange);
+        long RunTimeRange(SystemClockOffset timeRange);
         //! Returns the central SystemClock instance for the application
         /*! There will be only one instance on a application! */
         static SystemClock& Instance();
@@ -119,11 +119,11 @@ class SystemClock
             given offset to current simulation time + 1.
             
             \todo This method is possibly obsolete! */
-        void Rescedule(SimulationMember *sm, SystemClockOffset newTime);
+        void Reschedule(SimulationMember *sm, SystemClockOffset newTime);
         //! Switches trace mode for all current found simulation members
         void SetTraceModeForAllMembers(int trace_on);
-        //! Gives the possibillity to stop Run od Endless method by programm
-        void stop();
+        //! Stop Run/Endless or Step asynchronously
+        void Stop();
         //! Resets the simulation time and clears table for simulation members and async simulation members
         void ResetClock(void);
 };

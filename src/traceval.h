@@ -347,6 +347,9 @@ class DumpManager {
         //! Singleton class access.
         static DumpManager* Instance(void);
         
+        //! Reset DumpManager instance (e.g. delete available instance)
+        static void Reset(void);
+
         //! Tell DumpManager, that we have only one device
         /*! In normal simulavr application we have only one device aka processor.
          But it's possible to make a simulation with 2 or more devices together.
@@ -410,6 +413,9 @@ class DumpManager {
         //! Remove a device from devicelist
         void unregisterAvrDevice(AvrDevice* dev);
         
+        //! detach all devices
+        void detachAvrDevices();
+
         //! Seek value by name in all devices
         TraceValue* seekValueByName(const std::string &name);
         
@@ -426,6 +432,9 @@ class DumpManager {
         
         //! Device list
         std::vector<AvrDevice*> devices;
+
+        static int _devidx;
+        static DumpManager *_instance;
 };
 
 //! Build a register for TraceValue's
