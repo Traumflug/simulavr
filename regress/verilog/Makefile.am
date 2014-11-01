@@ -4,7 +4,7 @@
 
 verilogdir = $(srcdir)/regress/verilog
 
-EXTRA_DIST = baretest.v toggle.c
+EXTRA_DIST = baretest.v toggle.c verilog-test.py
 
 export PYTHONPATH=$(srcdir)/../modules
 
