@@ -16,10 +16,14 @@ if PYTHON_USE
 SUBDIRS += timertest extinttest modtest
 endif
 
-if USE_VERILOG_TOOLS
+if USE_VERILOG
 if PYTHON_CMD_USE
 SUBDIRS += verilog
 endif
+endif
+
+if USE_TCL
+SUBDIRS += tcl
 endif
 
 endif
