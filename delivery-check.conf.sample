@@ -31,9 +31,6 @@ CONF_WITH_VERILOG=n
 # CONF_SHOW_COMMIT_MAX: max count for option "-s", default is 20, but values to 999 are allowed
 CONF_SHOW_COMMIT_MAX=20
 
-# CONF_PYTHON_LDFLAGS: flags for linking python interface, especially necessary for building on msys
-#CONF_PYTHON_LDFLAGS='-Lc:/data/mybin/python2.6/libs -lpython26'
-
 # CONF_EXTRA_LIBS: only used for building on msys, if libintl or such is needed for linking
 #CONF_EXTRA_LIBS='-L/mingw/lib -lintl'
 
