@@ -15,7 +15,9 @@ proc locateInDirs {name dirs} {
   error "unable to locate ${name}"
 }
 
-set libraryFile [locateInDirs libsimulavr.so [list ../../src/.libs /lib /usr/lib]]
+set libraryFile [locateInDirs libsimulavr@AVR_TCL_MODULE_SUFFIX@ [list [file normalize ../../src/.libs] /lib /usr/lib]]
+set libraryPath [file dirname ${libraryFile}]
+set env(PATH) "${env(PATH)}${tcl_platform(pathSeparator)}${libraryPath}"
 load ${libraryFile}
 
 #create new device
