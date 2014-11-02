@@ -52,7 +52,7 @@ HAVE_TCL_SHELLS=yes
 
 ## Some of the examples include GUIs written in Wish
 if test ! x"${TCL_VERSION}" = x ; then
-  AC_PATH_PROGS(TCL_WISH, [wish${TCL_VERSION} wish{TCL_VERSION_MAJOR}{TCL_VERSION_MINOR}])
+  AC_PATH_PROGS(TCL_WISH, [wish${TCL_VERSION} wish${TCL_VERSION_MAJOR}${TCL_VERSION_MINOR}])
 else
   TCL_WISH=no
 fi
@@ -67,7 +67,7 @@ test x$TCL_WISH = x && HAVE_TCL_SHELLS=no
 
 ## Some of the examples include feedback modules written in Tclsh
 if test ! x"${TCL_VERSION}" = x ; then
-  AC_PATH_PROGS(TCL_SHELL, [tclsh${TCL_VERSION} tclsh{TCL_VERSION_MAJOR}{TCL_VERSION_MINOR}])
+  AC_PATH_PROGS(TCL_SHELL, [tclsh${TCL_VERSION} tclsh${TCL_VERSION_MAJOR}${TCL_VERSION_MINOR}])
 else
   TCL_SHELL=no
 fi
