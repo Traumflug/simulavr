@@ -83,7 +83,6 @@ AM_CONDITIONAL([USE_SWIG],[test "x$SWIG" != 'x'])
 ####
 ## Check all about Tcl and parse command line arguments
 AX_TCL_ENVIRONMENT
-AC_SUBST([AVR_TCL_MODULE_SUFFIX],[${TCL_SHLIB_SUFFIX}])
 
 ####
 # python support, used for regression test and python module
