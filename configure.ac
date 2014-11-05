@@ -203,11 +203,14 @@ AC_CONFIG_FILES([
   examples/atmega48/Makefile examples/atmega128_timer/Makefile
   examples/atmel_key/Makefile examples/feedback/Makefile examples/simple_ex1/Makefile
   examples/spi/Makefile examples/stdiodemo/Makefile examples/python/Makefile
-  examples/simple_serial/Makefile
+  examples/simple_serial/Makefile regress/verilog/Makefile regress/tcl/Makefile
 ])
 
 ## Certain files should only be generated if Tcl is available and enabled
 if test x"${build_tcl_libs}" = x"yes" -a x"${HAVE_TCL}" != x"no" ; then
+  AC_CONFIG_FILES(
+    [regress/tcl/tcl-test.tcl],
+    [chmod +x regress/tcl/tcl-test.tcl])
   AC_CONFIG_FILES(
     [examples/gui.tcl],
     [chmod +x examples/gui.tcl])

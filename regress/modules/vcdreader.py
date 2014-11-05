@@ -35,12 +35,24 @@ class VCDEdge(object):
   
   def __init__(self, var, time, value, isInit):
     self.__init = isInit
-    self.__value = value
+    self.__size = var.size
+    self.__value = self.__expandValue(value)
     self.__time = time
     self.__var = var
-    self.__size = var.size
     self.__intern = time.internalTime
     
+  def __expandValue(self, v):
+    l = len(v)
+    if l > self.__size:
+      return v[l - self.__size:]
+    elif l == self.__size:
+      return v
+    if v[0] in ("0", "1"):
+      f = "0"
+    else:
+      f = v[0]
+    return f * (self.__size - l) + v
+
   def bit(self, bitnum, width = 1):
     if bitnum >= self.__size:
       raise VCDInternalError, "invalid bit number, max is %d" % self.__size - 1
@@ -336,8 +348,8 @@ class VCD(object):
     if not i in self.__namemap:
       raise VCDParserError(self, "format error in change line: '%s': id not found" % value)
     var = self.__namemap[i]
-    if not var.size == len(v):
-      raise VCDParserError(self, "format error in change line: '%s': size dosn't match, expected=%d, found=%d" % (value, var.size, len(v)))
+    if var.size < len(v):
+      raise VCDParserError(self, "format error in change line: '%s': size exceeded, expected <= %d, found = %d" % (value, var.size, len(v)))
     try:
       e = VCDEdge(var, self.__time, v, isDump)
     except VCDInternalError, e:

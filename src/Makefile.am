@@ -59,11 +59,19 @@ libsim_la_SOURCES = \
   rwmem.cpp ui/scope.cpp ui/serialrx.cpp ui/serialtx.cpp spisrc.cpp spisink.cpp \
   specialmem.cpp string2.cpp systemclock.cpp traceval.cpp ui/ui.cpp 
 
-libsim_la_LDFLAGS = -version-info 0:0:0 -rpath $(libdir)
+libsim_la_LDFLAGS = -shared -avoid-version -rpath $(libdir)
+libsim_la_LIBADD = $(LIBWSOCK_FLAGS)
+if SYS_MINGW
+libsim_la_LDFLAGS += -no-undefined
+endif
 
 nodist_libsimulavr_la_SOURCES = $(TCL_WRAP_SRC)
 libsimulavr_la_LDFLAGS = -module -avoid-version -shared
 libsimulavr_la_LIBADD = libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
+if SYS_MINGW
+libsimulavr_la_LDFLAGS += -no-undefined
+libsimulavr_la_LIBADD += $(TCL_LIB)
+endif
 
 pkginclude_HEADERS = \
   adcpin.h application.h at4433.h at8515.h atmega128.h atmega16_32.h attiny2313.h \
@@ -85,11 +93,7 @@ export LIBSIM_SRCS=$(libsim_la_SOURCES)
 export LIBSIM_HDRS=$(pkginclude_HEADERS)
 
 simulavr_SOURCES = cmd/main.cpp
-if SYS_MINGW
-simulavr_LDADD = $(libsim_la_OBJECTS) $(LIBZ_FLAGS) $(EXTRA_LIBS) $(LIBWSOCK_FLAGS)
-else
-simulavr_LDADD = libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS) $(LIBWSOCK_FLAGS)
-endif
+simulavr_LDADD = libsim.la $(LIBZ_FLAGS) $(EXTRA_LIBS)
 
 if USE_VERILOG
 VPI_LIB=avr.vpi
