@@ -442,9 +442,8 @@ int main(int argc, char *argv[]) {
                  << "number of cpu cycles simulated: " << dec << steps << endl;
         } else {                                           // limited
             steps = SystemClock::Instance().Run(maxRunTime);
-            cout << "Ran too long.  Terminated after " << dec << maxRunTime
-                 << " ns (simulated) and " << endl 
-                 << dec << steps << " cpu cycles" << endl;
+            cout << "Ran too long. Terminated after "
+                 << dec << steps << " cpu cycles simulated." << endl;
         }
         Application::GetInstance()->PrintResults();
     } else { // gdb should be activated
