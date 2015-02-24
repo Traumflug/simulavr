@@ -241,8 +241,18 @@ long SystemClock::Run(SystemClockOffset maxRunTime) {
           (SystemClock::Instance().GetCurrentTime() < maxRunTime)) {
         steps++;
         bool untilCoreStepFinished = false;
-        if (Step(untilCoreStepFinished))
-            break;
+        // This breaks at least ATemga644, core->Step() in SystemClock::Step()
+        // occasionally returns 1 in normal program flow even without the use
+        // of Sleep, Break or whatever causes AvrDevice to return 1.
+        //
+        //if (Step(untilCoreStepFinished))
+        //    break;
+        //
+        // Breaking commit was d6e3b58358cce6aa35eaf5fcc62c1ff1e139bf06,
+        // "patch #7766 Make Step stoppable, print less when used as a library"
+        //
+        // Let's take the old code (this one line):
+        Step(untilCoreStepFinished);
     }
 
     return steps;
