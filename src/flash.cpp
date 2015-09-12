@@ -83,6 +83,13 @@ DecodedInstruction* AvrFlash::GetInstruction(unsigned int pc) {
     return DecodedMem[pc];
 }
 
+unsigned int AvrFlash::GetOpcode(unsigned int pc) {
+    unsigned int addr = pc * 2;
+    if(IsRWWLock(addr))
+        avr_error("flash is locked (RWW lock)");
+    return (myMemory[addr] << 8) + myMemory[addr + 1];
+}
+
 unsigned char AvrFlash::ReadMem(unsigned int offset) {
     if(IsRWWLock(offset)) {
         avr_warning("flash is locked (RWW lock)");

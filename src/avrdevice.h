@@ -78,6 +78,8 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         friend class DumpManager;
         void detachDumpManager() { dumpManager = NULL; }
 
+        bool opIsCli(unsigned opcode);
+
     protected:
         SystemClockOffset clockFreq;  ///< Period of a tick (1/F_OSC) in [ns]
         std::map < std::string, Pin *> allPins;
