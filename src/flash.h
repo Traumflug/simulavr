@@ -84,6 +84,9 @@ class AvrFlash: public Memory {
         
         /*! Returns instruction at pointer PC. Aborts if Flash write is in progress. */
         DecodedInstruction* GetInstruction(unsigned int pc);
+
+        /*! Returns opcode at PC. Aborts if Flash write is in progress. */
+        unsigned int GetOpcode(unsigned int pc);
         
         /*! Returns byte at flash address. Works even during flash writing. */
         unsigned char ReadMemRaw(unsigned int addr) { return myMemory[addr]; }
