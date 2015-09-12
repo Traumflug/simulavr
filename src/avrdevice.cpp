@@ -241,6 +241,28 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     }
 }
 
+bool AvrDevice::opIsCli(unsigned opcode) {
+    if (opcode == 0x94f8) {  // CLI
+        if(trace_on)
+            traceOut << "CLI detected during interrupt preparation ";
+        return true;
+    }
+
+    if ((opcode & 0xb800) == 0xb800) {  // OUT
+        unsigned addr = ((opcode >> 5) & 0x0030) | (opcode & 0x000f);
+        if (rw[registerSpaceSize + addr] == statusRegister) {
+            unsigned reg = (opcode >> 4) & 0x001f;
+            if ((GetCoreReg(reg) & 0x80) == 0) {
+                if(trace_on)
+                    traceOut << "OUT(SREG, 0b0xxxxxxx) detected during interrupt preparation ";
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 // do a single core step, (0)->a real hardware step, (1) until the uC finish the opcode!
 int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_ns) {
     if (cpuCycles<=0)
@@ -307,7 +329,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                 status->I = 0; //irq started so remove I-Flag from SREG
                 PC = newIrqPc - 1;   //we add a few lines later 1 so we sub here 1 :-)
 
-            } else if(status->I == 1) {
+            } else if(status->I == 1 && !opIsCli(Flash->GetOpcode(PC))) {
                 newIrqPc = irqSystem->GetNewPc(actualIrqVector);
 
                 if(newIrqPc != 0xffffffff) {
