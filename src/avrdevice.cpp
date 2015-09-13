@@ -245,6 +245,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
 int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_ns) {
     if (cpuCycles<=0)
         cPC=PC;
+
     if(trace_on == 1) {
         traceOut << actualFilename << " ";
         traceOut << HexShort(cPC << 1) << dec << ": ";
@@ -296,18 +297,31 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                  */
                 deferIrq = false;
 
-                if(trace_on)
-                    traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;
+                /* Attention: If now the I flag was cleaned, do not enter to the irq, CLI 
+                 * will stop execution of irq handling immediatly
+                 */
 
-                irqSystem->IrqHandlerStarted(actualIrqVector);    //what vector we raise?
-                Funktor* fkt = new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
-                stack->SetReturnPoint(stack->GetStackPointer(), fkt);
-                stack->PushAddr(PC);
-                cpuCycles = 4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
-                status->I = 0; //irq started so remove I-Flag from SREG
-                PC = newIrqPc - 1;   //we add a few lines later 1 so we sub here 1 :-)
+                /* TODO: The handling of IRQ was correct in older versions!
+                 * Please refactor the Step method to get it simpler and faster.
+                 * Checking multiple times on I flag and pending IRQs looks very ugly here!
+                 */
+                if ( status->I == 1 )
+                {
+                    if(trace_on)
+                        traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;
 
-            } else if(status->I == 1) {
+                    irqSystem->IrqHandlerStarted(actualIrqVector);    //what vector we raise?
+                    Funktor* fkt = new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
+                    stack->SetReturnPoint(stack->GetStackPointer(), fkt);
+                    stack->PushAddr(PC);
+                    cpuCycles = 4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
+                    status->I = 0; //irq started so remove I-Flag from SREG
+                    PC = newIrqPc - 1;   //we add a few lines later 1 so we sub here 1 :-)
+                }
+
+            } 
+            
+            if( (!deferIrq ) && (status->I == 1) ) {
                 newIrqPc = irqSystem->GetNewPc(actualIrqVector);
 
                 if(newIrqPc != 0xffffffff) {

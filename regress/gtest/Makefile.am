@@ -68,6 +68,7 @@ OBJS_TARGET = session_001/avr_code.atmega32.o \
               session_irq_check/tc1.atmega32.o \
               session_irq_check/tc2.atmega32.o \
               session_irq_check/tc3.atmega32.o \
+              session_irq_check/tc4.atmega32.o \
               session_io_pin/tc1.atmega128.o
 
 AM_CXXFLAGS = $(GTEST_CXXFLAGS) $(GTEST_INCLUDE) $(SIMULAVR_INCLUDE) -g
