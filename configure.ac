@@ -9,7 +9,6 @@ AC_INIT([SimulAVR], [1.1dev], [simulavr-devel@nongnu.org])
 AM_INIT_AUTOMAKE([1.10 -Wall foreign subdir-objects])
 AC_PREREQ([2.61])
 AC_CONFIG_MACRO_DIR([m4])
-AM_MAINTAINER_MODE
 
 ####
 # check for libdl and libz, if it is necessary to link simulavr successful
