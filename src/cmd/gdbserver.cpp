@@ -270,7 +270,7 @@ bool GdbServerSocketUnix::Connect(void) {
 
         /* If we got this far, we now have a client connected and can start 
         processing. */
-        fprintf(stderr, "Connection opened by host %s, port %hd.\n",
+        fprintf(stderr, "Connection opened by host %s, port %hu.\n",
                 inet_ntoa(address->sin_addr), ntohs(address->sin_port));
 
         return true;
