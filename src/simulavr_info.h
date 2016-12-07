@@ -4,7 +4,7 @@
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
  * Copyright (C) 2013 Markus Hitter <mah@jump-ing.de>
  * ELF storage strategy inspired by simavr by Michel Pollet.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -38,13 +38,14 @@
  * the linker from removing the info sections at the link stage:
  *
  *   -Wl,--section-start=.siminfo=0x900000
+ *   -u siminfo_device
+ *   -u siminfo_cpufrequency
+ *   -u siminfo_serial_in
+ *   -u siminfo_serial_out
  *
  * The value choosen here to be 0x900000 can be choosen freely, but must
  * be above 0x840400, else it can conflict with program / eeprom / fuses /
  * lockbits / signature data, see ELFLoad() in src/avrreadelf.cpp, line 215ff.
- *
- * You also have to avoid the -Wl,--gc-sections flag, which unfortunately
- * increases binary size if you have unused functions.
  *
  * Having this done, running the ELF binary in the simulator will
  * automatically inform simulavr for which AVR variant and CPU frequency
