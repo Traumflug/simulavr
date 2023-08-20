@@ -1,3 +1,17 @@
+Archiving hint: In late summer 2023, Github started to enforce 2FA (Two Factor
+                Authentication), so I had to archive it before losing control
+                over it.  See also https://github.com/Traumflug/simulavr/issues/14
+
+                Traumflug, August 2023
+
+Forking hint: Purpose of this fork is to add a number of features required for
+              Teacup Firmware https://github.com/Traumflug/Teacup_Firmware
+              These features weren't accepted upstream, so this reopitory has
+              to stay for that purpose.  Simulating Teacup works just great
+              and insights gained by doing so brought a lot of performance
+              and quality improvements.  Awesome!
+
+
 #
 #  $Id$
 #
